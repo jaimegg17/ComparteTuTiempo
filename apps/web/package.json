@@ -1,0 +1,33 @@
+{
+  "name": "@comparte-tu-tiempo/web",
+  "version": "1.0.0",
+  "description": "Aplicación web Next.js para ComparteTuTiempo",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "15.4.6",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-hook-form": "^7.51.0",
+    "@hookform/resolvers": "^3.9.1",
+    "@tanstack/react-query": "^5.59.0",
+    "@tanstack/react-query-devtools": "^5.59.0",
+    "tailwindcss": "^4.0.0",
+    "clsx": "^2.1.0",
+    "tailwind-merge": "^2.2.1",
+    "@comparte-tu-tiempo/contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "@types/node": "^22.10.7",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "eslint": "^9.18.0",
+    "eslint-config-next": "15.4.6"
+  }
+}
