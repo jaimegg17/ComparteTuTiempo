@@ -1,0 +1,159 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int      @id @default(autoincrement())
+  email       String   @unique
+  password    String
+  name        String
+  phoneNumber String?
+  location    String?
+  bio         String?
+  skills      String[] @default([])
+  imageUrl    String?
+  role        UserRole @default(USER)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  services    Service[]
+  sentMessages    Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+  ratings     Rating[]
+  communities Community[]
+  memberships Membership[]
+
+  @@map("users")
+}
+
+model Service {
+  id          Int           @id @default(autoincrement())
+  title       String
+  description String
+  duration    Int
+  location    String?
+  category    ServiceCategory
+  type        ServiceType
+  status      ServiceStatus @default(ACTIVO)
+  price       Float
+  userId      Int
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ratings     Rating[]
+
+  @@map("services")
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  content   String
+  senderId  Int
+  receiverId Int
+  createdAt DateTime @default(now())
+
+  // Relations
+  sender    User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver  User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+model Rating {
+  id        Int      @id @default(autoincrement())
+  score     Int      @db.SmallInt
+  comment   String?
+  userId    Int
+  serviceId Int
+  createdAt DateTime @default(now())
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, serviceId])
+  @@map("ratings")
+}
+
+model Community {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  isPrivate   Boolean  @default(false)
+  creatorId   Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  creator    User         @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  members    Membership[]
+
+  @@map("communities")
+}
+
+model Membership {
+  id          Int           @id @default(autoincrement())
+  userId      Int
+  communityId Int
+  role        MembershipRole @default(MEMBER)
+  status      MembershipStatus @default(ACTIVA)
+  joinedAt    DateTime      @default(now())
+
+  // Relations
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  community  Community     @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, communityId])
+  @@map("memberships")
+}
+
+enum UserRole {
+  USER
+  MODERATOR
+  ADMIN
+}
+
+enum ServiceCategory {
+  EDUCACION
+  HOGAR
+  TECNOLOGIA
+  SALUD
+  DEPORTES
+  ARTE
+  OTROS
+}
+
+enum ServiceType {
+  PRESENCIAL
+  VIRTUAL
+  HIBRIDO
+}
+
+enum ServiceStatus {
+  ACTIVO
+  INACTIVO
+  COMPLETADO
+}
+
+enum MembershipRole {
+  MEMBER
+  MODERATOR
+  ADMIN
+}
+
+enum MembershipStatus {
+  ACTIVA
+  PENDIENTE
+  SUSPENDIDA
+}
