@@ -1,0 +1,27 @@
+{
+  "name": "comparte-tu-tiempo-monorepo",
+  "version": "1.0.0",
+  "description": "Monorepo para la plataforma ComparteTuTiempo con arquitectura hexagonal",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm -r dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "clean": "pnpm -r clean",
+    "db:up": "docker-compose up postgres -d",
+    "db:down": "docker-compose down postgres",
+    "db:reset": "docker-compose down postgres && docker volume rm comparte-tiempo_postgres_data && docker-compose up postgres -d"
+  },
+  "keywords": ["monorepo", "hexagonal-architecture", "clean-architecture", "nestjs", "nextjs", "prisma"],
+  "author": "",
+  "license": "MIT",
+  "packageManager": "pnpm@10.14.0",
+  "devDependencies": {
+    "@types/node": "^22.10.7",
+    "typescript": "^5.7.3",
+    "prettier": "^3.4.2",
+    "eslint": "^9.18.0"
+  }
+}
