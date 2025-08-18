@@ -14,6 +14,31 @@ export * from './user.schemas';
 export * from './service.schemas';
 
 // ============================================================================
+// EXPORTACIONES DE EXCHANGE
+// ============================================================================
+export * from './exchange.schemas';
+
+// ============================================================================
+// EXPORTACIONES DE GROUP
+// ============================================================================
+export * from './group.schemas';
+
+// ============================================================================
+// EXPORTACIONES DE EVENT
+// ============================================================================
+export * from './event.schemas';
+
+// ============================================================================
+// EXPORTACIONES DE MEMBERSHIP
+// ============================================================================
+export * from './membership.schemas';
+
+// ============================================================================
+// EXPORTACIONES DE MESSAGE
+// ============================================================================
+export * from './message.schemas';
+
+// ============================================================================
 // RE-EXPORTACIONES PARA FACILITAR EL USO
 // ============================================================================
 export type {
@@ -32,6 +57,31 @@ export type {
   ServiceUpdate,
   ServiceListQuery,
   ServiceListResponse,
+  Exchange,
+  ExchangeCreate,
+  ExchangeUpdate,
+  ExchangeListQuery,
+  ExchangeListResponse,
+  Group,
+  GroupCreate,
+  GroupUpdate,
+  GroupListQuery,
+  GroupListResponse,
+  Event,
+  EventCreate,
+  EventUpdate,
+  EventListQuery,
+  EventListResponse,
+  Membership,
+  MembershipCreate,
+  MembershipUpdate,
+  MembershipListQuery,
+  MembershipListResponse,
+  Message,
+  MessageCreate,
+  MessageUpdate,
+  MessageListQuery,
+  MessageListResponse,
 } from './service.schemas';
 
 // ============================================================================
@@ -44,4 +94,10 @@ export {
   ServiceCategory,
   ServiceType,
   ServiceStatus,
+  ExchangeStatus,
+  GroupType,
+  MembershipRole,
+  MembershipStatus,
+  MessageStatus,
+  MessageType,
 } from './service.schemas';

@@ -31,6 +31,9 @@ model User {
   ratings     Rating[]
   communities Community[]
   memberships Membership[]
+  requestedExchanges Exchange[] @relation("RequestedExchanges")
+  offeredExchanges   Exchange[] @relation("OfferedExchanges")
+  createdGroups      Group[]
 
   @@map("users")
 }
@@ -52,6 +55,7 @@ model Service {
   // Relations
   user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   ratings     Rating[]
+  exchanges   Exchange[]
 
   @@map("services")
 }
@@ -97,7 +101,6 @@ model Community {
 
   // Relations
   creator    User         @relation(fields: [creatorId], references: [id], onDelete: Cascade)
-  members    Membership[]
 
   @@map("communities")
 }
@@ -105,17 +108,70 @@ model Community {
 model Membership {
   id          Int           @id @default(autoincrement())
   userId      Int
-  communityId Int
+  groupId     Int
   role        MembershipRole @default(MEMBER)
   status      MembershipStatus @default(ACTIVA)
   joinedAt    DateTime      @default(now())
 
   // Relations
   user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  community  Community     @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  group      Group         @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, communityId])
+  @@unique([userId, groupId])
   @@map("memberships")
+}
+
+model Exchange {
+  id            Int           @id @default(autoincrement())
+  requestedById Int
+  offeredById   Int
+  serviceId     Int
+  date          DateTime
+  state         ExchangeStatus @default(PENDING)
+  exchangedTime Decimal       @db.Decimal(5, 2)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relations
+  requestedBy  User          @relation("RequestedExchanges", fields: [requestedById], references: [id], onDelete: Cascade)
+  offeredBy    User          @relation("OfferedExchanges", fields: [offeredById], references: [id], onDelete: Cascade)
+  service      Service       @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@map("exchanges")
+}
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  groupId     Int
+  title       String   @db.VarChar(200)
+  description String?  @db.Text
+  date        DateTime
+  location    String?  @db.VarChar(200)
+  capacity    Int?
+  createdAt   DateTime @default(now())
+
+  // Relations
+  group       Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@map("events")
+}
+
+model Group {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(200)
+  description String?  @db.Text
+  type        GroupType @default(PUBLICO)
+  isPrivate   Boolean  @default(false)
+  creatorId   Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  creator     User         @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  members     Membership[]
+  events      Event[]
+
+  @@map("groups")
 }
 
 enum UserRole {
@@ -156,4 +212,20 @@ enum MembershipStatus {
   ACTIVA
   PENDIENTE
   SUSPENDIDA
+}
+
+enum ExchangeStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  DISPUTED
+}
+
+enum GroupType {
+  PUBLICO
+  PRIVADO
+  TRABAJO
+  HOBBY
 }
