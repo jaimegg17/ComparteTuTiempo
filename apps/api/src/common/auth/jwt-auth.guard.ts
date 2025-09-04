@@ -14,3 +14,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     return user;
   }
 }
+
+// Alias for Auth0
+export const Auth0Guard = JwtAuthGuard;
