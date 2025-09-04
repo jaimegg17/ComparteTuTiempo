@@ -11,7 +11,7 @@ datasource db {
 }
 
 model User {
-  id          Int      @id @default(autoincrement())
+  id          String   @id // Auth0 ID as primary key
   email       String   @unique
   password    String
   name        String
@@ -48,7 +48,7 @@ model Service {
   type        ServiceType
   status      ServiceStatus @default(ACTIVO)
   price       Float
-  userId      Int
+  userId      String
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
@@ -63,8 +63,8 @@ model Service {
 model Message {
   id        Int      @id @default(autoincrement())
   content   String
-  senderId  Int
-  receiverId Int
+  senderId  String
+  receiverId String
   createdAt DateTime @default(now())
 
   // Relations
@@ -78,7 +78,7 @@ model Rating {
   id        Int      @id @default(autoincrement())
   score     Int      @db.SmallInt
   comment   String?
-  userId    Int
+  userId    String
   serviceId Int
   createdAt DateTime @default(now())
 
@@ -95,7 +95,7 @@ model Community {
   name        String
   description String?
   isPrivate   Boolean  @default(false)
-  creatorId   Int
+  creatorId   String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -107,7 +107,7 @@ model Community {
 
 model Membership {
   id          Int           @id @default(autoincrement())
-  userId      Int
+  userId      String
   groupId     Int
   role        MembershipRole @default(MEMBER)
   status      MembershipStatus @default(ACTIVA)
@@ -123,8 +123,8 @@ model Membership {
 
 model Exchange {
   id            Int           @id @default(autoincrement())
-  requestedById Int
-  offeredById   Int
+  requestedById String
+  offeredById   String
   serviceId     Int
   date          DateTime
   state         ExchangeStatus @default(PENDING)
@@ -162,7 +162,7 @@ model Group {
   description String?  @db.Text
   type        GroupType @default(PUBLICO)
   isPrivate   Boolean  @default(false)
-  creatorId   Int
+  creatorId   String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
