@@ -5,7 +5,7 @@ import { Service } from '../domain/service.entity';
 
 export interface CreateServiceInput {
   data: ServiceCreate;
-  userId: number;
+  userId: string;
 }
 
 export interface CreateServiceOutput {

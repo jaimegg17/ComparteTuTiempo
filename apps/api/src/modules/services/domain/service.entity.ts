@@ -10,7 +10,7 @@ export class Service {
   private readonly _type: ServiceContract['type'];
   private readonly _status: ServiceContract['status'];
   private readonly _price: number;
-  private readonly _userId: number;
+  private readonly _userId: string;
   private readonly _createdAt: Date;
   private readonly _updatedAt: Date;
 
@@ -39,7 +39,7 @@ export class Service {
   get type(): ServiceContract['type'] { return this._type; }
   get status(): ServiceContract['status'] { return this._status; }
   get price(): number { return this._price; }
-  get userId(): number { return this._userId; }
+  get userId(): string { return this._userId; }
   get createdAt(): Date { return this._createdAt; }
   get updatedAt(): Date { return this._updatedAt; }
 
@@ -48,15 +48,15 @@ export class Service {
     return this._status === 'activo';
   }
 
-  isOwnedBy(userId: number): boolean {
+  isOwnedBy(userId: string): boolean {
     return this._userId === userId;
   }
 
-  canBeUpdatedBy(userId: number): boolean {
+  canBeUpdatedBy(userId: string): boolean {
     return this.isOwnedBy(userId) && this.isActive();
   }
 
-  canBeDeletedBy(userId: number): boolean {
+  canBeDeletedBy(userId: string): boolean {
     return this.isOwnedBy(userId);
   }
 

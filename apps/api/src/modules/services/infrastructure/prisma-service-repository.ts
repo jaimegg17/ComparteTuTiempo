@@ -4,6 +4,7 @@ import { ServiceRepositoryPort } from '../domain/service-repository.port';
 import { Service } from '../domain/service.entity';
 import { ServiceCreate, ServiceUpdate, ServiceListQuery, ServiceListResponse } from '@comparte-tu-tiempo/contracts';
 import { ServiceMapper } from './service.mapper';
+import { ServiceEnumMapper } from './service-enum.mapper';
 
 @Injectable()
 export class PrismaServiceRepository implements ServiceRepositoryPort {
@@ -12,10 +13,16 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
     private readonly mapper: ServiceMapper,
   ) {}
 
-  async create(data: ServiceCreate, userId: number): Promise<Service> {
+  async create(data: ServiceCreate, userId: string): Promise<Service> {
     const prismaService = await this.prisma.service.create({
       data: {
-        ...data,
+        title: data.title,
+        description: data.description,
+        duration: data.duration,
+        location: data.location,
+        category: ServiceEnumMapper.mapCategoryToPrisma(data.category) as any,
+        type: ServiceEnumMapper.mapTypeToPrisma(data.type) as any,
+        price: data.price,
         userId,
         status: 'ACTIVO',
       },
@@ -32,7 +39,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
     return prismaService ? this.mapper.toDomain(prismaService) : null;
   }
 
-  async findByUserId(userId: number): Promise<Service[]> {
+  async findByUserId(userId: string): Promise<Service[]> {
     const prismaServices = await this.prisma.service.findMany({
       where: { userId },
     });
@@ -54,9 +61,9 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
       ];
     }
     
-    if (category) where.category = category;
-    if (type) where.type = type;
-    if (status) where.status = status;
+    if (category) where.category = ServiceEnumMapper.mapCategoryToPrisma(category) as any;
+    if (type) where.type = ServiceEnumMapper.mapTypeToPrisma(type) as any;
+    if (status) where.status = ServiceEnumMapper.mapStatusToPrisma(status) as any;
     if (city) where.location = { contains: city, mode: 'insensitive' };
 
     // Obtener total y servicios
@@ -82,7 +89,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
     };
   }
 
-  async update(id: number, data: ServiceUpdate, userId: number): Promise<Service> {
+  async update(id: number, data: ServiceUpdate, userId: string): Promise<Service> {
     // Verificar que el servicio existe y pertenece al usuario
     const existingService = await this.findById(id);
     if (!existingService) {
@@ -92,15 +99,25 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
       throw new Error('Unauthorized to update this service');
     }
 
+    const updateData: any = {};
+    if (data.title) updateData.title = data.title;
+    if (data.description) updateData.description = data.description;
+    if (data.duration) updateData.duration = data.duration;
+    if (data.location !== undefined) updateData.location = data.location;
+    if (data.category) updateData.category = ServiceEnumMapper.mapCategoryToPrisma(data.category) as any;
+    if (data.type) updateData.type = ServiceEnumMapper.mapTypeToPrisma(data.type) as any;
+    if (data.status) updateData.status = ServiceEnumMapper.mapStatusToPrisma(data.status) as any;
+    if (data.price) updateData.price = data.price;
+
     const prismaService = await this.prisma.service.update({
       where: { id },
-      data,
+      data: updateData,
     });
 
     return this.mapper.toDomain(prismaService);
   }
 
-  async delete(id: number, userId: number): Promise<void> {
+  async delete(id: number, userId: string): Promise<void> {
     // Verificar que el servicio existe y pertenece al usuario
     const existingService = await this.findById(id);
     if (!existingService) {
@@ -117,7 +134,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
 
   async exists(id: number): Promise<boolean> {
     const count = await this.prisma.service.count({
-      where: { id },
+      where: { id: { equals: id } },
     });
     return count > 0;
   }

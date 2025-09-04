@@ -14,7 +14,7 @@ export const ServiceSchema = z.object({
   type: z.enum(['presencial', 'virtual', 'hibrido']),
   status: z.enum(['activo', 'inactivo', 'completado']),
   price: z.number().positive('El precio debe ser positivo'),
-  userId: z.number(),
+  userId: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
