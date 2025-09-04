@@ -22,32 +22,34 @@
     "db:seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
+    "@anatine/zod-nestjs": "^1.0.0",
+    "@auth0/nextjs-auth0": "^4.9.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
-    "@nestjs/platform-express": "^11.0.1",
-    "@nestjs/swagger": "^8.0.0",
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/passport": "^10.0.3",
-    "@anatine/zod-nestjs": "^1.0.0",
+    "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/swagger": "^8.0.0",
+    "@prisma/client": "^5.22.0",
+    "bcrypt": "^5.1.1",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
-    "bcrypt": "^5.1.1",
     "prisma": "^5.22.0",
-    "@prisma/client": "^5.22.0",
-    "zod": "^4.0.17",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "zod": "^4.0.17"
   },
   "devDependencies": {
+    "@comparte-tu-tiempo/contracts": "workspace:*",
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
+    "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^22.10.7",
-    "@types/bcrypt": "^5.0.2",
     "@types/passport-jwt": "^4.0.1",
     "@types/passport-local": "^1.0.38",
     "@types/supertest": "^6.0.2",
@@ -62,17 +64,22 @@
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.7.3",
-    "@comparte-tu-tiempo/contracts": "workspace:*"
+    "typescript": "^5.7.3"
   },
   "jest": {
-    "moduleFileExtensions": ["js", "json", "ts"],
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
-    "collectCoverageFrom": ["**/*.(t|j)s"],
+    "collectCoverageFrom": [
+      "**/*.(t|j)s"
+    ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
   }
