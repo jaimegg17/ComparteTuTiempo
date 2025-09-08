@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import type { ServiceRepositoryPort } from '../domain/service-repository.port';
 import { ServiceListQuery } from '@comparte-tu-tiempo/contracts';
+import { SERVICE_REPOSITORY_TOKEN } from '../domain/tokens';
 
 export interface ListServicesInput {
   query: ServiceListQuery;
@@ -12,7 +13,10 @@ export interface ListServicesOutput {
 
 @Injectable()
 export class ListServicesUseCase {
-  constructor(private readonly serviceRepository: ServiceRepositoryPort) {}
+  constructor(
+    @Inject(SERVICE_REPOSITORY_TOKEN)
+    private readonly serviceRepository: ServiceRepositoryPort
+  ) {}
 
   async execute(input: ListServicesInput): Promise<ListServicesOutput> {
     const { query } = input;

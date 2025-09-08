@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@auth0/nextjs-auth0": "3.5.0",
     "@comparte-tu-tiempo/contracts": "workspace:*",
     "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-slot": "^1.2.3",

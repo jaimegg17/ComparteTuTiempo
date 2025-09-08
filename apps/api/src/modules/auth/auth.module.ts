@@ -9,9 +9,10 @@ import { PrismaUserRepository } from './infrastructure/prisma-user-repository';
 import { UserRepositoryPort } from './domain/user-repository.port';
 import { USER_REPOSITORY_TOKEN } from './domain/tokens';
 import { Auth0Module } from '../../common/auth/auth0.module';
+import { PrismaModule } from '../../common/prisma/prisma.module';
 
 @Module({
-  imports: [Auth0Module],
+  imports: [Auth0Module, PrismaModule],
   controllers: [AuthController, Auth0Controller],
   providers: [
     SignUpUseCase,

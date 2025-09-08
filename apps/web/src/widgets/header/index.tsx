@@ -1,9 +1,12 @@
 "use client";
 
 import Link from 'next/link';
+import { useUser } from '@auth0/nextjs-auth0/client';
 import { Button } from '@/shared/ui/button';
 
 export function Header() {
+  const { user, error, isLoading } = useUser();
+
   return (
     <header className="bg-white shadow-sm border-b">
       <div className="container mx-auto px-4">
@@ -36,12 +39,31 @@ export function Header() {
 
           {/* Acciones */}
           <div className="flex items-center space-x-4">
-            <Link href="/auth/login">
-              <Button variant="ghost">Iniciar Sesión</Button>
-            </Link>
-            <Link href="/auth/signup">
-              <Button>Registrarse</Button>
-            </Link>
+            {isLoading && (
+              <span className="text-gray-500">Cargando...</span>
+            )}
+            {error && (
+              <span className="text-red-500">Error: {error.message}</span>
+            )}
+            {user ? (
+              <>
+                <span className="text-gray-700">
+                  ¡Hola, {user.name || user.email}!
+                </span>
+                <Link href="/api/auth/logout">
+                  <Button variant="ghost">Cerrar Sesión</Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/api/auth/login">
+                  <Button variant="ghost">Iniciar Sesión</Button>
+                </Link>
+                <Link href="/api/auth/login">
+                  <Button>Registrarse</Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
