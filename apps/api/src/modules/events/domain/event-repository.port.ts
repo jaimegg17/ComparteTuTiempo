@@ -4,8 +4,6 @@ import { EventCreate, EventUpdate, EventListQuery } from '@comparte-tu-tiempo/co
 export interface EventRepositoryPort {
   create(data: EventCreate): Promise<EventEntity>;
   findById(id: number): Promise<EventEntity | null>;
-  findByCommunityId(communityId: number): Promise<EventEntity[]>;
-  findByCreatorId(creatorId: string): Promise<EventEntity[]>;
   findUpcoming(): Promise<EventEntity[]>;
   findPast(): Promise<EventEntity[]>;
   update(id: number, data: EventUpdate): Promise<EventEntity>;

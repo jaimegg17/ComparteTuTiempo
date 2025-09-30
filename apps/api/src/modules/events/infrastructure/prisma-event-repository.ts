@@ -25,23 +25,7 @@ export class PrismaEventRepository implements EventRepositoryPort {
     return prismaEvent ? EventMapper.toDomain(prismaEvent) : null;
   }
 
-  async findByCommunityId(communityId: number): Promise<EventEntity[]> {
-    const prismaEvents = await this.prisma.event.findMany({
-      where: { communityId },
-      orderBy: { date: 'asc' },
-    });
-
-    return prismaEvents.map(EventMapper.toDomain);
-  }
-
-  async findByCreatorId(creatorId: string): Promise<EventEntity[]> {
-    const prismaEvents = await this.prisma.event.findMany({
-      where: { creatorId },
-      orderBy: { date: 'asc' },
-    });
-
-    return prismaEvents.map(EventMapper.toDomain);
-  }
+  // Removed findByCommunityId and findByCreatorId because Event model doesn't have these fields
 
   async findUpcoming(): Promise<EventEntity[]> {
     const prismaEvents = await this.prisma.event.findMany({
@@ -91,19 +75,18 @@ export class PrismaEventRepository implements EventRepositoryPort {
     pageSize: number;
     totalPages: number;
   }> {
-    const { page, pageSize, communityId, creatorId, upcoming } = query;
+    const { page, pageSize, groupId, q, dateFrom, dateTo, location } = query as any;
     const skip = (page - 1) * pageSize;
 
     // Build where clause
     const where: any = {};
-    if (communityId) where.communityId = communityId;
-    if (creatorId) where.creatorId = creatorId;
-    if (upcoming !== undefined) {
-      if (upcoming) {
-        where.date = { gte: new Date() };
-      } else {
-        where.date = { lt: new Date() };
-      }
+    if (groupId) where.groupId = groupId;
+    if (q) where.title = { contains: q, mode: 'insensitive' };
+    if (location) where.location = { contains: location, mode: 'insensitive' };
+    if (dateFrom || dateTo) {
+      where.date = {};
+      if (dateFrom) where.date.gte = dateFrom;
+      if (dateTo) where.date.lte = dateTo;
     }
 
     // Get total count
@@ -114,7 +97,7 @@ export class PrismaEventRepository implements EventRepositoryPort {
       where,
       skip,
       take: pageSize,
-      orderBy: upcoming ? { date: 'asc' } : { date: 'desc' },
+      orderBy: { date: 'asc' },
     });
 
     const events = prismaEvents.map(EventMapper.toDomain);

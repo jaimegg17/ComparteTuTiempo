@@ -22,6 +22,7 @@ export const EventCreateSchema = z.object({
   date: z.date(),
   location: z.string().optional(),
   capacity: z.number().positive('La capacidad debe ser positiva').optional(),
+  creatorId: z.string(),
 });
 
 export const EventUpdateSchema = z.object({

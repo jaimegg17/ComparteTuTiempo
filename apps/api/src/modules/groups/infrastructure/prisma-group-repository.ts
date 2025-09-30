@@ -25,14 +25,7 @@ export class PrismaGroupRepository implements GroupRepositoryPort {
     return prismaGroup ? GroupMapper.toDomain(prismaGroup) : null;
   }
 
-  async findByCommunityId(communityId: number): Promise<GroupEntity[]> {
-    const prismaGroups = await this.prisma.group.findMany({
-      where: { communityId },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    return prismaGroups.map(GroupMapper.toDomain);
-  }
+  // Removed findByCommunityId because Group model does not have communityId in schema
 
   async findByCreatorId(creatorId: string): Promise<GroupEntity[]> {
     const prismaGroups = await this.prisma.group.findMany({
@@ -65,13 +58,15 @@ export class PrismaGroupRepository implements GroupRepositoryPort {
     pageSize: number;
     totalPages: number;
   }> {
-    const { page, pageSize, communityId, creatorId } = query;
+    const { page, pageSize, creatorId, type, isPrivate, q } = query as any;
     const skip = (page - 1) * pageSize;
 
     // Build where clause
     const where: any = {};
-    if (communityId) where.communityId = communityId;
     if (creatorId) where.creatorId = creatorId;
+    if (type) where.type = type;
+    if (typeof isPrivate === 'boolean') where.isPrivate = isPrivate;
+    if (q) where.name = { contains: q, mode: 'insensitive' };
 
     // Get total count
     const total = await this.prisma.group.count({ where });

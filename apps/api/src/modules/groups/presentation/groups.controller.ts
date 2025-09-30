@@ -21,8 +21,9 @@ import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
 // Simple DTOs without Zod for now
 export class CreateGroupDto {
   name!: string;
-  description!: string;
-  communityId!: number;
+  description?: string;
+  type!: 'PUBLICO' | 'PRIVADO' | 'TRABAJO' | 'HOBBY';
+  isPrivate!: boolean;
 }
 
 export class UpdateGroupDto {

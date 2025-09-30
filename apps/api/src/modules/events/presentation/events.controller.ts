@@ -24,7 +24,7 @@ export class CreateEventDto {
   description!: string;
   date!: Date;
   location?: string;
-  communityId!: number;
+  groupId!: number;
 }
 
 export class UpdateEventDto {
