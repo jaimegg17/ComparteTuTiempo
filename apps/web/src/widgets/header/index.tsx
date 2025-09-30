@@ -3,104 +3,276 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useUser } from "@auth0/nextjs-auth0/client";
-import { Button } from "@/shared/ui/button";
+import { 
+  AppBar, 
+  Toolbar, 
+  Typography, 
+  Button, 
+  TextField, 
+  InputAdornment,
+  Box,
+  Container,
+  IconButton,
+  Menu,
+  MenuItem
+} from '@mui/material';
+import { 
+  Search as SearchIcon, 
+  AccountCircle,
+  Login as LoginIcon,
+  PersonAdd as PersonAddIcon
+} from '@mui/icons-material';
+import { useTranslation } from '@/hooks/useTranslation';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 export function Header() {
   const { user, error, isLoading } = useUser();
+  const { t } = useTranslation();
 
   return (
-    <header className="bg-[#C7D2D2] shadow-sm border-b w-full">
-      <div className="w-full px-4 sm:px-6 py-2">
-        <div className="navbar-container">
-          {/* Logo */}
-          <div className="navbar-logo">
-            <Link href="/" className="flex items-center space-x-3">
-              <Image 
-                src="/images/logo.png" 
-                alt="ComparteTuTiempo Logo" 
-                width={40} 
-                height={40}
-                className="w-10 h-10"
+    <AppBar position="static" elevation={1}>
+      <Container maxWidth="xl">
+        <Toolbar sx={{ 
+          justifyContent: 'center', 
+          py: 2, 
+          px: 8, // Margen fijo a los lados (64px)
+          minHeight: 80 // Altura mínima del header
+        }}>
+          {/* Contenido centrado con distribución equilibrada */}
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', // Centrado real
+            width: '100%',
+            maxWidth: '1200px', // Ancho máximo controlado
+            mx: 'auto', // Centrado automático
+            gap: 12 // Espacio fijo entre secciones principales (96px)
+          }}>
+            {/* Logo */}
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center'
+            }}>
+              <Button
+                component={Link}
+                href="/"
+                sx={{ 
+                  textDecoration: 'none',
+                  p: 0,
+                  minWidth: 'auto',
+                  '&:hover': {
+                    backgroundColor: 'transparent',
+                  }
+                }}
+              >
+                <Box
+                  component="img"
+                  src="/images/logo.png"
+                  alt="ComparteTuTiempo Logo"
+                  sx={{
+                    width: 70,
+                    height: 70,
+                    objectFit: 'contain',
+                  }}
+                />
+              </Button>
+            </Box>
+
+            {/* Navegación */}
+            <Box sx={{ 
+              display: { xs: 'none', lg: 'flex' }, 
+              alignItems: 'center', 
+              gap: 6 // Espacio entre botones (48px)
+            }}>
+              <Button 
+                component={Link}
+                href="/"
+                color="inherit" 
+                sx={{ fontSize: 22, color: 'text.primary', fontWeight: 500 }}
+              >
+                {t('header.navigation.home')}
+              </Button>
+              <Button 
+                component={Link}
+                href="/services"
+                color="inherit" 
+                sx={{ fontSize: 22, color: 'text.primary', fontWeight: 500 }}
+              >
+                {t('header.navigation.services')}
+              </Button>
+              <Button 
+                component={Link}
+                href="/communities"
+                color="inherit" 
+                sx={{ fontSize: 22, color: 'text.primary', fontWeight: 500 }}
+              >
+                {t('header.navigation.communities')}
+              </Button>
+              <Button 
+                component={Link}
+                href="/faq"
+                color="inherit" 
+                sx={{ fontSize: 22, color: 'text.primary', fontWeight: 500 }}
+              >
+                {t('header.navigation.faq')}
+              </Button>
+            </Box>
+
+            {/* Acciones */}
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 4 // Espacio entre elementos (32px)
+            }}>
+            {/* Barra de búsqueda */}
+            <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
+              <TextField
+                size="small"
+                placeholder={t('header.search.placeholder')}
+                variant="outlined"
+                sx={{ 
+                  width: 280,
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: 'background.paper',
+                    fontSize: '16px',
+                  }
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon color="action" />
+                    </InputAdornment>
+                  ),
+                }}
               />
-              <span className="text-xl font-bold text-[#3C4242] ml-2">
-                ComparteTuTiempo
-              </span>
-            </Link>
-          </div>
+            </Box>
 
-          {/* Navegación - Responsive */}
-          <nav className="hidden md:flex items-center space-x-4 lg:space-x-6">
-            <Link
-              href="/"
-              className="text-[#3C4242] hover:text-gray-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-            >
-              Inicio
-            </Link>
-            <Link
-              href="/services"
-              className="text-[#3C4242] hover:text-gray-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-            >
-              Servicios
-            </Link>
-            <Link
-              href="/communities"
-              className="text-[#3C4242] hover:text-gray-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-            >
-              Comunidades
-            </Link>
-            <Link
-              href="/faq"
-              className="text-[#3C4242] hover:text-gray-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-            >
-              FAQ
-            </Link>
-          </nav>
+            {/* Selector de idioma */}
+            <LanguageSwitcher />
 
-          {/* Acciones - Lado derecho */}
-          <div className="flex items-center space-x-2 sm:space-x-3">
+            {/* Estado de autenticación */}
             {isLoading && (
-              <span className="text-gray-600 text-xs sm:text-sm">Cargando...</span>
+              <Typography variant="body2" color="text.secondary">
+                {t('header.auth.loading')}
+              </Typography>
             )}
             {error && (
-              <span className="text-red-600 text-xs sm:text-sm">Error: {error.message}</span>
+              <Typography variant="body2" color="error">
+                {t('header.auth.error', { message: error.message })}
+              </Typography>
             )}
             {user ? (
-              <>
-                <span className="text-[#3C4242] text-xs sm:text-sm hidden sm:block">
-                  ¡Hola, {user.name || user.email}!
-                </span>
-                <Link href="/api/auth/logout">
-                  <Button
-                    size="sm"
-                    className="bg-[#1D2F3D] text-white hover:bg-[#0F1A23] transition-colors rounded-md px-2 py-1 text-xs sm:px-3 sm:py-2 sm:text-sm"
-                  >
-                    Salir
-                  </Button>
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link href="/api/auth/login">
-                  <Button
-                    size="sm"
-                    className="bg-[#1D2F3D] text-white hover:bg-[#0F1A23] transition-colors rounded-md px-4 py-2"
-                  >
-                    Entra
-                  </Button>
-                </Link>
-                <Link href="/api/auth/login">
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    display: { xs: 'none', sm: 'block' },
+                    color: 'text.primary'
+                  }}
+                >
+                  {t('header.auth.welcome', { name: user.name || user.email })}
+                </Typography>
+                <Link href="/api/auth/logout" style={{ textDecoration: 'none' }}>
                   <Button 
-                    size="sm" 
-                    className="bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors rounded-md px-4 py-2"
+                    variant="contained" 
+                    size="small"
+                    startIcon={<AccountCircle />}
+                    sx={{ 
+                      backgroundColor: 'primary.main',
+                      '&:hover': {
+                        backgroundColor: 'primary.dark',
+                      }
+                    }}
                   >
-                    Regístrate
+                    {t('header.auth.logout')}
                   </Button>
                 </Link>
-              </>
+              </Box>
+            ) : (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Link href="/api/auth/login" style={{ textDecoration: 'none' }}>
+                  <Button 
+                    variant="contained" 
+                    size="small"
+                    startIcon={<LoginIcon />}
+                    sx={{ 
+                      backgroundColor: 'primary.main',
+                      '&:hover': {
+                        backgroundColor: 'primary.dark',
+                      }
+                    }}
+                  >
+                    {t('header.auth.login')}
+                  </Button>
+                </Link>
+                <Link href="/api/auth/login" style={{ textDecoration: 'none' }}>
+                  <Button 
+                    variant="outlined" 
+                    size="small"
+                    startIcon={<PersonAddIcon />}
+                    sx={{ 
+                      color: 'text.primary',
+                      borderColor: 'grey.300',
+                      '&:hover': {
+                        borderColor: 'grey.400',
+                        backgroundColor: 'background.default',
+                      }
+                    }}
+                  >
+                    {t('header.auth.register')}
+                  </Button>
+                </Link>
+              </Box>
             )}
-          </div>
-        </div>
-      </div>
-    </header>
+          </Box>
+          </Box>
+        </Toolbar>
+
+        {/* Navegación móvil */}
+        <Box sx={{ 
+          display: { xs: 'flex', lg: 'none' }, 
+          justifyContent: 'center', 
+          gap: 4, // Más espacio entre botones móviles
+          py: 3, // Más padding vertical
+          px: 6, // Mismo margen horizontal que el header principal
+          borderTop: '1px solid', 
+          borderColor: 'divider',
+          backgroundColor: 'background.paper'
+        }}>
+          <Button 
+            component={Link}
+            href="/"
+            color="inherit" 
+            sx={{ fontSize: 18, color: 'text.primary', fontWeight: 500 }}
+          >
+            {t('header.navigation.home')}
+          </Button>
+          <Button 
+            component={Link}
+            href="/services"
+            color="inherit" 
+            sx={{ fontSize: 18, color: 'text.primary', fontWeight: 500 }}
+          >
+            {t('header.navigation.services')}
+          </Button>
+          <Button 
+            component={Link}
+            href="/communities"
+            color="inherit" 
+            sx={{ fontSize: 18, color: 'text.primary', fontWeight: 500 }}
+          >
+            {t('header.navigation.communities')}
+          </Button>
+          <Button 
+            component={Link}
+            href="/faq"
+            color="inherit" 
+            sx={{ fontSize: 18, color: 'text.primary', fontWeight: 500 }}
+          >
+            {t('header.navigation.faq')}
+          </Button>
+        </Box>
+      </Container>
+    </AppBar>
   );
 }

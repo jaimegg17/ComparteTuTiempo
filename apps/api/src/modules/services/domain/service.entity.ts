@@ -45,7 +45,7 @@ export class Service {
 
   // Métodos de dominio
   isActive(): boolean {
-    return this._status === 'activo';
+    return this._status === 'ACTIVO';
   }
 
   isOwnedBy(userId: string): boolean {
@@ -70,7 +70,7 @@ export class Service {
   }
 
   get isLocalService(): boolean {
-    return this._type === 'presencial';
+    return this._type === 'PRESENCIAL';
   }
 
   // Método para convertir a contrato

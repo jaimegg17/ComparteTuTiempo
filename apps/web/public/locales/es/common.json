@@ -1,0 +1,42 @@
+{
+  "header": {
+    "logo": "ComparteTuTiempo",
+    "navigation": {
+      "home": "Inicio",
+      "services": "Servicios",
+      "communities": "Comunidades",
+      "faq": "FAQ"
+    },
+    "search": {
+      "placeholder": "Buscar"
+    },
+    "auth": {
+      "login": "Entra",
+      "register": "Regístrate",
+      "logout": "Salir",
+      "welcome": "¡Hola, {{name}}!",
+      "loading": "Cargando...",
+      "error": "Error: {{message}}"
+    }
+  },
+  "pages": {
+    "home": {
+      "title": "¡Bienvenido a ComparteTuTiempo!",
+      "subtitle": "Tu plataforma para intercambiar habilidades usando horas como moneda",
+      "description": "El frontend está funcionando correctamente.\nAhora puedes acceder a la aplicación completa."
+    }
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "confirm": "Confirmar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "previous": "Anterior"
+  }
+}

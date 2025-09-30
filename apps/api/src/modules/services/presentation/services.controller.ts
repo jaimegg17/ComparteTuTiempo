@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Query, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { createZodDto } from '@anatine/zod-nestjs';
-import { ServiceCreateSchema } from '@comparte-tu-tiempo/contracts';
+import { ServiceCreateSchema, ServiceListQuerySchema } from '@comparte-tu-tiempo/contracts';
 import { CreateServiceUseCase } from '../application/create-service.use-case';
 import { ListServicesUseCase } from '../application/list-services.use-case';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';

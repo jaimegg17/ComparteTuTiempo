@@ -1,0 +1,42 @@
+{
+  "header": {
+    "logo": "ComparteTuTiempo",
+    "navigation": {
+      "home": "Home",
+      "services": "Services",
+      "communities": "Communities",
+      "faq": "FAQ"
+    },
+    "search": {
+      "placeholder": "Search"
+    },
+    "auth": {
+      "login": "Login",
+      "register": "Register",
+      "logout": "Logout",
+      "welcome": "Hello, {{name}}!",
+      "loading": "Loading...",
+      "error": "Error: {{message}}"
+    }
+  },
+  "pages": {
+    "home": {
+      "title": "Welcome to ComparteTuTiempo!",
+      "subtitle": "Your platform to exchange skills using hours as currency",
+      "description": "The frontend is working correctly.\nNow you can access the complete application."
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous"
+  }
+}

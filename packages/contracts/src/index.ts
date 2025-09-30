@@ -5,6 +5,8 @@ export * from './exchange.schemas';
 export * from './group.schemas';
 export * from './event.schemas';
 export * from './membership.schemas';
+export * from './community.schemas';
+export * from './rating.schemas';
 export * from './message.schemas';
 
 export type {
@@ -45,6 +47,20 @@ export type {
   EventListQuery,
   EventListResponse,
 } from './event.schemas';
+export type {
+  Community,
+  CommunityCreate,
+  CommunityUpdate,
+  CommunityListQuery,
+  CommunityListResponse,
+} from './community.schemas';
+export type {
+  Rating,
+  RatingCreate,
+  RatingUpdate,
+  RatingListQuery,
+  RatingListResponse,
+} from './rating.schemas';
 export type {
   Membership,
   MembershipCreate,
