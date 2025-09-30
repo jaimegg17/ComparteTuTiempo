@@ -198,12 +198,15 @@ importers:
       i18next:
         specifier: ^25.5.2
         version: 25.5.2(typescript@5.9.2)
+      iconoir-react:
+        specifier: ^7.11.0
+        version: 7.11.0(react@19.1.0)
       lucide-react:
         specifier: ^0.541.0
         version: 0.541.0(react@19.1.0)
       next:
         specifier: 15.4.6
-        version: 15.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 15.4.6(@babel/core@7.28.3)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react:
         specifier: 19.1.0
         version: 19.1.0
@@ -2891,6 +2894,11 @@ packages:
       typescript:
         optional: true
 
+  iconoir-react@7.11.0:
+    resolution: {integrity: sha512-uvTKtnHYwbbTsmQ6HCcliYd50WK0GbjP497RwdISxKzfS01x4cK1Mn/F2mT/t2roSaJQ0I+KnHxMcyvmNMXWsQ==}
+    peerDependencies:
+      react: 18 || 19
+
   iconv-lite@0.6.3:
     resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
     engines: {node: '>=0.10.0'}
@@ -4694,7 +4702,7 @@ snapshots:
       debug: 4.4.1
       joi: 17.13.3
       jose: 4.15.9
-      next: 15.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      next: 15.4.6(@babel/core@7.28.3)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       oauth4webapi: 2.17.0
       openid-client: 5.7.1
       tslib: 2.8.1
@@ -7661,6 +7669,10 @@ snapshots:
     optionalDependencies:
       typescript: 5.9.2
 
+  iconoir-react@7.11.0(react@19.1.0):
+    dependencies:
+      react: 19.1.0
+
   iconv-lite@0.6.3:
     dependencies:
       safer-buffer: 2.1.2
@@ -8501,29 +8513,6 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
-  next@15.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
-    dependencies:
-      '@next/env': 15.4.6
-      '@swc/helpers': 0.5.15
-      caniuse-lite: 1.0.30001735
-      postcss: 8.4.31
-      react: 19.1.0
-      react-dom: 19.1.0(react@19.1.0)
-      styled-jsx: 5.1.6(react@19.1.0)
-    optionalDependencies:
-      '@next/swc-darwin-arm64': 15.4.6
-      '@next/swc-darwin-x64': 15.4.6
-      '@next/swc-linux-arm64-gnu': 15.4.6
-      '@next/swc-linux-arm64-musl': 15.4.6
-      '@next/swc-linux-x64-gnu': 15.4.6
-      '@next/swc-linux-x64-musl': 15.4.6
-      '@next/swc-win32-arm64-msvc': 15.4.6
-      '@next/swc-win32-x64-msvc': 15.4.6
-      sharp: 0.34.3
-    transitivePeerDependencies:
-      - '@babel/core'
-      - babel-plugin-macros
-
   node-abort-controller@3.1.1: {}
 
   node-addon-api@8.5.0: {}
@@ -9228,11 +9217,6 @@ snapshots:
     optionalDependencies:
       '@babel/core': 7.28.3
       babel-plugin-macros: 3.1.0
-
-  styled-jsx@5.1.6(react@19.1.0):
-    dependencies:
-      client-only: 0.0.1
-      react: 19.1.0
 
   stylis@4.2.0: {}
 
