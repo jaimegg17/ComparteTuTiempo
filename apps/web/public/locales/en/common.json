@@ -38,5 +38,51 @@
     "back": "Back",
     "next": "Next",
     "previous": "Previous"
+  },
+  "sections": {
+    "title": "Find your section",
+    "languages": "Languages",
+    "music": "Music",
+    "sports": "Sports",
+    "education": "Education"
+  },
+  "testimonials": {
+    "title": "Rate your experience",
+    "user1": {
+      "text": "This app has been a game changer for me! I highly recommend it to anyone looking to streamline their workflow.",
+      "author": "John Doe",
+      "role": "CEO"
+    },
+    "user2": {
+      "text": "I've tried a lot of different apps, but this one really stands out. It's so easy to use, and the features are exactly what I need.",
+      "author": "Jane Smith",
+      "role": "Designer"
+    },
+    "user3": {
+      "text": "I love how customizable this app is. I can really make it work for me, no matter what project I'm working on.",
+      "author": "Bob Johnson",
+      "role": "Developer"
+    }
+  },
+  "footer": {
+    "help": {
+      "title": "Help",
+      "contact": "Contact Us",
+      "incidents": "Incidents",
+      "faq": "FAQ's"
+    },
+    "about": {
+      "title": "About Us",
+      "history": "History",
+      "blog": "Blog",
+      "collaborations": "Collaborations"
+    },
+    "moreInfo": {
+      "title": "More Information",
+      "terms": "Terms and Conditions",
+      "privacy": "Privacy Policy",
+      "address": "Eklingpura Chouraha, Ahmedabad Main Road\n(NH 8- Near Mahadev Hotel) Udaipur, India- 313002"
+    },
+    "copyright": "Copyright © {{year}} ComparteTuTiempo Arroyo Pvt Ltd. All rights reserved."
   }
 }

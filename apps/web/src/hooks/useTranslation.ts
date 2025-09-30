@@ -3,7 +3,7 @@
 import { useTranslation as useI18nTranslation } from 'react-i18next';
 
 export function useTranslation() {
-  const { t, i18n } = useI18nTranslation();
+  const { t, i18n } = useI18nTranslation('common');
 
   const changeLanguage = (locale: string) => {
     i18n.changeLanguage(locale);

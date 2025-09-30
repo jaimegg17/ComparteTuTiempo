@@ -38,5 +38,51 @@
     "back": "Atrás",
     "next": "Siguiente",
     "previous": "Anterior"
+  },
+  "sections": {
+    "title": "Encuentra tu sección",
+    "languages": "Idiomas",
+    "music": "Música",
+    "sports": "Deporte",
+    "education": "Estudios"
+  },
+  "testimonials": {
+    "title": "Valora tu experiencia",
+    "user1": {
+      "text": "Esta aplicación ha sido un cambio radical para mí. La recomiendo encarecidamente a cualquiera que busque optimizar su flujo de trabajo.",
+      "author": "Juan Pérez",
+      "role": "Empresario"
+    },
+    "user2": {
+      "text": "He probado muchas aplicaciones diferentes, pero esta realmente destaca. Es muy fácil de usar y las funciones son exactamente lo que necesito.",
+      "author": "María Delgado",
+      "role": "Diseñadora"
+    },
+    "user3": {
+      "text": "Me encanta lo personalizable que es esta aplicación. Realmente puedo hacer que funcione para mí, sin importar en qué proyecto esté trabajando.",
+      "author": "Carlos Rodríguez",
+      "role": "Desarrollador"
+    }
+  },
+  "footer": {
+    "help": {
+      "title": "Ayuda",
+      "contact": "Contáctanos",
+      "incidents": "Incidencias",
+      "faq": "FAQ's"
+    },
+    "about": {
+      "title": "Sobre nosotros",
+      "history": "Historia",
+      "blog": "Blog",
+      "collaborations": "Colaboraciones"
+    },
+    "moreInfo": {
+      "title": "Más información",
+      "terms": "Términos y Condiciones",
+      "privacy": "Política de privacidad",
+      "address": "Eklingpura Chouraha, Ahmedabad Main Road\n(NH 8- Near Mahadev Hotel) Udaipur, India- 313002"
+    },
+    "copyright": "Copyright © {{year}} ComparteTuTiempo Arroyo Pvt Ltd. All rights reserved."
   }
 }
