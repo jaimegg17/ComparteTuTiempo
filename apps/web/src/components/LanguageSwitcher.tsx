@@ -1,7 +1,7 @@
 "use client";
 
-import { Button, Menu, MenuItem, Box } from '@mui/material';
-import { Language as LanguageIcon } from '@mui/icons-material';
+import { IconButton, Menu, MenuItem, Box } from '@mui/material';
+import { Language } from 'iconoir-react';
 import { useState } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 
@@ -23,47 +23,26 @@ export function LanguageSwitcher() {
     handleClose();
   };
 
-  const getLanguageFlag = (locale: string) => {
-    switch (locale) {
-      case 'es':
-        return '🇪🇸';
-      case 'en':
-        return '🇺🇸';
-      default:
-        return '🌐';
-    }
-  };
-
-  const getLanguageName = (locale: string) => {
-    switch (locale) {
-      case 'es':
-        return 'Español';
-      case 'en':
-        return 'English';
-      default:
-        return 'Language';
-    }
-  };
-
   return (
     <Box>
-      <Button
+      <IconButton
         id="language-button"
         aria-controls={open ? 'language-menu' : undefined}
         aria-haspopup="true"
         aria-expanded={open ? 'true' : undefined}
         onClick={handleClick}
-        startIcon={<LanguageIcon />}
+        aria-label="Change language"
+        size="small"
         sx={{
-          color: 'text.primary',
-          fontSize: '14px',
-          textTransform: 'none',
-          minWidth: 'auto',
-          px: 1,
+          color: 'rgba(0, 0, 0, 0.7)',
+          '&:hover': {
+            color: 'rgba(0, 0, 0, 0.9)',
+            bgcolor: 'rgba(0, 0, 0, 0.05)',
+          },
         }}
       >
-        {getLanguageFlag(currentLanguage)} {getLanguageName(currentLanguage)}
-      </Button>
+        <Language width={20} height={20} strokeWidth={2} />
+      </IconButton>
       <Menu
         id="language-menu"
         anchorEl={anchorEl}
@@ -74,22 +53,20 @@ export function LanguageSwitcher() {
         }}
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'left',
+          horizontal: 'right',
         }}
         transformOrigin={{
           vertical: 'top',
-          horizontal: 'left',
+          horizontal: 'right',
         }}
       >
         <MenuItem 
           onClick={() => handleLanguageChange('es')}
-          selected={currentLanguage === 'es'}
         >
           🇪🇸 Español
         </MenuItem>
         <MenuItem 
           onClick={() => handleLanguageChange('en')}
-          selected={currentLanguage === 'en'}
         >
           🇺🇸 English
         </MenuItem>
