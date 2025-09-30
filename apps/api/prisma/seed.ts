@@ -19,6 +19,7 @@ async function main() {
       bio: 'Usuario de prueba para desarrollo',
       skills: ['programacion', 'diseno'],
       role: 'USER',
+      timeCredits: 300, // 5 horas en minutos
     },
   });
 
@@ -35,6 +36,7 @@ async function main() {
       bio: 'Otro usuario de prueba',
       skills: ['musica', 'cocina'],
       role: 'USER',
+      timeCredits: 240, // 4 horas en minutos
     },
   });
 
