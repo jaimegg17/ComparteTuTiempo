@@ -10,9 +10,9 @@ export const ServiceSchema = z.object({
   description: z.string(),
   duration: z.number().positive('La duración debe ser positiva'),
   location: z.string().nullable(),
-  category: z.enum(['educacion', 'hogar', 'tecnologia', 'salud', 'deportes', 'arte', 'otros']),
-  type: z.enum(['presencial', 'virtual', 'hibrido']),
-  status: z.enum(['activo', 'inactivo', 'completado']),
+  category: z.enum(['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'ARTE', 'OTROS']),
+  type: z.enum(['PRESENCIAL', 'VIRTUAL', 'HIBRIDO']),
+  status: z.enum(['ACTIVO', 'INACTIVO', 'COMPLETADO']),
   price: z.number().positive('El precio debe ser positivo'),
   userId: z.string(),
   createdAt: z.date(),
@@ -24,8 +24,8 @@ export const ServiceCreateSchema = z.object({
   description: z.string().min(20, 'La descripción debe tener al menos 20 caracteres'),
   duration: z.number().positive('La duración debe ser positiva'),
   location: z.string().optional(),
-  category: z.enum(['educacion', 'hogar', 'tecnologia', 'salud', 'deportes', 'arte', 'otros']),
-  type: z.enum(['presencial', 'virtual', 'hibrido']),
+  category: z.enum(['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'ARTE', 'OTROS']),
+  type: z.enum(['PRESENCIAL', 'VIRTUAL', 'HIBRIDO']),
   price: z.number().positive('El precio debe ser positivo'),
 });
 
@@ -34,18 +34,18 @@ export const ServiceUpdateSchema = z.object({
   description: z.string().min(20, 'La descripción debe tener al menos 20 caracteres').optional(),
   duration: z.number().positive('La duración debe ser positiva').optional(),
   location: z.string().optional(),
-  category: z.enum(['educacion', 'hogar', 'tecnologia', 'salud', 'deportes', 'arte', 'otros']).optional(),
-  type: z.enum(['presencial', 'virtual', 'hibrido']).optional(),
-  status: z.enum(['activo', 'inactivo', 'completado']).optional(),
+  category: z.enum(['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'ARTE', 'OTROS']).optional(),
+  type: z.enum(['PRESENCIAL', 'VIRTUAL', 'HIBRIDO']).optional(),
+  status: z.enum(['ACTIVO', 'INACTIVO', 'COMPLETADO']).optional(),
   price: z.number().positive('El precio debe ser positivo').optional(),
 });
 
 export const ServiceListQuerySchema = z.object({
   q: z.string().optional(),
-  category: z.enum(['educacion', 'hogar', 'tecnologia', 'salud', 'deportes', 'arte', 'otros']).optional(),
+  category: z.enum(['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'ARTE', 'OTROS']).optional(),
   city: z.string().optional(),
-  type: z.enum(['presencial', 'virtual', 'hibrido']).optional(),
-  status: z.enum(['activo', 'inactivo', 'completado']).optional(),
+  type: z.enum(['PRESENCIAL', 'VIRTUAL', 'HIBRIDO']).optional(),
+  status: z.enum(['ACTIVO', 'INACTIVO', 'COMPLETADO']).optional(),
   page: z.number().min(1, 'La página debe ser mayor a 0').default(1),
   pageSize: z.number().min(1, 'El tamaño de página debe ser mayor a 0').max(100, 'El tamaño de página no puede exceder 100').default(20),
 });
@@ -73,23 +73,23 @@ export type ServiceListResponse = z.infer<typeof ServiceListResponseSchema>;
 // ============================================================================
 
 export const ServiceCategory = {
-  EDUCACION: 'educacion',
-  HOGAR: 'hogar',
-  TECNOLOGIA: 'tecnologia',
-  SALUD: 'salud',
-  DEPORTES: 'deportes',
-  ARTE: 'arte',
-  OTROS: 'otros',
+  EDUCACION: 'EDUCACION',
+  HOGAR: 'HOGAR',
+  TECNOLOGIA: 'TECNOLOGIA',
+  SALUD: 'SALUD',
+  DEPORTES: 'DEPORTES',
+  ARTE: 'ARTE',
+  OTROS: 'OTROS',
 } as const;
 
 export const ServiceType = {
-  PRESENCIAL: 'presencial',
-  VIRTUAL: 'virtual',
-  HIBRIDO: 'hibrido',
+  PRESENCIAL: 'PRESENCIAL',
+  VIRTUAL: 'VIRTUAL',
+  HIBRIDO: 'HIBRIDO',
 } as const;
 
 export const ServiceStatus = {
-  ACTIVO: 'activo',
-  INACTIVO: 'inactivo',
-  COMPLETADO: 'completado',
+  ACTIVO: 'ACTIVO',
+  INACTIVO: 'INACTIVO',
+  COMPLETADO: 'COMPLETADO',
 } as const;
