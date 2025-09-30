@@ -3,275 +3,196 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useUser } from "@auth0/nextjs-auth0/client";
-import { 
-  AppBar, 
-  Toolbar, 
-  Typography, 
-  Button, 
-  TextField, 
-  InputAdornment,
+import {
+  AppBar,
+  Toolbar,
   Box,
+  Typography,
+  Button,
   Container,
-  IconButton,
-  Menu,
-  MenuItem
-} from '@mui/material';
-import { 
-  Search as SearchIcon, 
-  AccountCircle,
+} from "@mui/material";
+import {
   Login as LoginIcon,
-  PersonAdd as PersonAddIcon
-} from '@mui/icons-material';
-import { useTranslation } from '@/hooks/useTranslation';
-import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+  PersonAdd as PersonAddIcon,
+  AccountCircle,
+} from "@mui/icons-material";
+import { useTranslation } from "@/hooks/useTranslation";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { SearchBar } from "@/components/SearchBar";
 
 export function Header() {
   const { user, error, isLoading } = useUser();
   const { t } = useTranslation();
 
   return (
-    <AppBar position="static" elevation={1}>
-      <Container maxWidth="xl">
-        <Toolbar sx={{ 
-          justifyContent: 'center', 
-          py: 2, 
-          px: 8, // Margen fijo a los lados (64px)
-          minHeight: 80 // Altura mínima del header
-        }}>
-          {/* Contenido centrado con distribución equilibrada */}
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', // Centrado real
-            width: '100%',
-            maxWidth: '1200px', // Ancho máximo controlado
-            mx: 'auto', // Centrado automático
-            gap: 12 // Espacio fijo entre secciones principales (96px)
-          }}>
-            {/* Logo */}
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center'
-            }}>
-              <Button
-                component={Link}
-                href="/"
-                sx={{ 
-                  textDecoration: 'none',
-                  p: 0,
-                  minWidth: 'auto',
-                  '&:hover': {
-                    backgroundColor: 'transparent',
-                  }
-                }}
-              >
-                <Box
-                  component="img"
+    <AppBar
+      position="sticky"
+      elevation={0}
+      sx={{
+        bgcolor: "#c9d5d3",
+        borderBottom: "1px solid",
+        borderColor: "rgba(0,0,0,0.08)",
+      }}
+    >
+      {/* FULL-BLEED: sin límites de ancho */}
+      <Container maxWidth={false} disableGutters>
+        <Toolbar
+          sx={{
+            minHeight: 72,
+            px: { xs: 2, md: 3 }, // padding lateral del header
+          }}
+        >
+          {/* Contenido centrado opcional: limita SOLO el contenido, no el fondo */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              width: "100%",
+              maxWidth: 1440,   // ajusta si quieres más/menos ancho útil
+              mx: "auto",
+            }}
+          >
+            {/* IZQUIERDA: Logo */}
+            <Box sx={{ display: "flex", alignItems: "center", mr: 1.5 }}>
+              <Link href="/" style={{ display: "inline-flex", alignItems: "center" }}>
+                <Image
                   src="/images/logo.png"
-                  alt="ComparteTuTiempo Logo"
-                  sx={{
-                    width: 70,
-                    height: 70,
-                    objectFit: 'contain',
-                  }}
+                  alt="Comparte tu tiempo"
+                  width={48}
+                  height={48}
+                  style={{ borderRadius: "50%", objectFit: "contain" }}
                 />
-              </Button>
+              </Link>
             </Box>
 
-            {/* Navegación */}
-            <Box sx={{ 
-              display: { xs: 'none', lg: 'flex' }, 
-              alignItems: 'center', 
-              gap: 6 // Espacio entre botones (48px)
-            }}>
-              <Button 
-                component={Link}
-                href="/"
-                color="inherit" 
-                sx={{ fontSize: 22, color: 'text.primary', fontWeight: 500 }}
-              >
-                {t('header.navigation.home')}
-              </Button>
-              <Button 
-                component={Link}
-                href="/services"
-                color="inherit" 
-                sx={{ fontSize: 22, color: 'text.primary', fontWeight: 500 }}
-              >
-                {t('header.navigation.services')}
-              </Button>
-              <Button 
-                component={Link}
-                href="/communities"
-                color="inherit" 
-                sx={{ fontSize: 22, color: 'text.primary', fontWeight: 500 }}
-              >
-                {t('header.navigation.communities')}
-              </Button>
-              <Button 
-                component={Link}
-                href="/faq"
-                color="inherit" 
-                sx={{ fontSize: 22, color: 'text.primary', fontWeight: 500 }}
-              >
-                {t('header.navigation.faq')}
-              </Button>
+            {/* CENTRO: Navegación */}
+            <Box
+              component="nav"
+              sx={{
+                flex: "1 1 auto",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: { xs: 3, md: 6 },
+              }}
+            >
+              {[
+                { href: "/", label: t("header.navigation.home") },
+                { href: "/services", label: t("header.navigation.services") },
+                { href: "/communities", label: t("header.navigation.communities") },
+                { href: "/faq", label: t("header.navigation.faq") },
+              ].map((item) => (
+                <Link key={item.href} href={item.href} style={{ textDecoration: "none" }}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontSize: 20,
+                      fontWeight: 500,
+                      color: "rgba(0,0,0,0.8)",
+                      lineHeight: 1,
+                      px: 0.5,
+                      "&:hover": { color: "rgba(0,0,0,0.65)" },
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {item.label}
+                  </Typography>
+                </Link>
+              ))}
             </Box>
 
-            {/* Acciones */}
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 4 // Espacio entre elementos (32px)
-            }}>
-            {/* Barra de búsqueda */}
-            <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-              <TextField
-                size="small"
-                placeholder={t('header.search.placeholder')}
-                variant="outlined"
-                sx={{ 
-                  width: 280,
-                  '& .MuiOutlinedInput-root': {
-                    backgroundColor: 'background.paper',
-                    fontSize: '16px',
-                  }
-                }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon color="action" />
-                    </InputAdornment>
-                  ),
+            {/* DERECHA: Buscador + Idioma + Auth */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: { xs: 1.25, md: 2 },
+                pl: { xs: 1, md: 2 },
+              }}
+            >
+              <SearchBar 
+                placeholder={t("header.search.placeholder") || "Buscar"}
+                width={{ xs: 200, md: 360 }}
+                onSearch={(value) => {
+                  // Handle search logic here
+                  console.log("Search:", value);
                 }}
               />
-            </Box>
 
-            {/* Selector de idioma */}
-            <LanguageSwitcher />
+              <LanguageSwitcher />
 
-            {/* Estado de autenticación */}
-            {isLoading && (
-              <Typography variant="body2" color="text.secondary">
-                {t('header.auth.loading')}
-              </Typography>
-            )}
-            {error && (
-              <Typography variant="body2" color="error">
-                {t('header.auth.error', { message: error.message })}
-              </Typography>
-            )}
-            {user ? (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography 
-                  variant="body2" 
-                  sx={{ 
-                    display: { xs: 'none', sm: 'block' },
-                    color: 'text.primary'
-                  }}
-                >
-                  {t('header.auth.welcome', { name: user.name || user.email })}
+              {isLoading ? (
+                <Typography variant="body2" color="text.secondary">
+                  {t("header.auth.loading")}
                 </Typography>
-                <Link href="/api/auth/logout" style={{ textDecoration: 'none' }}>
-                  <Button 
-                    variant="contained" 
-                    size="small"
-                    startIcon={<AccountCircle />}
-                    sx={{ 
-                      backgroundColor: 'primary.main',
-                      '&:hover': {
-                        backgroundColor: 'primary.dark',
-                      }
-                    }}
+              ) : error ? (
+                <Typography variant="body2" color="error">
+                  {t("header.auth.error", { message: error.message })}
+                </Typography>
+              ) : user ? (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{ display: { xs: "none", md: "block" }, color: "rgba(0,0,0,0.8)" }}
                   >
-                    {t('header.auth.logout')}
-                  </Button>
-                </Link>
-              </Box>
-            ) : (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Link href="/api/auth/login" style={{ textDecoration: 'none' }}>
-                  <Button 
-                    variant="contained" 
-                    size="small"
-                    startIcon={<LoginIcon />}
-                    sx={{ 
-                      backgroundColor: 'primary.main',
-                      '&:hover': {
-                        backgroundColor: 'primary.dark',
-                      }
-                    }}
-                  >
-                    {t('header.auth.login')}
-                  </Button>
-                </Link>
-                <Link href="/api/auth/login" style={{ textDecoration: 'none' }}>
-                  <Button 
-                    variant="outlined" 
-                    size="small"
-                    startIcon={<PersonAddIcon />}
-                    sx={{ 
-                      color: 'text.primary',
-                      borderColor: 'grey.300',
-                      '&:hover': {
-                        borderColor: 'grey.400',
-                        backgroundColor: 'background.default',
-                      }
-                    }}
-                  >
-                    {t('header.auth.register')}
-                  </Button>
-                </Link>
-              </Box>
-            )}
-          </Box>
+                    {t("header.auth.welcome", { name: user.name || user.email })}
+                  </Typography>
+                  <Link href="/api/auth/logout" style={{ textDecoration: "none" }}>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      startIcon={<AccountCircle />}
+                      sx={{ borderRadius: 999, textTransform: "none", px: 2, py: 0.75 }}
+                    >
+                      {t("header.auth.logout")}
+                    </Button>
+                  </Link>
+                </Box>
+              ) : (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Link href="/api/auth/login" style={{ textDecoration: "none" }}>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      startIcon={<LoginIcon />}
+                      sx={{
+                        borderRadius: 999,
+                        textTransform: "none",
+                        px: 2.25,
+                        py: 0.75,
+                        boxShadow: "0 1px 0 rgba(0,0,0,0.1)",
+                      }}
+                    >
+                      {t("header.auth.login")}
+                    </Button>
+                  </Link>
+                  <Link href="/api/auth/login" style={{ textDecoration: "none" }}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<PersonAddIcon />}
+                      sx={{
+                        borderRadius: 999,
+                        textTransform: "none",
+                        px: 2,
+                        py: 0.75,
+                        borderColor: "rgba(0,0,0,0.2)",
+                        color: "rgba(0,0,0,0.8)",
+                        "&:hover": {
+                          borderColor: "rgba(0,0,0,0.35)",
+                          bgcolor: "rgba(255,255,255,0.4)",
+                        },
+                      }}
+                    >
+                      {t("header.auth.register")}
+                    </Button>
+                  </Link>
+                </Box>
+              )}
+            </Box>
           </Box>
         </Toolbar>
-
-        {/* Navegación móvil */}
-        <Box sx={{ 
-          display: { xs: 'flex', lg: 'none' }, 
-          justifyContent: 'center', 
-          gap: 4, // Más espacio entre botones móviles
-          py: 3, // Más padding vertical
-          px: 6, // Mismo margen horizontal que el header principal
-          borderTop: '1px solid', 
-          borderColor: 'divider',
-          backgroundColor: 'background.paper'
-        }}>
-          <Button 
-            component={Link}
-            href="/"
-            color="inherit" 
-            sx={{ fontSize: 18, color: 'text.primary', fontWeight: 500 }}
-          >
-            {t('header.navigation.home')}
-          </Button>
-          <Button 
-            component={Link}
-            href="/services"
-            color="inherit" 
-            sx={{ fontSize: 18, color: 'text.primary', fontWeight: 500 }}
-          >
-            {t('header.navigation.services')}
-          </Button>
-          <Button 
-            component={Link}
-            href="/communities"
-            color="inherit" 
-            sx={{ fontSize: 18, color: 'text.primary', fontWeight: 500 }}
-          >
-            {t('header.navigation.communities')}
-          </Button>
-          <Button 
-            component={Link}
-            href="/faq"
-            color="inherit" 
-            sx={{ fontSize: 18, color: 'text.primary', fontWeight: 500 }}
-          >
-            {t('header.navigation.faq')}
-          </Button>
-        </Box>
       </Container>
     </AppBar>
   );
