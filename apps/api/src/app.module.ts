@@ -9,6 +9,7 @@ import { RatingsModule } from './modules/ratings/ratings.module';
 import { CommunitiesModule } from './modules/communities/communities.module';
 import { GroupsModule } from './modules/groups/groups.module';
 import { EventsModule } from './modules/events/events.module';
+import { MembershipsModule } from './modules/memberships/memberships.module';
 import { Auth0Module } from './common/auth/auth0.module';
 
 @Module({
@@ -27,6 +28,7 @@ import { Auth0Module } from './common/auth/auth0.module';
     CommunitiesModule,
     GroupsModule,
     EventsModule,
+    MembershipsModule,
   ],
 })
 export class AppModule {}
