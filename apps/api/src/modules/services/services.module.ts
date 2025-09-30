@@ -7,6 +7,9 @@ import { ServiceMapper } from './infrastructure/service.mapper';
 import { ServiceRepositoryPort } from './domain/service-repository.port';
 import { SERVICE_REPOSITORY_TOKEN } from './domain/tokens';
 import { PrismaModule } from '../../common/prisma/prisma.module';
+import { GetServiceUseCase } from './application/get-service.use-case';
+import { UpdateServiceUseCase } from './application/update-service.use-case';
+import { DeleteServiceUseCase } from './application/delete-service.use-case';
 
 @Module({
   imports: [PrismaModule],
@@ -14,6 +17,9 @@ import { PrismaModule } from '../../common/prisma/prisma.module';
   providers: [
     CreateServiceUseCase,
     ListServicesUseCase,
+    GetServiceUseCase,
+    UpdateServiceUseCase,
+    DeleteServiceUseCase,
     ServiceMapper,
     {
       provide: SERVICE_REPOSITORY_TOKEN,

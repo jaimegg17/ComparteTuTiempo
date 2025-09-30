@@ -8,7 +8,11 @@ export interface ListServicesInput {
 }
 
 export interface ListServicesOutput {
-  services: any; // ServiceListResponse
+  services: any[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
 }
 
 @Injectable()
@@ -24,6 +28,12 @@ export class ListServicesUseCase {
     // Obtener servicios usando el repositorio
     const result = await this.serviceRepository.list(query);
 
-    return { services: result.services };
+    return {
+      services: result.services,
+      total: result.total,
+      page: result.page,
+      pageSize: result.pageSize,
+      totalPages: result.totalPages,
+    };
   }
 }
