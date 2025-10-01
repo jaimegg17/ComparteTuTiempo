@@ -8,7 +8,7 @@ export class EventMapper {
       prismaEvent.description,
       prismaEvent.date,
       prismaEvent.location,
-      prismaEvent.communityId,
+      prismaEvent.groupId ?? prismaEvent.communityId,
       prismaEvent.creatorId,
       prismaEvent.createdAt,
       prismaEvent.updatedAt,
@@ -22,7 +22,7 @@ export class EventMapper {
       description: event.description,
       date: event.date,
       location: event.location,
-      communityId: event.communityId,
+      groupId: event.communityId,
       creatorId: event.creatorId,
       createdAt: event.createdAt,
       updatedAt: event.updatedAt,
@@ -35,7 +35,7 @@ export class EventMapper {
       description: data.description,
       date: data.date,
       location: data.location,
-      communityId: data.communityId,
+      groupId: data.groupId,
       creatorId: data.creatorId,
     };
   }

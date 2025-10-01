@@ -29,7 +29,8 @@ export class GroupMapper {
     return {
       name: data.name,
       description: data.description,
-      communityId: data.communityId,
+      type: data.type,
+      isPrivate: data.isPrivate,
       creatorId: data.creatorId,
     };
   }

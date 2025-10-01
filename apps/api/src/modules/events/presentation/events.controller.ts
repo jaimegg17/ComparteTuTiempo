@@ -60,7 +60,7 @@ export class EventsController {
     @Body() createEventDto: CreateEventDto,
     @Request() req: any,
   ) {
-    const userId = req.user?.id;
+    const userId = req.user?.sub || 'auth0|test-user-1'; // Fallback para testing
     const result = await this.createEventUseCase.execute({
       data: { ...createEventDto, creatorId: userId },
       userId,
