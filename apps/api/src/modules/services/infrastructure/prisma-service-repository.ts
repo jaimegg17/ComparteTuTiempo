@@ -48,7 +48,9 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
   }
 
   async list(query: ServiceListQuery): Promise<ServiceListResponse> {
-    const { q, category, city, type, status, page, pageSize } = query;
+    const { q, category, location, type, status, page, pageSize } = query;
+    const minPrice = (query as any).minPrice;
+    const maxPrice = (query as any).maxPrice;
     const skip = (page - 1) * pageSize;
 
     // Construir filtros
@@ -64,7 +66,14 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
     if (category) where.category = ServiceEnumMapper.mapCategoryToPrisma(category) as any;
     if (type) where.type = ServiceEnumMapper.mapTypeToPrisma(type) as any;
     if (status) where.status = ServiceEnumMapper.mapStatusToPrisma(status) as any;
-    if (city) where.location = { contains: city, mode: 'insensitive' };
+    if (location) where.location = { contains: location, mode: 'insensitive' };
+    
+    // Filtros de precio
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      where.price = {};
+      if (minPrice !== undefined) where.price.gte = minPrice;
+      if (maxPrice !== undefined) where.price.lte = maxPrice;
+    }
 
     // Obtener total y servicios
     const [total, prismaServices] = await Promise.all([

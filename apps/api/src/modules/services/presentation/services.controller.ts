@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Query, UseGuards, Request, Param, ParseIntPipe, Put, Delete, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
-import { createZodDto } from '@anatine/zod-nestjs';
+import { IsString, IsNumber, IsOptional, IsEnum, MinLength, Min } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ServiceCreateSchema, ServiceListQuerySchema } from '@comparte-tu-tiempo/contracts';
 import { CreateServiceUseCase } from '../application/create-service.use-case';
 import { ListServicesUseCase } from '../application/list-services.use-case';
@@ -8,18 +9,77 @@ import { GetServiceUseCase } from '../application/get-service.use-case';
 import { UpdateServiceUseCase } from '../application/update-service.use-case';
 import { DeleteServiceUseCase } from '../application/delete-service.use-case';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
+import { PrismaService } from '@/common/prisma/prisma.service';
 
-// DTOs generados desde Zod
-export class CreateServiceDto extends createZodDto(ServiceCreateSchema) {}
+// DTO con validación completa
+export class CreateServiceDto {
+  @IsString()
+  @MinLength(5, { message: 'El título debe tener al menos 5 caracteres' })
+  title: string;
 
-// Simple query DTO without validation for now
+  @IsString()
+  @MinLength(20, { message: 'La descripción debe tener al menos 20 caracteres' })
+  description: string;
+
+  @IsNumber()
+  @Min(1, { message: 'La duración debe ser positiva' })
+  duration: number;
+
+  @IsOptional()
+  @IsString()
+  location?: string;
+
+  @IsEnum(['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'ARTE', 'OTROS'])
+  category: 'EDUCACION' | 'HOGAR' | 'TECNOLOGIA' | 'SALUD' | 'DEPORTES' | 'ARTE' | 'OTROS';
+
+  @IsEnum(['PRESENCIAL', 'VIRTUAL', 'HIBRIDO'])
+  type: 'PRESENCIAL' | 'VIRTUAL' | 'HIBRIDO';
+
+  @IsNumber()
+  @Min(1, { message: 'El precio debe ser positivo' })
+  price: number;
+}
+
+// Query DTO for searching and filtering services
 export class ServiceListQueryDto {
-  q?: string;
-  category?: string;
-  city?: string;
-  type?: string;
-  status?: string;
+  @IsOptional()
+  @IsString()
+  q?: string; // Search term (title or description)
+  
+  @IsOptional()
+  @IsEnum(['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'ARTE', 'OTROS'])
+  category?: 'EDUCACION' | 'HOGAR' | 'TECNOLOGIA' | 'SALUD' | 'DEPORTES' | 'ARTE' | 'OTROS';
+  
+  @IsOptional()
+  @IsString()
+  location?: string; // Location filter
+  
+  @IsOptional()
+  @IsEnum(['PRESENCIAL', 'VIRTUAL', 'HIBRIDO'])
+  type?: 'PRESENCIAL' | 'VIRTUAL' | 'HIBRIDO';
+  
+  @IsOptional()
+  @IsEnum(['ACTIVO', 'INACTIVO', 'COMPLETADO'])
+  status?: 'ACTIVO' | 'INACTIVO' | 'COMPLETADO';
+  
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  minPrice?: number;
+  
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  maxPrice?: number;
+  
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
   page?: number;
+  
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
   pageSize?: number;
 }
 
@@ -32,6 +92,7 @@ export class ServicesController {
     private readonly getServiceUseCase: GetServiceUseCase,
     private readonly updateServiceUseCase: UpdateServiceUseCase,
     private readonly deleteServiceUseCase: DeleteServiceUseCase,
+    private readonly prisma: PrismaService,
   ) {}
 
   @Post()
@@ -42,12 +103,29 @@ export class ServicesController {
   @ApiResponse({ status: 400, description: 'Datos inválidos' })
   @ApiResponse({ status: 401, description: 'No autorizado' })
   async createService(
-    @Body() createServiceDto: CreateServiceDto,
+    @Body() body: any, // Temporal: sin validación estricta
     @Request() req: any,
   ) {
-    const userId = req.user?.id || 1; // Temporal para testing
+    // Usar userId del JWT o un fallback temporal para testing
+    let userId = req.user?.sub || 'auth0|test-user-1';
+    
+    // Upsert user if doesn't exist
+    if (userId) {
+      await this.prisma.user.upsert({
+        where: { id: userId },
+        update: {},  // No actualizar nada si ya existe
+        create: {
+          id: userId,
+          email: req.user?.email || `${userId}@example.com`,
+          password: 'auth0-user', // Placeholder password for Auth0 users
+          name: req.user?.name || 'Usuario',
+          timeCredits: 0, // Default time credits for new users
+        },
+      });
+    }
+    
     const result = await this.createServiceUseCase.execute({
-      data: createServiceDto,
+      data: body,
       userId,
     });
 
@@ -66,10 +144,12 @@ export class ServicesController {
       page: query.page || 1,
       pageSize: query.pageSize || 20,
       q: query.q,
-      category: query.category as any, // Cast to avoid type issues
-      city: query.city,
-      type: query.type as any, // Cast to avoid type issues
-      status: query.status as any, // Cast to avoid type issues
+      category: query.category,
+      location: query.location,
+      type: query.type,
+      status: query.status,
+      minPrice: query.minPrice,
+      maxPrice: query.maxPrice,
     };
 
     const result = await this.listServicesUseCase.execute({ query: queryWithDefaults });
@@ -102,7 +182,7 @@ export class ServicesController {
     @Body() data: any,
     @Request() req: any,
   ) {
-    const userId = req.user?.id;
+    const userId = req.user?.sub || 'auth0|test-user-1'; // Fallback para testing
     const result = await this.updateServiceUseCase.execute({ id, data, userId });
     return { message: 'Servicio actualizado exitosamente', service: result.service.toContract() };
   }
@@ -114,7 +194,7 @@ export class ServicesController {
   @ApiOperation({ summary: 'Eliminar un servicio por ID' })
   @ApiResponse({ status: 204, description: 'Servicio eliminado' })
   async deleteService(@Param('id', ParseIntPipe) id: number, @Request() req: any) {
-    const userId = req.user?.id;
+    const userId = req.user?.sub || 'auth0|test-user-1'; // Fallback para testing
     await this.deleteServiceUseCase.execute({ id, userId });
     return { message: 'Servicio eliminado exitosamente' };
   }

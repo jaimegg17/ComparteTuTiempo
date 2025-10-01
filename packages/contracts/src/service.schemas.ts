@@ -43,9 +43,11 @@ export const ServiceUpdateSchema = z.object({
 export const ServiceListQuerySchema = z.object({
   q: z.string().optional(),
   category: z.enum(['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'ARTE', 'OTROS']).optional(),
-  city: z.string().optional(),
+  location: z.string().optional(),
   type: z.enum(['PRESENCIAL', 'VIRTUAL', 'HIBRIDO']).optional(),
   status: z.enum(['ACTIVO', 'INACTIVO', 'COMPLETADO']).optional(),
+  minPrice: z.number().optional(),
+  maxPrice: z.number().optional(),
   page: z.number().min(1, 'La página debe ser mayor a 0').default(1),
   pageSize: z.number().min(1, 'El tamaño de página debe ser mayor a 0').max(100, 'El tamaño de página no puede exceder 100').default(20),
 });
