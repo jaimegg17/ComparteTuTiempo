@@ -1,6 +1,7 @@
 import { Injectable, Inject, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import type { ExchangeRepositoryPort } from '../domain/exchange-repository.port';
 import { ExchangeUpdate, ExchangeStatus } from '@comparte-tu-tiempo/contracts';
+import { PrismaService } from '@/common/prisma/prisma.service';
 
 type ExchangeStatusType = keyof typeof ExchangeStatus;
 import { ExchangeEntity } from '../domain/exchange.entity';
@@ -20,7 +21,8 @@ export interface UpdateExchangeResponse {
 export class UpdateExchangeUseCase {
   constructor(
     @Inject(EXCHANGE_REPOSITORY_TOKEN)
-    private readonly exchangeRepository: ExchangeRepositoryPort
+    private readonly exchangeRepository: ExchangeRepositoryPort,
+    private readonly prisma: PrismaService,
   ) {}
 
   async execute(request: UpdateExchangeRequest): Promise<UpdateExchangeResponse> {
@@ -50,9 +52,57 @@ export class UpdateExchangeUseCase {
       throw new BadRequestException('El tiempo intercambiado debe ser mayor a 0');
     }
 
+    // If completing the exchange, transfer timeCredits
+    if (data.state === ExchangeStatus.COMPLETED) {
+      await this.transferTimeCredits(existingExchange);
+    }
+
     const updatedExchange = await this.exchangeRepository.update(id, data);
 
     return { exchange: updatedExchange };
+  }
+
+  private async transferTimeCredits(exchange: ExchangeEntity): Promise<void> {
+    // Get the service to know the duration/price
+    const service = await this.prisma.service.findUnique({
+      where: { id: exchange.serviceId },
+    });
+
+    if (!service) {
+      throw new NotFoundException('Servicio no encontrado');
+    }
+
+    // Calculate credits to transfer (using exchangedTime or service duration in minutes)
+    const creditsToTransfer = Math.round((exchange.exchangedTime || service.duration) * 60); // Convert hours to minutes
+
+    // Perform the transfer in a transaction
+    await this.prisma.$transaction(async (tx) => {
+      // Deduct credits from requester (who "buys" the service)
+      const requester = await tx.user.findUnique({
+        where: { id: exchange.requestedById },
+      });
+
+      if (!requester) {
+        throw new NotFoundException('Usuario solicitante no encontrado');
+      }
+
+      if (requester.timeCredits < creditsToTransfer) {
+        throw new BadRequestException(
+          `Créditos insuficientes. Tienes ${requester.timeCredits} minutos, necesitas ${creditsToTransfer} minutos`
+        );
+      }
+
+      await tx.user.update({
+        where: { id: exchange.requestedById },
+        data: { timeCredits: { decrement: creditsToTransfer } },
+      });
+
+      // Add credits to offerer (who provides the service)
+      await tx.user.update({
+        where: { id: exchange.offeredById },
+        data: { timeCredits: { increment: creditsToTransfer } },
+      });
+    });
   }
 
   private validateStateTransition(

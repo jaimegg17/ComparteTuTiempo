@@ -29,12 +29,30 @@ export class ListExchangesUseCase {
   async execute(request: ListExchangesRequest): Promise<ListExchangesResponse> {
     const { query, userId } = request;
 
-    // If userId is provided, filter exchanges where user is involved
-    const filteredQuery = userId 
-      ? { ...query, requestedById: userId, offeredById: userId }
-      : query;
+    // If userId is provided and no specific filters are set, we need to filter
+    // exchanges where the user is either the requester OR the offerer
+    // The repository's list method uses AND logic, so we can't pass both IDs
+    // We'll need to handle this at the repository level or use a different approach
+    
+    const result = await this.exchangeRepository.list(query);
 
-    const result = await this.exchangeRepository.list(filteredQuery);
+    // If userId is provided, filter results to only include exchanges where user is involved
+    if (userId && !query.requestedById && !query.offeredById) {
+      const filteredExchanges = result.exchanges.filter(
+        (exchange: ExchangeEntity) =>
+          exchange.requestedById === userId || exchange.offeredById === userId
+      );
+      
+      return {
+        exchanges: {
+          exchanges: filteredExchanges,
+          total: filteredExchanges.length,
+          page: result.page,
+          pageSize: result.pageSize,
+          totalPages: Math.ceil(filteredExchanges.length / result.pageSize),
+        },
+      };
+    }
 
     return { exchanges: result };
   }
