@@ -1,16 +1,13 @@
-import { Header } from '@/widgets/header';
+import { Layout } from '@/components/Layout';
 import { FindGeneralSections } from '@/components/FindGeneralSections';
 import { TestimonialsSection } from '@/components/TestimonialsSection';
-import { Footer } from '@/components/Footer';
 
 export default function Home() {
   return (
-    <>
-      <Header />
+    <Layout>
       <FindGeneralSections />
       <TestimonialsSection />
-      <Footer />
-    </>
+    </Layout>
   );
 }
 
