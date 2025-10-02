@@ -9,6 +9,14 @@ export class ServiceEnumMapper {
       'deportes': 'DEPORTES',
       'arte': 'ARTE',
       'otros': 'OTROS',
+      // Accept uppercase as well
+      'EDUCACION': 'EDUCACION',
+      'HOGAR': 'HOGAR',
+      'TECNOLOGIA': 'TECNOLOGIA',
+      'SALUD': 'SALUD',
+      'DEPORTES': 'DEPORTES',
+      'ARTE': 'ARTE',
+      'OTROS': 'OTROS',
     };
     return mapping[category] || 'OTROS';
   }
@@ -18,6 +26,10 @@ export class ServiceEnumMapper {
       'presencial': 'PRESENCIAL',
       'virtual': 'VIRTUAL',
       'hibrido': 'HIBRIDO',
+      // Accept uppercase as well
+      'PRESENCIAL': 'PRESENCIAL',
+      'VIRTUAL': 'VIRTUAL',
+      'HIBRIDO': 'HIBRIDO',
     };
     return mapping[type] || 'PRESENCIAL';
   }
