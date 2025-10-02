@@ -59,7 +59,11 @@ export class ExchangesController {
     @Body() body: any, // Temporal: sin validación estricta
     @Request() req: any,
   ) {
-    const userId = req.user?.sub || 'auth0|test-user-1';
+    const userId = req.user?.sub;
+    
+    if (!userId) {
+      throw new Error('Usuario no autenticado');
+    }
     
     // Ensure requestedById is set to the current user
     const exchangeData = {
