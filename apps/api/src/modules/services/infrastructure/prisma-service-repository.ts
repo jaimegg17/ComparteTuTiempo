@@ -5,6 +5,7 @@ import { Service } from '../domain/service.entity';
 import { ServiceCreate, ServiceUpdate, ServiceListQuery, ServiceListResponse } from '@comparte-tu-tiempo/contracts';
 import { ServiceMapper } from './service.mapper';
 import { ServiceEnumMapper } from './service-enum.mapper';
+import { ServiceCreateWithImage } from '../domain/service.types';
 
 @Injectable()
 export class PrismaServiceRepository implements ServiceRepositoryPort {
@@ -13,21 +14,25 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
     private readonly mapper: ServiceMapper,
   ) {}
 
-  async create(data: ServiceCreate, userId: string): Promise<Service> {
+  async create(data: ServiceCreateWithImage, userId: string): Promise<Service> {
+    // Force include imageUrl in the data
+    const serviceData = {
+      title: data.title,
+      description: data.description,
+      duration: data.duration,
+      location: data.location,
+      category: ServiceEnumMapper.mapCategoryToPrisma(data.category) as any,
+      type: ServiceEnumMapper.mapTypeToPrisma(data.type) as any,
+      price: data.price,
+      userId,
+      status: 'ACTIVO' as const,
+      detailedDescription: data.detailedDescription || null,
+      availability: data.availability || null,
+      imageUrl: data.imageUrl || null,
+    };
+    
     const prismaService = await this.prisma.service.create({
-      data: {
-        title: data.title,
-        description: data.description,
-        detailedDescription: data.detailedDescription || null,
-        duration: data.duration,
-        location: data.location,
-        availability: data.availability || null,
-        category: ServiceEnumMapper.mapCategoryToPrisma(data.category) as any,
-        type: ServiceEnumMapper.mapTypeToPrisma(data.type) as any,
-        price: data.price,
-        userId,
-        status: 'ACTIVO',
-      },
+      data: serviceData,
     });
 
     return this.mapper.toDomain(prismaService);
@@ -74,8 +79,15 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
       },
     });
 
+    if (!prismaService) {
+      return null;
+    }
+
     // Return raw data with relations instead of mapping to domain entity
-    return prismaService;
+    return {
+      ...prismaService,
+      imageUrl: prismaService.imageUrl || null,
+    };
   }
 
   async findByUserId(userId: string): Promise<Service[]> {
@@ -114,7 +126,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
       if (maxPrice !== undefined) where.price.lte = maxPrice;
     }
 
-    // Obtener total y servicios
+    // Obtener total y servicios con ratings
     const [total, prismaServices] = await Promise.all([
       this.prisma.service.count({ where }),
       this.prisma.service.findMany({
@@ -122,14 +134,71 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
         skip,
         take: pageSize,
         orderBy: { createdAt: 'desc' },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              imageUrl: true,
+            }
+          },
+          ratings: {
+            select: {
+              score: true,
+            }
+          },
+          _count: {
+            select: {
+              ratings: true,
+              exchanges: true,
+            }
+          }
+        },
       }),
     ]);
 
-    const services = prismaServices.map(service => this.mapper.toDomain(service));
+    // Calculate average rating for each service
+    const servicesWithRatings = prismaServices.map(service => {
+      const avgRating = service.ratings.length > 0
+        ? service.ratings.reduce((sum, r) => sum + r.score, 0) / service.ratings.length
+        : 0;
+
+
+      return {
+        ...service,
+        averageRating: Number(avgRating.toFixed(1)),
+        totalRatings: service._count.ratings, // Use _count instead of ratings.length
+        totalExchanges: service._count.exchanges,
+      };
+    });
+
     const totalPages = Math.ceil(total / pageSize);
 
     return {
-      services: services.map(service => service.toContract()),
+      services: servicesWithRatings.map(service => {
+        const serviceData = service as any; // Temporary until Prisma types are updated
+        return {
+          id: service.id,
+          title: service.title,
+          description: service.description,
+          detailedDescription: serviceData.detailedDescription || null,
+          duration: service.duration,
+          location: service.location,
+          availability: serviceData.availability || null,
+          category: service.category.toLowerCase() as any,
+          type: service.type.toLowerCase() as any,
+          status: service.status.toLowerCase() as any,
+          price: service.price,
+          imageUrl: serviceData.imageUrl || null,
+          userId: service.userId,
+          createdAt: service.createdAt,
+          updatedAt: service.updatedAt,
+          averageRating: service.averageRating,
+          totalRatings: service.totalRatings,
+          totalExchanges: service.totalExchanges,
+          user: service.user,
+        };
+      }),
       total,
       page,
       pageSize,
@@ -156,6 +225,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
     if (data.type) updateData.type = ServiceEnumMapper.mapTypeToPrisma(data.type) as any;
     if (data.status) updateData.status = ServiceEnumMapper.mapStatusToPrisma(data.status) as any;
     if (data.price) updateData.price = data.price;
+    if ((data as any).imageUrl !== undefined) updateData.imageUrl = (data as any).imageUrl as string;
 
     const prismaService = await this.prisma.service.update({
       where: { id },

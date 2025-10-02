@@ -2,14 +2,14 @@ import { Controller, Get, Post, Body, Query, UseGuards, Request, Param, ParseInt
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { IsString, IsNumber, IsOptional, IsEnum, MinLength, Min } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ServiceCreateSchema, ServiceListQuerySchema } from '@comparte-tu-tiempo/contracts';
+import { ServiceCreateWithImage } from '../domain/service.types';
+import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
+import { PrismaService } from '@/common/prisma/prisma.service';
 import { CreateServiceUseCase } from '../application/create-service.use-case';
 import { ListServicesUseCase } from '../application/list-services.use-case';
 import { GetServiceUseCase } from '../application/get-service.use-case';
 import { UpdateServiceUseCase } from '../application/update-service.use-case';
 import { DeleteServiceUseCase } from '../application/delete-service.use-case';
-import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
-import { PrismaService } from '@/common/prisma/prisma.service';
 
 // DTO con validación completa
 export class CreateServiceDto {
@@ -38,6 +38,18 @@ export class CreateServiceDto {
   @IsNumber()
   @Min(1, { message: 'El precio debe ser positivo' })
   price: number;
+
+  @IsOptional()
+  @IsString()
+  detailedDescription?: string;
+
+  @IsOptional()
+  @IsString()
+  availability?: string;
+
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
 }
 
 // Query DTO for searching and filtering services
@@ -103,11 +115,28 @@ export class ServicesController {
   @ApiResponse({ status: 400, description: 'Datos inválidos' })
   @ApiResponse({ status: 401, description: 'No autorizado' })
   async createService(
-    @Body() body: any, // Temporal: sin validación estricta
+    @Body() body: CreateServiceDto,
     @Request() req: any,
   ) {
-    // Usar userId del JWT o un fallback temporal para testing
-    let userId = req.user?.sub || 'auth0|test-user-1';
+    // Convert DTO to ServiceCreateWithImage
+    const serviceData: ServiceCreateWithImage = {
+      title: body.title,
+      description: body.description,
+      detailedDescription: body.detailedDescription,
+      duration: body.duration,
+      location: body.location,
+      availability: body.availability,
+      category: body.category,
+      type: body.type,
+      price: body.price,
+      imageUrl: body.imageUrl,
+    };
+    // Get userId from JWT (no fallback - user must be authenticated)
+    const userId = req.user?.sub;
+    
+    if (!userId) {
+      throw new Error('Usuario no autenticado');
+    }
     
     // Upsert user if doesn't exist
     if (userId) {
@@ -125,7 +154,7 @@ export class ServicesController {
     }
     
     const result = await this.createServiceUseCase.execute({
-      data: body,
+      data: serviceData,
       userId,
     });
 
@@ -168,10 +197,25 @@ export class ServicesController {
   @ApiResponse({ status: 200, description: 'Servicio obtenido' })
   @ApiResponse({ status: 404, description: 'Servicio no encontrado' })
   async getService(@Param('id', ParseIntPipe) id: number) {
-    // Get raw service data with relations
+    // Use the repository instead of direct Prisma call
     const serviceData = await this.prisma.service.findUnique({
       where: { id },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        detailedDescription: true,
+        duration: true,
+        location: true,
+        availability: true,
+        category: true,
+        type: true,
+        status: true,
+        price: true,
+        imageUrl: true, // Include imageUrl
+        userId: true,
+        createdAt: true,
+        updatedAt: true,
         user: {
           select: {
             id: true,
@@ -222,6 +266,7 @@ export class ServicesController {
       message: 'Servicio obtenido exitosamente', 
       service: {
         ...serviceData,
+        imageUrl: serviceData.imageUrl || null, // Ensure imageUrl is included
         averageRating: Number(avgRating.toFixed(1)),
         totalRatings: serviceData._count.ratings,
         totalExchanges: serviceData._count.exchanges,

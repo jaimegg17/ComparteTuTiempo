@@ -1,11 +1,11 @@
 import { Injectable, Inject } from '@nestjs/common';
 import type { ServiceRepositoryPort } from '../domain/service-repository.port';
-import { ServiceCreate } from '@comparte-tu-tiempo/contracts';
 import { Service } from '../domain/service.entity';
 import { SERVICE_REPOSITORY_TOKEN } from '../domain/tokens';
+import { ServiceCreateWithImage } from '../domain/service.types';
 
 export interface CreateServiceInput {
-  data: ServiceCreate;
+  data: ServiceCreateWithImage;
   userId: string;
 }
 

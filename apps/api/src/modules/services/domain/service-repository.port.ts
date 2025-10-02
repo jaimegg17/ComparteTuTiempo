@@ -1,8 +1,9 @@
 import { Service } from './service.entity';
 import { ServiceCreate, ServiceUpdate, ServiceListQuery, ServiceListResponse } from '@comparte-tu-tiempo/contracts';
+import { ServiceCreateWithImage } from './service.types';
 
 export interface ServiceRepositoryPort {
-  create(data: ServiceCreate, userId: string): Promise<Service>;
+  create(data: ServiceCreateWithImage, userId: string): Promise<Service>;
   findById(id: number): Promise<Service | null>;
   findByUserId(userId: string): Promise<Service[]>;
   list(query: ServiceListQuery): Promise<ServiceListResponse>;

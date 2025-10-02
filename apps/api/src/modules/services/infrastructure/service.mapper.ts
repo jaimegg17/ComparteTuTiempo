@@ -1,6 +1,6 @@
 import { Service as PrismaService } from '@prisma/client';
 import { Service } from '../domain/service.entity';
-import { Service as ServiceContract } from '@comparte-tu-tiempo/contracts';
+import { ServiceWithImage } from '../domain/service.types';
 
 export class ServiceMapper {
   toDomain(prismaService: PrismaService): Service {
@@ -36,7 +36,7 @@ export class ServiceMapper {
       return mapping[status] || 'activo';
     };
 
-    const contract: ServiceContract = {
+    const contract: ServiceWithImage = {
       id: prismaService.id,
       title: prismaService.title,
       description: prismaService.description,
@@ -48,6 +48,7 @@ export class ServiceMapper {
       type: mapType(prismaService.type) as any,
       status: mapStatus(prismaService.status) as any,
       price: prismaService.price,
+      imageUrl: (prismaService as any).imageUrl,
       userId: prismaService.userId,
       createdAt: prismaService.createdAt,
       updatedAt: prismaService.updatedAt,
@@ -100,6 +101,7 @@ export class ServiceMapper {
       type: mapTypeToPrisma(service.type) as any,
       status: mapStatusToPrisma(service.status) as any,
       price: service.price,
+      imageUrl: service.imageUrl || null,
       userId: service.userId,
     };
   }

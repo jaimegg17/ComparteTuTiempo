@@ -1,4 +1,5 @@
 import { Service as ServiceContract } from '@comparte-tu-tiempo/contracts';
+import { ServiceWithImage } from './service.types';
 
 export class Service {
   private readonly _id: number;
@@ -12,11 +13,12 @@ export class Service {
   private readonly _type: ServiceContract['type'];
   private readonly _status: ServiceContract['status'];
   private readonly _price: number;
+  private readonly _imageUrl: string | null | undefined;
   private readonly _userId: string;
   private readonly _createdAt: Date;
   private readonly _updatedAt: Date;
 
-  constructor(props: ServiceContract) {
+  constructor(props: ServiceWithImage) {
     this._id = props.id;
     this._title = props.title;
     this._description = props.description;
@@ -28,6 +30,7 @@ export class Service {
     this._type = props.type;
     this._status = props.status;
     this._price = props.price;
+    this._imageUrl = props.imageUrl;
     this._userId = props.userId;
     this._createdAt = props.createdAt;
     this._updatedAt = props.updatedAt;
@@ -45,6 +48,7 @@ export class Service {
   get type(): ServiceContract['type'] { return this._type; }
   get status(): ServiceContract['status'] { return this._status; }
   get price(): number { return this._price; }
+  get imageUrl(): string | null | undefined { return this._imageUrl; }
   get userId(): string { return this._userId; }
   get createdAt(): Date { return this._createdAt; }
   get updatedAt(): Date { return this._updatedAt; }
@@ -80,7 +84,7 @@ export class Service {
   }
 
   // Método para convertir a contrato
-  toContract(): ServiceContract {
+  toContract(): ServiceWithImage {
     return {
       id: this._id,
       title: this._title,
@@ -93,6 +97,7 @@ export class Service {
       type: this._type,
       status: this._status,
       price: this._price,
+      imageUrl: this._imageUrl,
       userId: this._userId,
       createdAt: this._createdAt,
       updatedAt: this._updatedAt,
@@ -100,7 +105,7 @@ export class Service {
   }
 
   // Factory method para crear desde contrato
-  static fromContract(contract: ServiceContract): Service {
+  static fromContract(contract: ServiceWithImage): Service {
     return new Service(contract);
   }
 }

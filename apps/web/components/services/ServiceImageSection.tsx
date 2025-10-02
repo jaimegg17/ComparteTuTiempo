@@ -1,5 +1,6 @@
 import { Box, Chip } from '@mui/material';
 import { CheckCircle } from 'iconoir-react';
+import { useState } from 'react';
 
 interface ServiceImageSectionProps {
   imageUrl?: string;
@@ -8,6 +9,8 @@ interface ServiceImageSectionProps {
 }
 
 export function ServiceImageSection({ imageUrl, title, status }: ServiceImageSectionProps) {
+  const [imageError, setImageError] = useState(false);
+
   return (
     <Box 
       sx={{ 
@@ -21,11 +24,12 @@ export function ServiceImageSection({ imageUrl, title, status }: ServiceImageSec
         position: 'relative'
       }}
     >
-      {imageUrl ? (
+      {imageUrl && !imageError ? (
         <img 
           src={imageUrl} 
           alt={title}
           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          onError={() => setImageError(true)}
         />
       ) : (
         <Box sx={{ fontSize: '120px', color: 'grey.400' }}>📦</Box>

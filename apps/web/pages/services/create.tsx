@@ -14,6 +14,8 @@ import {
 } from '@mui/material';
 import { Layout } from '@/components/Layout';
 import { useUser } from '@auth0/nextjs-auth0/client';
+import { useTranslation } from '@/hooks/useTranslation';
+import { ImageUpload } from '@/components/ui/ImageUpload';
 
 const CATEGORIES = ['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'ARTE', 'OTROS'];
 const TYPES = ['PRESENCIAL', 'VIRTUAL', 'HIBRIDO'];
@@ -28,6 +30,7 @@ interface FormData {
   type: string;
   location: string;
   availability: string;
+  imageUrl: string;
 }
 
 interface FormErrors {
@@ -42,6 +45,7 @@ interface FormErrors {
 export default function CreateServicePage() {
   const router = useRouter();
   const { user, isLoading: userLoading } = useUser();
+  const { t } = useTranslation();
   
   const [formData, setFormData] = useState<FormData>({
     title: '',
@@ -52,12 +56,78 @@ export default function CreateServicePage() {
     type: '',
     location: '',
     availability: '',
+    imageUrl: '',
   });
   
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  // Mapping functions for display
+  const getCategoryDisplayName = (category: string) => {
+    const categoryMap: Record<string, string> = {
+      'EDUCACION': t('services.categories.education'),
+      'HOGAR': t('services.categories.home'),
+      'TECNOLOGIA': t('services.categories.technology'),
+      'SALUD': t('services.categories.health'),
+      'DEPORTES': t('services.categories.sports'),
+      'ARTE': t('services.categories.art'),
+      'OTROS': t('services.categories.others'),
+    };
+    return categoryMap[category] || category;
+  };
+  
+  const getTypeDisplayName = (type: string) => {
+    const typeMap: Record<string, string> = {
+      'PRESENCIAL': t('services.types.in_person'),
+      'VIRTUAL': t('services.types.online'),
+      'HIBRIDO': t('services.types.hybrid'),
+    };
+    return typeMap[type] || type;
+  };
+
+  const getAvailabilityDisplayName = (availability: string) => {
+    const availabilityMap: Record<string, string> = {
+      'mañana': t('services.form.availability_options.morning'),
+      'tarde': t('services.form.availability_options.afternoon'),
+      'noche': t('services.form.availability_options.evening'),
+      'mañana-tarde': t('services.form.availability_options.morning_afternoon'),
+      'tarde-noche': t('services.form.availability_options.afternoon_evening'),
+      'flexible': t('services.form.availability_options.flexible'),
+    };
+    return availabilityMap[availability] || availability;
+  };
+
+  const uploadImage = async (file: File): Promise<string> => {
+    const tokenResponse = await fetch('/api/auth/token');
+    if (!tokenResponse.ok) {
+      throw new Error('No se pudo obtener el token de autenticación');
+    }
+    const tokenData = await tokenResponse.json();
+    const token = tokenData.accessToken;
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const response = await fetch('http://localhost:3001/api/upload/image', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Error al subir la imagen');
+    }
+
+    const data = await response.json();
+    return data.url;
+  };
 
   const handleChange = (field: keyof FormData) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -132,6 +202,15 @@ export default function CreateServicePage() {
     setError(null);
     
     try {
+      let imageUrl = formData.imageUrl;
+      
+      // Upload image if one was selected
+      if (selectedImage) {
+        setUploadingImage(true);
+        imageUrl = await uploadImage(selectedImage);
+        setUploadingImage(false);
+      }
+
       // Get token
       const tokenResponse = await fetch('/api/auth/token');
       if (!tokenResponse.ok) {
@@ -155,6 +234,7 @@ export default function CreateServicePage() {
           type: formData.type,
           location: formData.location.trim(),
           availability: formData.availability || undefined,
+          imageUrl: imageUrl || undefined,
           price: parseFloat(formData.duration) * 60, // Duration in minutes
         }),
       });
@@ -173,6 +253,7 @@ export default function CreateServicePage() {
       }, 1500);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al crear el servicio');
+      setUploadingImage(false);
     } finally {
       setLoading(false);
     }
@@ -201,15 +282,15 @@ export default function CreateServicePage() {
             onClick={() => router.push('/services')} 
             sx={{ mb: 3, textTransform: 'none' }}
           >
-            ← Volver a servicios
+            {t("services.form.back_to_services")}
           </Button>
 
           <Paper sx={{ p: 4 }}>
             <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-              Publicar un Servicio
+              {t("services.form.submit")}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-              Comparte tus habilidades con la comunidad y gana créditos de tiempo
+              {t("services.subtitle")}
             </Typography>
 
             {error && (
@@ -220,7 +301,7 @@ export default function CreateServicePage() {
 
             {success && (
               <Alert severity="success" sx={{ mb: 3 }}>
-                ¡Servicio creado exitosamente! Redirigiendo...
+                {t("services.form.success_message")}
               </Alert>
             )}
 
@@ -229,8 +310,8 @@ export default function CreateServicePage() {
                 {/* Título */}
                 <TextField
                   fullWidth
-                  label="Título del servicio"
-                  placeholder="Ej: Clases de inglés para principiantes"
+                  label={t("services.form.title")}
+                  placeholder={t("services.form.placeholders.title")}
                   value={formData.title}
                   onChange={handleChange('title')}
                   error={!!errors.title}
@@ -244,12 +325,12 @@ export default function CreateServicePage() {
                   fullWidth
                   multiline
                   rows={2}
-                  label="Descripción corta"
-                  placeholder="Resumen breve para el listado de servicios (máx. 150 caracteres)"
+                  label={t("services.form.description")}
+                  placeholder={t("services.form.placeholders.description")}
                   value={formData.description}
                   onChange={handleChange('description')}
                   error={!!errors.description}
-                  helperText={errors.description || `${formData.description.length} caracteres`}
+                  helperText={errors.description || `${formData.description.length} ${t("services.form.help_text.description")}`}
                   disabled={loading || success}
                   inputProps={{ maxLength: 150 }}
                   required
@@ -260,12 +341,18 @@ export default function CreateServicePage() {
                   fullWidth
                   multiline
                   rows={5}
-                  label="Descripción detallada (opcional)"
-                  placeholder="Describe tu servicio en detalle: qué ofreces, qué incluye, requisitos previos, material necesario..."
+                  label={t("services.form.detailed_description")}
+                  placeholder={t("services.form.placeholders.detailed_description")}
                   value={formData.detailedDescription}
                   onChange={handleChange('detailedDescription')}
-                  helperText={`${formData.detailedDescription.length} caracteres - Se mostrará en la página de detalle`}
+                  helperText={`${formData.detailedDescription.length} ${t("services.form.help_text.detailed_description")}`}
                   disabled={loading || success}
+                />
+
+                {/* Imagen del Servicio */}
+                <ImageUpload
+                  onImageSelect={setSelectedImage}
+                  disabled={loading || success || uploadingImage}
                 />
 
                 {/* Categoría y Tipo */}
@@ -273,7 +360,7 @@ export default function CreateServicePage() {
                   <TextField
                     select
                     fullWidth
-                    label="Categoría"
+                    label={t("services.form.category")}
                     value={formData.category}
                     onChange={handleChange('category')}
                     error={!!errors.category}
@@ -281,10 +368,10 @@ export default function CreateServicePage() {
                     disabled={loading || success}
                     required
                   >
-                    <MenuItem value="">Selecciona una categoría</MenuItem>
+                    <MenuItem value="">{t("services.filters.category")}</MenuItem>
                     {CATEGORIES.map((cat) => (
                       <MenuItem key={cat} value={cat}>
-                        {cat}
+                        {getCategoryDisplayName(cat)}
                       </MenuItem>
                     ))}
                   </TextField>
@@ -292,7 +379,7 @@ export default function CreateServicePage() {
                   <TextField
                     select
                     fullWidth
-                    label="Modalidad"
+                    label={t("services.form.type")}
                     value={formData.type}
                     onChange={handleChange('type')}
                     error={!!errors.type}
@@ -300,10 +387,10 @@ export default function CreateServicePage() {
                     disabled={loading || success}
                     required
                   >
-                    <MenuItem value="">Selecciona una modalidad</MenuItem>
+                    <MenuItem value="">{t("services.filters.type")}</MenuItem>
                     {TYPES.map((type) => (
                       <MenuItem key={type} value={type}>
-                        {type}
+                        {getTypeDisplayName(type)}
                       </MenuItem>
                     ))}
                   </TextField>
@@ -314,12 +401,12 @@ export default function CreateServicePage() {
                   <TextField
                     fullWidth
                     type="number"
-                    label="Duración (horas)"
-                    placeholder="Ej: 2"
+                    label={t("services.form.duration")}
+                    placeholder={t("services.form.placeholders.duration")}
                     value={formData.duration}
                     onChange={handleChange('duration')}
                     error={!!errors.duration}
-                    helperText={errors.duration || 'Duración aproximada de una sesión'}
+                    helperText={errors.duration || t("services.form.help_text.duration")}
                     disabled={loading || success}
                     inputProps={{ min: 0.5, max: 24, step: 0.5 }}
                     required
@@ -327,8 +414,8 @@ export default function CreateServicePage() {
 
                   <TextField
                     fullWidth
-                    label="Ubicación"
-                    placeholder="Ej: Madrid, Barcelona..."
+                    label={t("services.form.location")}
+                    placeholder={t("services.form.placeholders.location")}
                     value={formData.location}
                     onChange={handleChange('location')}
                     error={!!errors.location}
@@ -342,24 +429,23 @@ export default function CreateServicePage() {
                 <TextField
                   select
                   fullWidth
-                  label="Disponibilidad"
+                  label={t("services.form.availability")}
                   value={formData.availability}
                   onChange={handleChange('availability')}
-                  helperText="Cuándo puedes ofrecer este servicio"
+                  helperText={t("services.form.help_text.availability")}
                   disabled={loading || success}
                 >
-                  <MenuItem value="">Selecciona tu disponibilidad</MenuItem>
+                  <MenuItem value="">{t("services.form.placeholders.availability")}</MenuItem>
                   {AVAILABILITY.map((avail) => (
                     <MenuItem key={avail} value={avail}>
-                      {avail.charAt(0).toUpperCase() + avail.slice(1).replace('-', ' y ')}
+                      {getAvailabilityDisplayName(avail)}
                     </MenuItem>
                   ))}
                 </TextField>
 
                 {/* Info adicional */}
                 <Alert severity="info" sx={{ fontSize: '13px' }}>
-                  <strong>Nota:</strong> La duración del servicio representa las horas de crédito que recibirás 
-                  cuando se complete un intercambio.
+                  <strong>{t("services.form.info_note")}</strong>
                 </Alert>
 
                 {/* Botones */}
@@ -370,7 +456,7 @@ export default function CreateServicePage() {
                     disabled={loading || success}
                     sx={{ textTransform: 'none', minWidth: 120 }}
                   >
-                    Cancelar
+                    {t("services.form.cancel")}
                   </Button>
                   <Button
                     type="submit"
@@ -378,7 +464,11 @@ export default function CreateServicePage() {
                     disabled={loading || success}
                     sx={{ textTransform: 'none', minWidth: 120 }}
                   >
-                    {loading ? <CircularProgress size={24} /> : 'Publicar Servicio'}
+                    {loading || uploadingImage ? (
+                      <CircularProgress size={24} />
+                    ) : (
+                      t("services.form.submit")
+                    )}
                   </Button>
                 </Box>
               </Stack>

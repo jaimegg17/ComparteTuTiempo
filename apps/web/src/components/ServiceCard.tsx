@@ -1,5 +1,7 @@
-import { Card, CardContent, CardActions, CardMedia, Button, Typography, Box, Chip } from '@mui/material';
+import { Card, CardContent, CardActions, CardMedia, Button, Typography, Box, Chip, Rating } from '@mui/material';
 import { useRouter } from 'next/router';
+import { useTranslation } from '@/hooks/useTranslation';
+import { useState } from 'react';
 
 interface ServiceCardProps {
   service: {
@@ -13,11 +15,29 @@ interface ServiceCardProps {
     type: string;
     status?: string;
     imageUrl?: string;
+    averageRating?: number;
+    totalRatings?: number;
   };
 }
 
 export function ServiceCard({ service }: ServiceCardProps) {
   const router = useRouter();
+  const { t } = useTranslation();
+  const [imageError, setImageError] = useState(false);
+
+  // Mapping function for category display
+  const getCategoryDisplayName = (category: string) => {
+    const categoryMap: Record<string, string> = {
+      'EDUCACION': t('services.categories.education'),
+      'HOGAR': t('services.categories.home'),
+      'TECNOLOGIA': t('services.categories.technology'),
+      'SALUD': t('services.categories.health'),
+      'DEPORTES': t('services.categories.sports'),
+      'ARTE': t('services.categories.art'),
+      'OTROS': t('services.categories.others'),
+    };
+    return categoryMap[category] || category;
+  };
 
   return (
     <Card 
@@ -37,13 +57,14 @@ export function ServiceCard({ service }: ServiceCardProps) {
     >
       {/* Image section with status badge */}
       <Box sx={{ position: 'relative', width: '100%', height: 180, bgcolor: 'grey.200' }}>
-        {service.imageUrl ? (
+        {service.imageUrl && !imageError ? (
           <CardMedia
             component="img"
             height="180"
             image={service.imageUrl}
             alt={service.title}
             sx={{ objectFit: 'cover' }}
+            onError={() => setImageError(true)}
           />
         ) : (
           <Box 
@@ -79,30 +100,48 @@ export function ServiceCard({ service }: ServiceCardProps) {
               textTransform: 'uppercase'
             }}
           >
-            Disponible
+            {t("services.status.active")}
           </Box>
         )}
       </Box>
 
       <CardContent sx={{ flexGrow: 1, p: 2.5 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5, gap: 1 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 1.5, gap: 1 }}>
           <Chip 
-            label={service.category} 
+            label={getCategoryDisplayName(service.category)} 
             size="small" 
-            color="primary" 
-            sx={{ fontSize: '11px', height: '22px', fontWeight: 500 }} 
-          />
-          <Chip 
-            label={service.type} 
-            size="small" 
-            variant="outlined" 
-            sx={{ fontSize: '11px', height: '22px' }} 
+            sx={{ 
+              fontSize: '11px', 
+              height: '22px', 
+              fontWeight: 500,
+              bgcolor: '#F4BF61',
+              color: '#000',
+              '&:hover': {
+                bgcolor: '#E5B050'
+              }
+            }} 
           />
         </Box>
         
         <Typography variant="h6" component="h3" sx={{ mb: 1, fontWeight: 600, lineHeight: 1.3, fontSize: '16px' }}>
           {service.title}
         </Typography>
+        
+        {/* Rating section */}
+        {service.averageRating !== undefined && service.averageRating > 0 && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+            <Rating 
+              value={service.averageRating} 
+              precision={0.1} 
+              size="small" 
+              readOnly 
+              sx={{ fontSize: '16px' }}
+            />
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '12px' }}>
+              {service.averageRating.toFixed(1)} ({service.totalRatings || 0})
+            </Typography>
+          </Box>
+        )}
         
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2, minHeight: 40, fontSize: '13px', lineHeight: 1.5 }}>
           {service.description.length > 80
@@ -111,40 +150,40 @@ export function ServiceCard({ service }: ServiceCardProps) {
           }
         </Typography>
 
+        {/* Location, Duration (left) and Button (right) in same row */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 'auto', pt: 1 }}>
-          <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontSize: '12px' }}>
-            📍 {service.location || 'N/A'}
-          </Typography>
-          
-          {/* Duration as "price" */}
-          <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
-            <Typography variant="h6" color="primary" sx={{ fontWeight: 700, fontSize: '20px' }}>
-              {service.duration}
+          <Box>
+            <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontSize: '12px', mb: 0.5 }}>
+              📍 {service.location || 'N/A'}
             </Typography>
-            <Typography variant="body2" color="primary" sx={{ fontWeight: 600, fontSize: '13px' }}>
-              horas
-            </Typography>
+            
+            <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '12px' }}>
+                {t("common.duration")}:
+              </Typography>
+              <Typography variant="body1" color="primary" sx={{ fontWeight: 700, fontSize: '16px' }}>
+                {service.duration}h
+              </Typography>
+            </Box>
           </Box>
+
+          <Button 
+            size="small" 
+            variant="contained"
+            onClick={() => router.push(`/services/${service.id}`)}
+            sx={{ 
+              textTransform: 'none', 
+              borderRadius: 1.5,
+              px: 2.5,
+              py: 0.75,
+              fontWeight: 600,
+              fontSize: '13px'
+            }}
+          >
+            {t("services.card.view_details")}
+          </Button>
         </Box>
       </CardContent>
-
-      <CardActions sx={{ p: 2, pt: 0 }}>
-        <Button 
-          size="medium" 
-          fullWidth 
-          variant="contained"
-          onClick={() => router.push(`/services/${service.id}`)}
-          sx={{ 
-            textTransform: 'none', 
-            borderRadius: 2,
-            py: 1,
-            fontWeight: 600,
-            fontSize: '14px'
-          }}
-        >
-          Solicitar Servicio
-        </Button>
-      </CardActions>
     </Card>
   );
 }

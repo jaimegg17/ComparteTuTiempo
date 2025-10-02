@@ -83,6 +83,7 @@ export default function ServiceDetailPage() {
           serviceId: service?.id,
           offeredById: service?.user?.id || service?.userId,
           message: requestMessage || undefined,
+          date: new Date().toISOString(), // Default to current date/time
         }),
       });
 
@@ -120,12 +121,12 @@ export default function ServiceDetailPage() {
   if (error || !service) {
     return (
       <Layout>
-        <Container maxWidth="lg" sx={{ py: 4 }}>
-          <Alert severity="error">{error || 'Servicio no encontrado'}</Alert>
+        <Box sx={{ py: 4, px: { xs: 2, md: 3 } }}>
+          <Alert severity="error">{error || 'Service not found'}</Alert>
           <Button onClick={() => router.push('/services')} sx={{ mt: 2 }}>
-            ← Volver a servicios
+            ← Back to services
           </Button>
-        </Container>
+        </Box>
       </Layout>
     );
   }
@@ -135,12 +136,12 @@ export default function ServiceDetailPage() {
   return (
     <Layout>
       <Box sx={{ bgcolor: '#f5f5f5', minHeight: '100%', py: 6 }}>
-        <Container maxWidth="lg">
+        <Box sx={{ px: { xs: 2, md: 3 } }}>
           <Button 
             onClick={() => router.push('/services')} 
             sx={{ mb: 3, textTransform: 'none' }}
           >
-            ← Volver a servicios
+            ← Back to services
           </Button>
 
           <Paper sx={{ overflow: 'hidden', mb: 3 }}>
@@ -182,7 +183,7 @@ export default function ServiceDetailPage() {
               </Box>
             </Box>
           </Paper>
-        </Container>
+        </Box>
       </Box>
 
       {/* Modal de Solicitud */}
