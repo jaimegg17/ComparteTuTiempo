@@ -169,7 +169,7 @@ export default function CreateServicePage() {
       
       // Redirect to the created service
       setTimeout(() => {
-        router.push(`/services/${data.id}`);
+        router.push(`/services/${data.service.id}`);
       }, 1500);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al crear el servicio');
