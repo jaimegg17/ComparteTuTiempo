@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { Container, Typography, Box, CircularProgress, Button } from '@mui/material';
 import { Layout } from '@/components/Layout';
 import { ServiceCard } from '@/components/ServiceCard';
@@ -19,6 +20,7 @@ interface Service {
 }
 
 export default function ServicesPage() {
+  const router = useRouter();
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
@@ -153,6 +155,13 @@ export default function ServicesPage() {
                 <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '18px' }}>
                   {loading ? 'Cargando...' : `${total} servicios encontrados`}
                 </Typography>
+                <Button 
+                  variant="contained" 
+                  onClick={() => router.push('/services/create')}
+                  sx={{ textTransform: 'none', fontWeight: 600 }}
+                >
+                  + Publicar Servicio
+                </Button>
               </Box>
 
               {loading ? (
