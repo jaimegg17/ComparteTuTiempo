@@ -17,14 +17,17 @@ import { useUser } from '@auth0/nextjs-auth0/client';
 
 const CATEGORIES = ['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'ARTE', 'OTROS'];
 const TYPES = ['PRESENCIAL', 'VIRTUAL', 'HIBRIDO'];
+const AVAILABILITY = ['mañana', 'tarde', 'noche', 'mañana-tarde', 'tarde-noche', 'flexible'];
 
 interface FormData {
   title: string;
   description: string;
+  detailedDescription: string;
   duration: string;
   category: string;
   type: string;
   location: string;
+  availability: string;
 }
 
 interface FormErrors {
@@ -43,10 +46,12 @@ export default function CreateServicePage() {
   const [formData, setFormData] = useState<FormData>({
     title: '',
     description: '',
+    detailedDescription: '',
     duration: '',
     category: '',
     type: '',
     location: '',
+    availability: '',
   });
   
   const [errors, setErrors] = useState<FormErrors>({});
@@ -127,19 +132,29 @@ export default function CreateServicePage() {
     setError(null);
     
     try {
+      // Get token
+      const tokenResponse = await fetch('/api/auth/token');
+      if (!tokenResponse.ok) {
+        throw new Error('No se pudo obtener el token de autenticación');
+      }
+      const tokenData = await tokenResponse.json();
+      const token = tokenData.accessToken;
+
       const response = await fetch('http://localhost:3001/api/services', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
-        credentials: 'include',
         body: JSON.stringify({
           title: formData.title.trim(),
           description: formData.description.trim(),
+          detailedDescription: formData.detailedDescription.trim() || undefined,
           duration: parseFloat(formData.duration),
           category: formData.category,
           type: formData.type,
           location: formData.location.trim(),
+          availability: formData.availability || undefined,
           price: parseFloat(formData.duration) * 60, // Duration in minutes
         }),
       });
@@ -224,19 +239,33 @@ export default function CreateServicePage() {
                   required
                 />
 
-                {/* Descripción */}
+                {/* Descripción Corta */}
                 <TextField
                   fullWidth
                   multiline
-                  rows={4}
-                  label="Descripción"
-                  placeholder="Describe tu servicio en detalle: qué ofreces, qué incluye, requisitos previos..."
+                  rows={2}
+                  label="Descripción corta"
+                  placeholder="Resumen breve para el listado de servicios (máx. 150 caracteres)"
                   value={formData.description}
                   onChange={handleChange('description')}
                   error={!!errors.description}
                   helperText={errors.description || `${formData.description.length} caracteres`}
                   disabled={loading || success}
+                  inputProps={{ maxLength: 150 }}
                   required
+                />
+
+                {/* Descripción Detallada */}
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={5}
+                  label="Descripción detallada (opcional)"
+                  placeholder="Describe tu servicio en detalle: qué ofreces, qué incluye, requisitos previos, material necesario..."
+                  value={formData.detailedDescription}
+                  onChange={handleChange('detailedDescription')}
+                  helperText={`${formData.detailedDescription.length} caracteres - Se mostrará en la página de detalle`}
+                  disabled={loading || success}
                 />
 
                 {/* Categoría y Tipo */}
@@ -308,6 +337,24 @@ export default function CreateServicePage() {
                     required
                   />
                 </Box>
+
+                {/* Disponibilidad */}
+                <TextField
+                  select
+                  fullWidth
+                  label="Disponibilidad"
+                  value={formData.availability}
+                  onChange={handleChange('availability')}
+                  helperText="Cuándo puedes ofrecer este servicio"
+                  disabled={loading || success}
+                >
+                  <MenuItem value="">Selecciona tu disponibilidad</MenuItem>
+                  {AVAILABILITY.map((avail) => (
+                    <MenuItem key={avail} value={avail}>
+                      {avail.charAt(0).toUpperCase() + avail.slice(1).replace('-', ' y ')}
+                    </MenuItem>
+                  ))}
+                </TextField>
 
                 {/* Info adicional */}
                 <Alert severity="info" sx={{ fontSize: '13px' }}>

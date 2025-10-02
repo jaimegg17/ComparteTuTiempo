@@ -139,6 +139,29 @@ export function Header() {
                 }}
               />
 
+              {user && (
+                <Link href="/services/create" style={{ textDecoration: "none" }}>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    sx={{
+                      bgcolor: "#8A33FD",
+                      borderRadius: 999,
+                      textTransform: "none",
+                      px: 2.5,
+                      py: 0.75,
+                      fontWeight: 600,
+                      boxShadow: "0 2px 4px rgba(138, 51, 253, 0.3)",
+                      "&:hover": {
+                        bgcolor: "#7028E0",
+                      },
+                    }}
+                  >
+                    + Publicar Servicio
+                  </Button>
+                </Link>
+              )}
+
               <LanguageSwitcher />
 
               {isLoading ? (
