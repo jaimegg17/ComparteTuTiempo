@@ -158,7 +158,19 @@ export default function ServicesPage() {
                 <Button 
                   variant="contained" 
                   onClick={() => router.push('/services/create')}
-                  sx={{ textTransform: 'none', fontWeight: 600 }}
+                  sx={{ 
+                    textTransform: 'none', 
+                    fontWeight: 600,
+                    bgcolor: '#8A33FD',
+                    px: 3,
+                    py: 1,
+                    borderRadius: 2,
+                    boxShadow: '0 2px 8px rgba(138, 51, 253, 0.3)',
+                    '&:hover': {
+                      bgcolor: '#7028E0',
+                      boxShadow: '0 4px 12px rgba(138, 51, 253, 0.4)',
+                    }
+                  }}
                 >
                   + Publicar Servicio
                 </Button>
