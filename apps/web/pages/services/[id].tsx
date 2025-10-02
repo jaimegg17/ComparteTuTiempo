@@ -3,45 +3,20 @@ import { useRouter } from 'next/router';
 import {
   Container,
   Box,
-  Typography,
   Button,
   Paper,
-  Chip,
-  Avatar,
   CircularProgress,
   Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
   Divider,
-  Stack,
 } from '@mui/material';
 import { Layout } from '@/components/Layout';
-import { Clock, Pin, User, Calendar } from 'iconoir-react';
 import { useUser } from '@auth0/nextjs-auth0/client';
-
-interface Service {
-  id: number;
-  title: string;
-  description: string;
-  price: number;
-  duration: number;
-  location: string;
-  category: string;
-  type: string;
-  status: string;
-  imageUrl?: string;
-  createdAt: string;
-  userId: string;
-  user?: {
-    id: string;
-    name: string;
-    imageUrl?: string;
-    location?: string;
-  };
-}
+import { ServiceImageSection } from '@/components/services/ServiceImageSection';
+import { ServiceDetailHeader } from '@/components/services/ServiceDetailHeader';
+import { ServiceInfoTabs } from '@/components/services/ServiceInfoTabs';
+import { ServiceActionFooter } from '@/components/services/ServiceActionFooter';
+import { ServiceRequestDialog } from '@/components/services/ServiceRequestDialog';
+import type { Service } from '@/types/service.types';
 
 export default function ServiceDetailPage() {
   const router = useRouter();
@@ -52,53 +27,58 @@ export default function ServiceDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Estado del modal de solicitud
+  // Request dialog state
   const [openRequestDialog, setOpenRequestDialog] = useState(false);
   const [requestMessage, setRequestMessage] = useState('');
   const [requestLoading, setRequestLoading] = useState(false);
   const [requestSuccess, setRequestSuccess] = useState(false);
+  const [requestError, setRequestError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (id) {
-      fetchService();
-    }
-  }, [id]);
-
-  const fetchService = async () => {
-    setLoading(true);
-    setError(null);
+    if (!id) return;
     
-    try {
-      const response = await fetch(`http://localhost:3001/api/services/${id}`);
-      
-      if (!response.ok) {
-        throw new Error('Servicio no encontrado');
+    const fetchService = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch(`http://localhost:3001/api/services/${id}`);
+        
+        if (!response.ok) {
+          throw new Error('Error al cargar el servicio');
+        }
+        
+        const data = await response.json();
+        setService(data.service);
+      } catch (err: any) {
+        console.error('Error fetching service:', err);
+        setError(err.message || 'Error al cargar el servicio');
+      } finally {
+        setLoading(false);
       }
-      
-      const data = await response.json();
-      setService(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al cargar el servicio');
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    fetchService();
+  }, [id]);
 
   const handleRequestService = async () => {
     if (!user) {
-      router.push('/api/auth/login');
+      alert('Debes iniciar sesión para solicitar un servicio');
       return;
     }
 
-    setRequestLoading(true);
-    
     try {
+      setRequestLoading(true);
+      setRequestError(null);
+
+      const token = await fetch('/api/auth/token').then(res => res.json()).then(data => data.accessToken);
+
       const response = await fetch('http://localhost:3001/api/exchanges', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
-        credentials: 'include',
         body: JSON.stringify({
           serviceId: service?.id,
           offeredById: service?.user?.id || service?.userId,
@@ -114,10 +94,14 @@ export default function ServiceDetailPage() {
       setRequestSuccess(true);
       setTimeout(() => {
         setOpenRequestDialog(false);
-        router.push('/exchanges'); // Redirigir a la página de exchanges
+        setRequestSuccess(false);
+        setRequestMessage('');
+        router.push('/exchanges');
       }, 2000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al solicitar el servicio');
+
+    } catch (err: any) {
+      console.error('Error requesting service:', err);
+      setRequestError(err.message || 'Error al solicitar el servicio');
     } finally {
       setRequestLoading(false);
     }
@@ -139,7 +123,7 @@ export default function ServiceDetailPage() {
         <Container maxWidth="lg" sx={{ py: 4 }}>
           <Alert severity="error">{error || 'Servicio no encontrado'}</Alert>
           <Button onClick={() => router.push('/services')} sx={{ mt: 2 }}>
-            Volver a servicios
+            ← Volver a servicios
           </Button>
         </Container>
       </Layout>
@@ -159,49 +143,18 @@ export default function ServiceDetailPage() {
             ← Volver a servicios
           </Button>
 
-          <Paper sx={{ overflow: 'hidden' }}>
+          <Paper sx={{ overflow: 'hidden', mb: 3 }}>
             <Box sx={{ 
               display: 'flex', 
               flexDirection: { xs: 'column', lg: 'row' },
               minHeight: { lg: '600px' }
             }}>
               {/* Imagen del servicio - Izquierda */}
-              <Box 
-                sx={{ 
-                  width: { xs: '100%', lg: '50%' },
-                  height: { xs: '400px', lg: 'auto' },
-                  bgcolor: 'grey.100',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  overflow: 'hidden',
-                  position: 'relative'
-                }}
-              >
-                {service.imageUrl ? (
-                  <img 
-                    src={service.imageUrl} 
-                    alt={service.title}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                ) : (
-                  <Box sx={{ fontSize: '120px', color: 'grey.400' }}>📦</Box>
-                )}
-                
-                {/* Status badge */}
-                {service.status === 'ACTIVO' && (
-                  <Chip
-                    label="Disponible"
-                    color="success"
-                    sx={{
-                      position: 'absolute',
-                      top: 16,
-                      right: 16,
-                      fontWeight: 600
-                    }}
-                  />
-                )}
-              </Box>
+              <ServiceImageSection 
+                imageUrl={service.imageUrl}
+                title={service.title}
+                status={service.status}
+              />
 
               {/* Info del servicio - Derecha */}
               <Box sx={{ 
@@ -210,142 +163,22 @@ export default function ServiceDetailPage() {
                 display: 'flex',
                 flexDirection: 'column'
               }}>
-                {/* Categoría */}
-                <Typography variant="caption" sx={{ 
-                  color: 'text.secondary', 
-                  textTransform: 'uppercase', 
-                  letterSpacing: 1.5,
-                  fontWeight: 600,
-                  mb: 1
-                }}>
-                  {service.category}
-                </Typography>
+                <ServiceDetailHeader 
+                  category={service.category}
+                  title={service.title}
+                />
 
-                {/* Título */}
-                <Typography variant="h4" sx={{ fontWeight: 700, mb: 2, color: 'grey.900' }}>
-                  {service.title}
-                </Typography>
+                <ServiceInfoTabs service={service} />
 
-                {/* Tipo */}
-                <Box sx={{ mb: 3 }}>
-                  <Chip label={service.type} size="small" variant="outlined" />
-                </Box>
+                <Divider sx={{ my: 2 }} />
 
-                {/* Info rápida con iconos */}
-                <Stack direction="row" spacing={2} sx={{ mb: 3, flexWrap: 'wrap', gap: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Clock width={18} height={18} color="#666" />
-                    <Typography variant="body2" color="text.secondary">
-                      {service.duration} horas
-                    </Typography>
-                  </Box>
-                  
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Pin width={18} height={18} color="#666" />
-                    <Typography variant="body2" color="text.secondary">
-                      {service.location}
-                    </Typography>
-                  </Box>
-                  
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Calendar width={18} height={18} color="#666" />
-                    <Typography variant="body2" color="text.secondary">
-                      {new Date(service.createdAt).toLocaleDateString('es-ES')}
-                    </Typography>
-                  </Box>
-                </Stack>
-
-                {/* Descripción */}
-                <Typography variant="body1" sx={{ 
-                  lineHeight: 1.8, 
-                  color: 'text.secondary',
-                  mb: 4,
-                  flexGrow: 1
-                }}>
-                  {service.description}
-                </Typography>
-
-                <Divider sx={{ mb: 3 }} />
-
-                {/* Usuario que ofrece */}
-                {service.user && (
-                  <Box sx={{ mb: 3 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block', textTransform: 'uppercase', fontSize: '11px' }}>
-                      Ofrecido por
-                    </Typography>
-                    <Box 
-                      sx={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: 2,
-                        p: 1.5,
-                        bgcolor: 'grey.50',
-                        borderRadius: 2,
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        '&:hover': { bgcolor: 'grey.100', transform: 'translateX(4px)' }
-                      }}
-                      onClick={() => router.push(`/users/${service.user?.id || service.userId}`)}
-                    >
-                      <Avatar 
-                        src={service.user.imageUrl} 
-                        alt={service.user.name}
-                        sx={{ width: 42, height: 42 }}
-                      >
-                        {service.user.name[0].toUpperCase()}
-                      </Avatar>
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {service.user.name}
-                        </Typography>
-                        {service.user.location && (
-                          <Typography variant="caption" color="text.secondary">
-                            📍 {service.user.location}
-                          </Typography>
-                        )}
-                      </Box>
-                    </Box>
-                  </Box>
-                )}
-
-                {/* Precio y botón */}
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 'auto' }}>
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="h4" color="primary" sx={{ fontWeight: 700 }}>
-                      {service.duration}h
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      de intercambio
-                    </Typography>
-                  </Box>
-
-                  {isOwnService ? (
-                    <Chip label="Tu servicio" color="info" sx={{ py: 2.5, px: 2 }} />
-                  ) : (
-                    <Button
-                      variant="contained"
-                      size="large"
-                      onClick={() => setOpenRequestDialog(true)}
-                      disabled={service.status !== 'ACTIVO' || !user}
-                      sx={{
-                        py: 1.5,
-                        px: 4,
-                        fontWeight: 600,
-                        textTransform: 'none',
-                        borderRadius: 1,
-                        minWidth: 160
-                      }}
-                    >
-                      {service.status === 'ACTIVO' ? 'Solicitar' : 'No Disponible'}
-                    </Button>
-                  )}
-                </Box>
-
-                {!user && !isOwnService && (
-                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, textAlign: 'right' }}>
-                    Inicia sesión para solicitar
-                  </Typography>
-                )}
+                <ServiceActionFooter 
+                  isOwnService={isOwnService}
+                  status={service.status}
+                  duration={service.duration}
+                  isUserLoggedIn={!!user}
+                  onRequestService={() => setOpenRequestDialog(true)}
+                />
               </Box>
             </Box>
           </Paper>
@@ -353,60 +186,18 @@ export default function ServiceDetailPage() {
       </Box>
 
       {/* Modal de Solicitud */}
-      <Dialog 
-        open={openRequestDialog} 
-        onClose={() => !requestLoading && setOpenRequestDialog(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle sx={{ fontWeight: 600 }}>
-          Solicitar Servicio
-        </DialogTitle>
-        <DialogContent>
-          {requestSuccess ? (
-            <Alert severity="success" sx={{ mb: 2 }}>
-              ¡Solicitud enviada correctamente! Redirigiendo...
-            </Alert>
-          ) : (
-            <>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Estás a punto de solicitar el servicio <strong>{service.title}</strong>. 
-                Se descontarán <strong>{service.duration} horas</strong> de tus créditos cuando se complete el servicio.
-              </Typography>
-              
-              <TextField
-                fullWidth
-                multiline
-                rows={4}
-                label="Mensaje opcional"
-                placeholder="Añade un mensaje para el prestador del servicio..."
-                value={requestMessage}
-                onChange={(e) => setRequestMessage(e.target.value)}
-                disabled={requestLoading}
-                sx={{ mt: 2 }}
-              />
-            </>
-          )}
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button 
-            onClick={() => setOpenRequestDialog(false)}
-            disabled={requestLoading || requestSuccess}
-            sx={{ textTransform: 'none' }}
-          >
-            Cancelar
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleRequestService}
-            disabled={requestLoading || requestSuccess}
-            sx={{ textTransform: 'none', minWidth: 120 }}
-          >
-            {requestLoading ? <CircularProgress size={24} /> : 'Confirmar Solicitud'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <ServiceRequestDialog 
+        open={openRequestDialog}
+        loading={requestLoading}
+        success={requestSuccess}
+        error={requestError}
+        message={requestMessage}
+        providerName={service.user?.name}
+        duration={service.duration}
+        onClose={() => setOpenRequestDialog(false)}
+        onMessageChange={setRequestMessage}
+        onSubmit={handleRequestService}
+      />
     </Layout>
   );
 }
-
