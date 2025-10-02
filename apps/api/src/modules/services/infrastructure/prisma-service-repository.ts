@@ -18,8 +18,10 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
       data: {
         title: data.title,
         description: data.description,
+        detailedDescription: data.detailedDescription || null,
         duration: data.duration,
         location: data.location,
+        availability: data.availability || null,
         category: ServiceEnumMapper.mapCategoryToPrisma(data.category) as any,
         type: ServiceEnumMapper.mapTypeToPrisma(data.type) as any,
         price: data.price,
