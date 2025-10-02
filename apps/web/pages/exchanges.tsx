@@ -1,0 +1,197 @@
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import {
+  Container,
+  Box,
+  Typography,
+  CircularProgress,
+  Alert,
+  Button,
+} from '@mui/material';
+import { Layout } from '@/components/Layout';
+import { useUser } from '@auth0/nextjs-auth0/client';
+import { ExchangeCard, ExchangeFilters } from '@/components/exchanges';
+import type { Exchange, ExchangeState, ExchangesListResponse } from '@/types/exchange.types';
+
+export default function ExchangesPage() {
+  const router = useRouter();
+  const { user, isLoading: userLoading } = useUser();
+  
+  const [exchanges, setExchanges] = useState<Exchange[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  // Filters
+  const [activeTab, setActiveTab] = useState<'all' | 'received' | 'sent'>('all');
+  const [activeState, setActiveState] = useState<ExchangeState | 'all'>('all');
+
+  const fetchExchanges = async () => {
+    if (!user) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const token = await fetch('/api/auth/token').then(res => res.json()).then(data => data.accessToken);
+
+      // Build query params
+      const params = new URLSearchParams();
+      if (activeTab === 'received') {
+        params.append('offeredById', user.sub!);
+      } else if (activeTab === 'sent') {
+        params.append('requestedById', user.sub!);
+      }
+      if (activeState !== 'all') {
+        params.append('state', activeState);
+      }
+
+      const response = await fetch(`http://localhost:3001/api/exchanges?${params.toString()}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al cargar los intercambios');
+      }
+
+      const data = await response.json();
+      setExchanges(data.exchanges || []);
+    } catch (err: any) {
+      console.error('Error fetching exchanges:', err);
+      setError(err.message || 'Error al cargar los intercambios');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!userLoading && user) {
+      fetchExchanges();
+    }
+  }, [user, userLoading, activeTab, activeState]);
+
+  const handleAction = async (id: number, newState: ExchangeState) => {
+    if (!user) return;
+
+    try {
+      setActionLoading(true);
+      const token = await fetch('/api/auth/token').then(res => res.json()).then(data => data.accessToken);
+
+      const response = await fetch(`http://localhost:3001/api/exchanges/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ state: newState }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al actualizar el intercambio');
+      }
+
+      // Refresh list
+      await fetchExchanges();
+    } catch (err: any) {
+      console.error('Error updating exchange:', err);
+      alert(err.message || 'Error al actualizar el intercambio');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  if (userLoading) {
+    return (
+      <Layout>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+          <CircularProgress />
+        </Box>
+      </Layout>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Layout>
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            Debes iniciar sesión para ver tus intercambios
+          </Alert>
+          <Button variant="contained" href="/api/auth/login">
+            Iniciar Sesión
+          </Button>
+        </Container>
+      </Layout>
+    );
+  }
+
+  return (
+    <Layout>
+      <Box sx={{ bgcolor: '#f5f5f5', minHeight: '100vh', py: 4 }}>
+        <Container maxWidth="lg">
+          {/* Header */}
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+              Mis Intercambios
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Gestiona tus solicitudes y ofertas de servicios
+            </Typography>
+          </Box>
+
+          {/* Filters */}
+          <ExchangeFilters 
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            activeState={activeState}
+            onStateChange={setActiveState}
+          />
+
+          {/* Content */}
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+              <CircularProgress />
+            </Box>
+          ) : error ? (
+            <Alert severity="error">{error}</Alert>
+          ) : exchanges.length === 0 ? (
+            <Box sx={{ textAlign: 'center', py: 8 }}>
+              <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
+                No hay intercambios
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                {activeTab === 'received' 
+                  ? 'No has recibido solicitudes aún' 
+                  : activeTab === 'sent'
+                  ? 'No has enviado solicitudes aún'
+                  : 'No tienes intercambios registrados'}
+              </Typography>
+              <Button variant="contained" onClick={() => router.push('/services')}>
+                Explorar Servicios
+              </Button>
+            </Box>
+          ) : (
+            <Box>
+              {exchanges.map(exchange => (
+                <ExchangeCard 
+                  key={exchange.id}
+                  exchange={exchange}
+                  currentUserId={user.sub}
+                  onAccept={(id) => handleAction(id, 'CONFIRMED')}
+                  onReject={(id) => handleAction(id, 'REJECTED')}
+                  onStart={(id) => handleAction(id, 'IN_PROGRESS')}
+                  onComplete={(id) => handleAction(id, 'COMPLETED')}
+                  loading={actionLoading}
+                />
+              ))}
+            </Box>
+          )}
+        </Container>
+      </Box>
+    </Layout>
+  );
+}
+
