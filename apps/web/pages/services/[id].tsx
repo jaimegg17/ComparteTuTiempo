@@ -49,6 +49,8 @@ export default function ServiceDetailPage() {
         }
         
         const data = await response.json();
+        console.log('Service data from API:', data.service);
+        console.log('Has detailedDescription:', !!data.service.detailedDescription);
         setService(data.service);
       } catch (err: any) {
         console.error('Error fetching service:', err);

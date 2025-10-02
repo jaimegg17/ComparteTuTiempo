@@ -45,7 +45,11 @@ export function ServiceDetailsTab({ service }: ServiceDetailsTabProps) {
 
       {/* Descripción detallada */}
       <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8, mb: 3 }}>
-        {service.detailedDescription || service.description}
+        {(() => {
+          console.log('ServiceDetailsTab - detailedDescription:', service.detailedDescription);
+          console.log('ServiceDetailsTab - description:', service.description);
+          return service.detailedDescription || service.description;
+        })()}
       </Typography>
 
       {/* Card de Intercambios (si hay) */}
