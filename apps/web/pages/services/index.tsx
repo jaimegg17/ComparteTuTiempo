@@ -4,6 +4,9 @@ import { Container, Typography, Box, CircularProgress, Button } from '@mui/mater
 import { Layout } from '@/components/Layout';
 import { ServiceCard } from '@/components/ServiceCard';
 import { FilterSidebar } from '@/components/filters/FilterSidebar';
+import { ErrorAlert } from '@/components/ui/BeautifulAlert';
+import { useErrorHandling, ERROR_MESSAGES } from '@/hooks/useErrorHandling';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface Service {
   id: number;
@@ -21,16 +24,17 @@ interface Service {
 
 export default function ServicesPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [services, setServices] = useState<Service[]>([]);
-  const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
+  const { error, loading, handleAsyncOperation, clearError } = useErrorHandling();
   
   // Filtros
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [location, setLocation] = useState('');
   const [durationRange, setDurationRange] = useState<number[]>([0, 8]);
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [selectedType, setSelectedType] = useState<string>('');
 
   // Estados de colapso para cada filtro
   const [openCategories, setOpenCategories] = useState(false);
@@ -38,29 +42,55 @@ export default function ServicesPage() {
   const [openType, setOpenType] = useState(false);
   const [openDuration, setOpenDuration] = useState(false);
 
+  // Enum values for API calls (keep original values)
   const categories = ['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'ARTE', 'OTROS'];
   const types = ['PRESENCIAL', 'VIRTUAL', 'HIBRIDO'];
+  
+  // Mapping functions for display
+  const getCategoryDisplayName = (category: string) => {
+    const categoryMap: Record<string, string> = {
+      'EDUCACION': t('services.categories.education'),
+      'HOGAR': t('services.categories.home'),
+      'TECNOLOGIA': t('services.categories.technology'),
+      'SALUD': t('services.categories.health'),
+      'DEPORTES': t('services.categories.sports'),
+      'ARTE': t('services.categories.art'),
+      'OTROS': t('services.categories.others'),
+    };
+    return categoryMap[category] || category;
+  };
+  
+  const getTypeDisplayName = (type: string) => {
+    const typeMap: Record<string, string> = {
+      'PRESENCIAL': t('services.types.in_person'),
+      'VIRTUAL': t('services.types.online'),
+      'HIBRIDO': t('services.types.hybrid'),
+    };
+    return typeMap[type] || type;
+  };
 
   const fetchServices = async () => {
-    setLoading(true);
-    try {
+    await handleAsyncOperation(async () => {
       const params = new URLSearchParams();
       if (searchTerm) params.append('q', searchTerm);
       
-      if (selectedCategories.length > 0) {
-        selectedCategories.forEach(cat => params.append('category', cat));
-      }
+      // Solo una categoría a la vez
+      if (selectedCategory) params.append('category', selectedCategory);
       
       if (location) params.append('location', location);
       
       if (durationRange[0] > 0) params.append('minPrice', (durationRange[0] * 60).toString());
       if (durationRange[1] < 8) params.append('maxPrice', (durationRange[1] * 60).toString());
       
-      if (selectedTypes.length > 0) {
-        selectedTypes.forEach(type => params.append('type', type));
-      }
+      // Solo un tipo a la vez
+      if (selectedType) params.append('type', selectedType);
 
       const response = await fetch(`http://localhost:3001/api/services?${params.toString()}`);
+      
+      if (!response.ok) {
+        throw new Error(ERROR_MESSAGES.NETWORK_ERROR);
+      }
+      
       const data = await response.json();
       
       let filteredServices = data.services || [];
@@ -72,11 +102,7 @@ export default function ServicesPage() {
       
       setServices(filteredServices);
       setTotal(filteredServices.length);
-    } catch (error) {
-      console.error('Error al cargar servicios:', error);
-    } finally {
-      setLoading(false);
-    }
+    }, ERROR_MESSAGES.NETWORK_ERROR);
   };
 
   useEffect(() => {
@@ -85,10 +111,10 @@ export default function ServicesPage() {
 
   const handleClearFilters = () => {
     setSearchTerm('');
-    setSelectedCategories([]);
+    setSelectedCategory('');
     setLocation('');
     setDurationRange([0, 8]);
-    setSelectedTypes([]);
+    setSelectedType('');
     setTimeout(() => fetchServices(), 100);
   };
 
@@ -107,38 +133,48 @@ export default function ServicesPage() {
   };
 
   const toggleCategory = (cat: string) => {
-    setSelectedCategories(prev => 
-      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
-    );
+    // Si ya está seleccionada, la deseleccionamos; si no, la seleccionamos
+    setSelectedCategory(prev => prev === cat ? '' : cat);
   };
 
   const toggleType = (type: string) => {
-    setSelectedTypes(prev => 
-      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
-    );
+    // Si ya está seleccionado, lo deseleccionamos; si no, lo seleccionamos
+    setSelectedType(prev => prev === type ? '' : type);
   };
 
   return (
     <Layout>
       <Box sx={{ bgcolor: '#f5f5f5', minHeight: '100%', py: 4 }}>
-        <Container maxWidth="xl">
+        <Box sx={{ px: { xs: 2, md: 3 } }}>
+          {error && (
+            <Box sx={{ mb: 3 }}>
+              <ErrorAlert
+                message={error}
+                onRetry={fetchServices}
+                onClose={clearError}
+                retryText={t("common.retry")}
+              />
+            </Box>
+          )}
           <Box sx={{ display: 'flex', gap: 3 }}>
             {/* Sidebar de Filtros */}
             <FilterSidebar
               categories={categories}
-              selectedCategories={selectedCategories}
+              selectedCategories={selectedCategory ? [selectedCategory] : []}
               openCategories={openCategories}
               setOpenCategories={setOpenCategories}
               toggleCategory={toggleCategory}
+              getCategoryDisplayName={getCategoryDisplayName}
               location={location}
               openLocation={openLocation}
               setOpenLocation={setOpenLocation}
               setLocation={setLocation}
               types={types}
-              selectedTypes={selectedTypes}
+              selectedTypes={selectedType ? [selectedType] : []}
               openType={openType}
               setOpenType={setOpenType}
               toggleType={toggleType}
+              getTypeDisplayName={getTypeDisplayName}
               durationRange={durationRange}
               openDuration={openDuration}
               setOpenDuration={setOpenDuration}
@@ -147,34 +183,38 @@ export default function ServicesPage() {
               handleMaxDurationChange={handleMaxDurationChange}
               onApplyFilters={fetchServices}
               onClearFilters={handleClearFilters}
+              onClearCategory={() => { setSelectedCategory(''); setTimeout(() => fetchServices(), 100); }}
+              onClearType={() => { setSelectedType(''); setTimeout(() => fetchServices(), 100); }}
+              onClearLocation={() => { setLocation(''); setTimeout(() => fetchServices(), 100); }}
+              onClearDuration={() => { setDurationRange([0, 8]); setTimeout(() => fetchServices(), 100); }}
             />
 
             {/* Grid de Servicios */}
             <Box sx={{ flex: 1 }}>
-              <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '18px' }}>
-                  {loading ? 'Cargando...' : `${total} servicios encontrados`}
-                </Typography>
-                <Button 
-                  variant="contained" 
-                  onClick={() => router.push('/services/create')}
-                  sx={{ 
-                    textTransform: 'none', 
-                    fontWeight: 600,
-                    bgcolor: '#8A33FD',
-                    px: 3,
-                    py: 1,
-                    borderRadius: 2,
-                    boxShadow: '0 2px 8px rgba(138, 51, 253, 0.3)',
-                    '&:hover': {
-                      bgcolor: '#7028E0',
-                      boxShadow: '0 4px 12px rgba(138, 51, 253, 0.4)',
-                    }
-                  }}
-                >
-                  + Publicar Servicio
-                </Button>
-              </Box>
+            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 2 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '18px' }}>
+                {loading ? t("common.loading") : `${total} ${t("services.title").toLowerCase()} ${t("common.found")}`}
+              </Typography>
+              <Button 
+                variant="contained" 
+                onClick={() => router.push('/services/create')}
+                sx={{ 
+                  textTransform: 'none', 
+                  fontWeight: 600,
+                  bgcolor: '#8A33FD',
+                  px: 3,
+                  py: 1,
+                  borderRadius: 2,
+                  boxShadow: '0 2px 8px rgba(138, 51, 253, 0.3)',
+                  '&:hover': {
+                    bgcolor: '#7028E0',
+                    boxShadow: '0 4px 12px rgba(138, 51, 253, 0.4)',
+                  }
+                }}
+              >
+                + {t("services.create")}
+              </Button>
+            </Box>
 
               {loading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
@@ -197,20 +237,20 @@ export default function ServicesPage() {
               {!loading && services.length === 0 && (
                 <Box sx={{ textAlign: 'center', py: 8 }}>
                   <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
-                    No se encontraron servicios con los filtros seleccionados
+                    {t("services.not_found")}
                   </Typography>
                   <Button 
                     variant="outlined" 
                     onClick={handleClearFilters}
                     sx={{ textTransform: 'none' }}
                   >
-                    Limpiar Filtros
+                    {t("services.filters.clear")}
                   </Button>
                 </Box>
               )}
             </Box>
           </Box>
-        </Container>
+        </Box>
       </Box>
     </Layout>
   );

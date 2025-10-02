@@ -128,14 +128,14 @@ export default function ExchangesPage() {
   if (!user) {
     return (
       <Layout>
-        <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Box sx={{ py: 4, px: { xs: 2, md: 3 } }}>
           <Alert severity="warning" sx={{ mb: 2 }}>
-            Debes iniciar sesión para ver tus intercambios
+            You must log in to view your exchanges
           </Alert>
           <Button variant="contained" href="/api/auth/login">
-            Iniciar Sesión
+            Log In
           </Button>
-        </Container>
+        </Box>
       </Layout>
     );
   }
@@ -143,14 +143,14 @@ export default function ExchangesPage() {
   return (
     <Layout>
       <Box sx={{ bgcolor: '#f5f5f5', minHeight: '100vh', py: 4 }}>
-        <Container maxWidth="lg">
+        <Box sx={{ px: { xs: 2, md: 3 } }}>
           {/* Header */}
           <Box sx={{ mb: 4 }}>
             <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-              Mis Intercambios
+              My Exchanges
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Gestiona tus solicitudes y ofertas de servicios
+              Manage your service requests and offers
             </Typography>
           </Box>
 
@@ -201,7 +201,7 @@ export default function ExchangesPage() {
               ))}
             </Box>
           )}
-        </Container>
+        </Box>
       </Box>
     </Layout>
   );

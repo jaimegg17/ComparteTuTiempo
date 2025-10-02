@@ -1,11 +1,13 @@
 import { Box, Typography, IconButton, Collapse, TextField } from '@mui/material';
-import { NavArrowDown, NavArrowUp } from 'iconoir-react';
+import { NavArrowDown, NavArrowUp, Xmark } from 'iconoir-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface LocationFilterProps {
   location: string;
   isOpen: boolean;
   onToggle: () => void;
   onLocationChange: (location: string) => void;
+  onClear?: () => void;
 }
 
 export function LocationFilter({
@@ -13,7 +15,9 @@ export function LocationFilter({
   isOpen,
   onToggle,
   onLocationChange,
+  onClear,
 }: LocationFilterProps) {
+  const { t } = useTranslation();
   return (
     <Box>
       <Box 
@@ -28,11 +32,25 @@ export function LocationFilter({
         }}
       >
         <Typography variant="body1" sx={{ fontWeight: 500, fontSize: '14px' }}>
-          Ubicación
+          {t("services.filters.location")} {location && '(1)'}
         </Typography>
-        <IconButton size="small">
-          {isOpen ? <NavArrowUp width={18} /> : <NavArrowDown width={18} />}
-        </IconButton>
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
+          {location && onClear && (
+            <IconButton 
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClear();
+              }}
+              sx={{ color: 'error.main' }}
+            >
+              <Xmark width={16} />
+            </IconButton>
+          )}
+          <IconButton size="small">
+            {isOpen ? <NavArrowUp width={18} /> : <NavArrowDown width={18} />}
+          </IconButton>
+        </Box>
       </Box>
       
       <Collapse in={isOpen}>
@@ -40,7 +58,7 @@ export function LocationFilter({
           <TextField
             fullWidth
             size="small"
-            placeholder="Madrid, Barcelona..."
+            placeholder={t("services.filters.location")}
             value={location}
             onChange={(e) => onLocationChange(e.target.value)}
             sx={{ 

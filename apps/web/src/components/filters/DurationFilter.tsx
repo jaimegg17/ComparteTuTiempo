@@ -1,5 +1,6 @@
 import { Box, Typography, IconButton, Collapse, Slider, TextField } from '@mui/material';
-import { NavArrowDown, NavArrowUp } from 'iconoir-react';
+import { NavArrowDown, NavArrowUp, Xmark } from 'iconoir-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface DurationFilterProps {
   durationRange: number[];
@@ -8,6 +9,7 @@ interface DurationFilterProps {
   onDurationChange: (event: Event, newValue: number | number[]) => void;
   onMinChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onMaxChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onClear?: () => void;
 }
 
 export function DurationFilter({
@@ -17,7 +19,9 @@ export function DurationFilter({
   onDurationChange,
   onMinChange,
   onMaxChange,
+  onClear,
 }: DurationFilterProps) {
+  const { t } = useTranslation();
   return (
     <Box>
       <Box 
@@ -32,11 +36,25 @@ export function DurationFilter({
         }}
       >
         <Typography variant="body1" sx={{ fontWeight: 500, fontSize: '14px' }}>
-          Duración
+          {t("services.filters.duration")} {(durationRange[0] > 0 || durationRange[1] < 8) && '(1)'}
         </Typography>
-        <IconButton size="small">
-          {isOpen ? <NavArrowUp width={18} /> : <NavArrowDown width={18} />}
-        </IconButton>
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
+          {(durationRange[0] > 0 || durationRange[1] < 8) && onClear && (
+            <IconButton 
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClear();
+              }}
+              sx={{ color: 'error.main' }}
+            >
+              <Xmark width={16} />
+            </IconButton>
+          )}
+          <IconButton size="small">
+            {isOpen ? <NavArrowUp width={18} /> : <NavArrowDown width={18} />}
+          </IconButton>
+        </Box>
       </Box>
       
       <Collapse in={isOpen}>
@@ -78,7 +96,7 @@ export function DurationFilter({
           <Box sx={{ display: 'flex', gap: 1.5, mt: 2, alignItems: 'center' }}>
             <Box sx={{ flex: 1 }}>
               <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block', fontSize: '10px' }}>
-                Mín (h)
+                {t("common.min")} (h)
               </Typography>
               <TextField
                 size="small"
@@ -104,7 +122,7 @@ export function DurationFilter({
             
             <Box sx={{ flex: 1 }}>
               <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block', fontSize: '10px' }}>
-                Máx (h)
+                {t("common.max")} (h)
               </Typography>
               <TextField
                 size="small"

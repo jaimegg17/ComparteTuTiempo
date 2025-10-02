@@ -1,5 +1,5 @@
 import { Card, CardContent, Box, Typography, Chip, Avatar, Button, Stack } from '@mui/material';
-import { Clock, User as UserIcon, ArrowRight } from 'iconoir-react';
+import { Clock, User as UserIcon, ArrowRight, ChatBubble } from 'iconoir-react';
 import { useRouter } from 'next/router';
 import type { Exchange, ExchangeState } from '@/types/exchange.types';
 
@@ -30,10 +30,15 @@ export function ExchangeCard({ exchange, currentUserId, onAccept, onReject, onSt
 
   const stateConfig = STATE_CONFIG[exchange.state];
 
+  // Only provider can accept/reject
   const canAccept = isProvider && exchange.state === 'PENDING';
   const canReject = isProvider && exchange.state === 'PENDING';
-  const canStart = exchange.state === 'CONFIRMED';
-  const canComplete = exchange.state === 'IN_PROGRESS';
+  
+  // Only requester can start the exchange
+  const canStart = isRequester && exchange.state === 'CONFIRMED';
+  
+  // Only provider can complete the exchange
+  const canComplete = isProvider && exchange.state === 'IN_PROGRESS';
 
   return (
     <Card sx={{ mb: 2, '&:hover': { boxShadow: 3 }, transition: 'box-shadow 0.2s' }}>
@@ -140,9 +145,24 @@ export function ExchangeCard({ exchange, currentUserId, onAccept, onReject, onSt
             )}
 
             {/* Actions */}
-            {(canAccept || canReject || canStart || canComplete) && (
-              <Stack direction="row" spacing={1} flexWrap="wrap">
-                {canAccept && (
+            <Stack direction="row" spacing={1} flexWrap="wrap">
+              {/* Chat Button - Always available for active exchanges */}
+              {(exchange.state === 'PENDING' || exchange.state === 'CONFIRMED' || exchange.state === 'IN_PROGRESS') && (
+                <Button 
+                  size="small" 
+                  variant="outlined"
+                  startIcon={<ChatBubble width={16} height={16} />}
+                  onClick={() => router.push(`/exchanges/${exchange.id}`)}
+                  sx={{ textTransform: 'none', fontSize: '13px' }}
+                >
+                  Chat
+                </Button>
+              )}
+              
+              {/* Other Actions */}
+              {(canAccept || canReject || canStart || canComplete) && (
+                <>
+                  {canAccept && (
                   <Button 
                     size="small" 
                     variant="contained" 
@@ -188,8 +208,9 @@ export function ExchangeCard({ exchange, currentUserId, onAccept, onReject, onSt
                     Completar
                   </Button>
                 )}
-              </Stack>
-            )}
+                </>
+              )}
+            </Stack>
           </Box>
         </Box>
       </CardContent>

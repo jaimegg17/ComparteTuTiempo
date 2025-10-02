@@ -58,22 +58,20 @@ export function Header() {
         <Toolbar
           sx={{
             minHeight: 72,
-            px: { xs: 2, md: 3 }, // padding lateral del header
+            px: 0, // Remove all horizontal padding for true full-bleed
           }}
         >
-          {/* Contenido centrado opcional: limita SOLO el contenido, no el fondo */}
+          {/* Full-width content: no width constraints */}
           <Box
             sx={{
               display: "flex",
               alignItems: "center",
               gap: 2,
               width: "100%",
-              maxWidth: 1440,   // ajusta si quieres más/menos ancho útil
-              mx: "auto",
             }}
           >
             {/* IZQUIERDA: Logo */}
-            <Box sx={{ display: "flex", alignItems: "center", mr: 1.5 }}>
+            <Box sx={{ display: "flex", alignItems: "center", mr: 1.5, pl: { xs: 2, md: 3 } }}>
               <Link href="/" style={{ display: "inline-flex", alignItems: "center" }}>
                 <Image
                   src="/images/logo.png"
@@ -127,7 +125,7 @@ export function Header() {
                 display: "flex",
                 alignItems: "center",
                 gap: { xs: 1.25, md: 2 },
-                pl: { xs: 1, md: 2 },
+                pr: { xs: 2, md: 3 },
               }}
             >
               <SearchBar 
@@ -215,20 +213,20 @@ export function Header() {
                       <ListItemIcon>
                         <AccountCircle fontSize="small" />
                       </ListItemIcon>
-                      Mi Perfil
+                      {t("header.auth.profile")}
                     </MenuItem>
                     <MenuItem component={Link} href="/exchanges" sx={{ py: 1 }}>
                       <ListItemIcon>
                         <SwapHoriz fontSize="small" />
                       </ListItemIcon>
-                      Mis Intercambios
+                      {t("header.navigation.exchanges")}
                     </MenuItem>
                     <Divider />
                     <MenuItem component={Link} href="/api/auth/logout" sx={{ py: 1, color: 'error.main' }}>
                       <ListItemIcon>
                         <Logout fontSize="small" color="error" />
                       </ListItemIcon>
-                      Cerrar Sesión
+                      {t("header.auth.logout")}
                     </MenuItem>
                   </Menu>
                 </>
@@ -253,7 +251,7 @@ export function Header() {
                         },
                       }}
                     >
-                      Iniciar Sesión
+                      {t("header.auth.login")}
                     </Button>
                   </Link>
                   <Link href="/api/auth/login" style={{ textDecoration: "none" }}>
@@ -270,7 +268,7 @@ export function Header() {
                         boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                       }}
                     >
-                      Registrarse
+                      {t("header.auth.register")}
                     </Button>
                   </Link>
                 </Box>

@@ -18,25 +18,25 @@ export function FindGeneralSections() {
     {
       id: "languages",
       titleKey: "sections.languages",
-      image: "/images/sections/idiomas.png",
+      image: "/images/sections/idiomas.jpg",
       category: "idiomas",
     },
     {
       id: "music",
       titleKey: "sections.music",
-      image: "/images/sections/musica.png",
+      image: "/images/sections/musica.jpg",
       category: "musica",
     },
     {
       id: "sports",
       titleKey: "sections.sports",
-      image: "/images/sections/deporte.png",
+      image: "/images/sections/deporte.jpg",
       category: "deportes",
     },
     {
       id: "education",
       titleKey: "sections.education",
-      image: "/images/sections/educacion.png",
+      image: "/images/sections/estudios.jpg",
       category: "educacion",
     },
   ];

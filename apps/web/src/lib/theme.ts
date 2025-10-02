@@ -48,6 +48,26 @@ export const theme = createTheme({
     },
   },
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          margin: 0,
+          padding: 0,
+          width: '100%',
+          overflowX: 'hidden',
+        },
+        html: {
+          margin: 0,
+          padding: 0,
+          width: '100%',
+        },
+        '#__next': {
+          margin: 0,
+          padding: 0,
+          width: '100%',
+        },
+      },
+    },
     MuiButton: {
       styleOverrides: {
         root: {

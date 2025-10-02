@@ -1,5 +1,6 @@
 import { Box, Typography, IconButton, Collapse, Stack, Chip } from '@mui/material';
-import { NavArrowDown, NavArrowUp } from 'iconoir-react';
+import { NavArrowDown, NavArrowUp, Xmark } from 'iconoir-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface TypeFilterProps {
   types: string[];
@@ -7,6 +8,8 @@ interface TypeFilterProps {
   isOpen: boolean;
   onToggle: () => void;
   onTypeToggle: (type: string) => void;
+  onClear?: () => void;
+  getTypeDisplayName: (type: string) => string;
 }
 
 export function TypeFilter({
@@ -15,7 +18,10 @@ export function TypeFilter({
   isOpen,
   onToggle,
   onTypeToggle,
+  onClear,
+  getTypeDisplayName,
 }: TypeFilterProps) {
+  const { t } = useTranslation();
   return (
     <Box>
       <Box 
@@ -30,17 +36,31 @@ export function TypeFilter({
         }}
       >
         <Typography variant="body1" sx={{ fontWeight: 500, fontSize: '14px' }}>
-          Presencialidad
+          {t("services.filters.type")} {selectedTypes.length > 0 && `(${selectedTypes.length})`}
         </Typography>
-        <IconButton 
-          size="small"
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggle();
-          }}
-        >
-          {isOpen ? <NavArrowUp width={18} /> : <NavArrowDown width={18} />}
-        </IconButton>
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
+          {selectedTypes.length > 0 && onClear && (
+            <IconButton 
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClear();
+              }}
+              sx={{ color: 'error.main' }}
+            >
+              <Xmark width={16} />
+            </IconButton>
+          )}
+          <IconButton 
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggle();
+            }}
+          >
+            {isOpen ? <NavArrowUp width={18} /> : <NavArrowDown width={18} />}
+          </IconButton>
+        </Box>
       </Box>
       
       <Collapse in={isOpen}>
@@ -73,7 +93,7 @@ export function TypeFilter({
                     }
                   }}
                 >
-                  {type}
+                  {getTypeDisplayName(type)}
                 </Box>
               ))}
             </Stack>
@@ -83,7 +103,7 @@ export function TypeFilter({
               {selectedTypes.map(type => (
                 <Chip 
                   key={type}
-                  label={type} 
+                  label={getTypeDisplayName(type)} 
                   size="small" 
                   onDelete={() => onTypeToggle(type)}
                   sx={{ fontSize: '10px', height: '22px' }}

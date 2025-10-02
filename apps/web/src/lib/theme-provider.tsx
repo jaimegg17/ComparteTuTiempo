@@ -1,6 +1,7 @@
 "use client";
 
 import { ThemeProvider } from '@mui/material/styles';
+import { CssBaseline } from '@mui/material';
 import { theme } from './theme';
 
 interface ThemeProviderProps {
@@ -10,6 +11,7 @@ interface ThemeProviderProps {
 export function MuiThemeProvider({ children }: ThemeProviderProps) {
   return (
     <ThemeProvider theme={theme}>
+      <CssBaseline />
       {children}
     </ThemeProvider>
   );

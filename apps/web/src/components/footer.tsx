@@ -60,8 +60,8 @@ export function Footer() {
     >
       {/* Full-bleed para que el color llegue a los bordes */}
       <Container maxWidth={false} disableGutters>
-        {/* Contenido centrado con ancho máx. como el mockup */}
-        <Box sx={{ maxWidth: 1200, mx: "auto", px: { xs: 2, md: 3 } }}>
+        {/* Full-width content */}
+        <Box sx={{ px: { xs: 2, md: 3 } }}>
           {/* GRID de 3 columnas: bloque centrado, contenido alineado a la izquierda */}
           <Box
             sx={{

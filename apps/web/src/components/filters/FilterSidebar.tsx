@@ -3,6 +3,7 @@ import { CategoryFilter } from './CategoryFilter';
 import { LocationFilter } from './LocationFilter';
 import { TypeFilter } from './TypeFilter';
 import { DurationFilter } from './DurationFilter';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface FilterSidebarProps {
   // Categories
@@ -11,6 +12,7 @@ interface FilterSidebarProps {
   openCategories: boolean;
   setOpenCategories: (open: boolean) => void;
   toggleCategory: (category: string) => void;
+  getCategoryDisplayName: (category: string) => string;
   
   // Location
   location: string;
@@ -24,6 +26,7 @@ interface FilterSidebarProps {
   openType: boolean;
   setOpenType: (open: boolean) => void;
   toggleType: (type: string) => void;
+  getTypeDisplayName: (type: string) => string;
   
   // Duration
   durationRange: number[];
@@ -36,6 +39,10 @@ interface FilterSidebarProps {
   // Actions
   onApplyFilters: () => void;
   onClearFilters: () => void;
+  onClearCategory?: () => void;
+  onClearType?: () => void;
+  onClearLocation?: () => void;
+  onClearDuration?: () => void;
 }
 
 export function FilterSidebar({
@@ -44,6 +51,7 @@ export function FilterSidebar({
   openCategories,
   setOpenCategories,
   toggleCategory,
+  getCategoryDisplayName,
   location,
   openLocation,
   setOpenLocation,
@@ -53,6 +61,7 @@ export function FilterSidebar({
   openType,
   setOpenType,
   toggleType,
+  getTypeDisplayName,
   durationRange,
   openDuration,
   setOpenDuration,
@@ -61,7 +70,12 @@ export function FilterSidebar({
   handleMaxDurationChange,
   onApplyFilters,
   onClearFilters,
+  onClearCategory,
+  onClearType,
+  onClearLocation,
+  onClearDuration,
 }: FilterSidebarProps) {
+  const { t } = useTranslation();
   return (
     <Paper sx={{ 
       width: 280, 
@@ -81,7 +95,7 @@ export function FilterSidebar({
         borderColor: 'divider'
       }}>
         <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '16px' }}>
-          Filtros
+          {t("services.filters.title")}
         </Typography>
         <Box component="span" sx={{ fontSize: '18px' }}>⚙️</Box>
       </Box>
@@ -95,6 +109,8 @@ export function FilterSidebar({
             isOpen={openCategories}
             onToggle={() => setOpenCategories(!openCategories)}
             onCategoryToggle={toggleCategory}
+            onClear={onClearCategory}
+            getCategoryDisplayName={getCategoryDisplayName}
           />
           
           <Divider sx={{ my: 0.5 }} />
@@ -105,6 +121,7 @@ export function FilterSidebar({
             isOpen={openLocation}
             onToggle={() => setOpenLocation(!openLocation)}
             onLocationChange={setLocation}
+            onClear={onClearLocation}
           />
           
           <Divider sx={{ my: 0.5 }} />
@@ -116,6 +133,8 @@ export function FilterSidebar({
             isOpen={openType}
             onToggle={() => setOpenType(!openType)}
             onTypeToggle={toggleType}
+            onClear={onClearType}
+            getTypeDisplayName={getTypeDisplayName}
           />
           
           <Divider sx={{ my: 0.5 }} />
@@ -128,6 +147,7 @@ export function FilterSidebar({
             onDurationChange={handleDurationChange}
             onMinChange={handleMinDurationChange}
             onMaxChange={handleMaxDurationChange}
+            onClear={onClearDuration}
           />
           
           <Divider sx={{ my: 0.5 }} />
@@ -135,6 +155,7 @@ export function FilterSidebar({
           {/* Botones */}
           <Stack spacing={1} sx={{ pt: 1 }}>
             <Button 
+              color='primary'
               variant="contained" 
               onClick={onApplyFilters}
               fullWidth
@@ -146,7 +167,7 @@ export function FilterSidebar({
                 boxShadow: 1
               }}
             >
-              Aplicar Filtros
+              {t("services.filters.apply")}
             </Button>
             
             <Button 
@@ -159,7 +180,7 @@ export function FilterSidebar({
                 fontSize: '13px'
               }}
             >
-              Limpiar filtros
+              {t("services.filters.clear")}
             </Button>
           </Stack>
         </Stack>

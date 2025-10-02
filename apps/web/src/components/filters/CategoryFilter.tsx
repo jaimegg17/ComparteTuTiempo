@@ -1,5 +1,6 @@
 import { Box, Typography, IconButton, Collapse, Stack, Chip } from '@mui/material';
-import { NavArrowDown, NavArrowUp } from 'iconoir-react';
+import { NavArrowDown, NavArrowUp, Xmark } from 'iconoir-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface CategoryFilterProps {
   categories: string[];
@@ -7,6 +8,8 @@ interface CategoryFilterProps {
   isOpen: boolean;
   onToggle: () => void;
   onCategoryToggle: (category: string) => void;
+  onClear?: () => void;
+  getCategoryDisplayName: (category: string) => string;
 }
 
 export function CategoryFilter({
@@ -15,7 +18,10 @@ export function CategoryFilter({
   isOpen,
   onToggle,
   onCategoryToggle,
+  onClear,
+  getCategoryDisplayName,
 }: CategoryFilterProps) {
+  const { t } = useTranslation();
   return (
     <Box>
       <Box 
@@ -30,17 +36,31 @@ export function CategoryFilter({
         }}
       >
         <Typography variant="body1" sx={{ fontWeight: 500, fontSize: '14px' }}>
-          Categorías
+          {t("services.filters.category")} {selectedCategories.length > 0 && `(${selectedCategories.length})`}
         </Typography>
-        <IconButton 
-          size="small"
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggle();
-          }}
-        >
-          {isOpen ? <NavArrowUp width={18} /> : <NavArrowDown width={18} />}
-        </IconButton>
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
+          {selectedCategories.length > 0 && onClear && (
+            <IconButton 
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClear();
+              }}
+              sx={{ color: 'error.main' }}
+            >
+              <Xmark width={16} />
+            </IconButton>
+          )}
+          <IconButton 
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggle();
+            }}
+          >
+            {isOpen ? <NavArrowUp width={18} /> : <NavArrowDown width={18} />}
+          </IconButton>
+        </Box>
       </Box>
       
       <Collapse in={isOpen}>
@@ -73,7 +93,7 @@ export function CategoryFilter({
                     }
                   }}
                 >
-                  {cat}
+                  {getCategoryDisplayName(cat)}
                 </Box>
               ))}
             </Stack>
@@ -83,7 +103,7 @@ export function CategoryFilter({
               {selectedCategories.map(cat => (
                 <Chip 
                   key={cat}
-                  label={cat} 
+                  label={getCategoryDisplayName(cat)} 
                   size="small" 
                   onDelete={() => onCategoryToggle(cat)}
                   sx={{ fontSize: '10px', height: '22px' }}
