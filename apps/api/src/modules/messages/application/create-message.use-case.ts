@@ -1,12 +1,12 @@
-import { Injectable, Inject, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import type { MessageRepositoryPort } from '../domain/message-repository.port';
-import { MessageCreate } from '@comparte-tu-tiempo/contracts';
-import { MessageEntity } from '../domain/message.entity';
+import { MessageEntity, MessageCreate, MessageListQuery, MessageListResponse, MessageUpdate } from '../domain/message.types';
 import { MESSAGE_REPOSITORY_TOKEN } from '../domain/tokens';
+import { PrismaService } from '@/common/prisma/prisma.service';
 
 export interface CreateMessageRequest {
   data: MessageCreate;
-  userId: string; // The user sending the message
+  userId: string;
 }
 
 export interface CreateMessageResponse {
@@ -17,32 +17,40 @@ export interface CreateMessageResponse {
 export class CreateMessageUseCase {
   constructor(
     @Inject(MESSAGE_REPOSITORY_TOKEN)
-    private readonly messageRepository: MessageRepositoryPort
+    private readonly messageRepository: MessageRepositoryPort,
+    private readonly prisma: PrismaService,
   ) {}
 
   async execute(request: CreateMessageRequest): Promise<CreateMessageResponse> {
     const { data, userId } = request;
 
-    // Business logic validation
-    if (data.receiverId === userId) {
-      throw new BadRequestException('No puedes enviarte mensajes a ti mismo');
+    // Validate that the user is part of the exchange
+    const exchange = await this.prisma.exchange.findUnique({
+      where: { id: data.exchangeId },
+      include: {
+        service: true,
+      },
+    });
+
+    if (!exchange) {
+      throw new NotFoundException('Exchange not found');
     }
 
+    // Check if user is either the requester or the offerer
+    if (userId !== exchange.requestedById && userId !== exchange.offeredById) {
+      throw new ForbiddenException('You can only send messages in exchanges you are part of');
+    }
+
+    // Validate message content
     if (!data.content || data.content.trim().length === 0) {
-      throw new BadRequestException('El contenido del mensaje no puede estar vacío');
+      throw new BadRequestException('Message content cannot be empty');
     }
 
     if (data.content.length > 1000) {
-      throw new BadRequestException('El mensaje no puede exceder 1000 caracteres');
+      throw new BadRequestException('Message content cannot exceed 1000 characters');
     }
 
-    // Add senderId from the authenticated user
-    const messageData = {
-      ...data,
-      senderId: userId,
-    };
-
-    const message = await this.messageRepository.create(messageData);
+    const message = await this.messageRepository.create(data, userId);
 
     return { message };
   }

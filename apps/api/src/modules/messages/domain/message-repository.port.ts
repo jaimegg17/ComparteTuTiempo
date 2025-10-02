@@ -1,16 +1,10 @@
-import { MessageEntity } from './message.entity';
-import { MessageCreate, MessageListQuery } from '@comparte-tu-tiempo/contracts';
+import { MessageEntity, MessageCreate, MessageListQuery, MessageListResponse, MessageUpdate } from './message.types';
 
 export interface MessageRepositoryPort {
-  create(data: MessageCreate): Promise<MessageEntity>;
+  create(data: MessageCreate, senderId: string): Promise<MessageEntity>;
   findById(id: number): Promise<MessageEntity | null>;
-  findByUserId(userId: string): Promise<MessageEntity[]>;
-  findByConversation(userId1: string, userId2: string): Promise<MessageEntity[]>;
-  list(query: MessageListQuery): Promise<{
-    messages: MessageEntity[];
-    total: number;
-    page: number;
-    pageSize: number;
-    totalPages: number;
-  }>;
+  list(query: MessageListQuery): Promise<MessageListResponse>;
+  update(id: number, data: MessageUpdate): Promise<MessageEntity>;
+  markAsRead(messageIds: number[]): Promise<void>;
+  getUnreadCount(userId: string, exchangeId: number): Promise<number>;
 }

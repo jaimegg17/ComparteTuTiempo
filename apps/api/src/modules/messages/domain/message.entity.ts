@@ -1,34 +1,41 @@
+import { Message as PrismaMessage } from '@prisma/client';
+
 export class MessageEntity {
   constructor(
     public readonly id: number,
-    public readonly content: string,
+    public readonly exchangeId: number,
     public readonly senderId: string,
-    public readonly receiverId: string,
+    public readonly content: string,
+    public readonly isRead: boolean,
     public readonly createdAt: Date,
+    public readonly updatedAt: Date,
   ) {}
 
-  // Business logic methods
-  isFromUser(userId: string): boolean {
-    return this.senderId === userId;
+  static fromPrisma(prismaMessage: PrismaMessage): MessageEntity {
+    return new MessageEntity(
+      prismaMessage.id,
+      prismaMessage.exchangeId,
+      prismaMessage.senderId,
+      prismaMessage.content,
+      prismaMessage.isRead,
+      prismaMessage.createdAt,
+      prismaMessage.updatedAt,
+    );
   }
 
-  isToUser(userId: string): boolean {
-    return this.receiverId === userId;
+  toDomain(): MessageEntity {
+    return this;
   }
 
-  isBetweenUsers(userId1: string, userId2: string): boolean {
-    return (this.senderId === userId1 && this.receiverId === userId2) ||
-           (this.senderId === userId2 && this.receiverId === userId1);
-  }
-
-  // Convert to contract format
-  toContract() {
-    return {
-      id: this.id,
-      content: this.content,
-      senderId: this.senderId,
-      receiverId: this.receiverId,
-      createdAt: this.createdAt,
-    };
+  markAsRead(): MessageEntity {
+    return new MessageEntity(
+      this.id,
+      this.exchangeId,
+      this.senderId,
+      this.content,
+      true,
+      this.createdAt,
+      this.updatedAt,
+    );
   }
 }

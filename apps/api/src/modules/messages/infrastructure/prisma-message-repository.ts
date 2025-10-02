@@ -1,20 +1,32 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../common/prisma/prisma.service';
-import { MessageEntity } from '../domain/message.entity';
-import { MessageRepositoryPort } from '../domain/message-repository.port';
-import { MessageCreate, MessageListQuery } from '@comparte-tu-tiempo/contracts';
-import { MessageMapper } from './message.mapper';
+import { PrismaService } from '@/common/prisma/prisma.service';
+import type { MessageRepositoryPort } from '../domain/message-repository.port';
+import { MessageEntity } from '../domain/message.types';
+import { MessageCreate, MessageListQuery, MessageListResponse, MessageUpdate } from '../domain/message.types';
 
 @Injectable()
 export class PrismaMessageRepository implements MessageRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(data: MessageCreate): Promise<MessageEntity> {
+  async create(data: MessageCreate, senderId: string): Promise<MessageEntity> {
     const prismaMessage = await this.prisma.message.create({
-      data: MessageMapper.toPrismaCreate(data),
+      data: {
+        exchangeId: data.exchangeId,
+        senderId,
+        content: data.content,
+        isRead: false,
+      },
     });
 
-    return MessageMapper.toDomain(prismaMessage);
+    return {
+      id: prismaMessage.id,
+      exchangeId: prismaMessage.exchangeId,
+      senderId: prismaMessage.senderId,
+      content: prismaMessage.content,
+      isRead: prismaMessage.isRead,
+      createdAt: prismaMessage.createdAt,
+      updatedAt: prismaMessage.updatedAt,
+    };
   }
 
   async findById(id: number): Promise<MessageEntity | null> {
@@ -22,67 +34,47 @@ export class PrismaMessageRepository implements MessageRepositoryPort {
       where: { id },
     });
 
-    return prismaMessage ? MessageMapper.toDomain(prismaMessage) : null;
+    if (!prismaMessage) {
+      return null;
+    }
+
+    return {
+      id: prismaMessage.id,
+      exchangeId: prismaMessage.exchangeId,
+      senderId: prismaMessage.senderId,
+      content: prismaMessage.content,
+      isRead: prismaMessage.isRead,
+      createdAt: prismaMessage.createdAt,
+      updatedAt: prismaMessage.updatedAt,
+    };
   }
 
-  async findByUserId(userId: string): Promise<MessageEntity[]> {
-    const prismaMessages = await this.prisma.message.findMany({
-      where: {
-        OR: [
-          { senderId: userId },
-          { receiverId: userId },
-        ],
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    return prismaMessages.map(MessageMapper.toDomain);
-  }
-
-  async findByConversation(userId1: string, userId2: string): Promise<MessageEntity[]> {
-    const prismaMessages = await this.prisma.message.findMany({
-      where: {
-        OR: [
-          { senderId: userId1, receiverId: userId2 },
-          { senderId: userId2, receiverId: userId1 },
-        ],
-      },
-      orderBy: { createdAt: 'asc' },
-    });
-
-    return prismaMessages.map(MessageMapper.toDomain);
-  }
-
-  async list(query: MessageListQuery): Promise<{
-    messages: MessageEntity[];
-    total: number;
-    page: number;
-    pageSize: number;
-    totalPages: number;
-  }> {
-    const { page, pageSize, userId } = query;
+  async list(query: MessageListQuery): Promise<MessageListResponse> {
+    const { exchangeId, page = 1, pageSize = 50 } = query;
     const skip = (page - 1) * pageSize;
 
-    // Build where clause - filter messages where user is involved
-    const where: any = {
-      OR: [
-        { senderId: userId },
-        { receiverId: userId },
-      ],
-    };
+    const [total, prismaMessages] = await Promise.all([
+      this.prisma.message.count({
+        where: { exchangeId },
+      }),
+      this.prisma.message.findMany({
+        where: { exchangeId },
+        skip,
+        take: pageSize,
+        orderBy: { createdAt: 'asc' },
+      }),
+    ]);
 
-    // Get total count
-    const total = await this.prisma.message.count({ where });
+    const messages = prismaMessages.map(prismaMessage => ({
+      id: prismaMessage.id,
+      exchangeId: prismaMessage.exchangeId,
+      senderId: prismaMessage.senderId,
+      content: prismaMessage.content,
+      isRead: prismaMessage.isRead,
+      createdAt: prismaMessage.createdAt,
+      updatedAt: prismaMessage.updatedAt,
+    }));
 
-    // Get paginated results
-    const prismaMessages = await this.prisma.message.findMany({
-      where,
-      skip,
-      take: pageSize,
-      orderBy: { createdAt: 'desc' },
-    });
-
-    const messages = prismaMessages.map(MessageMapper.toDomain);
     const totalPages = Math.ceil(total / pageSize);
 
     return {
@@ -92,5 +84,43 @@ export class PrismaMessageRepository implements MessageRepositoryPort {
       pageSize,
       totalPages,
     };
+  }
+
+  async update(id: number, data: MessageUpdate): Promise<MessageEntity> {
+    const prismaMessage = await this.prisma.message.update({
+      where: { id },
+      data,
+    });
+
+    return {
+      id: prismaMessage.id,
+      exchangeId: prismaMessage.exchangeId,
+      senderId: prismaMessage.senderId,
+      content: prismaMessage.content,
+      isRead: prismaMessage.isRead,
+      createdAt: prismaMessage.createdAt,
+      updatedAt: prismaMessage.updatedAt,
+    };
+  }
+
+  async markAsRead(messageIds: number[]): Promise<void> {
+    await this.prisma.message.updateMany({
+      where: {
+        id: { in: messageIds },
+      },
+      data: {
+        isRead: true,
+      },
+    });
+  }
+
+  async getUnreadCount(userId: string, exchangeId: number): Promise<number> {
+    return this.prisma.message.count({
+      where: {
+        exchangeId,
+        senderId: { not: userId }, // Messages not sent by the current user
+        isRead: false,
+      },
+    });
   }
 }
