@@ -33,7 +33,17 @@ export default function ExchangesPage() {
       setLoading(true);
       setError(null);
 
-      const token = await fetch('/api/auth/token').then(res => res.json()).then(data => data.accessToken);
+      // Get token
+      const tokenResponse = await fetch('/api/auth/token');
+      if (!tokenResponse.ok) {
+        throw new Error('No se pudo obtener el token de autenticación');
+      }
+      const tokenData = await tokenResponse.json();
+      const token = tokenData.accessToken;
+
+      if (!token) {
+        throw new Error('Token de autenticación no disponible');
+      }
 
       // Build query params
       const params = new URLSearchParams();
@@ -53,6 +63,8 @@ export default function ExchangesPage() {
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Exchange API error:', errorText);
         throw new Error('Error al cargar los intercambios');
       }
 
