@@ -4,8 +4,10 @@ export class Service {
   private readonly _id: number;
   private readonly _title: string;
   private readonly _description: string;
+  private readonly _detailedDescription: string | null | undefined;
   private readonly _duration: number;
   private readonly _location: string | null;
+  private readonly _availability: string | null | undefined;
   private readonly _category: ServiceContract['category'];
   private readonly _type: ServiceContract['type'];
   private readonly _status: ServiceContract['status'];
@@ -18,8 +20,10 @@ export class Service {
     this._id = props.id;
     this._title = props.title;
     this._description = props.description;
+    this._detailedDescription = props.detailedDescription;
     this._duration = props.duration;
     this._location = props.location;
+    this._availability = props.availability;
     this._category = props.category;
     this._type = props.type;
     this._status = props.status;
@@ -33,8 +37,10 @@ export class Service {
   get id(): number { return this._id; }
   get title(): string { return this._title; }
   get description(): string { return this._description; }
+  get detailedDescription(): string | null | undefined { return this._detailedDescription; }
   get duration(): number { return this._duration; }
   get location(): string | null { return this._location; }
+  get availability(): string | null | undefined { return this._availability; }
   get category(): ServiceContract['category'] { return this._category; }
   get type(): ServiceContract['type'] { return this._type; }
   get status(): ServiceContract['status'] { return this._status; }
@@ -79,8 +85,10 @@ export class Service {
       id: this._id,
       title: this._title,
       description: this._description,
+      detailedDescription: this._detailedDescription,
       duration: this._duration,
       location: this._location,
+      availability: this._availability,
       category: this._category,
       type: this._type,
       status: this._status,

@@ -164,12 +164,69 @@ export class ServicesController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Obtener un servicio por ID' })
+  @ApiOperation({ summary: 'Obtener un servicio por ID con información completa' })
   @ApiResponse({ status: 200, description: 'Servicio obtenido' })
   @ApiResponse({ status: 404, description: 'Servicio no encontrado' })
   async getService(@Param('id', ParseIntPipe) id: number) {
-    const result = await this.getServiceUseCase.execute({ id });
-    return { message: 'Servicio obtenido exitosamente', service: result.service.toContract() };
+    // Get raw service data with relations
+    const serviceData = await this.prisma.service.findUnique({
+      where: { id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            imageUrl: true,
+            location: true,
+            bio: true,
+            skills: true,
+            timeCredits: true,
+            createdAt: true,
+          }
+        },
+        ratings: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                imageUrl: true,
+              }
+            }
+          },
+          orderBy: {
+            createdAt: 'desc'
+          },
+          take: 10,
+        },
+        _count: {
+          select: {
+            ratings: true,
+            exchanges: true,
+          }
+        }
+      },
+    });
+
+    if (!serviceData) {
+      throw new Error('Servicio no encontrado');
+    }
+
+    // Calculate average rating
+    const avgRating = serviceData.ratings.length > 0
+      ? serviceData.ratings.reduce((sum, r) => sum + r.score, 0) / serviceData.ratings.length
+      : 0;
+
+    return { 
+      message: 'Servicio obtenido exitosamente', 
+      service: {
+        ...serviceData,
+        averageRating: Number(avgRating.toFixed(1)),
+        totalRatings: serviceData._count.ratings,
+        totalExchanges: serviceData._count.exchanges,
+      }
+    };
   }
 
   @Put(':id')

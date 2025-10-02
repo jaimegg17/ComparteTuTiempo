@@ -40,18 +40,20 @@ model User {
 }
 
 model Service {
-  id          Int           @id @default(autoincrement())
-  title       String
-  description String
-  duration    Int
-  location    String?
-  category    ServiceCategory
-  type        ServiceType
-  status      ServiceStatus @default(ACTIVO)
-  price       Float
-  userId      String
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id                 Int           @id @default(autoincrement())
+  title              String
+  description        String        // Short description for listings
+  detailedDescription String?      @db.Text // Long description for detail page
+  duration           Int
+  location           String?
+  availability       String?       // e.g., "morning", "afternoon", "evening", "flexible"
+  category           ServiceCategory
+  type               ServiceType
+  status             ServiceStatus @default(ACTIVO)
+  price              Float
+  userId             String
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
 
   // Relations
   user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)

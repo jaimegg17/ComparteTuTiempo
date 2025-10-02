@@ -31,12 +31,49 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
     return this.mapper.toDomain(prismaService);
   }
 
-  async findById(id: number): Promise<Service | null> {
+  async findById(id: number): Promise<any> {
     const prismaService = await this.prisma.service.findUnique({
       where: { id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            imageUrl: true,
+            location: true,
+            bio: true,
+            skills: true,
+            timeCredits: true,
+            createdAt: true,
+          }
+        },
+        ratings: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                imageUrl: true,
+              }
+            }
+          },
+          orderBy: {
+            createdAt: 'desc'
+          },
+          take: 10, // Limit to 10 most recent ratings
+        },
+        _count: {
+          select: {
+            ratings: true,
+            exchanges: true,
+          }
+        }
+      },
     });
 
-    return prismaService ? this.mapper.toDomain(prismaService) : null;
+    // Return raw data with relations instead of mapping to domain entity
+    return prismaService;
   }
 
   async findByUserId(userId: string): Promise<Service[]> {
