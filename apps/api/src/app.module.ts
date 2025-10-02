@@ -11,6 +11,7 @@ import { CommunitiesModule } from './modules/communities/communities.module';
 import { GroupsModule } from './modules/groups/groups.module';
 import { EventsModule } from './modules/events/events.module';
 import { MembershipsModule } from './modules/memberships/memberships.module';
+import { UploadModule } from './modules/upload/upload.module';
 import { Auth0Module } from './common/auth/auth0.module';
 
 @Module({
@@ -31,6 +32,7 @@ import { Auth0Module } from './common/auth/auth0.module';
     GroupsModule,
     EventsModule,
     MembershipsModule,
+    UploadModule,
   ],
 })
 export class AppModule {}

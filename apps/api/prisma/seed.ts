@@ -141,6 +141,37 @@ async function main() {
         exchangedTime: 1.0, // 1 hora
       },
     }),
+    // Additional completed exchanges to match ratings
+    prisma.exchange.create({
+      data: {
+        requestedById: user2.id,
+        offeredById: user1.id,
+        serviceId: service4.id, // Entrenamiento Personal (segundo intercambio)
+        date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // Hace 1 día
+        state: 'COMPLETED',
+        exchangedTime: 1.5, // 1.5 horas
+      },
+    }),
+    prisma.exchange.create({
+      data: {
+        requestedById: user1.id,
+        offeredById: user2.id,
+        serviceId: service2.id, // Limpieza del Hogar
+        date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // Hace 3 días
+        state: 'COMPLETED',
+        exchangedTime: 2.0, // 2 horas
+      },
+    }),
+    prisma.exchange.create({
+      data: {
+        requestedById: user2.id,
+        offeredById: user1.id,
+        serviceId: service3.id, // Desarrollo Web
+        date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000), // Hace 4 días
+        state: 'COMPLETED',
+        exchangedTime: 3.0, // 3 horas
+      },
+    }),
   ]);
 
   console.log('✅ Intercambios creados:', exchanges.length);
@@ -163,31 +194,62 @@ async function main() {
         comment: 'Muy buenas clases, aprendí mucho en poco tiempo.',
       },
     }),
+    // Additional ratings for different services
+    prisma.rating.create({
+      data: {
+        userId: user1.id,
+        serviceId: service2.id, // Limpieza del Hogar
+        score: 4,
+        comment: 'Muy buen servicio de limpieza, puntual y eficiente',
+      },
+    }),
+    prisma.rating.create({
+      data: {
+        userId: user2.id,
+        serviceId: service3.id, // Desarrollo Web
+        score: 5,
+        comment: 'Excelente desarrollador, código limpio y bien documentado',
+      },
+    }),
   ]);
 
   console.log('✅ Valoraciones creadas:', ratings.length);
 
-  // Crear mensajes de prueba
+  // Crear mensajes de prueba para intercambios
   const messages = await Promise.all([
     prisma.message.create({
       data: {
+        exchangeId: exchanges[0].id, // Primer intercambio
         content: 'Hola! Me interesa tu servicio de limpieza. ¿Estarías disponible el próximo fin de semana?',
         senderId: user1.id,
-        receiverId: user2.id,
       },
     }),
     prisma.message.create({
       data: {
+        exchangeId: exchanges[0].id, // Primer intercambio
         content: '¡Hola! Sí, estoy disponible el sábado por la mañana. ¿Te parece bien?',
         senderId: user2.id,
-        receiverId: user1.id,
       },
     }),
     prisma.message.create({
       data: {
+        exchangeId: exchanges[0].id, // Primer intercambio
         content: 'Perfecto! Confirmamos entonces para el sábado a las 10:00 AM.',
         senderId: user1.id,
-        receiverId: user2.id,
+      },
+    }),
+    prisma.message.create({
+      data: {
+        exchangeId: exchanges[1].id, // Segundo intercambio
+        content: 'Hola! ¿Podrías ayudarme con el desarrollo web?',
+        senderId: user2.id,
+      },
+    }),
+    prisma.message.create({
+      data: {
+        exchangeId: exchanges[1].id, // Segundo intercambio
+        content: '¡Por supuesto! ¿Qué tipo de proyecto necesitas?',
+        senderId: user1.id,
       },
     }),
   ]);

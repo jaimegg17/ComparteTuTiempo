@@ -22,13 +22,10 @@ export class UserUpsertInterceptor implements NestInterceptor {
       // Upsert user if doesn't exist
       await this.prisma.user.upsert({
         where: { id: user.sub },
-        update: {
-          email: user.email || null,
-          name: user.name || null,
-        },
+        update: {}, // No update if user already exists
         create: {
           id: user.sub,
-          email: user.email || 'user@example.com',
+          email: user.email || `${user.sub}@example.com`,
           password: 'auth0-user', // Placeholder password for Auth0 users
           name: user.name || 'Usuario',
           timeCredits: 0, // Default time credits for new users

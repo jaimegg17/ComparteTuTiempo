@@ -3,12 +3,21 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { UserUpsertInterceptor } from './common/auth/user-upsert.interceptor';
+import { PrismaService } from './common/prisma/prisma.service';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // Configuración global
   app.setGlobalPrefix('api');
+  
+  // Configurar archivos estáticos
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+    prefix: '/uploads/',
+  });
+  
   app.enableCors({
     origin: ['http://localhost:3000', 'http://localhost:3002', 'http://localhost:3004'],
     credentials: true,
@@ -22,9 +31,9 @@ async function bootstrap() {
     forbidNonWhitelisted: false,
   }));
 
-  // Interceptor global para upsert de usuarios - temporalmente deshabilitado
-  // const prismaService = app.get('PrismaService');
-  // app.useGlobalInterceptors(new UserUpsertInterceptor(prismaService));
+  // Interceptor global para upsert de usuarios
+  const prismaService = app.get(PrismaService);
+  app.useGlobalInterceptors(new UserUpsertInterceptor(prismaService));
 
   // Configuración de Swagger
   const config = new DocumentBuilder()

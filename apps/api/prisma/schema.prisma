@@ -28,7 +28,6 @@ model User {
   // Relations
   services    Service[]
   sentMessages    Message[] @relation("SentMessages")
-  receivedMessages Message[] @relation("ReceivedMessages")
   ratings     Rating[]
   communities Community[]
   memberships Membership[]
@@ -51,6 +50,7 @@ model Service {
   type               ServiceType
   status             ServiceStatus @default(ACTIVO)
   price              Float
+  imageUrl           String?       // URL of the service image
   userId             String
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
@@ -65,14 +65,16 @@ model Service {
 
 model Message {
   id        Int      @id @default(autoincrement())
-  content   String
+  exchangeId Int
   senderId  String
-  receiverId String
+  content   String
+  isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relations
+  exchange  Exchange @relation(fields: [exchangeId], references: [id], onDelete: Cascade)
   sender    User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
-  receiver  User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
 
   @@map("messages")
 }
@@ -131,7 +133,7 @@ model Exchange {
   serviceId     Int
   date          DateTime
   state         ExchangeStatus @default(PENDING)
-  exchangedTime Decimal       @db.Decimal(5, 2)
+  exchangedTime Decimal?      @db.Decimal(5, 2)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
@@ -139,6 +141,7 @@ model Exchange {
   requestedBy  User          @relation("RequestedExchanges", fields: [requestedById], references: [id], onDelete: Cascade)
   offeredBy    User          @relation("OfferedExchanges", fields: [offeredById], references: [id], onDelete: Cascade)
   service      Service       @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  messages     Message[]
 
   @@map("exchanges")
 }

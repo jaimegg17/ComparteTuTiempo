@@ -27,7 +27,8 @@ export class Auth0Strategy extends PassportStrategy(Strategy) {
   async validate(payload: any) {
     // Auth0 payload contains user information
     return {
-      id: payload.sub, // Auth0 user ID
+      sub: payload.sub, // Auth0 user ID (standard claim)
+      id: payload.sub,  // Alias for compatibility
       email: payload.email,
       name: payload.name,
       picture: payload.picture,
