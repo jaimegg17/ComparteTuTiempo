@@ -93,6 +93,10 @@ export class ServiceListQueryDto {
   @Type(() => Number)
   @IsNumber()
   pageSize?: number;
+  
+  @IsOptional()
+  @IsString()
+  userId?: string; // Filter by user ID
 }
 
 @ApiTags('services')
@@ -167,7 +171,7 @@ export class ServicesController {
   @Get()
   @ApiOperation({ summary: 'Listar servicios con filtros y paginación' })
   @ApiResponse({ status: 200, description: 'Lista de servicios obtenida' })
-  async listServices(@Query() query: ServiceListQueryDto) {
+  async listServices(@Query() query: ServiceListQueryDto, @Request() req: any) {
     // Asegurar que page y pageSize estén presentes
     const queryWithDefaults = {
       page: query.page || 1,
@@ -179,7 +183,13 @@ export class ServicesController {
       status: query.status,
       minPrice: query.minPrice,
       maxPrice: query.maxPrice,
+      userId: query.userId, // Filtrar por usuario si se proporciona
     };
+
+    // Si se proporciona userId, verificar que el usuario solo pueda ver sus propios servicios
+    if (queryWithDefaults.userId && req.user && req.user.sub !== queryWithDefaults.userId) {
+      throw new Error('No tienes permisos para ver estos servicios');
+    }
 
     const result = await this.listServicesUseCase.execute({ query: queryWithDefaults });
     return {
@@ -191,6 +201,7 @@ export class ServicesController {
       totalPages: result.totalPages,
     };
   }
+
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtener un servicio por ID con información completa' })

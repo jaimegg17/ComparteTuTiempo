@@ -4,28 +4,33 @@ export class MessageMapper {
   static toDomain(prismaMessage: any): MessageEntity {
     return new MessageEntity(
       prismaMessage.id,
-      prismaMessage.content,
+      prismaMessage.exchangeId,
       prismaMessage.senderId,
-      prismaMessage.receiverId,
+      prismaMessage.content,
+      prismaMessage.isRead,
       prismaMessage.createdAt,
+      prismaMessage.updatedAt,
     );
   }
 
   static toPrisma(message: MessageEntity): any {
     return {
       id: message.id,
-      content: message.content,
+      exchangeId: message.exchangeId,
       senderId: message.senderId,
-      receiverId: message.receiverId,
+      content: message.content,
+      isRead: message.isRead,
       createdAt: message.createdAt,
+      updatedAt: message.updatedAt,
     };
   }
 
   static toPrismaCreate(data: any): any {
     return {
-      content: data.content,
+      exchangeId: data.exchangeId,
       senderId: data.senderId,
-      receiverId: data.receiverId,
+      content: data.content,
+      isRead: false,
     };
   }
 }

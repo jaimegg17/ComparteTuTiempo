@@ -27,6 +27,18 @@ export class MessageEntity {
     return this;
   }
 
+  toContract(): any {
+    return {
+      id: this.id,
+      exchangeId: this.exchangeId,
+      senderId: this.senderId,
+      content: this.content,
+      isRead: this.isRead,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
+  }
+
   markAsRead(): MessageEntity {
     return new MessageEntity(
       this.id,

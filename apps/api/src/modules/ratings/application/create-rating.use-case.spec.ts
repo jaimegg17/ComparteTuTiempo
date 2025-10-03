@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateRatingUseCase } from './create-rating.use-case';
-import { RatingRepositoryPort } from '../../domain/rating-repository.port';
+import { RatingRepositoryPort } from '../domain/rating-repository.port';
 import { PrismaService } from '@/common/prisma/prisma.service';
-import { RATING_REPOSITORY_TOKEN } from '../../domain/tokens';
+import { RATING_REPOSITORY_TOKEN } from '../domain/tokens';
 import { BadRequestException, ConflictException } from '@nestjs/common';
 
 describe('CreateRatingUseCase - Business Logic Validation', () => {
@@ -53,7 +53,7 @@ describe('CreateRatingUseCase - Business Logic Validation', () => {
       ratingRepository.findByUserAndService.mockResolvedValue(null);
       
       // Mock: No completed exchange
-      prismaService.exchange.findFirst.mockResolvedValue(null);
+      (prismaService.exchange.findFirst as jest.Mock).mockResolvedValue(null);
 
       const ratingData = {
         serviceId: 1,
@@ -86,7 +86,7 @@ describe('CreateRatingUseCase - Business Logic Validation', () => {
       ratingRepository.findByUserAndService.mockResolvedValue(null);
       
       // Mock: Completed exchange as requester
-      prismaService.exchange.findFirst.mockResolvedValue({
+      (prismaService.exchange.findFirst as jest.Mock).mockResolvedValue({
         id: 1,
         requestedById: 'user-123',
         offeredById: 'provider-456',
@@ -127,7 +127,7 @@ describe('CreateRatingUseCase - Business Logic Validation', () => {
       ratingRepository.findByUserAndService.mockResolvedValue(null);
       
       // Mock: Completed exchange as provider
-      prismaService.exchange.findFirst.mockResolvedValue({
+      (prismaService.exchange.findFirst as jest.Mock).mockResolvedValue({
         id: 1,
         requestedById: 'requester-456',
         offeredById: 'user-123',

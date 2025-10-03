@@ -276,10 +276,10 @@ describe('UpdateExchangeUseCase', () => {
         timeCredits: 200, // 200 minutes
       };
 
-      prismaService.service.findUnique.mockResolvedValue(mockService as any);
+      (prismaService.service.findUnique as jest.Mock).mockResolvedValue(mockService as any);
 
       // Mock transaction
-      prismaService.$transaction.mockImplementation(async (callback) => {
+      (prismaService.$transaction as jest.Mock).mockImplementation(async (callback) => {
         const txMock = {
           user: {
             findUnique: jest.fn().mockResolvedValue(mockRequester),
@@ -338,7 +338,7 @@ describe('UpdateExchangeUseCase', () => {
         timeCredits: 60, // Only 60 minutes, needs 120
       };
 
-      prismaService.service.findUnique.mockResolvedValue(mockService as any);
+      (prismaService.service.findUnique as jest.Mock).mockResolvedValue(mockService as any);
 
       prismaService.$transaction.mockImplementation(async (callback) => {
         const txMock = {

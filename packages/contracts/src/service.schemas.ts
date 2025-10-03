@@ -54,6 +54,7 @@ export const ServiceListQuerySchema = z.object({
   status: z.enum(['ACTIVO', 'INACTIVO', 'COMPLETADO']).optional(),
   minPrice: z.number().optional(),
   maxPrice: z.number().optional(),
+  userId: z.string().optional(), // Filter by user ID
   page: z.number().min(1, 'La página debe ser mayor a 0').default(1),
   pageSize: z.number().min(1, 'El tamaño de página debe ser mayor a 0').max(100, 'El tamaño de página no puede exceder 100').default(20),
 });

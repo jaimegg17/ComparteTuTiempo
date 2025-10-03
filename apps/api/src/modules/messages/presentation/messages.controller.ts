@@ -50,7 +50,11 @@ export class MessagesController {
   ) {
     const userId = req.user?.id;
     const result = await this.createMessageUseCase.execute({
-      data: createMessageDto,
+      data: {
+        ...createMessageDto,
+        exchangeId: 1, // TODO: Get from request or context
+        senderId: userId,
+      },
       userId,
     });
 
@@ -76,6 +80,7 @@ export class MessagesController {
       page: query.page || 1,
       pageSize: query.pageSize || 20,
       userId,
+      exchangeId: 1, // TODO: Get from request or context
     };
 
     const result = await this.listMessagesUseCase.execute({ 
