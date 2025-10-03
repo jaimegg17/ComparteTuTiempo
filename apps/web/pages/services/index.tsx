@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { Container, Typography, Box, CircularProgress, Button } from '@mui/material';
+import { Container, Typography, Box, CircularProgress, Button, Tabs, Tab } from '@mui/material';
 import { Layout } from '@/components/Layout';
 import { ServiceCard } from '@/components/ServiceCard';
 import { FilterSidebar } from '@/components/filters/FilterSidebar';
 import { ErrorAlert } from '@/components/ui/BeautifulAlert';
 import { useErrorHandling, ERROR_MESSAGES } from '@/hooks/useErrorHandling';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useUser } from '@auth0/nextjs-auth0/client';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Service {
   id: number;
@@ -25,8 +27,11 @@ interface Service {
 export default function ServicesPage() {
   const router = useRouter();
   const { t } = useTranslation();
+  const { user } = useUser();
+  const { accessToken } = useAuth();
   const [services, setServices] = useState<Service[]>([]);
   const [total, setTotal] = useState(0);
+  const [activeTab, setActiveTab] = useState(0);
   const { error, loading, handleAsyncOperation, clearError } = useErrorHandling();
   
   // Filtros
@@ -85,7 +90,20 @@ export default function ServicesPage() {
       // Solo un tipo a la vez
       if (selectedType) params.append('type', selectedType);
 
-      const response = await fetch(`http://localhost:3001/api/services?${params.toString()}`);
+      // Determinar la URL según el tab activo
+      let url = `http://localhost:3001/api/services?${params.toString()}`;
+      
+      // Si está en el tab "Mis Servicios" y hay usuario logueado
+      if (activeTab === 1 && user?.sub && accessToken) {
+        params.append('userId', user.sub);
+        url = `http://localhost:3001/api/services?${params.toString()}`;
+      }
+
+      const response = await fetch(url, {
+        headers: activeTab === 1 && accessToken ? {
+          'Authorization': `Bearer ${accessToken}`,
+        } : {},
+      });
       
       if (!response.ok) {
         throw new Error(ERROR_MESSAGES.NETWORK_ERROR);
@@ -109,6 +127,10 @@ export default function ServicesPage() {
     fetchServices();
   }, []);
 
+  useEffect(() => {
+    fetchServices();
+  }, [activeTab]);
+
   const handleClearFilters = () => {
     setSearchTerm('');
     setSelectedCategory('');
@@ -116,6 +138,10 @@ export default function ServicesPage() {
     setDurationRange([0, 8]);
     setSelectedType('');
     setTimeout(() => fetchServices(), 100);
+  };
+
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
   };
 
   const handleDurationChange = (_event: Event, newValue: number | number[]) => {
@@ -191,29 +217,62 @@ export default function ServicesPage() {
 
             {/* Grid de Servicios */}
             <Box sx={{ flex: 1 }}>
-            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 2 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '18px' }}>
-                {loading ? t("common.loading") : `${total} ${t("services.title").toLowerCase()} ${t("common.found")}`}
-              </Typography>
-              <Button 
-                variant="contained" 
-                onClick={() => router.push('/services/create')}
-                sx={{ 
-                  textTransform: 'none', 
-                  fontWeight: 600,
-                  bgcolor: '#8A33FD',
-                  px: 3,
-                  py: 1,
-                  borderRadius: 2,
-                  boxShadow: '0 2px 8px rgba(138, 51, 253, 0.3)',
-                  '&:hover': {
-                    bgcolor: '#7028E0',
-                    boxShadow: '0 4px 12px rgba(138, 51, 253, 0.4)',
-                  }
+            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
+              {/* Tab Controller - Izquierda */}
+              <Tabs
+                value={activeTab}
+                onChange={handleTabChange}
+                sx={{
+                  '& .MuiTab-root': {
+                    textTransform: 'none',
+                    fontWeight: 500,
+                    fontSize: '14px',
+                    minHeight: '36px',
+                    py: 1,
+                    px: 2,
+                  },
+                  '& .Mui-selected': {
+                    color: '#8A33FD',
+                    fontWeight: 600,
+                  },
+                  '& .MuiTabs-indicator': {
+                    backgroundColor: '#8A33FD',
+                  },
                 }}
               >
-                + {t("services.create")}
-              </Button>
+                <Tab label={t("services.tabs.offers")} />
+                <Tab 
+                  label={t("services.tabs.my_services")} 
+                  disabled={!user?.sub}
+                />
+              </Tabs>
+              
+              {/* Número de resultados y botón - Derecha */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '18px' }}>
+                  {loading ? t("common.loading") : `${total} ${t("services.title").toLowerCase()} ${t("common.found")}`}
+                </Typography>
+                
+                <Button 
+                  variant="contained" 
+                  onClick={() => router.push('/services/create')}
+                  sx={{ 
+                    textTransform: 'none', 
+                    fontWeight: 600,
+                    bgcolor: '#8A33FD',
+                    px: 3,
+                    py: 1,
+                    borderRadius: 2,
+                    boxShadow: '0 2px 8px rgba(138, 51, 253, 0.3)',
+                    '&:hover': {
+                      bgcolor: '#7028E0',
+                      boxShadow: '0 4px 12px rgba(138, 51, 253, 0.4)',
+                    }
+                  }}
+                >
+                  + {t("services.create")}
+                </Button>
+              </Box>
             </Box>
 
               {loading ? (
@@ -237,14 +296,20 @@ export default function ServicesPage() {
               {!loading && services.length === 0 && (
                 <Box sx={{ textAlign: 'center', py: 8 }}>
                   <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
-                    {t("services.not_found")}
+                    {activeTab === 1 
+                      ? t("services.empty_states.no_my_services")
+                      : t("services.empty_states.no_services")
+                    }
                   </Typography>
                   <Button 
                     variant="outlined" 
-                    onClick={handleClearFilters}
+                    onClick={activeTab === 1 ? () => router.push('/services/create') : handleClearFilters}
                     sx={{ textTransform: 'none' }}
                   >
-                    {t("services.filters.clear")}
+                    {activeTab === 1 
+                      ? t("services.empty_states.create_first")
+                      : t("services.filters.clear")
+                    }
                   </Button>
                 </Box>
               )}

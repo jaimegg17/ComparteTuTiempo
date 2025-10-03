@@ -133,7 +133,7 @@ export function ServiceMarketplace() {
               <h3 className="text-sm font-medium text-gray-700 mb-3">Duración</h3>
               <div className="relative">
                 <div className="w-full h-2 bg-gray-200 rounded-full">
-                  <div className="h-2 bg-purple-500 rounded-full" style={{ width: "60%" }}></div>
+                  <div className="h-2 rounded-full" style={{ width: "60%", backgroundColor: "#8A33FD" }}></div>
                 </div>
                 <div className="flex justify-between mt-2 text-xs text-gray-500">
                   <span>40 min</span>
@@ -173,9 +173,10 @@ export function ServiceMarketplace() {
                 onClick={() => setActiveTab(tab)}
                 className={`pb-2 border-b-2 transition-colors ${
                   activeTab === tab
-                    ? "border-purple-500 text-purple-600"
+                    ? "text-gray-700"
                     : "border-transparent text-gray-500 hover:text-gray-700"
                 }`}
+                style={activeTab === tab ? { borderBottomColor: "#8A33FD" } : {}}
               >
                 {tab}
               </button>

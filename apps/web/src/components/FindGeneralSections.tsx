@@ -51,7 +51,7 @@ export function FindGeneralSections() {
             fontWeight: 600,
             color: "rgba(0, 0, 0, 0.87)",
             borderLeft: "4px solid",
-            borderColor: "primary.main",
+            borderColor: "#8A33FD",
             pl: 2,
           }}
         >
