@@ -148,9 +148,9 @@ export default function ExchangeDetailPage() {
             ← Back to exchanges
           </Button>
 
-          <Grid container spacing={3}>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
             {/* Exchange Details */}
-            <Grid item xs={12} md={4}>
+            <Box sx={{ width: { xs: '100%', md: '33%' } }}>
               <Paper sx={{ p: 3, height: 'fit-content' }}>
                 <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
                   Exchange Details
@@ -181,17 +181,17 @@ export default function ExchangeDetailPage() {
                     Date
                   </Typography>
                   <Typography variant="body2">
-                    {new Date(exchange.date).toLocaleDateString()}
+                    {new Date(exchange.createdAt).toLocaleDateString()}
                   </Typography>
                 </Box>
 
-                {exchange.exchangedTime && (
+                {exchange.service?.duration && (
                   <Box sx={{ mb: 2 }}>
                     <Typography variant="subtitle2" color="text.secondary">
                       Duration
                     </Typography>
                     <Typography variant="body2">
-                      {exchange.exchangedTime} hours
+                      {exchange.service.duration} hours
                     </Typography>
                   </Box>
                 )}
@@ -216,18 +216,18 @@ export default function ExchangeDetailPage() {
                   </Typography>
                 </Box>
               </Paper>
-            </Grid>
+            </Box>
 
             {/* Chat */}
-            <Grid item xs={12} md={8}>
+            <Box sx={{ width: { xs: '100%', md: '67%' } }}>
               <Chat
                 exchangeId={exchange.id}
                 currentUserId={user?.sub || ''}
                 otherUser={otherUser}
                 onMessageSent={handleMessageSent}
               />
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         </Box>
       </Box>
     </Layout>

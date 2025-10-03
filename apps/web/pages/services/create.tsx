@@ -138,7 +138,7 @@ export default function CreateServicePage() {
     }));
     
     // Clear error for this field
-    if (errors[field]) {
+    if (errors[field as keyof FormErrors]) {
       setErrors(prev => ({
         ...prev,
         [field]: undefined,

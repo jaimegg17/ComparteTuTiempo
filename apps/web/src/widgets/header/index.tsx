@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useUser } from "@auth0/nextjs-auth0/client";
+import { useUserProfileContext } from "@/contexts/UserProfileContext";
 import {
   AppBar,
   Toolbar,
@@ -31,7 +32,12 @@ import { SearchBar } from "@/components/SearchBar";
 
 export function Header() {
   const { user, error, isLoading } = useUser();
+  const { displayName, displayEmail, displayImage } = useUserProfileContext();
   const { t } = useTranslation();
+  
+  // Debug log
+  console.log('🔄 Header render:', { displayImage, auth0Image: user?.picture });
+  
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -163,11 +169,11 @@ export function Header() {
                     aria-expanded={open ? 'true' : undefined}
                   >
                     <Avatar 
-                      src={user.picture || undefined} 
-                      alt={user.name || user.email || undefined}
+                      src={displayImage || undefined} 
+                      alt={displayName || undefined}
                       sx={{ width: 32, height: 32 }}
                     >
-                      {(user.name || user.email || '?')[0].toUpperCase()}
+                      {(displayName || '?')[0].toUpperCase()}
                     </Avatar>
                   </IconButton>
                   <Menu
@@ -202,14 +208,14 @@ export function Header() {
                   >
                     <Box sx={{ px: 2, py: 1.5 }}>
                       <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                        {user.name || user.email}
+                        {displayName}
                       </Typography>
                       <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                        {user.email}
+                        {displayEmail}
                       </Typography>
                     </Box>
                     <Divider />
-                    <MenuItem component={Link} href="/perfil" sx={{ py: 1 }}>
+                    <MenuItem component={Link} href="/profile" sx={{ py: 1 }}>
                       <ListItemIcon>
                         <AccountCircle fontSize="small" />
                       </ListItemIcon>

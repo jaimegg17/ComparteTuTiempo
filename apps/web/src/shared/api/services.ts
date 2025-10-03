@@ -13,7 +13,7 @@ export const servicesApi = {
     
     if (query.q) searchParams.append('q', query.q);
     if (query.category) searchParams.append('category', query.category);
-    if (query.city) searchParams.append('city', query.city);
+    if (query.location) searchParams.append('location', query.location);
     if (query.type) searchParams.append('type', query.type);
     if (query.status) searchParams.append('status', query.status);
     searchParams.append('page', query.page.toString());
