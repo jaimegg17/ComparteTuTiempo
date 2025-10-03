@@ -84,10 +84,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
     }
 
     // Return raw data with relations instead of mapping to domain entity
-    return {
-      ...prismaService,
-      imageUrl: prismaService.imageUrl || null,
-    };
+    return prismaService;
   }
 
   async findByUserId(userId: string): Promise<Service[]> {
@@ -99,7 +96,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
   }
 
   async list(query: ServiceListQuery): Promise<ServiceListResponse> {
-    const { q, category, location, type, status, page, pageSize } = query;
+    const { q, category, location, type, status, page, pageSize, userId } = query;
     const minPrice = (query as any).minPrice;
     const maxPrice = (query as any).maxPrice;
     const skip = (page - 1) * pageSize;
@@ -118,6 +115,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
     if (type) where.type = ServiceEnumMapper.mapTypeToPrisma(type) as any;
     if (status) where.status = ServiceEnumMapper.mapStatusToPrisma(status) as any;
     if (location) where.location = { contains: location, mode: 'insensitive' };
+    if (userId) where.userId = userId; // Filtrar por usuario
     
     // Filtros de precio
     if (minPrice !== undefined || maxPrice !== undefined) {
