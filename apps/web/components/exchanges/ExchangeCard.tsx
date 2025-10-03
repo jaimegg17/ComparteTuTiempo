@@ -1,6 +1,7 @@
 import { Card, CardContent, Box, Typography, Chip, Avatar, Button, Stack } from '@mui/material';
 import { Clock, User as UserIcon, ArrowRight, ChatBubble } from 'iconoir-react';
 import { useRouter } from 'next/router';
+import { RatingButton } from '@/components/ratings';
 import type { Exchange, ExchangeState } from '@/types/exchange.types';
 
 interface ExchangeCardProps {
@@ -10,6 +11,7 @@ interface ExchangeCardProps {
   onReject?: (id: number) => void;
   onStart?: (id: number) => void;
   onComplete?: (id: number) => void;
+  onRatingSubmitted?: () => void;
   loading?: boolean;
 }
 
@@ -22,7 +24,7 @@ const STATE_CONFIG: Record<ExchangeState, { label: string; color: 'default' | 'w
   CANCELLED: { label: 'Cancelado', color: 'default' },
 };
 
-export function ExchangeCard({ exchange, currentUserId, onAccept, onReject, onStart, onComplete, loading }: ExchangeCardProps) {
+export function ExchangeCard({ exchange, currentUserId, onAccept, onReject, onStart, onComplete, onRatingSubmitted, loading }: ExchangeCardProps) {
   const router = useRouter();
   const isProvider = currentUserId === exchange.offeredById;
   const isRequester = currentUserId === exchange.requestedById;
@@ -39,6 +41,9 @@ export function ExchangeCard({ exchange, currentUserId, onAccept, onReject, onSt
   
   // Only provider can complete the exchange
   const canComplete = isProvider && exchange.state === 'IN_PROGRESS';
+  
+  // Only requester can rate completed exchanges
+  const canRate = isRequester && exchange.state === 'COMPLETED';
 
   return (
     <Card sx={{ mb: 2, '&:hover': { boxShadow: 3 }, transition: 'box-shadow 0.2s' }}>
@@ -209,6 +214,16 @@ export function ExchangeCard({ exchange, currentUserId, onAccept, onReject, onSt
                   </Button>
                 )}
                 </>
+              )}
+              
+              {/* Rating Button for completed exchanges */}
+              {canRate && (
+                <RatingButton
+                  exchangeId={exchange.id}
+                  serviceId={exchange.serviceId}
+                  serviceTitle={exchange.service?.title || 'Servicio'}
+                  onRatingSubmitted={onRatingSubmitted}
+                />
               )}
             </Stack>
           </Box>

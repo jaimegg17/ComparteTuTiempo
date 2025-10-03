@@ -115,6 +115,11 @@ export default function ExchangesPage() {
     }
   };
 
+  const handleRatingSubmitted = async () => {
+    // Refresh exchanges to show updated data
+    await fetchExchanges();
+  };
+
   if (userLoading) {
     return (
       <Layout>
@@ -191,11 +196,12 @@ export default function ExchangesPage() {
                 <ExchangeCard 
                   key={exchange.id}
                   exchange={exchange}
-                  currentUserId={user.sub}
+                  currentUserId={user.sub || ''}
                   onAccept={(id) => handleAction(id, 'CONFIRMED')}
                   onReject={(id) => handleAction(id, 'REJECTED')}
                   onStart={(id) => handleAction(id, 'IN_PROGRESS')}
                   onComplete={(id) => handleAction(id, 'COMPLETED')}
+                  onRatingSubmitted={handleRatingSubmitted}
                   loading={actionLoading}
                 />
               ))}

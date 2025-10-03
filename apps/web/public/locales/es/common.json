@@ -100,8 +100,6 @@
     "validation_error": "Error de validación",
     "server_error": "Error del servidor",
     "bad_request": "Solicitud incorrecta",
-    "not_implemented": "No implementado",
-    "service_unavailable": "Servicio no disponible",
     "timeout": "Tiempo agotado",
     "conflict": "Conflicto",
     "gone": "Eliminado",
@@ -169,6 +167,37 @@
     "request": "Solicitar Servicio",
     "offer": "Ofrecer Servicio",
     "search": "Buscar servicios...",
+    "tabs": {
+      "offers": "Ofertas",
+      "my_services": "Mis Servicios"
+    },
+    "empty_states": {
+      "no_services": "No se encontraron servicios",
+      "no_my_services": "Aún no has publicado ningún servicio",
+    "create_first": "Publica tu primer servicio"
+  },
+  "ratings": {
+    "title": "Valoraciones",
+    "rate_service": "Valorar servicio",
+    "rating": "Valoración",
+    "comment": "Comentario",
+    "comment_placeholder": "Comparte tu experiencia con este servicio...",
+    "submit": "Enviar valoración",
+    "submitting": "Enviando...",
+    "cancel": "Cancelar",
+    "required": "Por favor, selecciona una valoración",
+    "success": "Valoración enviada exitosamente",
+    "error": "Error al enviar la valoración",
+    "ratings_count": "valoraciones",
+    "rating_count": "valoración",
+    "no_ratings": "Este servicio aún no tiene valoraciones",
+    "view_all": "Ver todas las valoraciones",
+    "excellent": "Excelente",
+    "good": "Bueno",
+    "average": "Regular",
+    "poor": "Malo",
+    "terrible": "Muy malo"
+  },
     "filters": {
       "title": "Filtros",
       "category": "Categoría",
@@ -385,5 +414,113 @@
       "address": "Eklingpura Chouraha, Ahmedabad Main Road\n(NH 8- Near Mahadev Hotel) Udaipur, India- 313002"
     },
     "copyright": "Copyright © {{year}} ComparteTuTiempo Arroyo Pvt Ltd. All rights reserved."
+  },
+  "promo": {
+    "title": "Comparte para conseguir",
+    "subtitle": "En esta plataforma podrás encontrar todo lo que necesites. Solo necesitas tiempo.",
+    "button": "Busca ahora"
+  },
+  "video": {
+    "title": "¿Cómo funciona nuestra plataforma?",
+    "subtitle": "Descubre en este video cómo puedes intercambiar tu tiempo por servicios y experiencias únicas.",
+    "playButton": "Ver video explicativo"
+  },
+  "hero": {
+    "title": "Comparte tu tiempo",
+    "subtitle": "Conecta, comparte y aprende",
+    "button": "Empieza ya"
+  },
+  "profile": {
+    "title": "Perfil",
+    "description": "Esta información se mostrará públicamente, así que ten cuidado con lo que compartes.",
+    "basicInfo": "Información Básica",
+    "name": "Nombre",
+    "namePlaceholder": "Tu nombre completo",
+    "email": "Email",
+    "emailPlaceholder": "tu@email.com",
+    "bio": "Biografía",
+    "bioPlaceholder": "Cuéntanos algo sobre ti...",
+    "bioDescription": "Escribe algunas frases sobre ti mismo.",
+    "photo": "Foto de perfil",
+    "photoAlt": "Foto de perfil",
+    "personalInfo": "Información Personal",
+    "personalDescription": "Información adicional sobre ti.",
+    "contactInfo": "Información de Contacto",
+    "location": "Ubicación",
+    "locationPlaceholder": "Ciudad, País",
+    "phone": "Teléfono",
+    "phonePlaceholder": "+34 123 456 789",
+    "skills": "Habilidades",
+    "skillsPlaceholder": "Escribe una habilidad y presiona Enter",
+    "skillsDescription": "Agrega tus habilidades principales.",
+    "accountInfo": "Información de la Cuenta",
+    "accountDescription": "Información sobre tu cuenta y créditos de tiempo.",
+    "accountDetails": "Detalles de la Cuenta",
+    "timeCredits": "Créditos de Tiempo",
+    "timeCreditsDescription": "Minutos disponibles para intercambios",
+    "role": "Rol",
+    "roleDescription": "Tu rol en la plataforma",
+    "memberSince": "Miembro desde",
+    "memberSinceDescription": "Fecha de registro en la plataforma",
+    "notifications": "Notificaciones",
+    "notificationsDescription": "Próximamente: configuración de notificaciones.",
+    "comingSoon": "Próximamente",
+    "notificationsComingSoon": "La configuración de notificaciones estará disponible en futuras actualizaciones.",
+    "cancel": "Cancelar",
+    "saving": "Guardando...",
+    "save": "Guardar",
+    "saveChanges": "Guardar Cambios",
+    "sections": {
+      "myInformation": "Mi información",
+      "notifications": "Notificaciones"
+    },
+    "form": {
+      "personalInfo": "Información Personal",
+      "additionalInfo": "Información Adicional",
+      "name": "Nombre",
+      "email": "Email",
+      "phoneNumber": "Teléfono",
+      "location": "Ubicación",
+      "dateOfBirth": "Fecha de Nacimiento",
+      "gender": "Género",
+      "genderOptions": {
+        "male": "Masculino",
+        "female": "Femenino",
+        "other": "Otro",
+        "preferNotToSay": "Prefiero no decir"
+      },
+      "preferredLanguage": "Idioma Preferido",
+      "languageOptions": {
+        "spanish": "Español",
+        "english": "Inglés"
+      },
+      "bio": "Biografía",
+      "bioPlaceholder": "Cuéntanos algo sobre ti...",
+      "skills": "Habilidades",
+      "skillsPlaceholder": "Escribe tus habilidades separadas por comas",
+      "skillsHelper": "Separa las habilidades con comas",
+      "saving": "Guardando...",
+      "saveChanges": "Guardar Cambios"
+    },
+    "image": {
+      "edit": "Editar"
+    },
+    "timeCredits": {
+      "title": "Créditos de Tiempo",
+      "credits": "créditos"
+    },
+    "notifications": {
+      "description": "Próximamente: configuración de notificaciones.",
+      "comingSoon": "PRÓXIMAMENTE"
+    },
+    "success": {
+      "message": "Perfil actualizado correctamente"
+    },
+    "error": {
+      "title": "Error al cargar el perfil",
+      "description": "Ha ocurrido un problema al cargar tu perfil. Puedes intentar cerrar sesión y volver a iniciar, o recargar la página.",
+      "logoutAndRetry": "Cerrar Sesión y Volver a Iniciar",
+      "reload": "Recargar Página"
+    }
   }
 }

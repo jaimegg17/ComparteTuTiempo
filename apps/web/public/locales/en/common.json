@@ -100,8 +100,6 @@
     "validation_error": "Validation Error",
     "server_error": "Server Error",
     "bad_request": "Bad Request",
-    "not_implemented": "Not Implemented",
-    "service_unavailable": "Service Unavailable",
     "timeout": "Timeout",
     "conflict": "Conflict",
     "gone": "Gone",
@@ -169,6 +167,37 @@
     "request": "Request Service",
     "offer": "Offer Service",
     "search": "Search services...",
+    "tabs": {
+      "offers": "Offers",
+      "my_services": "My Services"
+    },
+    "empty_states": {
+      "no_services": "No services found",
+      "no_my_services": "You haven't published any services yet",
+    "create_first": "Publish your first service"
+  },
+  "ratings": {
+    "title": "Ratings",
+    "rate_service": "Rate service",
+    "rating": "Rating",
+    "comment": "Comment",
+    "comment_placeholder": "Share your experience with this service...",
+    "submit": "Submit rating",
+    "submitting": "Submitting...",
+    "cancel": "Cancel",
+    "required": "Please select a rating",
+    "success": "Rating submitted successfully",
+    "error": "Error submitting rating",
+    "ratings_count": "ratings",
+    "rating_count": "rating",
+    "no_ratings": "This service has no ratings yet",
+    "view_all": "View all ratings",
+    "excellent": "Excellent",
+    "good": "Good",
+    "average": "Average",
+    "poor": "Poor",
+    "terrible": "Terrible"
+  },
     "filters": {
       "title": "Filters",
       "category": "Category",
@@ -385,5 +414,113 @@
       "address": "Eklingpura Chouraha, Ahmedabad Main Road\n(NH 8- Near Mahadev Hotel) Udaipur, India- 313002"
     },
     "copyright": "Copyright © {{year}} ComparteTuTiempo Arroyo Pvt Ltd. All rights reserved."
+  },
+  "promo": {
+    "title": "Share to achieve",
+    "subtitle": "On this platform you will find everything you need. You only need time.",
+    "button": "Search now"
+  },
+  "video": {
+    "title": "How does our platform work?",
+    "subtitle": "Discover in this video how you can exchange your time for services and unique experiences.",
+    "playButton": "Watch explanatory video"
+  },
+  "hero": {
+    "title": "Share your time",
+    "subtitle": "Connect, share and learn",
+    "button": "Get started"
+  },
+  "profile": {
+    "title": "Profile",
+    "description": "This information will be displayed publicly so be careful what you share.",
+    "basicInfo": "Basic Information",
+    "name": "Name",
+    "namePlaceholder": "Your full name",
+    "email": "Email",
+    "emailPlaceholder": "your@email.com",
+    "bio": "Bio",
+    "bioPlaceholder": "Tell us something about yourself...",
+    "bioDescription": "Write a few sentences about yourself.",
+    "photo": "Profile Photo",
+    "photoAlt": "Profile photo",
+    "personalInfo": "Personal Information",
+    "personalDescription": "Additional information about yourself.",
+    "contactInfo": "Contact Information",
+    "location": "Location",
+    "locationPlaceholder": "City, Country",
+    "phone": "Phone",
+    "phonePlaceholder": "+1 234 567 890",
+    "skills": "Skills",
+    "skillsPlaceholder": "Type a skill and press Enter",
+    "skillsDescription": "Add your main skills.",
+    "accountInfo": "Account Information",
+    "accountDescription": "Information about your account and time credits.",
+    "accountDetails": "Account Details",
+    "timeCredits": "Time Credits",
+    "timeCreditsDescription": "Minutes available for exchanges",
+    "role": "Role",
+    "roleDescription": "Your role on the platform",
+    "memberSince": "Member since",
+    "memberSinceDescription": "Registration date on the platform",
+    "notifications": "Notifications",
+    "notificationsDescription": "Coming soon: notification settings.",
+    "comingSoon": "Coming Soon",
+    "notificationsComingSoon": "Notification settings will be available in future updates.",
+    "cancel": "Cancel",
+    "saving": "Saving...",
+    "save": "Save",
+    "saveChanges": "Save Changes",
+    "sections": {
+      "myInformation": "My Information",
+      "notifications": "Notifications"
+    },
+    "form": {
+      "personalInfo": "Personal Information",
+      "additionalInfo": "Additional Information",
+      "name": "Name",
+      "email": "Email",
+      "phoneNumber": "Phone",
+      "location": "Location",
+      "dateOfBirth": "Date of Birth",
+      "gender": "Gender",
+      "genderOptions": {
+        "male": "Male",
+        "female": "Female",
+        "other": "Other",
+        "preferNotToSay": "Prefer not to say"
+      },
+      "preferredLanguage": "Preferred Language",
+      "languageOptions": {
+        "spanish": "Spanish",
+        "english": "English"
+      },
+      "bio": "Bio",
+      "bioPlaceholder": "Tell us something about yourself...",
+      "skills": "Skills",
+      "skillsPlaceholder": "Write your skills separated by commas",
+      "skillsHelper": "Separate skills with commas",
+      "saving": "Saving...",
+      "saveChanges": "Save Changes"
+    },
+    "image": {
+      "edit": "Edit"
+    },
+    "timeCredits": {
+      "title": "Time Credits",
+      "credits": "credits"
+    },
+    "notifications": {
+      "description": "Coming soon: notification settings.",
+      "comingSoon": "COMING SOON"
+    },
+    "success": {
+      "message": "Profile updated successfully"
+    },
+    "error": {
+      "title": "Error loading profile",
+      "description": "There was a problem loading your profile. You can try logging out and logging back in, or reload the page.",
+      "logoutAndRetry": "Logout and Retry",
+      "reload": "Reload Page"
+    }
   }
 }
