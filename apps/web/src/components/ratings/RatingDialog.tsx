@@ -14,6 +14,9 @@ import {
 } from '@mui/material';
 import { Star } from '@mui/icons-material';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useCreateRating } from '@/shared/hooks/use-ratings';
+import { useAuth } from '@/hooks/useAuth';
+import { apiClient } from '@/shared/api/client';
 
 interface RatingDialogProps {
   open: boolean;
@@ -31,60 +34,50 @@ export function RatingDialog({
   onRatingSubmitted 
 }: RatingDialogProps) {
   const { t } = useTranslation();
+  const { user, getAccessToken } = useAuth();
+  const createRating = useCreateRating();
   const [rating, setRating] = useState<number>(0);
   const [comment, setComment] = useState<string>('');
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
     if (rating === 0) {
-      setError(t('ratings.required'));
+      setError(t('ratings.required') || 'Debes seleccionar una puntuación');
+      return;
+    }
+
+    if (!user?.sub) {
+      setError('Debes estar autenticado para valorar');
       return;
     }
 
     try {
-      setLoading(true);
       setError(null);
 
-      // Get token
-      const tokenResponse = await fetch('/api/auth/token');
-      if (!tokenResponse.ok) {
+      // Get access token
+      const token = await getAccessToken();
+      if (!token) {
         throw new Error('No se pudo obtener el token de autenticación');
       }
-      const tokenData = await tokenResponse.json();
-      const token = tokenData.accessToken;
 
-      if (!token) {
-        throw new Error('Token de autenticación no disponible');
-      }
+      // Set token in API client
+      apiClient.setToken(token);
 
       // Submit rating
-      const response = await fetch('http://localhost:3001/api/ratings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          score: rating,
-          comment: comment.trim() || undefined,
-          serviceId: serviceId,
-        }),
+      await createRating.mutateAsync({
+        userId: user.sub,
+        serviceId: serviceId,
+        score: rating,
+        comment: comment.trim() || undefined,
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al enviar la valoración');
-      }
 
       // Success
       onRatingSubmitted();
       handleClose();
       
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error inesperado');
-    } finally {
-      setLoading(false);
+    } catch (err: any) {
+      const errorMessage = err?.response?.data?.message || err?.message || 'Error inesperado al enviar la valoración';
+      setError(errorMessage);
     }
   };
 
@@ -162,16 +155,16 @@ export function RatingDialog({
       </DialogContent>
       
       <DialogActions>
-        <Button onClick={handleClose} disabled={loading}>
+        <Button onClick={handleClose} disabled={createRating.isPending}>
           {t('ratings.cancel')}
         </Button>
         <Button 
           onClick={handleSubmit} 
           variant="contained"
-          disabled={loading || rating === 0}
-          startIcon={loading ? <CircularProgress size={16} /> : <Star />}
+          disabled={createRating.isPending || rating === 0}
+          startIcon={createRating.isPending ? <CircularProgress size={16} /> : <Star />}
         >
-          {loading ? t('ratings.submitting') : t('ratings.submit')}
+          {createRating.isPending ? (t('ratings.submitting') || 'Enviando...') : (t('ratings.submit') || 'Enviar')}
         </Button>
       </DialogActions>
     </Dialog>

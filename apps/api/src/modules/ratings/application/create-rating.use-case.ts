@@ -38,6 +38,15 @@ export class CreateRatingUseCase {
       throw new BadRequestException('El comentario no puede exceder 500 caracteres');
     }
 
+    // Verify that the service exists
+    const service = await this.prisma.service.findUnique({
+      where: { id: data.serviceId },
+    });
+
+    if (!service) {
+      throw new BadRequestException('El servicio no existe');
+    }
+
     // Check if user already rated this service
     const existingRating = await this.ratingRepository.findByUserAndService(userId, data.serviceId);
     if (existingRating) {
@@ -53,7 +62,7 @@ export class CreateRatingUseCase {
           { offeredById: userId }
         ],
         state: 'COMPLETED'
-      }
+      } as any,
     });
 
     if (!completedExchange) {

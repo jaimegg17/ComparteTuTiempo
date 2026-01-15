@@ -11,33 +11,26 @@ import {
   UseGuards, 
   Request,
   HttpCode,
-  HttpStatus
+  HttpStatus,
+  UnauthorizedException
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { CreateRatingUseCase } from '../application/create-rating.use-case';
 import { ListRatingsUseCase } from '../application/list-ratings.use-case';
 import { UpdateRatingUseCase } from '../application/update-rating.use-case';
+import { DeleteRatingUseCase } from '../application/delete-rating.use-case';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
+import { createZodDto } from '@anatine/zod-nestjs';
+import { 
+  RatingCreateSchema, 
+  RatingUpdateSchema, 
+  RatingListQuerySchema 
+} from '@comparte-tu-tiempo/contracts';
 
-// Simple DTOs without Zod for now
-export class CreateRatingDto {
-  serviceId!: number;
-  score!: number;
-  comment?: string;
-}
-
-export class UpdateRatingDto {
-  score?: number;
-  comment?: string;
-}
-
-export class RatingListQueryDto {
-  userId?: string;
-  serviceId?: number;
-  score?: number;
-  page?: number;
-  pageSize?: number;
-}
+// DTOs generados desde Zod
+export class CreateRatingDto extends createZodDto(RatingCreateSchema) {}
+export class UpdateRatingDto extends createZodDto(RatingUpdateSchema) {}
+export class RatingListQueryDto extends createZodDto(RatingListQuerySchema) {}
 
 @ApiTags('ratings')
 @Controller('ratings')
@@ -46,6 +39,7 @@ export class RatingsController {
     private readonly createRatingUseCase: CreateRatingUseCase,
     private readonly listRatingsUseCase: ListRatingsUseCase,
     private readonly updateRatingUseCase: UpdateRatingUseCase,
+    private readonly deleteRatingUseCase: DeleteRatingUseCase,
   ) {}
 
   @Post()
@@ -59,7 +53,12 @@ export class RatingsController {
     @Body() createRatingDto: CreateRatingDto,
     @Request() req: any,
   ) {
-    const userId = req.user?.id;
+    const userId = req.user?.sub || req.user?.id;
+    
+    if (!userId) {
+      throw new UnauthorizedException('Usuario no autenticado');
+    }
+
     const result = await this.createRatingUseCase.execute({
       data: { ...createRatingDto, userId },
       userId,
@@ -108,7 +107,12 @@ export class RatingsController {
     @Body() updateRatingDto: UpdateRatingDto,
     @Request() req: any,
   ) {
-    const userId = req.user?.id;
+    const userId = req.user?.sub || req.user?.id;
+    
+    if (!userId) {
+      throw new UnauthorizedException('Usuario no autenticado');
+    }
+
     const result = await this.updateRatingUseCase.execute({
       id,
       data: updateRatingDto,
@@ -134,10 +138,12 @@ export class RatingsController {
     @Param('id', ParseIntPipe) id: number,
     @Request() req: any,
   ) {
-    // This would need a delete use case
-    // For now, we'll return a placeholder
-    return {
-      message: 'Valoración eliminada exitosamente',
-    };
+    const userId = req.user?.sub || req.user?.id;
+    
+    if (!userId) {
+      throw new UnauthorizedException('Usuario no autenticado');
+    }
+
+    await this.deleteRatingUseCase.execute({ id, userId });
   }
 }

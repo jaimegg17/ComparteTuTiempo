@@ -23,6 +23,9 @@ describe('CreateRatingUseCase - Business Logic Validation', () => {
     };
 
     const mockPrismaService = {
+      service: {
+        findUnique: jest.fn(),
+      },
       exchange: {
         findFirst: jest.fn(),
       },
@@ -47,8 +50,40 @@ describe('CreateRatingUseCase - Business Logic Validation', () => {
     prismaService = module.get(PrismaService);
   });
 
+  describe('Service Validation', () => {
+    it('should reject rating if service does not exist', async () => {
+      // Mock: Service does not exist
+      (prismaService.service.findUnique as jest.Mock).mockResolvedValue(null);
+
+      const ratingData = {
+        serviceId: 999,
+        score: 5,
+        comment: 'Great service!',
+        userId: 'user-123',
+      };
+
+      await expect(
+        useCase.execute({
+          data: ratingData,
+          userId: 'user-123',
+        })
+      ).rejects.toThrow(BadRequestException);
+
+      expect(prismaService.service.findUnique).toHaveBeenCalledWith({
+        where: { id: 999 },
+      });
+      expect(ratingRepository.create).not.toHaveBeenCalled();
+    });
+  });
+
   describe('Exchange Validation', () => {
     it('should reject rating if user has no completed exchange for the service', async () => {
+      // Mock: Service exists
+      (prismaService.service.findUnique as jest.Mock).mockResolvedValue({
+        id: 1,
+        title: 'Test Service',
+      });
+      
       // Mock: No existing rating
       ratingRepository.findByUserAndService.mockResolvedValue(null);
       
@@ -82,6 +117,12 @@ describe('CreateRatingUseCase - Business Logic Validation', () => {
     });
 
     it('should allow rating if user has completed exchange as requester', async () => {
+      // Mock: Service exists
+      (prismaService.service.findUnique as jest.Mock).mockResolvedValue({
+        id: 1,
+        title: 'Test Service',
+      });
+      
       // Mock: No existing rating
       ratingRepository.findByUserAndService.mockResolvedValue(null);
       
@@ -123,6 +164,12 @@ describe('CreateRatingUseCase - Business Logic Validation', () => {
     });
 
     it('should allow rating if user has completed exchange as provider', async () => {
+      // Mock: Service exists
+      (prismaService.service.findUnique as jest.Mock).mockResolvedValue({
+        id: 1,
+        title: 'Test Service',
+      });
+      
       // Mock: No existing rating
       ratingRepository.findByUserAndService.mockResolvedValue(null);
       
@@ -164,6 +211,12 @@ describe('CreateRatingUseCase - Business Logic Validation', () => {
     });
 
     it('should reject rating if user already rated the service', async () => {
+      // Mock: Service exists
+      (prismaService.service.findUnique as jest.Mock).mockResolvedValue({
+        id: 1,
+        title: 'Test Service',
+      });
+      
       // Mock: Existing rating
       ratingRepository.findByUserAndService.mockResolvedValue({
         id: 1,

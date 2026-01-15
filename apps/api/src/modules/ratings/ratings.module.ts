@@ -3,6 +3,7 @@ import { RatingsController } from './presentation/ratings.controller';
 import { CreateRatingUseCase } from './application/create-rating.use-case';
 import { ListRatingsUseCase } from './application/list-ratings.use-case';
 import { UpdateRatingUseCase } from './application/update-rating.use-case';
+import { DeleteRatingUseCase } from './application/delete-rating.use-case';
 import { PrismaRatingRepository } from './infrastructure/prisma-rating-repository';
 import { RatingRepositoryPort } from './domain/rating-repository.port';
 import { RATING_REPOSITORY_TOKEN } from './domain/tokens';
@@ -15,6 +16,7 @@ import { PrismaModule } from '../../common/prisma/prisma.module';
     CreateRatingUseCase,
     ListRatingsUseCase,
     UpdateRatingUseCase,
+    DeleteRatingUseCase,
     {
       provide: RATING_REPOSITORY_TOKEN,
       useClass: PrismaRatingRepository,

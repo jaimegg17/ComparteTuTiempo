@@ -23,8 +23,8 @@ export const servicesApi = {
   },
 
   // Obtener servicio por ID
-  async getService(id: number): Promise<Service> {
-    return apiClient.get<Service>(`/services/${id}`);
+  async getService(id: number): Promise<{ service: Service & { averageRating?: number; totalRatings?: number; totalExchanges?: number } }> {
+    return apiClient.get<{ service: Service & { averageRating?: number; totalRatings?: number; totalExchanges?: number } }>(`/services/${id}`);
   },
 
   // Crear nuevo servicio

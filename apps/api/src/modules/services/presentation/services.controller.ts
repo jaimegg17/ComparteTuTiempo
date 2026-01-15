@@ -152,7 +152,6 @@ export class ServicesController {
           email: req.user?.email || `${userId}@example.com`,
           password: 'auth0-user', // Placeholder password for Auth0 users
           name: req.user?.name || 'Usuario',
-          timeCredits: 0, // Default time credits for new users
         },
       });
     }
@@ -236,7 +235,6 @@ export class ServicesController {
             location: true,
             bio: true,
             skills: true,
-            timeCredits: true,
             createdAt: true,
           }
         },
@@ -261,7 +259,7 @@ export class ServicesController {
             exchanges: true,
           }
         }
-      },
+      } as any,
     });
 
     if (!serviceData) {
@@ -269,18 +267,23 @@ export class ServicesController {
     }
 
     // Calculate average rating
-    const avgRating = serviceData.ratings.length > 0
-      ? serviceData.ratings.reduce((sum, r) => sum + r.score, 0) / serviceData.ratings.length
-      : 0;
+    // Get total count and average from database for accuracy
+    const ratingsStats = await this.prisma.rating.aggregate({
+      where: { serviceId: id },
+      _avg: { score: true },
+      _count: { id: true },
+    });
+
+    const avgRating = ratingsStats._avg.score ? Number(ratingsStats._avg.score.toFixed(1)) : 0;
+    const totalRatingsCount = ratingsStats._count.id;
 
     return { 
       message: 'Servicio obtenido exitosamente', 
       service: {
         ...serviceData,
-        imageUrl: serviceData.imageUrl || null, // Ensure imageUrl is included
-        averageRating: Number(avgRating.toFixed(1)),
-        totalRatings: serviceData._count.ratings,
-        totalExchanges: serviceData._count.exchanges,
+        imageUrl: (serviceData as any).imageUrl || null,
+        totalRatings: totalRatingsCount,
+        totalExchanges: (serviceData as any)._count?.exchanges || 0,
       }
     };
   }
