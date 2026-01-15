@@ -16,6 +16,7 @@ import { Layout } from '@/components/Layout';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { useTranslation } from '@/hooks/useTranslation';
 import { ImageUpload } from '@/components/ui/ImageUpload';
+import { useUploadImage } from '@/shared/hooks/use-upload';
 
 const CATEGORIES = ['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'ARTE', 'OTROS'];
 const TYPES = ['PRESENCIAL', 'VIRTUAL', 'HIBRIDO'];
@@ -63,8 +64,8 @@ export default function CreateServicePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
+  const uploadImage = useUploadImage();
 
   // Mapping functions for display
   const getCategoryDisplayName = (category: string) => {
@@ -101,33 +102,6 @@ export default function CreateServicePage() {
     return availabilityMap[availability] || availability;
   };
 
-  const uploadImage = async (file: File): Promise<string> => {
-    const tokenResponse = await fetch('/api/auth/token');
-    if (!tokenResponse.ok) {
-      throw new Error('No se pudo obtener el token de autenticación');
-    }
-    const tokenData = await tokenResponse.json();
-    const token = tokenData.accessToken;
-
-    const formData = new FormData();
-    formData.append('image', file);
-
-    const response = await fetch('http://localhost:3001/api/upload/image', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-      body: formData,
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Error al subir la imagen');
-    }
-
-    const data = await response.json();
-    return data.url;
-  };
 
   const handleChange = (field: keyof FormData) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -202,14 +176,8 @@ export default function CreateServicePage() {
     setError(null);
     
     try {
-      let imageUrl = formData.imageUrl;
-      
-      // Upload image if one was selected
-      if (selectedImage) {
-        setUploadingImage(true);
-        imageUrl = await uploadImage(selectedImage);
-        setUploadingImage(false);
-      }
+      // Use uploaded image URL if available
+      const imageUrl = uploadedImageUrl || formData.imageUrl;
 
       // Get token
       const tokenResponse = await fetch('/api/auth/token');
@@ -253,7 +221,6 @@ export default function CreateServicePage() {
       }, 1500);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al crear el servicio');
-      setUploadingImage(false);
     } finally {
       setLoading(false);
     }
@@ -351,8 +318,12 @@ export default function CreateServicePage() {
 
                 {/* Imagen del Servicio */}
                 <ImageUpload
-                  onImageSelect={setSelectedImage}
-                  disabled={loading || success || uploadingImage}
+                  autoUpload={true}
+                  onImageUploaded={(url) => {
+                    setUploadedImageUrl(url);
+                    setFormData(prev => ({ ...prev, imageUrl: url }));
+                  }}
+                  disabled={loading || success}
                 />
 
                 {/* Categoría y Tipo */}
@@ -464,7 +435,7 @@ export default function CreateServicePage() {
                     disabled={loading || success}
                     sx={{ textTransform: 'none', minWidth: 120 }}
                   >
-                    {loading || uploadingImage ? (
+                    {loading || uploadImage.isPending ? (
                       <CircularProgress size={24} />
                     ) : (
                       t("services.form.submit")

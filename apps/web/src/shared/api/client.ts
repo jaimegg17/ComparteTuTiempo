@@ -19,9 +19,13 @@ export class ApiClient {
     const url = `${this.baseUrl}${endpoint}`;
     
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
       ...(options.headers as Record<string, string>),
     };
+
+    // Only set Content-Type if not already set (e.g., for FormData)
+    if (!headers['Content-Type'] && !(options.body instanceof FormData)) {
+      headers['Content-Type'] = 'application/json';
+    }
 
     if (this.token) {
       headers.Authorization = `Bearer ${this.token}`;
@@ -56,10 +60,18 @@ export class ApiClient {
     return this.request<T>(endpoint, { method: 'GET' });
   }
 
-  async post<T>(endpoint: string, data?: any): Promise<T> {
+  async post<T>(endpoint: string, data?: any, isFormData: boolean = false): Promise<T> {
+    const headers: Record<string, string> = {};
+    
+    // Don't set Content-Type for FormData, browser will set it with boundary
+    if (!isFormData) {
+      headers['Content-Type'] = 'application/json';
+    }
+
     return this.request<T>(endpoint, {
       method: 'POST',
-      body: data ? JSON.stringify(data) : undefined,
+      headers,
+      body: isFormData ? data : (data ? JSON.stringify(data) : undefined),
     });
   }
 
