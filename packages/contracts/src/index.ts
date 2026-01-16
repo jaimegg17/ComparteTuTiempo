@@ -81,4 +81,3 @@ export { ServiceCategory, ServiceType, ServiceStatus } from './service.schemas';
 export { ExchangeStatus } from './exchange.schemas';
 export { GroupType } from './group.schemas';
 export { MembershipRole, MembershipStatus } from './membership.schemas';
-export { MessageStatus, MessageType } from './message.schemas';

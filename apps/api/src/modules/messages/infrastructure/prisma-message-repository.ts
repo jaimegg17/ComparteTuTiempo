@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import type { MessageRepositoryPort } from '../domain/message-repository.port';
-import { MessageEntity } from '../domain/message.types';
+import { MessageEntity } from '../domain/message.entity';
 import { MessageCreate, MessageListQuery, MessageListResponse, MessageUpdate } from '../domain/message.types';
 
 @Injectable()
@@ -18,15 +18,7 @@ export class PrismaMessageRepository implements MessageRepositoryPort {
       },
     });
 
-    return {
-      id: prismaMessage.id,
-      exchangeId: prismaMessage.exchangeId,
-      senderId: prismaMessage.senderId,
-      content: prismaMessage.content,
-      isRead: prismaMessage.isRead,
-      createdAt: prismaMessage.createdAt,
-      updatedAt: prismaMessage.updatedAt,
-    };
+    return MessageEntity.fromPrisma(prismaMessage);
   }
 
   async findById(id: number): Promise<MessageEntity | null> {
@@ -38,15 +30,7 @@ export class PrismaMessageRepository implements MessageRepositoryPort {
       return null;
     }
 
-    return {
-      id: prismaMessage.id,
-      exchangeId: prismaMessage.exchangeId,
-      senderId: prismaMessage.senderId,
-      content: prismaMessage.content,
-      isRead: prismaMessage.isRead,
-      createdAt: prismaMessage.createdAt,
-      updatedAt: prismaMessage.updatedAt,
-    };
+    return MessageEntity.fromPrisma(prismaMessage);
   }
 
   async list(query: MessageListQuery): Promise<MessageListResponse> {
@@ -65,15 +49,9 @@ export class PrismaMessageRepository implements MessageRepositoryPort {
       }),
     ]);
 
-    const messages = prismaMessages.map(prismaMessage => ({
-      id: prismaMessage.id,
-      exchangeId: prismaMessage.exchangeId,
-      senderId: prismaMessage.senderId,
-      content: prismaMessage.content,
-      isRead: prismaMessage.isRead,
-      createdAt: prismaMessage.createdAt,
-      updatedAt: prismaMessage.updatedAt,
-    }));
+    const messages = prismaMessages.map(prismaMessage => 
+      MessageEntity.fromPrisma(prismaMessage)
+    );
 
     const totalPages = Math.ceil(total / pageSize);
 
@@ -92,15 +70,7 @@ export class PrismaMessageRepository implements MessageRepositoryPort {
       data,
     });
 
-    return {
-      id: prismaMessage.id,
-      exchangeId: prismaMessage.exchangeId,
-      senderId: prismaMessage.senderId,
-      content: prismaMessage.content,
-      isRead: prismaMessage.isRead,
-      createdAt: prismaMessage.createdAt,
-      updatedAt: prismaMessage.updatedAt,
-    };
+    return MessageEntity.fromPrisma(prismaMessage);
   }
 
   async markAsRead(messageIds: number[]): Promise<void> {

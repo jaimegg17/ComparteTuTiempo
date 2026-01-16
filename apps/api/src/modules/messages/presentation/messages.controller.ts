@@ -2,6 +2,7 @@ import {
   Controller, 
   Get, 
   Post, 
+  Put,
   Body, 
   Query, 
   UseGuards, 
@@ -17,17 +18,14 @@ import {
 } from '@comparte-tu-tiempo/contracts';
 import { CreateMessageUseCase } from '../application/create-message.use-case';
 import { ListMessagesUseCase } from '../application/list-messages.use-case';
+import { MarkMessageReadUseCase } from '../application/mark-message-read.use-case';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
 
 // DTOs generados desde Zod
 export class CreateMessageDto extends createZodDto(MessageCreateSchema) {}
 
-// Simple query DTO without validation for now
-export class MessageListQueryDto {
-  userId?: string;
-  page?: number;
-  pageSize?: number;
-}
+// Query DTO for listing messages
+export class MessageListQueryDto extends createZodDto(MessageListQuerySchema) {}
 
 @ApiTags('messages')
 @Controller('messages')
@@ -35,6 +33,7 @@ export class MessagesController {
   constructor(
     private readonly createMessageUseCase: CreateMessageUseCase,
     private readonly listMessagesUseCase: ListMessagesUseCase,
+    private readonly markMessageReadUseCase: MarkMessageReadUseCase,
   ) {}
 
   @Post()
@@ -48,12 +47,20 @@ export class MessagesController {
     @Body() createMessageDto: CreateMessageDto,
     @Request() req: any,
   ) {
-    const userId = req.user?.id;
+    const userId = req.user?.sub || req.user?.id;
+    
+    if (!userId) {
+      throw new Error('User not authenticated');
+    }
+
+    if (!createMessageDto.exchangeId) {
+      throw new Error('exchangeId is required');
+    }
+
     const result = await this.createMessageUseCase.execute({
       data: {
-        ...createMessageDto,
-        exchangeId: 1, // TODO: Get from request or context
-        senderId: userId,
+        exchangeId: createMessageDto.exchangeId,
+        content: createMessageDto.content,
       },
       userId,
     });
@@ -73,14 +80,21 @@ export class MessagesController {
     @Query() query: MessageListQueryDto,
     @Request() req: any,
   ) {
-    const userId = req.user?.id;
+    const userId = req.user?.sub || req.user?.id;
+    
+    if (!userId) {
+      throw new Error('User not authenticated');
+    }
+
+    if (!query.exchangeId) {
+      throw new Error('exchangeId is required in query params');
+    }
     
     // Asegurar que page y pageSize estén presentes
     const queryWithDefaults = {
       page: query.page || 1,
       pageSize: query.pageSize || 20,
-      userId,
-      exchangeId: 1, // TODO: Get from request or context
+      exchangeId: query.exchangeId,
     };
 
     const result = await this.listMessagesUseCase.execute({ 
@@ -95,24 +109,68 @@ export class MessagesController {
     };
   }
 
-  @Get('conversation/:userId')
+  @Get('exchange/:exchangeId')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Obtener conversación con un usuario específico' })
-  @ApiParam({ name: 'userId', description: 'ID del usuario con quien conversar' })
-  @ApiResponse({ status: 200, description: 'Conversación obtenida exitosamente' })
-  async getConversation(
-    @Param('userId') otherUserId: string,
+  @ApiOperation({ summary: 'Obtener mensajes de un intercambio específico' })
+  @ApiParam({ name: 'exchangeId', description: 'ID del intercambio', type: Number })
+  @ApiResponse({ status: 200, description: 'Mensajes obtenidos exitosamente' })
+  async getMessagesByExchange(
+    @Param('exchangeId', ParseIntPipe) exchangeId: number,
+    @Query('page') page?: number,
+    @Query('pageSize') pageSize?: number,
+    @Request() req?: any,
+  ) {
+    const userId = req?.user?.sub || req?.user?.id;
+    
+    if (!userId) {
+      throw new Error('User not authenticated');
+    }
+
+    const query = {
+      exchangeId,
+      page: page || 1,
+      pageSize: pageSize || 20,
+    };
+
+    const result = await this.listMessagesUseCase.execute({ 
+      query,
+      userId 
+    });
+
+    return {
+      message: 'Mensajes obtenidos exitosamente',
+      ...result.messages,
+      messages: result.messages.messages.map(message => message.toContract()),
+    };
+  }
+
+  @Put(':id/read')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Marcar un mensaje como leído' })
+  @ApiParam({ name: 'id', description: 'ID del mensaje', type: Number })
+  @ApiResponse({ status: 200, description: 'Mensaje marcado como leído' })
+  @ApiResponse({ status: 404, description: 'Mensaje no encontrado' })
+  @ApiResponse({ status: 403, description: 'No autorizado' })
+  async markMessageAsRead(
+    @Param('id', ParseIntPipe) messageId: number,
     @Request() req: any,
   ) {
-    const userId = req.user?.id;
+    const userId = req.user?.sub || req.user?.id;
     
-    // This would need a new use case for getting conversation
-    // For now, we'll return a placeholder
+    if (!userId) {
+      throw new Error('User not authenticated');
+    }
+
+    const result = await this.markMessageReadUseCase.execute({
+      messageId,
+      userId,
+    });
+
     return {
-      message: 'Conversación obtenida exitosamente',
-      conversation: [],
-      otherUserId,
+      message: 'Mensaje marcado como leído',
+      data: result.message.toContract(),
     };
   }
 }

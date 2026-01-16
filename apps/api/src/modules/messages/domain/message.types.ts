@@ -1,12 +1,6 @@
-export interface MessageEntity {
-  id: number;
-  exchangeId: number;
-  senderId: string;
-  content: string;
-  isRead: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+// MessageEntity is now a class, re-export it
+export { MessageEntity } from './message.entity';
+import type { MessageEntity } from './message.entity';
 
 export interface MessageCreate {
   exchangeId: number;
@@ -20,7 +14,7 @@ export interface MessageListQuery {
 }
 
 export interface MessageListResponse {
-  messages: MessageEntity[];
+  messages: MessageEntity[]; // MessageEntity is a class
   total: number;
   page: number;
   pageSize: number;

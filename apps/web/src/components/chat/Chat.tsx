@@ -14,6 +14,8 @@ import { Send as SendIcon } from '@mui/icons-material';
 import { Message, MessageCreate, ChatUser } from '@/types/message.types';
 import { useErrorHandling, ERROR_MESSAGES } from '@/hooks/useErrorHandling';
 import { ErrorAlert } from '@/components/ui/BeautifulAlert';
+import { useAuth } from '@/hooks/useAuth';
+import { apiClient } from '@/shared/api/client';
 
 interface ChatProps {
   exchangeId: number;
@@ -28,6 +30,7 @@ export function Chat({ exchangeId, currentUserId, otherUser, onMessageSent }: Ch
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { error, handleAsyncOperation, clearError } = useErrorHandling();
+  const { getAccessToken } = useAuth();
 
   // Auto-scroll to bottom when new messages arrive
   const scrollToBottom = () => {
@@ -41,18 +44,22 @@ export function Chat({ exchangeId, currentUserId, otherUser, onMessageSent }: Ch
   // Fetch messages
   const fetchMessages = async () => {
     await handleAsyncOperation(async () => {
-      const response = await fetch(`http://localhost:3001/api/messages/exchange/${exchangeId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(ERROR_MESSAGES.NETWORK_ERROR);
+      const token = await getAccessToken();
+      if (token) {
+        apiClient.setToken(token);
       }
 
-      const data = await response.json();
-      setMessages(data.messages.messages || []);
+      const data = await apiClient.get<{
+        message: string;
+        messages: Message[];
+        total: number;
+        page: number;
+        pageSize: number;
+        totalPages: number;
+      }>(`/messages/exchange/${exchangeId}`);
+
+      // Backend returns messages array directly in the response
+      setMessages(data.messages || []);
     }, ERROR_MESSAGES.NETWORK_ERROR);
   };
 
@@ -70,21 +77,17 @@ export function Chat({ exchangeId, currentUserId, otherUser, onMessageSent }: Ch
     };
 
     await handleAsyncOperation(async () => {
-      const response = await fetch('http://localhost:3001/api/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-        },
-        body: JSON.stringify(messageData),
-      });
-
-      if (!response.ok) {
-        throw new Error(ERROR_MESSAGES.NETWORK_ERROR);
+      const token = await getAccessToken();
+      if (token) {
+        apiClient.setToken(token);
       }
 
-      const data = await response.json();
-      const newMsg = data.message;
+      const data = await apiClient.post<{
+        message: string;
+        data: Message;
+      }>('/messages', messageData);
+
+      const newMsg = data.data;
       
       setMessages(prev => [...prev, newMsg]);
       setNewMessage('');
