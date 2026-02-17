@@ -2,7 +2,7 @@ export class CommunityEntity {
   constructor(
     public readonly id: number,
     public readonly name: string,
-    public readonly description: string,
+    public readonly description: string | null,
     public readonly isPrivate: boolean,
     public readonly creatorId: string,
     public readonly createdAt: Date,
@@ -26,8 +26,8 @@ export class CommunityEntity {
       description: this.description,
       isPrivate: this.isPrivate,
       creatorId: this.creatorId,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
+      createdAt: this.createdAt instanceof Date ? this.createdAt.toISOString() : this.createdAt,
+      updatedAt: this.updatedAt instanceof Date ? this.updatedAt.toISOString() : this.updatedAt,
     };
   }
 }

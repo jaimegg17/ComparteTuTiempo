@@ -65,34 +65,48 @@ export class PrismaCommunityRepository implements CommunityRepositoryPort {
     pageSize: number;
     totalPages: number;
   }> {
-    const { page, pageSize, creatorId, isPrivate } = query;
-    const skip = (page - 1) * pageSize;
+    try {
+      const { page, pageSize, creatorId, isPrivate } = query;
+      const skip = (page - 1) * pageSize;
 
-    // Build where clause
-    const where: any = {};
-    if (creatorId) where.creatorId = creatorId;
-    if (isPrivate !== undefined) where.isPrivate = isPrivate;
+      // Build where clause
+      const where: any = {};
+      if (creatorId) where.creatorId = creatorId;
+      if (isPrivate !== undefined) where.isPrivate = isPrivate;
 
-    // Get total count
-    const total = await this.prisma.community.count({ where });
+      // Get total count
+      const total = await this.prisma.community.count({ where });
 
-    // Get paginated results
-    const prismaCommunities = await this.prisma.community.findMany({
-      where,
-      skip,
-      take: pageSize,
-      orderBy: { createdAt: 'desc' },
-    });
+      // Get paginated results
+      const prismaCommunities = await this.prisma.community.findMany({
+        where,
+        skip,
+        take: pageSize,
+        orderBy: { createdAt: 'desc' },
+      });
 
-    const communities = prismaCommunities.map(CommunityMapper.toDomain);
-    const totalPages = Math.ceil(total / pageSize);
+      // Map to domain entities safely
+      const communities = prismaCommunities.map((prismaCommunity) => {
+        try {
+          return CommunityMapper.toDomain(prismaCommunity);
+        } catch (error) {
+          console.error('Error mapping community:', error, prismaCommunity);
+          throw error;
+        }
+      });
 
-    return {
-      communities,
-      total,
-      page,
-      pageSize,
-      totalPages,
-    };
+      const totalPages = Math.ceil(total / pageSize);
+
+      return {
+        communities,
+        total,
+        page,
+        pageSize,
+        totalPages,
+      };
+    } catch (error) {
+      console.error('Error in PrismaCommunityRepository.list:', error);
+      throw error;
+    }
   }
 }

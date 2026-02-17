@@ -25,10 +25,21 @@ export class ListCommunitiesUseCase {
   ) {}
 
   async execute(request: ListCommunitiesRequest): Promise<ListCommunitiesResponse> {
-    const { query } = request;
+    try {
+      const { query } = request;
 
-    const result = await this.communityRepository.list(query);
+      const result = await this.communityRepository.list(query);
 
-    return { communities: result };
+      // Validate result structure
+      if (!result || !Array.isArray(result.communities)) {
+        console.error('Invalid result from repository:', result);
+        throw new Error('Invalid result structure from repository');
+      }
+
+      return { communities: result };
+    } catch (error) {
+      console.error('Error in ListCommunitiesUseCase.execute:', error);
+      throw error;
+    }
   }
 }

@@ -13,15 +13,12 @@ import { PrismaModule } from '../../common/prisma/prisma.module';
   providers: [
     CreateCommunityUseCase,
     ListCommunitiesUseCase,
+    PrismaCommunityRepository,
     {
       provide: COMMUNITY_REPOSITORY_TOKEN,
       useClass: PrismaCommunityRepository,
     },
-    {
-      provide: 'CommunityRepositoryPort',
-      useExisting: COMMUNITY_REPOSITORY_TOKEN,
-    },
   ],
-  exports: ['CommunityRepositoryPort'],
+  exports: [COMMUNITY_REPOSITORY_TOKEN, PrismaCommunityRepository],
 })
 export class CommunitiesModule {}

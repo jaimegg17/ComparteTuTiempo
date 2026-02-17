@@ -2,15 +2,20 @@ import { CommunityEntity } from '../domain/community.entity';
 
 export class CommunityMapper {
   static toDomain(prismaCommunity: any): CommunityEntity {
-    return new CommunityEntity(
-      prismaCommunity.id,
-      prismaCommunity.name,
-      prismaCommunity.description,
-      prismaCommunity.isPrivate,
-      prismaCommunity.creatorId,
-      prismaCommunity.createdAt,
-      prismaCommunity.updatedAt,
-    );
+    try {
+      return new CommunityEntity(
+        prismaCommunity.id,
+        prismaCommunity.name,
+        prismaCommunity.description ?? null, // Handle nullable description
+        prismaCommunity.isPrivate,
+        prismaCommunity.creatorId,
+        prismaCommunity.createdAt instanceof Date ? prismaCommunity.createdAt : new Date(prismaCommunity.createdAt),
+        prismaCommunity.updatedAt instanceof Date ? prismaCommunity.updatedAt : new Date(prismaCommunity.updatedAt),
+      );
+    } catch (error) {
+      console.error('Error in CommunityMapper.toDomain:', error, prismaCommunity);
+      throw error;
+    }
   }
 
   static toPrisma(community: CommunityEntity): any {
