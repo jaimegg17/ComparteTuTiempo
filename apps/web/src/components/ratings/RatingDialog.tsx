@@ -67,8 +67,8 @@ export function RatingDialog({
       await createRating.mutateAsync({
         userId: user.sub,
         serviceId: serviceId,
-        score: rating,
-        comment: comment.trim() || undefined,
+          score: rating,
+          comment: comment.trim() || undefined,
       });
 
       // Success

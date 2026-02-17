@@ -74,26 +74,31 @@ export default function ServicesPage() {
     return typeMap[type] || type;
   };
 
-  const fetchServices = async () => {
+  type FilterOverrides = {
+    searchTerm?: string;
+    selectedCategory?: string;
+    location?: string;
+    durationRange?: number[];
+    selectedType?: string;
+  };
+
+  const fetchServices = async (overrides?: FilterOverrides) => {
+    const q = overrides?.searchTerm ?? searchTerm;
+    const cat = overrides?.selectedCategory ?? selectedCategory;
+    const loc = overrides?.location ?? location;
+    const dur = overrides?.durationRange ?? durationRange;
+    const typ = overrides?.selectedType ?? selectedType;
+
     await handleAsyncOperation(async () => {
       const params = new URLSearchParams();
-      if (searchTerm) params.append('q', searchTerm);
-      
-      // Solo una categoría a la vez
-      if (selectedCategory) params.append('category', selectedCategory);
-      
-      if (location) params.append('location', location);
-      
-      if (durationRange[0] > 0) params.append('minPrice', (durationRange[0] * 60).toString());
-      if (durationRange[1] < 8) params.append('maxPrice', (durationRange[1] * 60).toString());
-      
-      // Solo un tipo a la vez
-      if (selectedType) params.append('type', selectedType);
+      if (q) params.append('q', q);
+      if (cat) params.append('category', cat);
+      if (loc) params.append('location', loc);
+      if (dur[0] > 0) params.append('minPrice', (dur[0] * 60).toString());
+      if (dur[1] < 8) params.append('maxPrice', (dur[1] * 60).toString());
+      if (typ) params.append('type', typ);
 
-      // Determinar la URL según el tab activo
       let url = `http://localhost:3001/api/services?${params.toString()}`;
-      
-      // Si está en el tab "Mis Servicios" y hay usuario logueado
       if (activeTab === 1 && user?.sub && accessToken) {
         params.append('userId', user.sub);
         url = `http://localhost:3001/api/services?${params.toString()}`;
@@ -104,20 +109,18 @@ export default function ServicesPage() {
           'Authorization': `Bearer ${accessToken}`,
         } : {},
       });
-      
+
       if (!response.ok) {
         throw new Error(ERROR_MESSAGES.NETWORK_ERROR);
       }
-      
+
       const data = await response.json();
-      
       let filteredServices = data.services || [];
-      if (durationRange[0] > 0 || durationRange[1] < 8) {
-        filteredServices = filteredServices.filter((service: Service) => 
-          service.duration >= durationRange[0] && service.duration <= durationRange[1]
+      if (dur[0] > 0 || dur[1] < 8) {
+        filteredServices = filteredServices.filter((service: Service) =>
+          service.duration >= dur[0] && service.duration <= dur[1]
         );
       }
-      
       setServices(filteredServices);
       setTotal(filteredServices.length);
     }, ERROR_MESSAGES.NETWORK_ERROR);
@@ -132,12 +135,20 @@ export default function ServicesPage() {
   }, [activeTab]);
 
   const handleClearFilters = () => {
+    const emptyFilters = {
+      searchTerm: '',
+      selectedCategory: '',
+      location: '',
+      durationRange: [0, 8] as number[],
+      selectedType: '',
+    };
     setSearchTerm('');
     setSelectedCategory('');
     setLocation('');
     setDurationRange([0, 8]);
     setSelectedType('');
-    setTimeout(() => fetchServices(), 100);
+    // Fetch with empty filters immediately so results update on first click
+    fetchServices(emptyFilters);
   };
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
@@ -209,10 +220,10 @@ export default function ServicesPage() {
               handleMaxDurationChange={handleMaxDurationChange}
               onApplyFilters={fetchServices}
               onClearFilters={handleClearFilters}
-              onClearCategory={() => { setSelectedCategory(''); setTimeout(() => fetchServices(), 100); }}
-              onClearType={() => { setSelectedType(''); setTimeout(() => fetchServices(), 100); }}
-              onClearLocation={() => { setLocation(''); setTimeout(() => fetchServices(), 100); }}
-              onClearDuration={() => { setDurationRange([0, 8]); setTimeout(() => fetchServices(), 100); }}
+              onClearCategory={() => { setSelectedCategory(''); fetchServices({ selectedCategory: '' }); }}
+              onClearType={() => { setSelectedType(''); fetchServices({ selectedType: '' }); }}
+              onClearLocation={() => { setLocation(''); fetchServices({ location: '' }); }}
+              onClearDuration={() => { setDurationRange([0, 8]); fetchServices({ durationRange: [0, 8] }); }}
             />
 
             {/* Grid de Servicios */}
