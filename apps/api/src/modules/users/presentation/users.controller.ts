@@ -47,7 +47,12 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'Perfil obtenido exitosamente' })
   @ApiResponse({ status: 401, description: 'No autorizado' })
   async getMyProfile(@Request() req: any) {
-    const userId = req.user?.sub || 'auth0|test-user-1';
+    const userId = req.user?.sub;
+    
+    if (!userId) {
+      throw new Error('Usuario no autenticado');
+    }
+    
     const result = await this.getUserProfileUseCase.execute({ userId });
     return {
       message: 'Perfil obtenido exitosamente',
@@ -65,7 +70,11 @@ export class UsersController {
     @Request() req: any,
     @Body() updateData: UpdateUserProfileDto,
   ) {
-    const userId = req.user?.sub || 'auth0|test-user-1';
+    const userId = req.user?.sub;
+    
+    if (!userId) {
+      throw new Error('Usuario no autenticado');
+    }
     const result = await this.updateUserProfileUseCase.execute({
       userId,
       data: updateData,

@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Query, UseGuards, Request, Param, ParseIntPipe, Put, Delete, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional, IsEnum, MinLength, Min } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsEnum, MinLength, Min, IsUrl } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ServiceCreateWithImage } from '../domain/service.types';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
@@ -11,7 +11,10 @@ import { GetServiceUseCase } from '../application/get-service.use-case';
 import { UpdateServiceUseCase } from '../application/update-service.use-case';
 import { DeleteServiceUseCase } from '../application/delete-service.use-case';
 
-// DTO con validación completa
+const CATEGORIES = ['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'ARTE', 'OTROS'] as const;
+const TYPES = ['PRESENCIAL', 'VIRTUAL', 'HIBRIDO'] as const;
+
+// DTOs con class-validator para compatibilidad con ValidationPipe global
 export class CreateServiceDto {
   @IsString()
   @MinLength(5, { message: 'El título debe tener al menos 5 caracteres' })
@@ -21,35 +24,91 @@ export class CreateServiceDto {
   @MinLength(20, { message: 'La descripción debe tener al menos 20 caracteres' })
   description: string;
 
+  @IsOptional()
+  @IsString()
+  detailedDescription?: string;
+
   @IsNumber()
-  @Min(1, { message: 'La duración debe ser positiva' })
+  @Min(0.1)
+  @Type(() => Number)
   duration: number;
 
   @IsOptional()
   @IsString()
   location?: string;
 
-  @IsEnum(['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'ARTE', 'OTROS'])
-  category: 'EDUCACION' | 'HOGAR' | 'TECNOLOGIA' | 'SALUD' | 'DEPORTES' | 'ARTE' | 'OTROS';
+  @IsOptional()
+  @IsString()
+  availability?: string;
 
-  @IsEnum(['PRESENCIAL', 'VIRTUAL', 'HIBRIDO'])
-  type: 'PRESENCIAL' | 'VIRTUAL' | 'HIBRIDO';
+  @IsEnum(CATEGORIES)
+  category: (typeof CATEGORIES)[number];
+
+  @IsEnum(TYPES)
+  type: (typeof TYPES)[number];
 
   @IsNumber()
-  @Min(1, { message: 'El precio debe ser positivo' })
+  @Min(0)
+  @Type(() => Number)
   price: number;
+
+  @IsOptional()
+  @IsUrl()
+  @IsString()
+  imageUrl?: string | null;
+}
+
+export class UpdateServiceDto {
+  @IsOptional()
+  @IsString()
+  @MinLength(5, { message: 'El título debe tener al menos 5 caracteres' })
+  title?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(20, { message: 'La descripción debe tener al menos 20 caracteres' })
+  description?: string;
 
   @IsOptional()
   @IsString()
   detailedDescription?: string;
 
   @IsOptional()
+  @IsNumber()
+  @Min(0.1)
+  @Type(() => Number)
+  duration?: number;
+
+  @IsOptional()
+  @IsString()
+  location?: string;
+
+  @IsOptional()
   @IsString()
   availability?: string;
 
   @IsOptional()
+  @IsEnum(CATEGORIES)
+  category?: (typeof CATEGORIES)[number];
+
+  @IsOptional()
+  @IsEnum(TYPES)
+  type?: (typeof TYPES)[number];
+
+  @IsOptional()
+  @IsEnum(['ACTIVO', 'INACTIVO', 'COMPLETADO'])
+  status?: 'ACTIVO' | 'INACTIVO' | 'COMPLETADO';
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Type(() => Number)
+  price?: number;
+
+  @IsOptional()
+  @IsUrl()
   @IsString()
-  imageUrl?: string;
+  imageUrl?: string | null;
 }
 
 // Query DTO for searching and filtering services
@@ -293,13 +352,19 @@ export class ServicesController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Actualizar un servicio por ID' })
   @ApiResponse({ status: 200, description: 'Servicio actualizado' })
+  @ApiResponse({ status: 403, description: 'No autorizado para actualizar este servicio' })
   async updateService(
     @Param('id', ParseIntPipe) id: number,
-    @Body() data: any,
+    @Body() updateServiceDto: UpdateServiceDto,
     @Request() req: any,
   ) {
-    const userId = req.user?.sub || 'auth0|test-user-1'; // Fallback para testing
-    const result = await this.updateServiceUseCase.execute({ id, data, userId });
+    const userId = req.user?.sub;
+    
+    if (!userId) {
+      throw new Error('Usuario no autenticado');
+    }
+    
+    const result = await this.updateServiceUseCase.execute({ id, data: updateServiceDto, userId });
     return { message: 'Servicio actualizado exitosamente', service: result.service.toContract() };
   }
 
@@ -309,8 +374,14 @@ export class ServicesController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Eliminar un servicio por ID' })
   @ApiResponse({ status: 204, description: 'Servicio eliminado' })
+  @ApiResponse({ status: 403, description: 'No autorizado para eliminar este servicio' })
   async deleteService(@Param('id', ParseIntPipe) id: number, @Request() req: any) {
-    const userId = req.user?.sub || 'auth0|test-user-1'; // Fallback para testing
+    const userId = req.user?.sub;
+    
+    if (!userId) {
+      throw new Error('Usuario no autenticado');
+    }
+    
     await this.deleteServiceUseCase.execute({ id, userId });
     return { message: 'Servicio eliminado exitosamente' };
   }

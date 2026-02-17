@@ -20,7 +20,7 @@ export const GroupCreateSchema = z.object({
   description: z.string().optional(),
   type: z.enum(['PUBLICO', 'PRIVADO', 'TRABAJO', 'HOBBY']).default('PUBLICO'),
   isPrivate: z.boolean().default(false),
-  creatorId: z.string(),
+  // creatorId is set automatically from the authenticated user
 });
 
 export const GroupUpdateSchema = z.object({

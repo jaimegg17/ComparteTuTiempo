@@ -73,7 +73,10 @@ export class UpdateExchangeUseCase {
     }
 
     // Calculate credits to transfer (using exchangedTime or service duration in minutes)
-    const creditsToTransfer = Math.round((exchange.exchangedTime || service.duration) * 60); // Convert hours to minutes
+    // exchangedTime is in hours, service.duration is also in hours
+    // Convert to minutes for timeCredits (which are stored in minutes)
+    const timeInHours = exchange.exchangedTime > 0 ? exchange.exchangedTime : service.duration;
+    const creditsToTransfer = Math.round(timeInHours * 60); // Convert hours to minutes
 
     // Perform the transfer in a transaction
     await this.prisma.$transaction(async (tx) => {

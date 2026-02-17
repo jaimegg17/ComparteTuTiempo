@@ -31,6 +31,7 @@ export const ServiceCreateSchema = z.object({
   category: z.enum(['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'ARTE', 'OTROS']),
   type: z.enum(['PRESENCIAL', 'VIRTUAL', 'HIBRIDO']),
   price: z.number().positive('El precio debe ser positivo'),
+  imageUrl: z.string().url('La URL de la imagen debe ser válida').optional().nullable(),
 });
 
 export const ServiceUpdateSchema = z.object({
@@ -44,6 +45,7 @@ export const ServiceUpdateSchema = z.object({
   type: z.enum(['PRESENCIAL', 'VIRTUAL', 'HIBRIDO']).optional(),
   status: z.enum(['ACTIVO', 'INACTIVO', 'COMPLETADO']).optional(),
   price: z.number().positive('El precio debe ser positivo').optional(),
+  imageUrl: z.string().url('La URL de la imagen debe ser válida').optional().nullable(),
 });
 
 export const ServiceListQuerySchema = z.object({

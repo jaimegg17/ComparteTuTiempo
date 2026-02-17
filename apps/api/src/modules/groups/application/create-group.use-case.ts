@@ -24,10 +24,6 @@ export class CreateGroupUseCase {
     const { data, userId } = request;
 
     // Business logic validation
-    if (data.creatorId !== userId) {
-      throw new BadRequestException('No puedes crear grupos en nombre de otro usuario');
-    }
-
     if (!data.name || data.name.trim().length < 3) {
       throw new BadRequestException('El nombre del grupo debe tener al menos 3 caracteres');
     }
@@ -36,15 +32,21 @@ export class CreateGroupUseCase {
       throw new BadRequestException('El nombre del grupo no puede exceder 100 caracteres');
     }
 
-    if (!data.description || data.description.trim().length < 10) {
-      throw new BadRequestException('La descripción debe tener al menos 10 caracteres');
+    if (data.description && data.description.trim().length > 0 && data.description.trim().length < 10) {
+      throw new BadRequestException('La descripción debe tener al menos 10 caracteres si se proporciona');
     }
 
-    if (data.description.length > 500) {
+    if (data.description && data.description.length > 500) {
       throw new BadRequestException('La descripción no puede exceder 500 caracteres');
     }
 
-    const group = await this.groupRepository.create(data);
+    // Add creatorId from authenticated user (not from request body for security)
+    const groupData = {
+      ...data,
+      creatorId: userId,
+    } as GroupCreate & { creatorId: string };
+
+    const group = await this.groupRepository.create(groupData as any);
 
     return { group };
   }

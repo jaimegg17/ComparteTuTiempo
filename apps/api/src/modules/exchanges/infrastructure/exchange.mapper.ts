@@ -12,7 +12,7 @@ export class ExchangeMapper {
       prismaExchange.serviceId,
       prismaExchange.date,
       prismaExchange.state as ExchangeStatusType,
-      Number(prismaExchange.exchangedTime), // Convert Decimal to number
+      prismaExchange.exchangedTime ? Number(prismaExchange.exchangedTime) : 0, // Convert Decimal to number, default to 0 if null
       prismaExchange.createdAt,
       prismaExchange.updatedAt,
     );

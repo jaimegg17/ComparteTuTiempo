@@ -56,7 +56,7 @@ export class ExchangesController {
   @ApiResponse({ status: 400, description: 'Datos inválidos o créditos insuficientes' })
   @ApiResponse({ status: 401, description: 'No autorizado' })
   async createExchange(
-    @Body() body: any, // Temporal: sin validación estricta
+    @Body() createExchangeDto: CreateExchangeDto,
     @Request() req: any,
   ) {
     const userId = req.user?.sub;
@@ -65,9 +65,9 @@ export class ExchangesController {
       throw new Error('Usuario no autenticado');
     }
     
-    // Ensure requestedById is set to the current user
+    // Ensure requestedById is set to the current user (override any value from DTO)
     const exchangeData = {
-      ...body,
+      ...createExchangeDto,
       requestedById: userId,
     };
     
@@ -91,7 +91,11 @@ export class ExchangesController {
     @Query() query: ExchangeListQueryDto,
     @Request() req: any,
   ) {
-    const userId = req.user?.sub || 'auth0|test-user-1';
+    const userId = req.user?.sub;
+    
+    if (!userId) {
+      throw new Error('Usuario no autenticado');
+    }
     
     // Asegurar que page y pageSize estén presentes
     const queryWithDefaults = {
@@ -127,7 +131,11 @@ export class ExchangesController {
     @Param('id', ParseIntPipe) id: number,
     @Request() req: any,
   ) {
-    const userId = req.user?.sub || 'auth0|test-user-1';
+    const userId = req.user?.sub;
+    
+    if (!userId) {
+      throw new Error('Usuario no autenticado');
+    }
     const result = await this.getExchangeUseCase.execute({ id, userId });
 
     return {
@@ -147,13 +155,18 @@ export class ExchangesController {
   @ApiResponse({ status: 403, description: 'No autorizado para actualizar este intercambio' })
   async updateExchange(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: any, // Temporal: sin validación estricta
+    @Body() updateExchangeDto: UpdateExchangeDto,
     @Request() req: any,
   ) {
-    const userId = req.user?.sub || 'auth0|test-user-1';
+    const userId = req.user?.sub;
+    
+    if (!userId) {
+      throw new Error('Usuario no autenticado');
+    }
+    
     const result = await this.updateExchangeUseCase.execute({
       id,
-      data: body,
+      data: updateExchangeDto,
       userId,
     });
 

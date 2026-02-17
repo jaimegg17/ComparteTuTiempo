@@ -14,22 +14,15 @@ import {
   HttpStatus
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { createZodDto } from '@anatine/zod-nestjs';
+import { GroupCreateSchema, GroupUpdateSchema } from '@comparte-tu-tiempo/contracts';
 import { CreateGroupUseCase } from '../application/create-group.use-case';
 import { ListGroupsUseCase } from '../application/list-groups.use-case';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
 
-// Simple DTOs without validation for now
-export class CreateGroupDto {
-  name: string;
-  description?: string;
-  type: 'PUBLICO' | 'PRIVADO' | 'TRABAJO' | 'HOBBY';
-  isPrivate: boolean;
-}
-
-export class UpdateGroupDto {
-  name?: string;
-  description?: string;
-}
+// DTOs generados desde Zod
+export class CreateGroupDto extends createZodDto(GroupCreateSchema) {}
+export class UpdateGroupDto extends createZodDto(GroupUpdateSchema) {}
 
 export class GroupListQueryDto {
   communityId?: number;
@@ -53,12 +46,17 @@ export class GroupsController {
   @ApiResponse({ status: 201, description: 'Grupo creado exitosamente' })
   @ApiResponse({ status: 400, description: 'Datos inválidos' })
   async createGroup(
-    @Body() body: any, // Temporal: sin validación estricta
+    @Body() createGroupDto: CreateGroupDto,
     @Request() req: any,
   ) {
-    const userId = req.user?.sub || 'auth0|test-user-1'; // Fallback para testing
+    const userId = req.user?.sub;
+    
+    if (!userId) {
+      throw new Error('Usuario no autenticado');
+    }
+    
     const result = await this.createGroupUseCase.execute({
-      data: { ...body, creatorId: userId },
+      data: createGroupDto,
       userId,
     });
 
@@ -130,6 +128,12 @@ export class GroupsController {
     @Body() updateGroupDto: UpdateGroupDto,
     @Request() req: any,
   ) {
+    const userId = req.user?.sub;
+    
+    if (!userId) {
+      throw new Error('Usuario no autenticado');
+    }
+    
     // This would need an update group use case
     return {
       message: 'Grupo actualizado exitosamente',
@@ -150,6 +154,12 @@ export class GroupsController {
     @Param('id', ParseIntPipe) id: number,
     @Request() req: any,
   ) {
+    const userId = req.user?.sub;
+    
+    if (!userId) {
+      throw new Error('Usuario no autenticado');
+    }
+    
     // This would need a delete group use case
     return {
       message: 'Grupo eliminado exitosamente',
