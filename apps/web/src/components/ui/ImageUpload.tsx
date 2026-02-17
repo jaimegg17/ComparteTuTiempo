@@ -3,6 +3,7 @@ import { Box, Button, Typography, IconButton, Alert, LinearProgress, CircularPro
 import { CloudUpload, Delete, Image as ImageIcon } from '@mui/icons-material';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useUploadImage } from '@/shared/hooks/use-upload';
+import { useUser } from '@auth0/nextjs-auth0/client';
 
 interface ImageUploadProps {
   onImageSelect?: (file: File | null) => void;
@@ -13,7 +14,7 @@ interface ImageUploadProps {
 }
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB (must match API)
 
 export function ImageUpload({ 
   onImageSelect, 
@@ -23,6 +24,7 @@ export function ImageUpload({
   autoUpload = false,
 }: ImageUploadProps) {
   const { t } = useTranslation();
+  const { user, isLoading: userLoading } = useUser();
   const uploadImage = useUploadImage();
   
   const [preview, setPreview] = useState<string | null>(currentImage || null);
@@ -38,9 +40,8 @@ export function ImageUpload({
       return 'Tipo de archivo no permitido. Formatos permitidos: JPEG, PNG, WebP, GIF';
     }
 
-    // Validate file size
     if (file.size > MAX_FILE_SIZE) {
-      return `El archivo es demasiado grande. Tamaño máximo: ${MAX_FILE_SIZE / 1024 / 1024}MB`;
+      return `El archivo es demasiado grande. Tamaño máximo: ${MAX_FILE_SIZE / 1024 / 1024}MB. Elige otra o comprímela.`;
     }
 
     return null;
@@ -55,7 +56,7 @@ export function ImageUpload({
     reader.readAsDataURL(file);
   }, []);
 
-  const handleFileSelect = useCallback(async (file: File | null) => {
+  const handleFileSelect = useCallback((file: File | null) => {
     if (!file) {
       onImageSelect?.(null);
       setPreview(null);
@@ -78,31 +79,58 @@ export function ImageUpload({
 
     // Auto-upload if enabled
     if (autoUpload) {
-      try {
-        setUploadProgress(0);
-        // Simulate progress (Cloudinary doesn't provide real-time progress)
-        const progressInterval = setInterval(() => {
-          setUploadProgress((prev) => {
-            if (prev >= 90) {
-              clearInterval(progressInterval);
-              return 90;
-            }
-            return prev + 10;
-          });
-        }, 200);
-
-        const result = await uploadImage.mutateAsync(file);
-        clearInterval(progressInterval);
-        setUploadProgress(100);
-        onImageUploaded?.(result.url);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error al subir la imagen');
-        setUploadProgress(0);
-        selectedFileRef.current = null;
+      // Check if user is authenticated
+      if (!user && !userLoading) {
+        setError('Debes iniciar sesión para subir imágenes. Por favor, inicia sesión e intenta nuevamente.');
         setPreview(null);
+        selectedFileRef.current = null;
+        return;
       }
+
+      if (userLoading) {
+        setError('Cargando autenticación... Por favor, espera un momento.');
+        return;
+      }
+
+      setUploadProgress(0);
+      setError(null);
+      let progressInterval: ReturnType<typeof setInterval> | null = setInterval(() => {
+        setUploadProgress((prev) => {
+          if (prev >= 90) {
+            if (progressInterval) clearInterval(progressInterval);
+            progressInterval = null;
+            return 90;
+          }
+          return prev + 10;
+        });
+      }, 200);
+
+      const clearProgress = () => {
+        if (progressInterval) {
+          clearInterval(progressInterval);
+          progressInterval = null;
+        }
+      };
+
+      uploadImage
+        .mutateAsync(file)
+        .then((result) => {
+          clearProgress();
+          setUploadProgress(100);
+          onImageUploaded?.(result.url);
+          // Reset progress after a short delay so it doesn't stay at "Subiendo imagen... 100%"
+          setTimeout(() => setUploadProgress(0), 600);
+        })
+        .catch((err: unknown) => {
+          clearProgress();
+          const msg =
+            err instanceof Error ? err.message : typeof err === 'string' ? err : 'Error al subir la imagen. Inténtalo de nuevo.';
+          setError(msg);
+          setUploadProgress(0);
+          selectedFileRef.current = file;
+        });
     }
-  }, [autoUpload, onImageSelect, onImageUploaded, createPreview, uploadImage]);
+  }, [autoUpload, onImageSelect, onImageUploaded, createPreview, uploadImage, user, userLoading]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -257,7 +285,7 @@ export function ImageUpload({
               : t("services.form.image_upload.title") || 'Arrastra una imagen o haz clic para seleccionar'}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            {t("services.form.image_upload.subtitle") || 'Formatos: JPEG, PNG, WebP, GIF (máx. 5MB)'}
+            {t("services.form.image_upload.subtitle") || 'Formatos: JPEG, PNG, WebP, GIF (máx. 10MB)'}
           </Typography>
           <Button
             variant="outlined"
@@ -281,13 +309,31 @@ export function ImageUpload({
       )}
 
       {error && (
-        <Alert severity="error" sx={{ mt: 2 }}>
+        <Alert
+          severity="error"
+          sx={{ mt: 2 }}
+          action={
+            <Button
+              color="inherit"
+              size="small"
+              onClick={() => {
+                setError(null);
+                setPreview(null);
+                selectedFileRef.current = null;
+                if (fileInputRef.current) fileInputRef.current.value = '';
+                handleUploadClick();
+              }}
+            >
+              Reintentar
+            </Button>
+          }
+        >
           {error}
         </Alert>
       )}
 
       <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-        {t("services.form.image_upload.help") || 'Dimensiones recomendadas: mínimo 200x200px, máximo 4000x4000px'}
+        {t("services.form.image_upload.help") || 'Dimensiones: mínimo 50x50px, máximo 6000x6000px. Tamaño máximo: 10MB.'}
       </Typography>
     </Box>
   );

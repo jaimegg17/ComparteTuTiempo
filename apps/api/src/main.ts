@@ -23,12 +23,14 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Validación global deshabilitada temporalmente para testing
   // Global validation pipe con transform habilitado para query params
   app.useGlobalPipes(new ValidationPipe({
     transform: true, // Convierte tipos automáticamente (string → number)
-    whitelist: false, // Deshabilitado temporalmente para evitar errores de validación
-    forbidNonWhitelisted: false,
+    whitelist: true, // Elimina propiedades que no están en el DTO
+    forbidNonWhitelisted: true, // Lanza error si hay propiedades no permitidas
+    transformOptions: {
+      enableImplicitConversion: true, // Convierte tipos automáticamente
+    },
   }));
 
   // Interceptor global para upsert de usuarios

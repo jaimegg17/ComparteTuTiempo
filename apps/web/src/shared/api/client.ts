@@ -23,18 +23,33 @@ export class ApiClient {
     };
 
     // Only set Content-Type if not already set (e.g., for FormData)
+    // IMPORTANT: Don't set Content-Type for FormData - browser will set it with boundary
     if (!headers['Content-Type'] && !(options.body instanceof FormData)) {
       headers['Content-Type'] = 'application/json';
     }
 
+    // Always set Authorization header if we have a token
+    // This must be set even for FormData requests
     if (this.token) {
       headers.Authorization = `Bearer ${this.token}`;
+      console.log('🔑 Setting Authorization header, token length:', this.token.length);
+    } else {
+      console.warn('⚠️ No token available in apiClient for request to:', endpoint);
     }
 
     const config: RequestInit = {
       ...options,
       headers,
     };
+
+    // Log request details for debugging
+    console.log('📤 Making request:', {
+      method: config.method || 'GET',
+      url,
+      hasToken: !!this.token,
+      isFormData: options.body instanceof FormData,
+      headers: Object.keys(headers),
+    });
 
     try {
       // Asegurar que fetch esté disponible
@@ -45,7 +60,20 @@ export class ApiClient {
       const response = await fetch(url, config);
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          const raw = errorData.message ?? errorData.error;
+          // Nest/ValidationPipe can return message as string or string[]
+          errorMessage = Array.isArray(raw) ? raw[0] ?? raw.join(' ') : (raw || errorMessage);
+        } catch {
+          errorMessage = response.statusText || errorMessage;
+        }
+
+        const error = new Error(errorMessage);
+        (error as any).status = response.status;
+        (error as any).response = response;
+        throw error;
       }
 
       const data = await response.json();
@@ -61,11 +89,19 @@ export class ApiClient {
   }
 
   async post<T>(endpoint: string, data?: any, isFormData: boolean = false): Promise<T> {
+    // For FormData, we don't set Content-Type (browser will set it with boundary)
+    // But we still need to pass the Authorization header
     const headers: Record<string, string> = {};
     
     // Don't set Content-Type for FormData, browser will set it with boundary
     if (!isFormData) {
       headers['Content-Type'] = 'application/json';
+    }
+
+    // Authorization header will be added in request() method
+    // But we ensure it's available here too
+    if (this.token) {
+      headers.Authorization = `Bearer ${this.token}`;
     }
 
     return this.request<T>(endpoint, {

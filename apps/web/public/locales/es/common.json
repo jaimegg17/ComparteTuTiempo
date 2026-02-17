@@ -271,9 +271,9 @@
       "info_note": "Nota: La duración del servicio representa las horas de crédito que recibirás cuando se complete un intercambio.",
       "image_upload": {
         "title": "Subir Imagen del Servicio",
-        "subtitle": "Arrastra y suelta una imagen o haz clic para explorar",
+        "subtitle": "Arrastra y suelta una imagen o haz clic para explorar (máx. 10MB)",
         "button": "Elegir Imagen",
-        "help": "Formatos soportados: JPG, PNG, GIF. Tamaño máximo: 5MB"
+        "help": "Dimensiones: mínimo 50x50px, máximo 6000x6000px. Tamaño máximo: 10MB."
       }
     },
     "card": {
@@ -379,6 +379,34 @@
       "created": "Valoración creada exitosamente",
       "updated": "Valoración actualizada exitosamente",
       "deleted": "Valoración eliminada exitosamente"
+    }
+  },
+  "communities": {
+    "title": "Comunidades",
+    "subtitle": "Descubre y únete a comunidades de interés",
+    "create": "Crear Comunidad",
+    "edit": "Editar Comunidad",
+    "delete": "Eliminar Comunidad",
+    "public": "Pública",
+    "private": "Privada",
+    "view_details": "Ver Detalles",
+    "no_description": "Sin descripción",
+    "tabs": {
+      "all": "Todas",
+      "my_communities": "Mis Comunidades",
+      "public": "Públicas"
+    },
+    "empty_states": {
+      "no_communities": "No se encontraron comunidades",
+      "no_my_communities": "Aún no has creado ninguna comunidad",
+      "create_first": "Crea tu primera comunidad"
+    },
+    "not_found": "No se encontraron comunidades",
+    "error": "Error al cargar comunidades",
+    "success": {
+      "created": "Comunidad creada exitosamente",
+      "updated": "Comunidad actualizada exitosamente",
+      "deleted": "Comunidad eliminada exitosamente"
     }
   },
   "auth": {

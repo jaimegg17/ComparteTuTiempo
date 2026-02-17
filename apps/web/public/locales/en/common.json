@@ -271,9 +271,9 @@
       "info_note": "Note: The service duration represents the credit hours you will receive when an exchange is completed.",
       "image_upload": {
         "title": "Upload Service Image",
-        "subtitle": "Drag and drop an image or click to browse",
+        "subtitle": "Drag and drop an image or click to browse (max 10MB)",
         "button": "Choose Image",
-        "help": "Supported formats: JPG, PNG, GIF. Max size: 5MB"
+        "help": "Dimensions: min 50x50px, max 6000x6000px. Max size: 10MB."
       }
     },
     "card": {

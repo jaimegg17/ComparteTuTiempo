@@ -69,7 +69,10 @@ export class CloudinaryService {
         (error, result) => {
           if (error) {
             this.logger.error(`Error uploading to Cloudinary: ${error.message}`, error.stack);
-            reject(new Error(`Error al subir la imagen: ${error.message}`));
+            const msg = error.message?.includes('api_key')
+              ? 'El servidor no tiene configurado el almacenamiento de imágenes. Contacta con el administrador.'
+              : `Error al subir la imagen: ${error.message}`;
+            reject(new Error(msg));
           } else if (result) {
             this.logger.log(`Image uploaded successfully: ${result.public_id}`);
             resolve(result.secure_url);

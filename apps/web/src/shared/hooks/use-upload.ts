@@ -9,16 +9,68 @@ import { useAuth } from '@/hooks/useAuth';
  */
 export const useUploadImage = () => {
   const queryClient = useQueryClient();
-  const { getAccessToken } = useAuth();
+  const { getAccessToken, user, isLoading } = useAuth();
 
   return useMutation({
     mutationFn: async (file: File) => {
-      // Get token and set it in API client
-      const token = await getAccessToken();
-      if (token) {
-        apiClient.setToken(token);
+      // Ensure user is authenticated
+      if (!user) {
+        console.error('❌ User not authenticated');
+        throw new Error('Debes iniciar sesión para subir imágenes. Por favor, inicia sesión e intenta nuevamente.');
       }
-      return uploadApi.uploadImage(file);
+
+      if (isLoading) {
+        console.log('⏳ Waiting for auth to load...');
+        // Wait a bit for auth to finish loading
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+      console.log('🔑 Attempting to get access token for user:', user.sub);
+      
+      // Always get a fresh token before making the request
+      // Don't rely on cached token as it might be expired
+      // Force refresh to ensure we get a valid token
+      const token = await getAccessToken(true); // forceRefresh = true
+      
+      if (!token) {
+        console.error('❌ Failed to get access token');
+        console.error('User:', user);
+        console.error('User sub:', user.sub);
+        throw new Error('No se pudo obtener el token de autenticación. Por favor, recarga la página e inicia sesión nuevamente.');
+      }
+      
+      console.log('✅ Token obtained, length:', token.length);
+      console.log('✅ Token preview:', token.substring(0, 20) + '...');
+      
+      // Always set a fresh token before making the request
+      // Clear any old token first to avoid issues
+      apiClient.setToken(token);
+      console.log('✅ Token set in apiClient');
+      
+      // Small delay to ensure token is set
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      try {
+        console.log('📤 Starting image upload...');
+        const result = await uploadApi.uploadImage(file);
+        console.log('✅ Image upload successful');
+        return result;
+      } catch (error: any) {
+        // If we get a 401, the token might be expired
+        if (error.status === 401 || error.message?.includes('401') || error.message?.includes('Unauthorized') || error.message?.includes('Token inválido')) {
+          console.log('🔄 Token expired or invalid, trying to get a fresh one...');
+          // Force a fresh token fetch (don't use cache)
+          const freshToken = await getAccessToken(true); // forceRefresh = true
+          if (freshToken && freshToken !== token) {
+            apiClient.setToken(freshToken);
+            // Retry once with the fresh token
+            return await uploadApi.uploadImage(file);
+          } else {
+            throw new Error('Token de autenticación inválido o expirado. Por favor, recarga la página e inicia sesión nuevamente.');
+          }
+        }
+        throw error;
+      }
     },
     onSuccess: () => {
       // Invalidate any queries that might depend on uploaded images
