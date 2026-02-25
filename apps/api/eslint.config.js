@@ -10,10 +10,7 @@ const compat = new FlatCompat({
 
 module.exports = [
   {
-    ignores: [
-      'node_modules/**',
-      'dist/**',
-    ],
+    ignores: ['node_modules/**', 'dist/**'],
   },
   recommendedConfig,
   ...compat.config({
@@ -26,9 +23,6 @@ module.exports = [
         ecmaVersion: 2022,
         sourceType: 'module',
       },
-      globals: {
-        NodeJS: true,
-      },
     },
     rules: {
       '@typescript-eslint/no-unused-vars': 'error',
@@ -38,26 +32,6 @@ module.exports = [
     },
     settings: {
       node: true,
-    },
-  },
-  {
-    files: [
-      '**/*.config.js',
-      '**/*.config.cjs',
-      'eslint.config.js',
-    ],
-    languageOptions: {
-      sourceType: 'commonjs',
-      globals: {
-        module: 'writable',
-        require: 'readonly',
-        __dirname: 'readonly',
-      },
-    },
-    rules: {
-      '@typescript-eslint/no-require-imports': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-      'no-undef': 'off',
     },
   },
 ];
