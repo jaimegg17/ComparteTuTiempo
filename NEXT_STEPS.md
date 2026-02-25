@@ -15,21 +15,21 @@
 
 ### P0 - Crítico (Completar Ahora)
 
-#### 1. Página de Conversaciones (P0.1.6)
+#### 1. Página de Conversaciones (P0.1.6) ✅
 **Prioridad**: Alta  
 **Tiempo estimado**: 2-3 horas
 
 **Tareas:**
-- [ ] Crear página `/conversations` o `/messages`
-- [ ] Listar todas las conversaciones del usuario
-- [ ] Mostrar último mensaje, timestamp, contador de no leídos
-- [ ] Navegación a chat individual
-- [ ] Integrar con el componente Chat existente
+- [x] Crear página `/conversations`
+- [x] Listar todas las conversaciones del usuario
+- [x] Mostrar último mensaje, timestamp, contador de no leídos
+- [x] Navegación a chat individual
+- [x] Integrar con el componente Chat existente (link a exchanges)
 
 **Archivos:**
-- `apps/web/pages/conversations.tsx` (crear)
-- `apps/web/src/shared/api/messages.ts` (extender)
-- `apps/api/src/modules/messages/application/list-conversations.use-case.ts` (crear)
+- `apps/web/pages/conversations.tsx`
+- `apps/web/src/shared/api/messages.ts`
+- `apps/api/src/modules/messages/application/list-conversations.use-case.ts`
 
 ---
 

@@ -74,6 +74,10 @@ export type {
   MessageUpdate,
   MessageListQuery,
   MessageListResponse,
+  ConversationUser,
+  ConversationService,
+  ConversationSummary,
+  ConversationListResponse,
 } from './message.schemas';
 
 export { UserRole } from './user.schemas';

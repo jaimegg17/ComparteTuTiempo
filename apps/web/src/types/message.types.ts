@@ -26,3 +26,28 @@ export interface ChatUser {
   name: string;
   imageUrl?: string;
 }
+
+export interface ConversationUser {
+  id: string;
+  name: string;
+  imageUrl?: string | null;
+}
+
+export interface ConversationService {
+  id: number;
+  title: string;
+}
+
+export interface ConversationSummary {
+  exchangeId: number;
+  exchangeState: string;
+  otherUser: ConversationUser;
+  service: ConversationService | null;
+  lastMessage: Message | null;
+  lastMessageAt: string;
+  unreadCount: number;
+}
+
+export interface ConversationListResponse {
+  conversations: ConversationSummary[];
+}

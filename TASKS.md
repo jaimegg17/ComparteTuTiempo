@@ -57,11 +57,11 @@ Nice-to-have y mejoras adicionales.
   - Mostrar notificaciones de nuevos mensajes
   - **Prioridad**: WebSocket es mejor UX, pero polling es más simple
 
-- [ ] **P0.1.6** Crear página de conversaciones
+- [x] **P0.1.6** Crear página de conversaciones
   - Lista de todas las conversaciones del usuario
   - Mostrar último mensaje, timestamp, no leídos
   - Navegación a chat individual
-  - **Archivo**: `apps/web/src/app/conversations/page.tsx` (crear)
+  - **Archivos**: `apps/web/pages/conversations.tsx`, `apps/web/src/shared/api/messages.ts`, `apps/api/src/modules/messages/application/list-conversations.use-case.ts`
 
 - [ ] **P0.1.7** Mejorar UI del Chat component
   - Indicadores de "escribiendo..."

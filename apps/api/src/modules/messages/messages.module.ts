@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MessagesController } from './presentation/messages.controller';
 import { CreateMessageUseCase } from './application/create-message.use-case';
+import { ListConversationsUseCase } from './application/list-conversations.use-case';
 import { ListMessagesUseCase } from './application/list-messages.use-case';
 import { UpdateMessageUseCase } from './application/update-message.use-case';
 import { MarkMessageReadUseCase } from './application/mark-message-read.use-case';
@@ -13,6 +14,7 @@ import { PrismaModule } from '@/common/prisma/prisma.module';
   controllers: [MessagesController],
   providers: [
     CreateMessageUseCase,
+    ListConversationsUseCase,
     ListMessagesUseCase,
     UpdateMessageUseCase,
     MarkMessageReadUseCase,
@@ -23,6 +25,7 @@ import { PrismaModule } from '@/common/prisma/prisma.module';
   ],
   exports: [
     CreateMessageUseCase,
+    ListConversationsUseCase,
     ListMessagesUseCase,
     UpdateMessageUseCase,
     MarkMessageReadUseCase,

@@ -17,6 +17,7 @@ import {
   MessageListQuerySchema 
 } from '@comparte-tu-tiempo/contracts';
 import { CreateMessageUseCase } from '../application/create-message.use-case';
+import { ListConversationsUseCase } from '../application/list-conversations.use-case';
 import { ListMessagesUseCase } from '../application/list-messages.use-case';
 import { MarkMessageReadUseCase } from '../application/mark-message-read.use-case';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
@@ -32,6 +33,7 @@ export class MessageListQueryDto extends createZodDto(MessageListQuerySchema) {}
 export class MessagesController {
   constructor(
     private readonly createMessageUseCase: CreateMessageUseCase,
+    private readonly listConversationsUseCase: ListConversationsUseCase,
     private readonly listMessagesUseCase: ListMessagesUseCase,
     private readonly markMessageReadUseCase: MarkMessageReadUseCase,
   ) {}
@@ -106,6 +108,31 @@ export class MessagesController {
       message: 'Mensajes obtenidos exitosamente',
       ...result.messages,
       messages: result.messages.messages.map(message => message.toContract()),
+    };
+  }
+
+  @Get('conversations')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Listar conversaciones del usuario' })
+  @ApiResponse({ status: 200, description: 'Lista de conversaciones obtenida' })
+  async listConversations(@Request() req: any) {
+    const userId = req.user?.sub || req.user?.id;
+
+    if (!userId) {
+      throw new Error('User not authenticated');
+    }
+
+    const result = await this.listConversationsUseCase.execute(userId);
+
+    return {
+      message: 'Conversaciones obtenidas exitosamente',
+      conversations: result.conversations.map(conversation => ({
+        ...conversation,
+        lastMessage: conversation.lastMessage
+          ? conversation.lastMessage.toContract()
+          : null,
+      })),
     };
   }
 

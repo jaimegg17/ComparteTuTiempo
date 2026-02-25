@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ExchangeStatus } from './exchange.schemas';
 
 // ============================================================================
 // ESQUEMAS DE MESSAGE
@@ -37,6 +38,38 @@ export const MessageListResponseSchema = z.object({
   totalPages: z.number(),
 });
 
+export const ConversationUserSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  imageUrl: z.string().nullable().optional(),
+});
+
+export const ConversationServiceSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+});
+
+export const ConversationSummarySchema = z.object({
+  exchangeId: z.number(),
+  exchangeState: z.enum([
+    ExchangeStatus.PENDING,
+    ExchangeStatus.CONFIRMED,
+    ExchangeStatus.IN_PROGRESS,
+    ExchangeStatus.COMPLETED,
+    ExchangeStatus.CANCELLED,
+    ExchangeStatus.DISPUTED,
+  ]),
+  otherUser: ConversationUserSchema,
+  service: ConversationServiceSchema.nullable(),
+  lastMessage: MessageSchema.nullable(),
+  lastMessageAt: z.date(),
+  unreadCount: z.number(),
+});
+
+export const ConversationListResponseSchema = z.object({
+  conversations: z.array(ConversationSummarySchema),
+});
+
 // ============================================================================
 // TIPOS INFERIDOS
 // ============================================================================
@@ -46,4 +79,7 @@ export type MessageCreate = z.infer<typeof MessageCreateSchema>;
 export type MessageUpdate = z.infer<typeof MessageUpdateSchema>;
 export type MessageListQuery = z.infer<typeof MessageListQuerySchema>;
 export type MessageListResponse = z.infer<typeof MessageListResponseSchema>;
-
+export type ConversationUser = z.infer<typeof ConversationUserSchema>;
+export type ConversationService = z.infer<typeof ConversationServiceSchema>;
+export type ConversationSummary = z.infer<typeof ConversationSummarySchema>;
+export type ConversationListResponse = z.infer<typeof ConversationListResponseSchema>;
