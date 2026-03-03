@@ -21,7 +21,9 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
-    "db:seed": "ts-node prisma/seed.ts"
+    "db:seed": "ts-node prisma/seed.ts",
+    "db:data:migrate": "ts-node prisma/scripts/run-data-migrations.ts",
+    "db:reset:local": "prisma migrate reset --force --skip-generate --skip-seed && prisma db push && prisma generate && pnpm db:data:migrate"
   },
   "dependencies": {
     "@anatine/zod-nestjs": "^1.0.0",
