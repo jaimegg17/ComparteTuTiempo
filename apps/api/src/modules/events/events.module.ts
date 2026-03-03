@@ -3,7 +3,6 @@ import { EventsController } from './presentation/events.controller';
 import { CreateEventUseCase } from './application/create-event.use-case';
 import { ListEventsUseCase } from './application/list-events.use-case';
 import { PrismaEventRepository } from './infrastructure/prisma-event-repository';
-import { EventRepositoryPort } from './domain/event-repository.port';
 import { EVENT_REPOSITORY_TOKEN } from './domain/tokens';
 import { PrismaModule } from '../../common/prisma/prisma.module';
 

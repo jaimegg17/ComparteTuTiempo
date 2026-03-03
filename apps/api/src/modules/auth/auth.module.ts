@@ -6,7 +6,6 @@ import { SignInUseCase } from './application/sign-in.use-case';
 import { GetMeUseCase } from './application/get-me.use-case';
 import { Auth0UserService } from './application/auth0-user.service';
 import { PrismaUserRepository } from './infrastructure/prisma-user-repository';
-import { UserRepositoryPort } from './domain/user-repository.port';
 import { USER_REPOSITORY_TOKEN } from './domain/tokens';
 import { Auth0Module } from '../../common/auth/auth0.module';
 import { PrismaModule } from '../../common/prisma/prisma.module';

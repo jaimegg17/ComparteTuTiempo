@@ -12,7 +12,8 @@ export class GetMeUseCase {
     }
 
     // Remove password from response
-    const { password, ...userWithoutPassword } = user;
+    const userWithoutPassword = { ...user } as any;
+    delete userWithoutPassword.password;
 
     return userWithoutPassword;
   }

@@ -158,8 +158,6 @@ export class EventsController {
   @ApiResponse({ status: 403, description: 'No autorizado para actualizar este evento' })
   async updateEvent(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateEventDto: UpdateEventDto,
-    @Request() req: any,
   ) {
     // This would need an update event use case
     return {
@@ -179,11 +177,11 @@ export class EventsController {
   @ApiResponse({ status: 403, description: 'No autorizado para eliminar este evento' })
   async deleteEvent(
     @Param('id', ParseIntPipe) id: number,
-    @Request() req: any,
   ) {
     // This would need a delete event use case
     return {
       message: 'Evento eliminado exitosamente',
+      event: { id },
     };
   }
 }

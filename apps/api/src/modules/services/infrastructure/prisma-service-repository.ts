@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { ServiceRepositoryPort } from '../domain/service-repository.port';
 import { Service } from '../domain/service.entity';
-import { ServiceCreate, ServiceUpdate, ServiceListQuery, ServiceListResponse } from '@comparte-tu-tiempo/contracts';
+import { ServiceUpdate, ServiceListQuery, ServiceListResponse } from '@comparte-tu-tiempo/contracts';
 import { ServiceMapper } from './service.mapper';
 import { ServiceEnumMapper } from './service-enum.mapper';
 import { ServiceCreateWithImage } from '../domain/service.types';

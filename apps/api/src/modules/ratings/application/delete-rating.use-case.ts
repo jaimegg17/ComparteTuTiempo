@@ -1,6 +1,5 @@
 import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
 import type { RatingRepositoryPort } from '../domain/rating-repository.port';
-import { RatingEntity } from '../domain/rating.entity';
 import { RATING_REPOSITORY_TOKEN } from '../domain/tokens';
 
 export interface DeleteRatingRequest {

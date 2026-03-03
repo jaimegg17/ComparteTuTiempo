@@ -40,7 +40,8 @@ export class SignUpUseCase {
     const user = await this.userRepository.create(userData);
 
     // Remove password from response
-    const { password, ...userWithoutPassword } = user;
+    const userWithoutPassword = { ...user } as any;
+    delete userWithoutPassword.password;
 
     // TODO: Generate JWT token
     const token = 'mock-jwt-token';

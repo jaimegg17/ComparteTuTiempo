@@ -1,4 +1,4 @@
-import { NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { NotFoundException, ForbiddenException } from '@nestjs/common';
 import { UpdateExchangeUseCase } from './update-exchange.use-case';
 import { ExchangeRepositoryPort } from '../domain/exchange-repository.port';
 import { ExchangeEntity } from '../domain/exchange.entity';

@@ -1,5 +1,5 @@
 import { Service } from './service.entity';
-import { ServiceCreate, ServiceUpdate, ServiceListQuery, ServiceListResponse } from '@comparte-tu-tiempo/contracts';
+import { ServiceUpdate, ServiceListQuery, ServiceListResponse } from '@comparte-tu-tiempo/contracts';
 import { ServiceCreateWithImage } from './service.types';
 
 export interface ServiceRepositoryPort {

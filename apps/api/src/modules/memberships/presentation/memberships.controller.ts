@@ -101,8 +101,7 @@ export class MembershipsController {
   @ApiOperation({ summary: 'Eliminar una membresía' })
   async deleteMembership(@Param('id', ParseIntPipe) id: number) {
     // Pendiente: delete use case si lo necesitamos
-    return { message: 'Membresía eliminada exitosamente' };
+    return { message: 'Membresía eliminada exitosamente', membership: { id } };
   }
 }
-
 

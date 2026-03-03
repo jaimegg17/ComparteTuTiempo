@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Get, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
 
@@ -7,14 +7,14 @@ import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
 export class AuthController {
   @Post('signup')
   @ApiOperation({ summary: 'Registrar nuevo usuario' })
-  async signup(@Body() body: { email: string; password: string }) {
+  async signup() {
     // TODO: Implement signup logic
     return { message: 'Signup endpoint - to be implemented' };
   }
 
   @Post('signin')
   @ApiOperation({ summary: 'Iniciar sesión' })
-  async signin(@Body() body: { email: string; password: string }) {
+  async signin() {
     // TODO: Implement signin logic
     return { message: 'Signin endpoint - to be implemented' };
   }
@@ -43,4 +43,3 @@ export class AuthController {
     };
   }
 }
-

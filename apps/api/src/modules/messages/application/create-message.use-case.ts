@@ -1,6 +1,6 @@
 import { Injectable, Inject, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import type { MessageRepositoryPort } from '../domain/message-repository.port';
-import { MessageEntity, MessageCreate, MessageListQuery, MessageListResponse, MessageUpdate } from '../domain/message.types';
+import { MessageEntity, MessageCreate } from '../domain/message.types';
 import { MESSAGE_REPOSITORY_TOKEN } from '../domain/tokens';
 import { PrismaService } from '@/common/prisma/prisma.service';
 

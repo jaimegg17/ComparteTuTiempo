@@ -107,7 +107,7 @@ export class UploadController {
       let metadata: { width?: number; height?: number; format?: string };
       try {
         metadata = await sharp(file.buffer).metadata();
-      } catch (sharpError) {
+      } catch {
         throw new BadRequestException(
           'No se pudo procesar la imagen. Comprueba que sea un archivo de imagen válido (JPEG, PNG, WebP o GIF) e intenta de nuevo.'
         );

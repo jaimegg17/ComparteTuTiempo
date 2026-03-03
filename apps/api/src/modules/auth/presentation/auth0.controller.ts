@@ -13,7 +13,8 @@ export class Auth0Controller {
     const user = await this.auth0UserService.findOrCreateFromAuth0(req.user);
     
     // Remove password from response
-    const { password, ...userWithoutPassword } = user;
+    const userWithoutPassword = { ...user } as any;
+    delete userWithoutPassword.password;
     
     return {
       user: userWithoutPassword,

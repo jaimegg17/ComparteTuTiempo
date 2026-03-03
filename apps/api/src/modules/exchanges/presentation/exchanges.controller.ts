@@ -3,7 +3,6 @@ import {
   Get, 
   Post, 
   Put, 
-  Delete, 
   Body, 
   Param, 
   Query, 
@@ -15,8 +14,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam } from '@ne
 import { createZodDto } from '@anatine/zod-nestjs';
 import { 
   ExchangeCreateSchema, 
-  ExchangeUpdateSchema, 
-  ExchangeListQuerySchema 
+  ExchangeUpdateSchema 
 } from '@comparte-tu-tiempo/contracts';
 import { CreateExchangeUseCase } from '../application/create-exchange.use-case';
 import { ListExchangesUseCase } from '../application/list-exchanges.use-case';

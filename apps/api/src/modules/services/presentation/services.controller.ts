@@ -333,7 +333,7 @@ export class ServicesController {
       _count: { id: true },
     });
 
-    const avgRating = ratingsStats._avg.score ? Number(ratingsStats._avg.score.toFixed(1)) : 0;
+    const averageRating = ratingsStats._avg.score ? Number(ratingsStats._avg.score.toFixed(1)) : 0;
     const totalRatingsCount = ratingsStats._count.id;
 
     return { 
@@ -341,6 +341,7 @@ export class ServicesController {
       service: {
         ...serviceData,
         imageUrl: (serviceData as any).imageUrl || null,
+        averageRating,
         totalRatings: totalRatingsCount,
         totalExchanges: (serviceData as any)._count?.exchanges || 0,
       }

@@ -277,8 +277,6 @@ export class CommunitiesController {
   @ApiResponse({ status: 403, description: 'No autorizado para actualizar esta comunidad' })
   async updateCommunity(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateCommunityDto: UpdateCommunityDto,
-    @Request() req: any,
   ) {
     // This would need an update community use case
     return {
@@ -298,11 +296,11 @@ export class CommunitiesController {
   @ApiResponse({ status: 403, description: 'No autorizado para eliminar esta comunidad' })
   async deleteCommunity(
     @Param('id', ParseIntPipe) id: number,
-    @Request() req: any,
   ) {
     // This would need a delete community use case
     return {
       message: 'Comunidad eliminada exitosamente',
+      community: { id },
     };
   }
 }

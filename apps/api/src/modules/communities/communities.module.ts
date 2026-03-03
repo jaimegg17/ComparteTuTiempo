@@ -3,7 +3,6 @@ import { CommunitiesController } from './presentation/communities.controller';
 import { CreateCommunityUseCase } from './application/create-community.use-case';
 import { ListCommunitiesUseCase } from './application/list-communities.use-case';
 import { PrismaCommunityRepository } from './infrastructure/prisma-community-repository';
-import { CommunityRepositoryPort } from './domain/community-repository.port';
 import { COMMUNITY_REPOSITORY_TOKEN } from './domain/tokens';
 import { PrismaModule } from '../../common/prisma/prisma.module';
 

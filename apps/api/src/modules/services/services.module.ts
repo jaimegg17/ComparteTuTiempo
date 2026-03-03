@@ -4,7 +4,6 @@ import { CreateServiceUseCase } from './application/create-service.use-case';
 import { ListServicesUseCase } from './application/list-services.use-case';
 import { PrismaServiceRepository } from './infrastructure/prisma-service-repository';
 import { ServiceMapper } from './infrastructure/service.mapper';
-import { ServiceRepositoryPort } from './domain/service-repository.port';
 import { SERVICE_REPOSITORY_TOKEN } from './domain/tokens';
 import { PrismaModule } from '../../common/prisma/prisma.module';
 import { GetServiceUseCase } from './application/get-service.use-case';

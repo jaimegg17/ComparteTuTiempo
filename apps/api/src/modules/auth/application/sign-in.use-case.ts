@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException, Inject } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import type { UserRepositoryPort } from '../domain/user-repository.port';
 import { SignIn } from '@comparte-tu-tiempo/contracts';
 import * as bcrypt from 'bcrypt';
@@ -21,7 +21,8 @@ export class SignInUseCase {
     }
 
     // Remove password from response
-    const { password, ...userWithoutPassword } = user;
+    const userWithoutPassword = { ...user } as any;
+    delete userWithoutPassword.password;
 
     // TODO: Generate JWT token
     const token = 'mock-jwt-token';

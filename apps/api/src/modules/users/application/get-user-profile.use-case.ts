@@ -40,7 +40,8 @@ export class GetUserProfileUseCase {
     });
 
     // Remove sensitive data
-    const { password, ...userWithoutPassword } = user;
+    const userWithoutPassword = { ...user } as any;
+    delete userWithoutPassword.password;
 
     return {
       user: {
@@ -56,4 +57,3 @@ export class GetUserProfileUseCase {
     };
   }
 }
-
