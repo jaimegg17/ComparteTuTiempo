@@ -1,5 +1,5 @@
 import { Card, CardContent, Box, Typography, Chip, Avatar, Button, Stack } from '@mui/material';
-import { Clock, User as UserIcon, ArrowRight, ChatBubble } from 'iconoir-react';
+import { Clock, ChatBubble } from 'iconoir-react';
 import { useRouter } from 'next/router';
 import { RatingButton } from '@/components/ratings';
 import type { Exchange, ExchangeState } from '@/types/exchange.types';
@@ -145,7 +145,7 @@ export function ExchangeCard({ exchange, currentUserId, onAccept, onReject, onSt
                   borderColor: 'primary.main'
                 }}
               >
-                "{exchange.message}"
+                &quot;{exchange.message}&quot;
               </Typography>
             )}
 
@@ -222,7 +222,7 @@ export function ExchangeCard({ exchange, currentUserId, onAccept, onReject, onSt
                   exchangeId={exchange.id}
                   serviceId={exchange.serviceId}
                   serviceTitle={exchange.service?.title || 'Servicio'}
-                  onRatingSubmitted={onRatingSubmitted}
+                  onRatingSubmitted={onRatingSubmitted ?? (() => {})}
                 />
               )}
             </Stack>
@@ -232,4 +232,3 @@ export function ExchangeCard({ exchange, currentUserId, onAccept, onReject, onSt
     </Card>
   );
 }
-
