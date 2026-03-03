@@ -9,6 +9,7 @@
 4. ✅ Bug de comunidades resuelto
 5. ✅ Mejoras UX/UI básicas
 6. ✅ Fase A de Comunidades base completada (listado + filtros + estados + navegación)
+7. ✅ Avance Fase B: página de detalle con secciones (header, miembros, actividad) y acciones unirse/salir con fallback
 
 ---
 
@@ -21,14 +22,28 @@
 **Tiempo estimado**: 1-1.5 días
 
 **Tareas:**
-- [ ] Completar header con métricas rápidas
-- [ ] Sección de miembros y rol del usuario
-- [ ] Actividad/eventos según disponibilidad backend
-- [ ] Acciones unirse/salir con feedback
+- [x] Completar header con métricas rápidas
+- [x] Sección de miembros y rol del usuario
+- [x] Actividad/eventos según disponibilidad backend
+- [x] Acciones unirse/salir con feedback
+- [ ] Endpoints backend de membresías/eventos alineados 100% con comunidades (actualmente con fallback por limitaciones de dominio Group/Community)
 
 **Archivos:**
 - `apps/web/pages/communities/[id].tsx` (ampliar)
 - `apps/web/src/components/communities/*` (crear)
+- `apps/web/src/shared/api/memberships.ts` (crear)
+- `apps/web/src/shared/api/events.ts` (crear)
+
+---
+
+#### 1.1 Bloque técnico: saneamiento lint/typecheck
+**Prioridad**: Alta  
+**Tiempo estimado**: 1-2 días
+
+**Tareas:**
+- [ ] Resolver errores históricos de `pnpm lint` en API y Web
+- [ ] Resolver errores históricos de `pnpm typecheck` en tests/módulos no relacionados a Comunidades
+- [ ] Dejar quality gate global en verde
 
 ---
 

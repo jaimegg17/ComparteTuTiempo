@@ -1,38 +1,133 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
-import { Box, Button, Chip, CircularProgress, Typography } from '@mui/material';
-import { ArrowBack, Lock, Public } from '@mui/icons-material';
+import { Alert, Box, Button, CircularProgress, Stack } from '@mui/material';
+import { ArrowBack, ExitToApp, GroupAdd } from '@mui/icons-material';
+import { useUser } from '@auth0/nextjs-auth0/client';
 import { Layout } from '@/components/Layout';
 import { ErrorAlert } from '@/components/ui/BeautifulAlert';
 import { communitiesApi } from '@/shared/api/communities';
+import { membershipsApi } from '@/shared/api/memberships';
+import { eventsApi } from '@/shared/api/events';
 import { useErrorHandling, ERROR_MESSAGES } from '@/hooks/useErrorHandling';
 import { useTranslation } from '@/hooks/useTranslation';
-import type { Community } from '@comparte-tu-tiempo/contracts';
+import { useAuth } from '@/hooks/useAuth';
+import { CommunityHeader } from '@/components/communities/CommunityHeader';
+import { CommunityMembersSection } from '@/components/communities/CommunityMembersSection';
+import { CommunityActivitySection } from '@/components/communities/CommunityActivitySection';
+import type { Community, Event, Membership } from '@comparte-tu-tiempo/contracts';
+import { apiClient } from '@/shared/api/client';
 
 export default function CommunityDetailPage() {
   const router = useRouter();
   const { id } = router.query;
+  const { user } = useUser();
+  const { accessToken } = useAuth();
   const { t } = useTranslation();
   const [community, setCommunity] = useState<Community | null>(null);
+  const [memberships, setMemberships] = useState<Membership[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
   const { error, loading, handleAsyncOperation, clearError } = useErrorHandling();
 
-  const fetchCommunity = useCallback(async () => {
-    if (!id || Number.isNaN(Number(id))) return;
+  const communityId = useMemo(() => {
+    if (!id) return null;
+    const parsed = Number(id);
+    return Number.isNaN(parsed) ? null : parsed;
+  }, [id]);
+
+  const fetchCommunityData = useCallback(async () => {
+    if (!communityId) return;
 
     await handleAsyncOperation(async () => {
-      const response = await communitiesApi.getCommunity(Number(id));
-      setCommunity(response.community);
+      if (accessToken) {
+        apiClient.setToken(accessToken);
+      }
+
+      const detailResponse = await communitiesApi.getCommunity(communityId);
+      setCommunity(detailResponse.community);
+
+      const [membershipsResult, eventsResult] = await Promise.allSettled([
+        membershipsApi.getMemberships({ groupId: communityId, page: 1, pageSize: 50 }),
+        eventsApi.getEventsByCommunity(communityId),
+      ]);
+
+      if (membershipsResult.status === 'fulfilled') {
+        setMemberships(membershipsResult.value.memberships);
+      } else {
+        setMemberships([]);
+      }
+
+      if (eventsResult.status === 'fulfilled') {
+        setEvents(eventsResult.value);
+      } else {
+        setEvents([]);
+      }
     }, ERROR_MESSAGES.NETWORK_ERROR);
-  }, [id, handleAsyncOperation]);
+  }, [communityId, accessToken, handleAsyncOperation]);
 
   useEffect(() => {
-    fetchCommunity();
-  }, [fetchCommunity]);
+    fetchCommunityData();
+  }, [fetchCommunityData]);
+
+  const activeMemberships = memberships.filter((membership) => membership.status === 'ACTIVA');
+  const myMembership = memberships.find(
+    (membership) => membership.userId === user?.sub && membership.status === 'ACTIVA',
+  );
+  const isMember = Boolean(myMembership);
+
+  const handleJoin = async () => {
+    if (!communityId || !user?.sub || actionLoading) return;
+
+    setActionLoading(true);
+    setNotice(null);
+
+    try {
+      if (accessToken) {
+        apiClient.setToken(accessToken);
+      }
+
+      await membershipsApi.createMembership({
+        userId: user.sub,
+        groupId: communityId,
+        role: 'MEMBER',
+        status: 'ACTIVA',
+      });
+
+      setNotice('Te has unido a la comunidad.');
+      await fetchCommunityData();
+    } catch {
+      setNotice('No se pudo completar la acción de unirse. Endpoint pendiente o acceso no permitido.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleLeave = async () => {
+    if (!myMembership || actionLoading) return;
+
+    setActionLoading(true);
+    setNotice(null);
+
+    try {
+      if (accessToken) {
+        apiClient.setToken(accessToken);
+      }
+
+      await membershipsApi.updateMembership(myMembership.id, { status: 'SUSPENDIDA' });
+      setNotice('Has salido de la comunidad.');
+      await fetchCommunityData();
+    } catch {
+      setNotice('No se pudo completar la acción de salir. Endpoint pendiente o acceso no permitido.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   return (
     <Layout>
       <Box sx={{ bgcolor: '#f5f5f5', minHeight: '100%', py: 4 }}>
-        <Box sx={{ maxWidth: 920, mx: 'auto', px: { xs: 2, md: 3 } }}>
+        <Box sx={{ maxWidth: 1040, mx: 'auto', px: { xs: 2, md: 3 } }}>
           <Button
             startIcon={<ArrowBack />}
             onClick={() => router.push('/communities')}
@@ -42,14 +137,20 @@ export default function CommunityDetailPage() {
           </Button>
 
           {error && (
-            <Box sx={{ mb: 3 }}>
+            <Box sx={{ mb: 2 }}>
               <ErrorAlert
                 message={error}
-                onRetry={fetchCommunity}
+                onRetry={fetchCommunityData}
                 onClose={clearError}
                 retryText={t('common.retry')}
               />
             </Box>
+          )}
+
+          {notice && (
+            <Alert severity="info" sx={{ mb: 2 }} onClose={() => setNotice(null)}>
+              {notice}
+            </Alert>
           )}
 
           {loading && (
@@ -59,24 +160,30 @@ export default function CommunityDetailPage() {
           )}
 
           {!loading && community && (
-            <Box sx={{ bgcolor: '#fff', p: { xs: 2.5, md: 4 }, borderRadius: 3, boxShadow: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, mb: 2 }}>
-                <Typography variant="h4" sx={{ fontWeight: 700, fontSize: { xs: '1.75rem', md: '2rem' } }}>
-                  {community.name}
-                </Typography>
+            <Stack spacing={2.5}>
+              <CommunityHeader
+                community={community}
+                membersCount={activeMemberships.length}
+                eventsCount={events.length}
+                t={t}
+              />
 
-                <Chip
-                  icon={community.isPrivate ? <Lock /> : <Public />}
-                  label={community.isPrivate ? t('communities.private') : t('communities.public')}
-                  color={community.isPrivate ? 'default' : 'primary'}
-                  variant={community.isPrivate ? 'outlined' : 'filled'}
-                />
-              </Box>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+                <Button
+                  variant={isMember ? 'outlined' : 'contained'}
+                  color={isMember ? 'inherit' : 'primary'}
+                  onClick={isMember ? handleLeave : handleJoin}
+                  startIcon={isMember ? <ExitToApp /> : <GroupAdd />}
+                  disabled={!user?.sub || actionLoading}
+                  sx={{ textTransform: 'none', fontWeight: 600, alignSelf: 'flex-start' }}
+                >
+                  {isMember ? 'Salir de comunidad' : 'Unirse a comunidad'}
+                </Button>
+              </Stack>
 
-              <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-                {community.description || t('communities.no_description')}
-              </Typography>
-            </Box>
+              <CommunityMembersSection memberships={memberships} currentUserId={user?.sub ?? undefined} />
+              <CommunityActivitySection events={events} />
+            </Stack>
           )}
         </Box>
       </Box>

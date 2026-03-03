@@ -44,6 +44,14 @@ Nice-to-have y mejoras adicionales.
 - [ ] **P0.C.4** Fase D: sección FAQ
   - Categorías, acordeones accesibles y búsqueda
 
+### 0.1 Saneamiento técnico (lint + typecheck monorepo)
+
+- [ ] **P0.Q.1** Bloque de estabilización de calidad global
+  - Resolver errores de lint históricos en API/Web (no-explicit-any, no-unused-vars, unescaped-entities)
+  - Corregir errores de typecheck en tests y módulos compartidos
+  - Ejecutar quality gate final: `pnpm lint` + `pnpm typecheck` en verde
+  - **Nota**: este bloque es transversal y no depende de una feature concreta
+
 ### 1. Sistema de Mensajería (Chat) - COMPLETAR
 
 **Estado Actual**: Parcialmente implementado, tiene bugs críticos.
