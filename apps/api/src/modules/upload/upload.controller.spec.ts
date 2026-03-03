@@ -147,7 +147,7 @@ describe('UploadController', () => {
       const publicId = 'test-public-id';
       cloudinaryService.deleteImage.mockResolvedValue(undefined);
 
-      const result = await controller.deleteImage(publicId, {} as any);
+      const result = await controller.deleteImage(publicId);
 
       expect(result.success).toBe(true);
       expect(cloudinaryService.deleteImage).toHaveBeenCalledWith(publicId);
@@ -155,7 +155,7 @@ describe('UploadController', () => {
 
     it('should reject when publicId is not provided', async () => {
       await expect(
-        controller.deleteImage('', {} as any)
+        controller.deleteImage('')
       ).rejects.toThrow(BadRequestException);
     });
   });

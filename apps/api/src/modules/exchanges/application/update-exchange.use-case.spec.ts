@@ -347,7 +347,7 @@ describe('UpdateExchangeUseCase', () => {
             update: jest.fn(),
           },
         };
-        return callback(txMock);
+        return (callback as any)(txMock);
       });
 
       await expect(
