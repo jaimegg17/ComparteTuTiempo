@@ -8,6 +8,7 @@
 3. ✅ Transferencia de créditos
 4. ✅ Bug de comunidades resuelto
 5. ✅ Mejoras UX/UI básicas
+6. ✅ Fase A de Comunidades base completada (listado + filtros + estados + navegación)
 
 ---
 
@@ -15,42 +16,55 @@
 
 ### P0 - Crítico (Completar Ahora)
 
-#### 1. Página de Conversaciones (P0.1.6) ✅
+#### 1. Comunidades Fase B (detalle + acciones)
 **Prioridad**: Alta  
-**Tiempo estimado**: 2-3 horas
+**Tiempo estimado**: 1-1.5 días
 
 **Tareas:**
-- [x] Crear página `/conversations`
-- [x] Listar todas las conversaciones del usuario
-- [x] Mostrar último mensaje, timestamp, contador de no leídos
-- [x] Navegación a chat individual
-- [x] Integrar con el componente Chat existente (link a exchanges)
+- [ ] Completar header con métricas rápidas
+- [ ] Sección de miembros y rol del usuario
+- [ ] Actividad/eventos según disponibilidad backend
+- [ ] Acciones unirse/salir con feedback
 
 **Archivos:**
-- `apps/web/pages/conversations.tsx`
-- `apps/web/src/shared/api/messages.ts`
-- `apps/api/src/modules/messages/application/list-conversations.use-case.ts`
+- `apps/web/pages/communities/[id].tsx` (ampliar)
+- `apps/web/src/components/communities/*` (crear)
 
 ---
 
-#### 2. Mejorar UI del Chat (P0.1.7)
+#### 2. Comunidades Fase C (crear/editar MVP)
 **Prioridad**: Alta  
-**Tiempo estimado**: 3-4 horas
+**Tiempo estimado**: 0.5-1 día
 
 **Tareas:**
-- [ ] Indicador de "escribiendo..." (opcional, requiere WebSocket)
-- [ ] Mejorar formato de timestamps (hoy, ayer, fecha completa)
-- [ ] Avatares de usuarios (ya existe, mejorar)
-- [ ] Estados de entrega más claros
-- [ ] Mejorar responsive design
+- [ ] Formulario validado (nombre, descripción, privacidad)
+- [ ] Manejo de errores de validación API
+- [ ] Submit + redirección post-creación
 
 **Archivos:**
-- `apps/web/src/components/chat/Chat.tsx` (mejorar)
+- `apps/web/pages/communities/new.tsx` (completar)
+- `apps/web/pages/communities/[id]/edit.tsx` (crear opcional)
+- `apps/web/src/components/communities/forms/*` (crear)
 
 ---
 
-#### 3. Cálculo de Promedio de Ratings (P0.2.3)
+#### 3. FAQ Fase D
 **Prioridad**: Media  
+**Tiempo estimado**: 0.5 día
+
+**Tareas:**
+- [ ] Crear página FAQ con categorías
+- [ ] Acordeones accesibles
+- [ ] Búsqueda simple por texto
+
+**Archivos:**
+- `apps/web/pages/faq.tsx` (crear)
+- `apps/web/src/components/faq/*` (crear)
+
+---
+
+#### 4. Cálculo de Promedio de Ratings (P0.2.3)
+**Prioridad**: Media
 **Tiempo estimado**: 1 hora
 
 **Tareas:**

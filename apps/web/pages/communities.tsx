@@ -1,6 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/router';
-import { Typography, Box, CircularProgress, Button, Tabs, Tab } from '@mui/material';
+import {
+  Typography,
+  Box,
+  CircularProgress,
+  Button,
+  Tabs,
+  Tab,
+  TextField,
+  InputAdornment,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Stack,
+} from '@mui/material';
 import { Layout } from '@/components/Layout';
 import { CommunityCard } from '@/components/CommunityCard';
 import { ErrorAlert } from '@/components/ui/BeautifulAlert';
@@ -10,6 +24,9 @@ import { useUser } from '@auth0/nextjs-auth0/client';
 import { useAuth } from '@/hooks/useAuth';
 import { communitiesApi } from '@/shared/api/communities';
 import { Community } from '@comparte-tu-tiempo/contracts';
+import { Search } from '@mui/icons-material';
+
+type VisibilityFilter = 'all' | 'public' | 'private';
 
 export default function CommunitiesPage() {
   const router = useRouter();
@@ -21,9 +38,11 @@ export default function CommunitiesPage() {
   const [activeTab, setActiveTab] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize] = useState(20);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [visibilityFilter, setVisibilityFilter] = useState<VisibilityFilter>('all');
   const { error, loading, handleAsyncOperation, clearError } = useErrorHandling();
 
-  const fetchCommunities = async () => {
+  const fetchCommunities = useCallback(async () => {
     await handleAsyncOperation(async () => {
       // Configure API client token if authenticated
       if (accessToken) {
@@ -35,27 +54,20 @@ export default function CommunitiesPage() {
         page,
         pageSize,
         creatorId: activeTab === 1 && user?.sub ? user.sub : undefined,
-        isPrivate: activeTab === 2 ? false : undefined, // Tab 2 = Public communities only
+        isPrivate:
+          activeTab === 2 ? false : visibilityFilter === 'all' ? undefined : visibilityFilter === 'private',
       };
 
       const response = await communitiesApi.getCommunities(query);
-      
-      // Backend returns: { message, communities: [...], total, page, pageSize, totalPages }
-      // But our schema expects: { communities: [...], total, page, pageSize, totalPages }
-      // Handle both structures
-      const communities = Array.isArray(response.communities) 
-        ? response.communities 
-        : [];
-      const total = response.total || communities.length;
-      
-      setCommunities(communities);
-      setTotal(total);
+
+      setCommunities(response.communities);
+      setTotal(response.total);
     }, ERROR_MESSAGES.NETWORK_ERROR);
-  };
+  }, [handleAsyncOperation, accessToken, page, pageSize, activeTab, user?.sub, visibilityFilter]);
 
   useEffect(() => {
     fetchCommunities();
-  }, [activeTab, page]);
+  }, [fetchCommunities]);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -63,9 +75,25 @@ export default function CommunitiesPage() {
   };
 
   const handleCreateCommunity = () => {
-    // TODO: Navigate to create community page when implemented
-    router.push('/communities/create');
+    router.push('/communities/new');
   };
+
+  const filteredCommunities = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+    if (!normalizedSearch) return communities;
+
+    return communities.filter((community) => {
+      const name = community.name?.toLowerCase() ?? '';
+      const description = community.description?.toLowerCase() ?? '';
+      return name.includes(normalizedSearch) || description.includes(normalizedSearch);
+    });
+  }, [communities, searchTerm]);
+
+  const handleJoinCommunity = (community: Community) => {
+    router.push(`/communities/${community.id}?action=join`);
+  };
+
+  const resultCount = filteredCommunities.length;
 
   return (
     <Layout>
@@ -117,7 +145,9 @@ export default function CommunitiesPage() {
               {/* Número de resultados y botón */}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '18px' }}>
-                  {loading ? t("common.loading") : `${total} ${t("communities.title").toLowerCase()} ${t("common.found")}`}
+                  {loading
+                    ? t('common.loading')
+                    : `${resultCount}/${total} ${t('communities.title').toLowerCase()} ${t('common.found')}`}
                 </Typography>
                 
                 {user && (
@@ -144,6 +174,40 @@ export default function CommunitiesPage() {
               </Box>
             </Box>
 
+            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 3 }}>
+              <TextField
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder={`${t('common.search')} ${t('communities.title').toLowerCase()}...`}
+                fullWidth
+                size="small"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Search fontSize="small" />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              <FormControl size="small" sx={{ minWidth: { xs: '100%', md: 220 } }}>
+                <InputLabel>{t('common.filter')}</InputLabel>
+                <Select
+                  value={visibilityFilter}
+                  label={t('common.filter')}
+                  onChange={(event) => {
+                    setVisibilityFilter(event.target.value as VisibilityFilter);
+                    setPage(1);
+                  }}
+                  disabled={activeTab === 2}
+                >
+                  <MenuItem value="all">{t('communities.tabs.all')}</MenuItem>
+                  <MenuItem value="public">{t('communities.public')}</MenuItem>
+                  <MenuItem value="private">{t('communities.private')}</MenuItem>
+                </Select>
+              </FormControl>
+            </Stack>
+
             {loading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
                 <CircularProgress />
@@ -156,28 +220,41 @@ export default function CommunitiesPage() {
                   gap: 2.5,
                 }}
               >
-                {communities.map((community) => (
-                  <CommunityCard key={community.id} community={community} />
+                {filteredCommunities.map((community) => (
+                  <CommunityCard
+                    key={community.id}
+                    community={community}
+                    onJoin={handleJoinCommunity}
+                    showJoinAction={Boolean(user?.sub && community.creatorId !== user.sub)}
+                  />
                 ))}
               </Box>
             )}
 
-            {!loading && communities.length === 0 && (
+            {!loading && filteredCommunities.length === 0 && (
               <Box sx={{ textAlign: 'center', py: 8 }}>
                 <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
-                  {activeTab === 1 
-                    ? t("communities.empty_states.no_my_communities")
-                    : t("communities.empty_states.no_communities")
-                  }
+                  {communities.length > 0
+                    ? `${t('common.not_found')}: ${t('communities.title').toLowerCase()}`
+                    : activeTab === 1
+                      ? t('communities.empty_states.no_my_communities')
+                      : t('communities.empty_states.no_communities')}
                 </Typography>
                 {user && (
-                  <Button 
-                    variant="outlined" 
-                    onClick={handleCreateCommunity}
-                    sx={{ textTransform: 'none' }}
-                  >
-                    {t("communities.empty_states.create_first")}
-                  </Button>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
+                    <Button variant="outlined" onClick={handleCreateCommunity} sx={{ textTransform: 'none' }}>
+                      {t('communities.empty_states.create_first')}
+                    </Button>
+                    {searchTerm && (
+                      <Button
+                        variant="text"
+                        onClick={() => setSearchTerm('')}
+                        sx={{ textTransform: 'none' }}
+                      >
+                        {t('common.clear')}
+                      </Button>
+                    )}
+                  </Box>
                 )}
               </Box>
             )}

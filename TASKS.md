@@ -22,6 +22,28 @@ Nice-to-have y mejoras adicionales.
 
 ## 🔴 P0 - CRÍTICO
 
+### 0. Roadmap UI Comunidades + FAQ (nuevo foco)
+
+- [x] **P0.C.1** Fase A completada: listado de comunidades mejorado
+  - Búsqueda por texto y filtro de visibilidad
+  - Estados loading/empty/error y CTA claros
+  - Navegación a detalle y ruta de creación preparada
+  - **Archivos**:
+    - `apps/web/pages/communities.tsx`
+    - `apps/web/src/components/CommunityCard.tsx`
+    - `apps/web/src/shared/api/communities.ts`
+    - `apps/web/pages/communities/[id].tsx`
+    - `apps/web/pages/communities/new.tsx`
+
+- [ ] **P0.C.2** Fase B: detalle de comunidad con acciones clave
+  - Header, miembros, actividad y acciones de unirse/salir
+
+- [ ] **P0.C.3** Fase C: crear/editar comunidad (MVP)
+  - Formulario completo con validación frontend/backend
+
+- [ ] **P0.C.4** Fase D: sección FAQ
+  - Categorías, acordeones accesibles y búsqueda
+
 ### 1. Sistema de Mensajería (Chat) - COMPLETAR
 
 **Estado Actual**: Parcialmente implementado, tiene bugs críticos.

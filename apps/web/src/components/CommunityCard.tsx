@@ -1,14 +1,16 @@
-import { Card, CardContent, CardActions, Button, Typography, Box, Chip } from '@mui/material';
+import { Card, CardContent, CardActions, Button, Typography, Box } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Community } from '@comparte-tu-tiempo/contracts';
-import { Lock, Public, People } from '@mui/icons-material';
+import { Lock, Public, People, GroupAdd } from '@mui/icons-material';
 
 interface CommunityCardProps {
   community: Community;
+  onJoin?: (community: Community) => void;
+  showJoinAction?: boolean;
 }
 
-export function CommunityCard({ community }: CommunityCardProps) {
+export function CommunityCard({ community, onJoin, showJoinAction = false }: CommunityCardProps) {
   const router = useRouter();
   const { t } = useTranslation();
 
@@ -107,6 +109,7 @@ export function CommunityCard({ community }: CommunityCardProps) {
             size="small" 
             variant="contained"
             onClick={() => router.push(`/communities/${community.id}`)}
+            aria-label={`${t("communities.view_details")} ${community.name}`}
             sx={{ 
               textTransform: 'none', 
               borderRadius: 1.5,
@@ -124,6 +127,22 @@ export function CommunityCard({ community }: CommunityCardProps) {
           </Button>
         </Box>
       </CardContent>
+
+      {showJoinAction && onJoin && !community.isPrivate && (
+        <CardActions sx={{ pt: 0, px: 2.5, pb: 2 }}>
+          <Button
+            fullWidth
+            variant="outlined"
+            size="small"
+            startIcon={<GroupAdd />}
+            onClick={() => onJoin(community)}
+            aria-label={`Unirse a ${community.name}`}
+            sx={{ textTransform: 'none', borderRadius: 1.5, fontWeight: 600 }}
+          >
+            Unirse
+          </Button>
+        </CardActions>
+      )}
     </Card>
   );
 }
