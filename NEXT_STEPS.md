@@ -16,6 +16,7 @@
 11. ✅ Ratings P0.2.4: formulario frontend reutilizable (crear/editar) con validación y contador
 12. ✅ Ratings P0.2.5/P0.2.7: listado de valoraciones mejorado con paginación y edición integrada
 13. ✅ Ratings P0.2.6: validación DTO con Zod en controller (create/update/list)
+14. ✅ Upload P0.3.1/P0.3.2/P0.3.3: Cloudinary verificado + tests backend de upload + componente de subida validado
 
 ---
 

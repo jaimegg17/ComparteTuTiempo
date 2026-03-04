@@ -57,41 +57,30 @@ describe('UploadController', () => {
       path: '',
       stream: null as any,
     };
-
-    // Note: This test requires proper sharp mocking which is complex due to how sharp is imported
-    // The validation tests below cover the critical paths. Integration tests would cover the full flow.
-    it.skip('should upload valid image successfully', async () => {
-      const metadataResult = {
+    it('should upload valid image successfully', async () => {
+      mockMetadata.mockResolvedValue({
         width: 1920,
         height: 1080,
         format: 'jpeg',
-      };
-
-      mockMetadata.mockResolvedValue(metadataResult);
+      });
       cloudinaryService.uploadImage.mockResolvedValue('https://res.cloudinary.com/test/image/upload/test.jpg');
 
       const result = await controller.uploadImage(mockFile, {} as any);
 
       expect(result.success).toBe(true);
-      expect(result.url).toBeDefined();
-      expect(cloudinaryService.uploadImage).toHaveBeenCalled();
-    });
-
-    it('should reject invalid MIME type', async () => {
-      const invalidFile = {
-        ...mockFile,
-        mimetype: 'application/pdf',
-      };
-
-      await expect(
-        controller.uploadImage(invalidFile, {} as any)
-      ).rejects.toThrow(BadRequestException);
+      expect(result.width).toBe(1920);
+      expect(result.height).toBe(1080);
+      expect(result.url).toBe('https://res.cloudinary.com/test/image/upload/test.jpg');
+      expect(cloudinaryService.uploadImage).toHaveBeenCalledWith(
+        mockFile,
+        expect.objectContaining({ width: 1920, height: 1080 }),
+      );
     });
 
     it('should reject file that is too large', async () => {
       const largeFile = {
         ...mockFile,
-        size: 6 * 1024 * 1024, // 6MB
+        size: 11 * 1024 * 1024, // >10MB
       };
 
       await expect(
@@ -101,8 +90,8 @@ describe('UploadController', () => {
 
     it('should reject image that is too small', async () => {
       mockMetadata.mockResolvedValue({
-        width: 100,
-        height: 100,
+        width: 40,
+        height: 40,
         format: 'jpeg',
       });
 
@@ -113,8 +102,8 @@ describe('UploadController', () => {
 
     it('should reject image that is too large (dimensions)', async () => {
       mockMetadata.mockResolvedValue({
-        width: 5000,
-        height: 5000,
+        width: 7000,
+        height: 3000,
         format: 'jpeg',
       });
 
@@ -129,6 +118,26 @@ describe('UploadController', () => {
         height: 100, // Very wide image
         format: 'jpeg',
       });
+
+      await expect(
+        controller.uploadImage(mockFile, {} as any)
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should reject image when sharp cannot read dimensions', async () => {
+      mockMetadata.mockResolvedValue({
+        width: undefined,
+        height: undefined,
+        format: 'jpeg',
+      });
+
+      await expect(
+        controller.uploadImage(mockFile, {} as any)
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should reject image when sharp fails to parse image', async () => {
+      mockMetadata.mockRejectedValue(new Error('Invalid image'));
 
       await expect(
         controller.uploadImage(mockFile, {} as any)

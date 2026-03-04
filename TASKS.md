@@ -189,20 +189,23 @@ Nice-to-have y mejoras adicionales.
 
 #### Tareas:
 
-- [ ] **P0.3.1** Verificar configuración de Cloudinary
+- [x] **P0.3.1** Verificar configuración de Cloudinary
   - Asegurar que variables de entorno estén configuradas
   - Probar subida de imagen
   - Verificar que las URLs se guardan correctamente
+  - Añadidos tests unitarios de servicio Cloudinary (upload/delete/extractPublicId)
   - **Archivo**: `apps/api/src/common/cloudinary/cloudinary.service.ts`
+  - **Test**: `apps/api/src/common/cloudinary/cloudinary.service.spec.ts`
 
-- [ ] **P0.3.2** Mejorar validación de archivos
+- [x] **P0.3.2** Mejorar validación de archivos
   - Validar tipos MIME específicos (jpeg, png, webp)
   - Validar dimensiones mínimas/máximas
   - Validar ratio de aspecto si es necesario
   - Mensajes de error más descriptivos
   - **Archivo**: `apps/api/src/modules/upload/upload.controller.ts`
+  - **Test**: `apps/api/src/modules/upload/upload.controller.spec.ts`
 
-- [ ] **P0.3.3** Implementar componente de subida de imágenes en frontend
+- [x] **P0.3.3** Implementar componente de subida de imágenes en frontend
   - Drag & drop
   - Preview antes de subir
   - Indicador de progreso
