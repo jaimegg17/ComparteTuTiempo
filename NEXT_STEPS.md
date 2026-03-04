@@ -15,6 +15,7 @@
 10. ✅ Ratings P0.2.2: validaciones de creación reforzadas y cubiertas por tests
 11. ✅ Ratings P0.2.4: formulario frontend reutilizable (crear/editar) con validación y contador
 12. ✅ Ratings P0.2.5/P0.2.7: listado de valoraciones mejorado con paginación y edición integrada
+13. ✅ Ratings P0.2.6: validación DTO con Zod en controller (create/update/list)
 
 ---
 

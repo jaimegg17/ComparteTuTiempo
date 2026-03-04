@@ -167,9 +167,10 @@ Nice-to-have y mejoras adicionales.
     - `apps/web/components/services/ServiceRatingsTab.tsx`
     - `apps/web/src/components/ratings/RatingsList.tsx`
 
-- [ ] **P0.2.6** Agregar validación con DTOs Zod
+- [x] **P0.2.6** Agregar validación con DTOs Zod
   - Reemplazar DTOs manuales con Zod schemas
   - Usar `createZodDto` de `@anatine/zod-nestjs`
+  - DTOs de create/update/query conectados a `RatingCreateSchema`, `RatingUpdateSchema` y `RatingListQuerySchema`
   - **Archivo**: `apps/api/src/modules/ratings/presentation/ratings.controller.ts`
 
 - [x] **P0.2.7** Implementar edición de valoraciones
