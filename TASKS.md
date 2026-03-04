@@ -44,8 +44,10 @@ Nice-to-have y mejoras adicionales.
   - Formulario completo con validación frontend (nombre, descripción, privacidad)
   - Manejo de errores de API y redirección al detalle tras crear
   - Alineación de normalización en `communitiesApi.create/update`
-- [ ] **P0.C.3.1** Editar comunidad (MVP+ opcional)
-  - Ruta/pantalla de edición pendiente
+- [x] **P0.C.3.1** Editar comunidad (MVP+)
+  - Ruta `/communities/[id]/edit` implementada
+  - Control de propiedad: solo creador puede editar
+  - Endpoint backend `PUT /communities/:id` implementado con validación de autorización
 
 - [ ] **P0.C.4** Fase D: sección FAQ
   - Categorías, acordeones accesibles y búsqueda

@@ -75,6 +75,7 @@ export default function CommunityDetailPage() {
     (membership) => membership.userId === user?.sub && membership.status === 'ACTIVA',
   );
   const isMember = Boolean(myMembership);
+  const isOwner = Boolean(community && user?.sub && community.creatorId === user.sub);
 
   const handleJoin = async () => {
     if (!communityId || !user?.sub || actionLoading) return;
@@ -169,6 +170,15 @@ export default function CommunityDetailPage() {
               />
 
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+                {isOwner && (
+                  <Button
+                    variant="outlined"
+                    onClick={() => router.push(`/communities/${community.id}/edit`)}
+                    sx={{ textTransform: 'none', fontWeight: 600, alignSelf: 'flex-start' }}
+                  >
+                    Editar comunidad
+                  </Button>
+                )}
                 <Button
                   variant={isMember ? 'outlined' : 'contained'}
                   color={isMember ? 'inherit' : 'primary'}

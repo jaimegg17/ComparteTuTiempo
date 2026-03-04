@@ -12,7 +12,9 @@ import {
   Request,
   HttpCode,
   HttpStatus,
-  Logger
+  Logger,
+  ForbiddenException,
+  NotFoundException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { IsString, IsBoolean, IsOptional, IsNumber, Min } from 'class-validator';
@@ -277,11 +279,49 @@ export class CommunitiesController {
   @ApiResponse({ status: 403, description: 'No autorizado para actualizar esta comunidad' })
   async updateCommunity(
     @Param('id', ParseIntPipe) id: number,
+    @Body() updateCommunityDto: UpdateCommunityDto,
+    @Request() req: any,
   ) {
-    // This would need an update community use case
+    const userId = req.user?.sub || req.user?.id;
+
+    if (!userId) {
+      throw new Error('Usuario no autenticado');
+    }
+
+    const existing = await this.prisma.community.findUnique({ where: { id } });
+
+    if (!existing) {
+      throw new NotFoundException('Comunidad no encontrada');
+    }
+
+    if (existing.creatorId !== userId) {
+      throw new ForbiddenException('No autorizado para actualizar esta comunidad');
+    }
+
+    const updated = await this.prisma.community.update({
+      where: { id },
+      data: {
+        ...(updateCommunityDto.name !== undefined ? { name: updateCommunityDto.name } : {}),
+        ...(updateCommunityDto.description !== undefined
+          ? { description: updateCommunityDto.description }
+          : {}),
+        ...(updateCommunityDto.isPrivate !== undefined
+          ? { isPrivate: updateCommunityDto.isPrivate }
+          : {}),
+      },
+    });
+
     return {
       message: 'Comunidad actualizada exitosamente',
-      community: { id },
+      community: {
+        id: updated.id,
+        name: updated.name,
+        description: updated.description,
+        isPrivate: updated.isPrivate,
+        creatorId: updated.creatorId,
+        createdAt: updated.createdAt.toISOString(),
+        updatedAt: updated.updatedAt.toISOString(),
+      },
     };
   }
 

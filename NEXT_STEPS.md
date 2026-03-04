@@ -57,11 +57,12 @@
 - [x] Formulario validado (nombre, descripción, privacidad)
 - [x] Manejo de errores de validación API
 - [x] Submit + redirección post-creación
-- [ ] Edición de comunidad (opcional MVP+)
+- [x] Edición de comunidad (MVP+): ruta `/communities/[id]/edit` con control de propiedad
 
 **Archivos:**
 - `apps/web/pages/communities/new.tsx` (completar)
 - `apps/web/pages/communities/[id]/edit.tsx` (crear opcional)
+- `apps/web/pages/communities/[id].tsx` (añadir acceso a edición para creador)
 - `apps/web/src/components/communities/forms/*` (crear)
 
 ---
