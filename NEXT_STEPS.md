@@ -72,9 +72,9 @@
 **Tiempo estimado**: 0.5 día
 
 **Tareas:**
-- [ ] Crear página FAQ con categorías
-- [ ] Acordeones accesibles
-- [ ] Búsqueda simple por texto
+- [x] Crear página FAQ con categorías
+- [x] Acordeones accesibles
+- [x] Búsqueda simple por texto
 
 **Archivos:**
 - `apps/web/pages/faq.tsx` (crear)

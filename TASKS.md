@@ -49,8 +49,10 @@ Nice-to-have y mejoras adicionales.
   - Control de propiedad: solo creador puede editar
   - Endpoint backend `PUT /communities/:id` implementado con validación de autorización
 
-- [ ] **P0.C.4** Fase D: sección FAQ
-  - Categorías, acordeones accesibles y búsqueda
+- [x] **P0.C.4** Fase D: sección FAQ
+  - Categorías de ayuda (cuenta, servicios, comunidades)
+  - Acordeones accesibles para preguntas/respuestas
+  - Búsqueda simple por texto (pregunta + respuesta)
 
 ### 0.1 Saneamiento técnico (lint + typecheck monorepo)
 
