@@ -1,9 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { 
   Box, 
   Typography, 
-  Rating, 
-  TextField, 
   Button, 
   Dialog, 
   DialogTitle, 
@@ -14,15 +12,19 @@ import {
 } from '@mui/material';
 import { Star } from '@mui/icons-material';
 import { useTranslation } from '@/hooks/useTranslation';
-import { useCreateRating } from '@/shared/hooks/use-ratings';
+import { useCreateRating, useUpdateRating } from '@/shared/hooks/use-ratings';
 import { useAuth } from '@/hooks/useAuth';
 import { apiClient } from '@/shared/api/client';
+import { RatingForm } from './RatingForm';
 
 interface RatingDialogProps {
   open: boolean;
   onClose: () => void;
   serviceTitle: string;
   serviceId: number;
+  ratingId?: number;
+  initialScore?: number;
+  initialComment?: string;
   onRatingSubmitted: () => void;
 }
 
@@ -31,18 +33,24 @@ export function RatingDialog({
   onClose, 
   serviceTitle, 
   serviceId, 
+  ratingId,
+  initialScore = 0,
+  initialComment = '',
   onRatingSubmitted 
 }: RatingDialogProps) {
   const { t } = useTranslation();
   const { user, getAccessToken } = useAuth();
   const createRating = useCreateRating();
-  const [rating, setRating] = useState<number>(0);
-  const [comment, setComment] = useState<string>('');
+  const updateRating = useUpdateRating();
+  const [rating, setRating] = useState<number>(initialScore);
+  const [comment, setComment] = useState<string>(initialComment);
   const [error, setError] = useState<string | null>(null);
+  const isEditMode = Boolean(ratingId);
+  const isSubmitting = createRating.isPending || updateRating.isPending;
 
   const handleSubmit = async () => {
     if (rating === 0) {
-      setError(t('ratings.required') || 'Debes seleccionar una puntuación');
+      setError('Debes seleccionar una puntuación');
       return;
     }
 
@@ -63,13 +71,22 @@ export function RatingDialog({
       // Set token in API client
       apiClient.setToken(token);
 
-      // Submit rating
-      await createRating.mutateAsync({
-        userId: user.sub,
-        serviceId: serviceId,
+      if (isEditMode && ratingId) {
+        await updateRating.mutateAsync({
+          id: ratingId,
+          data: {
+            score: rating,
+            comment: comment.trim() || undefined,
+          },
+        });
+      } else {
+        await createRating.mutateAsync({
+          userId: user.sub,
+          serviceId: serviceId,
           score: rating,
           comment: comment.trim() || undefined,
-      });
+        });
+      }
 
       // Success
       onRatingSubmitted();
@@ -82,11 +99,17 @@ export function RatingDialog({
   };
 
   const handleClose = () => {
-    setRating(0);
-    setComment('');
+    setRating(initialScore);
+    setComment(initialComment);
     setError(null);
     onClose();
   };
+
+  // Sync state when dialog opens with different initial values
+  useEffect(() => {
+    setRating(initialScore);
+    setComment(initialComment);
+  }, [initialScore, initialComment, open]);
 
   return (
     <Dialog 
@@ -99,15 +122,16 @@ export function RatingDialog({
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Star sx={{ color: 'primary.main' }} />
           <Typography variant="h6">
-            {t('ratings.rate_service')}
+            {isEditMode ? t('ratings.edit') : t('ratings.create')}
           </Typography>
         </Box>
       </DialogTitle>
       
       <DialogContent>
         <Box sx={{ py: 2 }}>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-            ¿Cómo calificarías el servicio <strong>"{serviceTitle}"</strong>?
+          <Typography variant="body1" sx={{ mb: 2.5 }}>
+            {isEditMode ? 'Actualiza tu valoración para' : '¿Cómo calificarías el servicio'}{' '}
+            <strong>"{serviceTitle}"</strong>?
           </Typography>
           
           {error && (
@@ -116,55 +140,32 @@ export function RatingDialog({
             </Alert>
           )}
           
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="body2" sx={{ mb: 1 }}>
-              {t('ratings.rating')} *
-            </Typography>
-            <Rating
-              value={rating}
-              onChange={(_, newValue) => setRating(newValue || 0)}
-              size="large"
-              sx={{ 
-                '& .MuiRating-icon': { 
-                  fontSize: '2rem' 
-                } 
-              }}
-            />
-            {rating > 0 && (
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                {rating === 1 && t('ratings.terrible')}
-                {rating === 2 && t('ratings.poor')}
-                {rating === 3 && t('ratings.average')}
-                {rating === 4 && t('ratings.good')}
-                {rating === 5 && t('ratings.excellent')}
-              </Typography>
-            )}
-          </Box>
-          
-          <TextField
-            fullWidth
-            multiline
-            rows={3}
-            label={`${t('ratings.comment')} (opcional)`}
-            placeholder={t('ratings.comment_placeholder')}
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            sx={{ mb: 2 }}
+          <RatingForm
+            score={rating}
+            comment={comment}
+            error={error}
+            disabled={isSubmitting}
+            onScoreChange={setRating}
+            onCommentChange={setComment}
           />
         </Box>
       </DialogContent>
       
       <DialogActions>
-        <Button onClick={handleClose} disabled={createRating.isPending}>
+        <Button onClick={handleClose} disabled={isSubmitting}>
           {t('ratings.cancel')}
         </Button>
         <Button 
           onClick={handleSubmit} 
           variant="contained"
-          disabled={createRating.isPending || rating === 0}
-          startIcon={createRating.isPending ? <CircularProgress size={16} /> : <Star />}
+          disabled={isSubmitting || rating === 0}
+          startIcon={isSubmitting ? <CircularProgress size={16} /> : <Star />}
         >
-          {createRating.isPending ? (t('ratings.submitting') || 'Enviando...') : (t('ratings.submit') || 'Enviar')}
+          {isSubmitting
+            ? 'Guardando...'
+            : isEditMode
+              ? t('ratings.update')
+              : t('ratings.submit')}
         </Button>
       </DialogActions>
     </Dialog>

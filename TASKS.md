@@ -148,12 +148,16 @@ Nice-to-have y mejoras adicionales.
     - `apps/web/pages/services/[id].tsx`
     - `apps/web/components/services/ServiceDetailHeader.tsx`
 
-- [ ] **P0.2.4** Crear componente de valoración en frontend
-  - Formulario para crear/editar valoración
+- [x] **P0.2.4** Crear componente de valoración en frontend
+  - Formulario reutilizable para crear/editar valoración
   - Selector de estrellas (1-5)
-  - Campo de comentario con contador de caracteres
-  - Validación en frontend
-  - **Archivo**: `apps/web/src/components/ratings/RatingForm.tsx` (crear)
+  - Campo de comentario con contador de caracteres (máx. 500)
+  - Validación en frontend y mensajes de error
+  - Integrado en diálogo de creación/edición de rating
+  - **Archivos**:
+    - `apps/web/src/components/ratings/RatingForm.tsx`
+    - `apps/web/src/components/ratings/RatingDialog.tsx`
+    - `apps/web/src/components/ratings/RatingsList.tsx`
 
 - [ ] **P0.2.5** Mostrar valoraciones en página de servicio
   - Lista de valoraciones con usuario, estrellas, comentario

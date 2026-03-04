@@ -153,6 +153,9 @@ export function RatingsList({ serviceId, serviceTitle, onRatingUpdated }: Rating
           onClose={() => setEditingRating(null)}
           serviceTitle={serviceTitle}
           serviceId={serviceId}
+          ratingId={editingRating.id}
+          initialScore={editingRating.score}
+          initialComment={editingRating.comment || ''}
           onRatingSubmitted={() => {
             setEditingRating(null);
             onRatingUpdated?.();
