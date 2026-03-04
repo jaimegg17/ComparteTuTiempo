@@ -54,9 +54,10 @@
 **Tiempo estimado**: 0.5-1 día
 
 **Tareas:**
-- [ ] Formulario validado (nombre, descripción, privacidad)
-- [ ] Manejo de errores de validación API
-- [ ] Submit + redirección post-creación
+- [x] Formulario validado (nombre, descripción, privacidad)
+- [x] Manejo de errores de validación API
+- [x] Submit + redirección post-creación
+- [ ] Edición de comunidad (opcional MVP+)
 
 **Archivos:**
 - `apps/web/pages/communities/new.tsx` (completar)

@@ -40,8 +40,12 @@ Nice-to-have y mejoras adicionales.
   - Alineación backend `communityId/groupId` en eventos/membresías
   - Tests dirigidos de regresión para listados y normalización de query
 
-- [ ] **P0.C.3** Fase C: crear/editar comunidad (MVP)
-  - Formulario completo con validación frontend/backend
+- [x] **P0.C.3** Fase C: crear comunidad (MVP)
+  - Formulario completo con validación frontend (nombre, descripción, privacidad)
+  - Manejo de errores de API y redirección al detalle tras crear
+  - Alineación de normalización en `communitiesApi.create/update`
+- [ ] **P0.C.3.1** Editar comunidad (MVP+ opcional)
+  - Ruta/pantalla de edición pendiente
 
 - [ ] **P0.C.4** Fase D: sección FAQ
   - Categorías, acordeones accesibles y búsqueda

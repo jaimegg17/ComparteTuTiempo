@@ -65,12 +65,20 @@ export const communitiesApi = {
 
   // Crear nueva comunidad
   async createCommunity(data: CommunityCreate): Promise<{ community: Community }> {
-    return apiClient.post<{ community: Community }>('/communities', data);
+    const response = await apiClient.post<{ community?: RawCommunity }>('/communities', data);
+    if (!response?.community) {
+      throw new Error('No se pudo crear la comunidad');
+    }
+    return { community: normalizeCommunity(response.community) };
   },
 
   // Actualizar comunidad
-  async updateCommunity(id: number, data: Partial<CommunityCreate>): Promise<Community> {
-    return apiClient.put<Community>(`/communities/${id}`, data);
+  async updateCommunity(id: number, data: Partial<CommunityCreate>): Promise<{ community: Community }> {
+    const response = await apiClient.put<{ community?: RawCommunity }>(`/communities/${id}`, data);
+    if (!response?.community) {
+      throw new Error('No se pudo actualizar la comunidad');
+    }
+    return { community: normalizeCommunity(response.community) };
   },
 
   // Eliminar comunidad
