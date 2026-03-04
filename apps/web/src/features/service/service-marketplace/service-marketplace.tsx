@@ -5,6 +5,7 @@ import { Search, Heart, MessageCircle, User, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
+import Image from "next/image"
 
 const services = [
   {
@@ -188,10 +189,12 @@ export function ServiceMarketplace() {
             {services.map((service) => (
               <Card key={service.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className={`relative h-48 ${service.bgColor}`}>
-                  <img
+                  <Image
                     src={service.image || "/placeholder.svg"}
                     alt={service.title}
-                    className="w-full h-full object-cover"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover"
                   />
                   <Button variant="ghost" size="icon" className="absolute top-3 right-3 bg-white/80 hover:bg-white">
                     <Heart className="w-4 h-4" />

@@ -229,11 +229,16 @@ Nice-to-have y mejoras adicionales.
     - `apps/api/src/modules/services/application/delete-service.use-case.ts`
     - `apps/api/src/modules/users/users.controller.ts`
 
-- [ ] **P0.3.6** Optimizar imágenes en frontend
+- [x] **P0.3.6** Optimizar imágenes en frontend
   - Usar `next/image` para optimización
   - Lazy loading
   - Placeholders mientras carga
-  - **Archivo**: Componentes que muestran imágenes
+  - **Archivos**:
+    - `apps/web/components/exchanges/ExchangeCard.tsx`
+    - `apps/web/components/services/ServiceImageSection.tsx`
+    - `apps/web/src/components/hero-section.tsx`
+    - `apps/web/src/components/testimonials-section.tsx`
+    - `apps/web/src/features/service/service-marketplace/service-marketplace.tsx`
 
 - [ ] **P0.3.7** Agregar soporte para múltiples imágenes
   - Permitir subir varias imágenes para un servicio

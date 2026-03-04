@@ -1,6 +1,7 @@
 import { Card, CardContent, Box, Typography, Chip, Avatar, Button, Stack } from '@mui/material';
 import { Clock, ChatBubble } from 'iconoir-react';
 import { useRouter } from 'next/router';
+import Image from 'next/image';
 import { RatingButton } from '@/components/ratings';
 import type { Exchange, ExchangeState } from '@/types/exchange.types';
 
@@ -61,15 +62,18 @@ export function ExchangeCard({ exchange, currentUserId, onAccept, onReject, onSt
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              position: 'relative',
             }}
             onClick={() => router.push(`/services/${exchange.serviceId}`)}
           >
             {exchange.service?.imageUrl ? (
-              <img 
-                src={exchange.service.imageUrl} 
+              <Image
+                src={exchange.service.imageUrl}
                 alt={exchange.service.title}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                fill
+                sizes="(max-width: 900px) 100vw, 120px"
+                style={{ objectFit: 'cover' }}
               />
             ) : (
               <Typography sx={{ fontSize: '48px' }}>📦</Typography>

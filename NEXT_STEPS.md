@@ -18,6 +18,7 @@
 13. ✅ Ratings P0.2.6: validación DTO con Zod en controller (create/update/list)
 14. ✅ Upload P0.3.1/P0.3.2/P0.3.3: Cloudinary verificado + tests backend de upload + componente de subida validado
 15. ✅ Upload P0.3.4/P0.3.5: integración en flujos existentes (servicio/perfil) + limpieza de imágenes al reemplazar/borrar
+16. ✅ Upload P0.3.6: optimización frontend con `next/image` en componentes críticos de imagen
 
 ---
 
