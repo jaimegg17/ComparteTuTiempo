@@ -118,11 +118,15 @@ Nice-to-have y mejoras adicionales.
 
 #### Tareas:
 
-- [ ] **P0.2.1** Implementar endpoint DELETE para valoraciones
-  - Crear `DeleteRatingUseCase`
-  - Validar que solo el creador puede eliminar
-  - Endpoint: `DELETE /api/ratings/:id`
-  - **Archivo**: `apps/api/src/modules/ratings/application/delete-rating.use-case.ts`
+- [x] **P0.2.1** Implementar endpoint DELETE para valoraciones
+  - `DeleteRatingUseCase` implementado
+  - Validación de autoría (solo el creador puede eliminar)
+  - Endpoint activo: `DELETE /api/ratings/:id`
+  - Tests de regresión en use case + controller
+  - **Archivos**:
+    - `apps/api/src/modules/ratings/application/delete-rating.use-case.ts`
+    - `apps/api/src/modules/ratings/application/delete-rating.use-case.spec.ts`
+    - `apps/api/src/modules/ratings/presentation/ratings.controller.spec.ts`
 
 - [ ] **P0.2.2** Mejorar validación de creación de valoraciones
   - Verificar que el usuario completó el intercambio (ya existe)

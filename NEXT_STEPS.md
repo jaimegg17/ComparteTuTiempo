@@ -11,6 +11,7 @@
 6. ✅ Fase A de Comunidades base completada (listado + filtros + estados + navegación)
 7. ✅ Avance Fase B: página de detalle con secciones (header, miembros, actividad) y acciones unirse/salir con fallback
 8. ✅ Cierre Fase B: endpoints de membresías/eventos alineados (communityId/groupId) + tests dirigidos
+9. ✅ Ratings P0.2.1 y P0.2.3: delete de valoraciones + promedio destacado en detalle de servicio
 
 ---
 
