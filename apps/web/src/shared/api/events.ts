@@ -18,16 +18,9 @@ const normalizeEvent = (event: RawEvent): Event => ({
 
 export const eventsApi = {
   async getEventsByCommunity(communityId: number): Promise<Event[]> {
-    try {
-      const response = await apiClient.get<RawEventListResponse>(`/events?communityId=${communityId}`);
-      if (Array.isArray(response.events)) {
-        return response.events.map(normalizeEvent);
-      }
-    } catch {
-      // Fallback endpoint below
-    }
-
-    const fallback = await apiClient.get<{ events?: RawEvent[] }>(`/events/community/${communityId}`);
-    return Array.isArray(fallback.events) ? fallback.events.map(normalizeEvent) : [];
+    const response = await apiClient.get<RawEventListResponse>(
+      `/events?groupId=${communityId}&page=1&pageSize=20`,
+    );
+    return Array.isArray(response.events) ? response.events.map(normalizeEvent) : [];
   },
 };

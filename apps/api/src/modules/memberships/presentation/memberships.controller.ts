@@ -16,7 +16,14 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
 import { createZodDto } from '@anatine/zod-nestjs';
-import { MembershipCreateSchema, MembershipUpdateSchema } from '@comparte-tu-tiempo/contracts';
+import {
+  MembershipCreateSchema,
+  MembershipRole,
+  MembershipStatus,
+  MembershipUpdateSchema,
+} from '@comparte-tu-tiempo/contracts';
+import { IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
 import { CreateMembershipUseCase } from '../application/create-membership.use-case';
 import { ListMembershipsUseCase } from '../application/list-memberships.use-case';
 import { UpdateMembershipUseCase } from '../application/update-membership.use-case';
@@ -26,13 +33,50 @@ export class UpdateMembershipDto extends createZodDto(MembershipUpdateSchema) {}
 
 // Simple list DTO for now
 export class MembershipListQueryDto {
+  @IsOptional()
+  @IsString()
   userId?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
   groupId?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  @Transform(({ value }) => (value === undefined ? undefined : Number(value)))
+  communityId?: number;
+
+  @IsOptional()
+  @IsEnum(MembershipRole)
   role?: 'MEMBER' | 'MODERATOR' | 'ADMIN';
+
+  @IsOptional()
+  @IsEnum(MembershipStatus)
   status?: 'ACTIVA' | 'PENDIENTE' | 'SUSPENDIDA';
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Type(() => Number)
   page?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Type(() => Number)
   pageSize?: number;
 }
+
+export const normalizeMembershipListQuery = (query: MembershipListQueryDto) => ({
+  page: query.page || 1,
+  pageSize: query.pageSize || 20,
+  userId: query.userId,
+  groupId: query.groupId ?? query.communityId,
+  role: query.role,
+  status: query.status,
+});
 
 @ApiTags('memberships')
 @Controller('memberships')
@@ -61,16 +105,9 @@ export class MembershipsController {
   @ApiOperation({ summary: 'Listar membresías' })
   @ApiResponse({ status: 200, description: 'Lista de membresías obtenida' })
   async listMemberships(@Query() query: MembershipListQueryDto) {
-    const queryWithDefaults = {
-      page: query.page || 1,
-      pageSize: query.pageSize || 20,
-      userId: query.userId,
-      groupId: query.groupId,
-      role: query.role,
-      status: query.status,
-    };
+    const queryWithDefaults = normalizeMembershipListQuery(query);
 
-    const result = await this.listMembershipsUseCase.execute({ query: queryWithDefaults as any });
+    const result = await this.listMembershipsUseCase.execute({ query: queryWithDefaults });
     return {
       message: 'Membresías obtenidas exitosamente',
       ...result.memberships,
@@ -104,4 +141,3 @@ export class MembershipsController {
     return { message: 'Membresía eliminada exitosamente', membership: { id } };
   }
 }
-

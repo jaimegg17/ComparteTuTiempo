@@ -10,6 +10,7 @@
 5. ✅ Mejoras UX/UI básicas
 6. ✅ Fase A de Comunidades base completada (listado + filtros + estados + navegación)
 7. ✅ Avance Fase B: página de detalle con secciones (header, miembros, actividad) y acciones unirse/salir con fallback
+8. ✅ Cierre Fase B: endpoints de membresías/eventos alineados (communityId/groupId) + tests dirigidos
 
 ---
 
@@ -26,7 +27,8 @@
 - [x] Sección de miembros y rol del usuario
 - [x] Actividad/eventos según disponibilidad backend
 - [x] Acciones unirse/salir con feedback
-- [ ] Endpoints backend de membresías/eventos alineados 100% con comunidades (actualmente con fallback por limitaciones de dominio Group/Community)
+- [x] Endpoints backend de membresías/eventos alineados 100% con comunidades (alias communityId/groupId y endpoint real `/events/community/:communityId`)
+- [x] Tests mínimos de regresión para normalización y listados (events/memberships)
 
 **Archivos:**
 - `apps/web/pages/communities/[id].tsx` (ampliar)

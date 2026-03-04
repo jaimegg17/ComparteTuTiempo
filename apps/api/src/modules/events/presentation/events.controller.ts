@@ -17,6 +17,9 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam } from '@ne
 import { CreateEventUseCase } from '../application/create-event.use-case';
 import { ListEventsUseCase } from '../application/list-events.use-case';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
+import { IsDateString, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { Type } from 'class-transformer';
+import type { EventListQuery } from '@comparte-tu-tiempo/contracts';
 
 // Simple DTOs without Zod for now
 export class CreateEventDto {
@@ -35,12 +38,54 @@ export class UpdateEventDto {
 }
 
 export class EventListQueryDto {
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
   communityId?: number;
-  creatorId?: string;
-  upcoming?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  groupId?: number;
+
+  @IsOptional()
+  @IsString()
+  q?: string;
+
+  @IsOptional()
+  @IsDateString()
+  dateFrom?: string;
+
+  @IsOptional()
+  @IsDateString()
+  dateTo?: string;
+
+  @IsOptional()
+  @IsString()
+  location?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Type(() => Number)
   page?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Type(() => Number)
   pageSize?: number;
 }
+
+export const normalizeEventListQuery = (query: EventListQueryDto): EventListQuery => ({
+  page: query.page || 1,
+  pageSize: query.pageSize || 20,
+  groupId: query.groupId ?? query.communityId,
+  q: query.q,
+  dateFrom: query.dateFrom ? new Date(query.dateFrom) : undefined,
+  dateTo: query.dateTo ? new Date(query.dateTo) : undefined,
+  location: query.location,
+});
 
 @ApiTags('events')
 @Controller('events')
@@ -80,17 +125,10 @@ export class EventsController {
   @ApiOperation({ summary: 'Listar eventos con filtros' })
   @ApiResponse({ status: 200, description: 'Lista de eventos obtenida' })
   async listEvents(@Query() query: EventListQueryDto) {
-    // Asegurar que page y pageSize estén presentes
-    const queryWithDefaults = {
-      page: query.page || 1,
-      pageSize: query.pageSize || 20,
-      communityId: query.communityId,
-      creatorId: query.creatorId,
-      upcoming: query.upcoming,
-    };
+    const queryWithDefaults = normalizeEventListQuery(query);
 
-    const result = await this.listEventsUseCase.execute({ 
-      query: queryWithDefaults 
+    const result = await this.listEventsUseCase.execute({
+      query: queryWithDefaults,
     });
 
     return {
@@ -127,11 +165,15 @@ export class EventsController {
   @ApiParam({ name: 'communityId', description: 'ID de la comunidad' })
   @ApiResponse({ status: 200, description: 'Lista de eventos de la comunidad obtenida' })
   async listEventsByCommunity(@Param('communityId', ParseIntPipe) communityId: number) {
-    // This would need a specific use case for community events
+    const result = await this.listEventsUseCase.execute({
+      query: normalizeEventListQuery({ communityId, page: 1, pageSize: 20 }),
+    });
+
     return {
       message: 'Eventos de la comunidad obtenidos exitosamente',
-      events: [],
-      communityId,
+      ...result.events,
+      events: result.events.events.map(event => event.toContract()),
+      communityId, // Compatibilidad para clientes legados
     };
   }
 

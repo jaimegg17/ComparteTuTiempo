@@ -35,8 +35,10 @@ Nice-to-have y mejoras adicionales.
     - `apps/web/pages/communities/[id].tsx`
     - `apps/web/pages/communities/new.tsx`
 
-- [ ] **P0.C.2** Fase B: detalle de comunidad con acciones clave
+- [x] **P0.C.2** Fase B: detalle de comunidad con acciones clave
   - Header, miembros, actividad y acciones de unirse/salir
+  - Alineación backend `communityId/groupId` en eventos/membresías
+  - Tests dirigidos de regresión para listados y normalización de query
 
 - [ ] **P0.C.3** Fase C: crear/editar comunidad (MVP)
   - Formulario completo con validación frontend/backend
