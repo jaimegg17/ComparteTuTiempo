@@ -232,7 +232,7 @@ export function ServiceMarketplace() {
               </li>
               <li>
                 <a href="#" className="hover:text-white">
-                  FAQ's
+                  FAQs
                 </a>
               </li>
             </ul>

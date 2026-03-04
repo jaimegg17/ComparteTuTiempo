@@ -19,6 +19,7 @@
 14. ✅ Upload P0.3.1/P0.3.2/P0.3.3: Cloudinary verificado + tests backend de upload + componente de subida validado
 15. ✅ Upload P0.3.4/P0.3.5: integración en flujos existentes (servicio/perfil) + limpieza de imágenes al reemplazar/borrar
 16. ✅ Upload P0.3.6: optimización frontend con `next/image` en componentes críticos de imagen
+17. ✅ Refactor/debug perfil: limpieza de estado/efectos, tipado de componentes de perfil y ajustes UI/accesibilidad de edición de avatar
 
 ---
 
@@ -228,7 +229,7 @@ Para tener un MVP funcional, completar:
 - [ ] Mejorar responsive design
 - [ ] Agregar animaciones y transiciones
 - [ ] Implementar dark mode (opcional)
-- [ ] Optimizar imágenes (lazy loading)
+- [ ] Continuar saneamiento de warnings lint (hooks deps, `any`, imports no usados)
 
 ---
 

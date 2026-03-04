@@ -24,12 +24,13 @@ interface ProfileFormValues {
 
 interface ProfileFormProps {
   formData: ProfileFormValues;
-  profileData: any;
+  profileData: {
+    timeCredits?: number;
+  } | null;
   isSubmitting: boolean;
-  onInputChange: (field: keyof ProfileFormValues, value: any) => void;
+  onInputChange: (field: keyof ProfileFormValues, value: string | string[]) => void;
   onSkillAdd: (skill: string) => void;
   onSkillRemove: (index: number) => void;
-  onSubmit: (e: React.FormEvent) => void;
 }
 
 export const ProfileForm: React.FC<ProfileFormProps> = ({
@@ -39,7 +40,6 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
   onInputChange,
   onSkillAdd,
   onSkillRemove,
-  onSubmit,
 }) => {
   return (
     <Card sx={{ width: { xs: '100%', md: '65%' } }}>

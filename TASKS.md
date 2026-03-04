@@ -375,6 +375,7 @@ Nice-to-have y mejoras adicionales.
   - Servicios del usuario
   - Valoraciones recibidas
   - Editar perfil
+  - ✅ Refactor/debug de `pages/profile.tsx`: carga estable de perfil, tipado fuerte y UX de edición de avatar mejorada
   - **Archivo**: `apps/web/src/app/profile/page.tsx` (crear)
 
 - [ ] **P1.7.3** Página de mis intercambios

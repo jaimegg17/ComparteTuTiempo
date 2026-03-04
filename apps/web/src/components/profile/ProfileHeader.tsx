@@ -3,7 +3,7 @@ import {
   Box,
   Typography,
   Avatar,
-  IconButton,
+  ButtonBase,
 } from '@mui/material';
 import { Edit as EditIcon } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
@@ -42,7 +42,8 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           >
             {(userName || userEmail || 'U')[0].toUpperCase()}
           </Avatar>
-          <Box
+          <ButtonBase
+            aria-label="Editar foto de perfil"
             sx={{
               position: 'absolute',
               top: 0,
@@ -60,11 +61,16 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               '&:hover': {
                 opacity: 1,
               },
+              '&:focus-visible': {
+                opacity: 1,
+                outline: '2px solid white',
+                outlineOffset: 2,
+              },
             }}
             onClick={onImageEdit}
           >
             <EditIcon sx={{ color: 'white', fontSize: 28 }} />
-          </Box>
+          </ButtonBase>
         </Box>
         <Typography
           variant="body2"
