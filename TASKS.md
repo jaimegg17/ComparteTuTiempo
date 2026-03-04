@@ -159,21 +159,26 @@ Nice-to-have y mejoras adicionales.
     - `apps/web/src/components/ratings/RatingDialog.tsx`
     - `apps/web/src/components/ratings/RatingsList.tsx`
 
-- [ ] **P0.2.5** Mostrar valoraciones en página de servicio
-  - Lista de valoraciones con usuario, estrellas, comentario
+- [x] **P0.2.5** Mostrar valoraciones en página de servicio
+  - Lista de valoraciones con usuario, estrellas y comentario
   - Promedio de estrellas destacado
-  - Paginación si hay muchas valoraciones
-  - **Archivo**: `apps/web/src/app/services/[id]/page.tsx` (crear)
+  - Paginación en listado de valoraciones (5 por página)
+  - **Archivos**:
+    - `apps/web/components/services/ServiceRatingsTab.tsx`
+    - `apps/web/src/components/ratings/RatingsList.tsx`
 
 - [ ] **P0.2.6** Agregar validación con DTOs Zod
   - Reemplazar DTOs manuales con Zod schemas
   - Usar `createZodDto` de `@anatine/zod-nestjs`
   - **Archivo**: `apps/api/src/modules/ratings/presentation/ratings.controller.ts`
 
-- [ ] **P0.2.7** Implementar edición de valoraciones
-  - Permitir editar comentario y estrellas
-  - Validar que solo el creador puede editar
-  - **Archivo**: Ya existe `UpdateRatingUseCase`, verificar que funcione correctamente
+- [x] **P0.2.7** Implementar edición de valoraciones
+  - Editar comentario y estrellas desde el diálogo de valoración
+  - Validación de autoría en backend (`UpdateRatingUseCase`)
+  - **Archivos**:
+    - `apps/web/src/components/ratings/RatingDialog.tsx`
+    - `apps/web/src/components/ratings/RatingsList.tsx`
+    - `apps/api/src/modules/ratings/application/update-rating.use-case.ts`
 
 ---
 

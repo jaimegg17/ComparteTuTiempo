@@ -1,7 +1,7 @@
 "use client";
 
-import { Box, Typography, Rating, Avatar, Paper, IconButton } from '@mui/material';
-import { Star, Edit, Delete } from '@mui/icons-material';
+import { Box, Typography, Rating, Avatar, Paper, IconButton, Pagination } from '@mui/material';
+import { Edit, Delete } from '@mui/icons-material';
 import { useRatings, useDeleteRating } from '@/shared/hooks/use-ratings';
 import { useAuth } from '@/hooks/useAuth';
 import { apiClient } from '@/shared/api/client';
@@ -17,10 +17,12 @@ interface RatingsListProps {
 
 export function RatingsList({ serviceId, serviceTitle, onRatingUpdated }: RatingsListProps) {
   const { user, getAccessToken } = useAuth();
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
   const { data, isLoading, error } = useRatings({ 
     serviceId, 
-    page: 1, 
-    pageSize: 20 
+    page,
+    pageSize,
   });
   const deleteRating = useDeleteRating();
   const [editingRating, setEditingRating] = useState<RatingType | null>(null);
@@ -38,6 +40,9 @@ export function RatingsList({ serviceId, serviceTitle, onRatingUpdated }: Rating
         apiClient.setToken(token);
       }
       await deleteRating.mutateAsync(ratingId);
+      if (data && data.ratings.length === 1 && page > 1) {
+        setPage((prev) => prev - 1);
+      }
       onRatingUpdated?.();
     } catch (err) {
       console.error('Error al eliminar valoración:', err);
@@ -146,6 +151,18 @@ export function RatingsList({ serviceId, serviceTitle, onRatingUpdated }: Rating
           );
         })}
       </Box>
+
+      {data && data.totalPages > 1 && (
+        <Box sx={{ mt: 2.5, display: 'flex', justifyContent: 'center' }}>
+          <Pagination
+            page={page}
+            count={data.totalPages}
+            onChange={(_, newPage) => setPage(newPage)}
+            color="primary"
+            size="small"
+          />
+        </Box>
+      )}
 
       {editingRating && (
         <RatingDialog
