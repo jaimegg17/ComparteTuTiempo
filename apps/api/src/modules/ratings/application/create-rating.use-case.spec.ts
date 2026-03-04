@@ -76,6 +76,81 @@ describe('CreateRatingUseCase - Business Logic Validation', () => {
     });
   });
 
+  describe('Input Validation', () => {
+    it('should reject if user tries to rate on behalf of another user', async () => {
+      const ratingData = {
+        serviceId: 1,
+        score: 5,
+        comment: 'Great service!',
+        userId: 'other-user',
+      };
+
+      await expect(
+        useCase.execute({
+          data: ratingData,
+          userId: 'user-123',
+        })
+      ).rejects.toThrow(BadRequestException);
+
+      expect(prismaService.service.findUnique).not.toHaveBeenCalled();
+      expect(ratingRepository.create).not.toHaveBeenCalled();
+    });
+
+    it('should reject score lower than 1', async () => {
+      const ratingData = {
+        serviceId: 1,
+        score: 0,
+        comment: 'Too low',
+        userId: 'user-123',
+      };
+
+      await expect(
+        useCase.execute({
+          data: ratingData,
+          userId: 'user-123',
+        })
+      ).rejects.toThrow(BadRequestException);
+
+      expect(prismaService.service.findUnique).not.toHaveBeenCalled();
+    });
+
+    it('should reject score greater than 5', async () => {
+      const ratingData = {
+        serviceId: 1,
+        score: 6,
+        comment: 'Too high',
+        userId: 'user-123',
+      };
+
+      await expect(
+        useCase.execute({
+          data: ratingData,
+          userId: 'user-123',
+        })
+      ).rejects.toThrow(BadRequestException);
+
+      expect(prismaService.service.findUnique).not.toHaveBeenCalled();
+    });
+
+    it('should reject comments longer than 500 chars', async () => {
+      const ratingData = {
+        serviceId: 1,
+        score: 5,
+        comment: 'a'.repeat(501),
+        userId: 'user-123',
+      };
+
+      await expect(
+        useCase.execute({
+          data: ratingData,
+          userId: 'user-123',
+        })
+      ).rejects.toThrow(BadRequestException);
+
+      expect(prismaService.service.findUnique).not.toHaveBeenCalled();
+    });
+  });
+
   describe('Exchange Validation', () => {
     it('should reject rating if user has no completed exchange for the service', async () => {
       // Mock: Service exists

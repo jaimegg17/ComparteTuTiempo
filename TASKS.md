@@ -128,11 +128,15 @@ Nice-to-have y mejoras adicionales.
     - `apps/api/src/modules/ratings/application/delete-rating.use-case.spec.ts`
     - `apps/api/src/modules/ratings/presentation/ratings.controller.spec.ts`
 
-- [ ] **P0.2.2** Mejorar validación de creación de valoraciones
-  - Verificar que el usuario completó el intercambio (ya existe)
-  - Verificar que no haya valorado antes (ya existe)
-  - Agregar validación de que el servicio existe
-  - **Archivo**: `apps/api/src/modules/ratings/application/create-rating.use-case.ts`
+- [x] **P0.2.2** Mejorar validación de creación de valoraciones
+  - Verificar que el usuario completó el intercambio
+  - Verificar que no haya valorado antes
+  - Validar que el servicio existe
+  - Validar score (1-5), longitud de comentario y suplantación de `userId`
+  - Tests de regresión ampliados en create-rating use case
+  - **Archivos**:
+    - `apps/api/src/modules/ratings/application/create-rating.use-case.ts`
+    - `apps/api/src/modules/ratings/application/create-rating.use-case.spec.ts`
 
 - [x] **P0.2.3** Implementar cálculo de promedio de ratings por servicio
   - Campo `averageRating` + `totalRatings` en `GET /api/services/:id`
