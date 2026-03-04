@@ -87,13 +87,15 @@
 **Tiempo estimado**: 1 hora
 
 **Tareas:**
-- [ ] Verificar que `averageRating` se calcula en `GET /api/services/:id`
-- [ ] Agregar `averageRating` a la respuesta si no está
-- [ ] Mostrar promedio destacado en frontend
+- [x] Verificar que `averageRating` se calcula en `GET /api/services/:id`
+- [x] Agregar `averageRating` a la respuesta (con `totalRatings`)
+- [x] Mostrar promedio destacado en frontend
 
 **Archivos:**
 - `apps/api/src/modules/services/presentation/services.controller.ts` (verificar)
+- `apps/api/src/modules/services/presentation/services.controller.spec.ts` (tests)
 - `apps/web/pages/services/[id].tsx` (mejorar)
+- `apps/web/components/services/ServiceDetailHeader.tsx` (destacar promedio)
 
 ---
 

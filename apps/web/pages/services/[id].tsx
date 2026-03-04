@@ -167,6 +167,8 @@ export default function ServiceDetailPage() {
                 <ServiceDetailHeader 
                   category={service.category}
                   title={service.title}
+                  averageRating={service.averageRating ?? 0}
+                  totalRatings={service.totalRatings ?? service._count?.ratings ?? 0}
                 />
 
                 <ServiceInfoTabs service={service} />

@@ -130,11 +130,15 @@ Nice-to-have y mejoras adicionales.
   - Agregar validación de que el servicio existe
   - **Archivo**: `apps/api/src/modules/ratings/application/create-rating.use-case.ts`
 
-- [ ] **P0.2.3** Implementar cálculo de promedio de ratings por servicio
-  - Agregar campo `averageRating` en respuesta de `GET /api/services/:id`
-  - Cachear promedio si es necesario (Redis o en BD)
-  - Actualizar promedio cuando se crea/actualiza/elimina rating
-  - **Archivo**: `apps/api/src/modules/services/presentation/services.controller.ts`
+- [x] **P0.2.3** Implementar cálculo de promedio de ratings por servicio
+  - Campo `averageRating` + `totalRatings` en `GET /api/services/:id`
+  - Mostrar promedio destacado en frontend de detalle de servicio
+  - Tests dirigidos para casos con/sin valoraciones
+  - **Archivos**:
+    - `apps/api/src/modules/services/presentation/services.controller.ts`
+    - `apps/api/src/modules/services/presentation/services.controller.spec.ts`
+    - `apps/web/pages/services/[id].tsx`
+    - `apps/web/components/services/ServiceDetailHeader.tsx`
 
 - [ ] **P0.2.4** Crear componente de valoración en frontend
   - Formulario para crear/editar valoración
