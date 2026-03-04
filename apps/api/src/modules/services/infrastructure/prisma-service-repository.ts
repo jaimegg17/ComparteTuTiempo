@@ -206,11 +206,11 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
 
   async update(id: number, data: ServiceUpdate, userId: string): Promise<Service> {
     // Verificar que el servicio existe y pertenece al usuario
-    const existingService = await this.findById(id);
+    const existingService = await this.findById(id) as any;
     if (!existingService) {
       throw new Error('Service not found');
     }
-    if (!existingService.isOwnedBy(userId)) {
+    if (existingService.userId !== userId) {
       throw new Error('Unauthorized to update this service');
     }
 
@@ -235,11 +235,11 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
 
   async delete(id: number, userId: string): Promise<void> {
     // Verificar que el servicio existe y pertenece al usuario
-    const existingService = await this.findById(id);
+    const existingService = await this.findById(id) as any;
     if (!existingService) {
       throw new Error('Service not found');
     }
-    if (!existingService.canBeDeletedBy(userId)) {
+    if (existingService.userId !== userId) {
       throw new Error('Unauthorized to delete this service');
     }
 

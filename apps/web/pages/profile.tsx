@@ -16,6 +16,7 @@ import { SuccessAlert, ErrorAlert } from '@/components/ui/BeautifulAlert';
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { ProfileForm } from '@/components/profile/ProfileForm';
 import { NotificationsSection } from '@/components/profile/NotificationsSection';
+import { useUploadImage } from '@/shared/hooks/use-upload';
 
 // Tipos para el formulario de perfil
 interface ProfileFormValues {
@@ -53,6 +54,7 @@ const ProfilePage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [profileData, setProfileData] = useState<any>(null);
   const [formData, setFormData] = useState<ProfileFormValues>(defaultValues);
+  const uploadImage = useUploadImage();
 
   // Funciones auxiliares para los componentes
   const handleInputChange = (field: keyof ProfileFormValues, value: any) => {
@@ -182,55 +184,18 @@ const ProfilePage = () => {
   // Manejar upload de imagen
   const handleImageUpload = async (file: File) => {
     try {
-      console.log('Starting image upload...', file);
-      
-      // Obtener token si no lo tenemos
-      let token = accessToken;
-      if (!token) {
-        token = await getAccessToken();
-      }
-      
-      if (!token) {
-        throw new Error('No access token available');
-      }
-      
-      console.log('Token available:', !!token);
-      
-      const formData = new FormData();
-      formData.append('image', file);
+      const result = await uploadImage.mutateAsync(file);
 
-      const response = await fetch('http://localhost:3001/api/upload/image', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        body: formData,
-      });
+      // Actualizar el estado del formulario
+      setFormData((prev: ProfileFormValues) => ({ ...prev, imageUrl: result.url }));
 
-      console.log('Upload response status:', response.status);
+      // También actualizar los datos del perfil para que se refleje inmediatamente
+      setProfileData((prev: any) => ({ ...prev, imageUrl: result.url }));
 
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Upload result:', result);
-        
-        // Actualizar el estado del formulario
-        setFormData((prev: ProfileFormValues) => ({ ...prev, imageUrl: result.url }));
-        
-        // También actualizar los datos del perfil para que se refleje inmediatamente
-        setProfileData((prev: any) => ({ ...prev, imageUrl: result.url }));
-        
-        // Actualizar el contexto global para que se refleje en la navbar
-        console.log('🔄 Updating context with image URL:', result.url);
-        updateUserProfile({ imageUrl: result.url });
-        console.log('✅ Context updated');
-        
-        console.log('Image URL updated:', result.url);
-        return result.url;
-      } else {
-        const errorText = await response.text();
-        console.error('Upload failed:', response.status, errorText);
-        throw new Error(`Error uploading image: ${response.status}`);
-      }
+      // Actualizar el contexto global para que se refleje en la navbar
+      updateUserProfile({ imageUrl: result.url });
+
+      return result.url;
     } catch (error) {
       console.error('Upload error:', error);
       setError('Error uploading image');

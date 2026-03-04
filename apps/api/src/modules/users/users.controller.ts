@@ -2,6 +2,7 @@ import { Controller, Get, Put, Param, Body, UseGuards, Request, NotFoundExceptio
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
 import { PrismaService } from '@/common/prisma/prisma.service';
+import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 import { IsString, IsOptional, IsEmail, MaxLength, IsArray } from 'class-validator';
 
 export class UpdateUserDto {
@@ -40,7 +41,10 @@ export class UpdateUserDto {
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
@@ -113,6 +117,10 @@ export class UsersController {
       throw new NotFoundException('User not found');
     }
 
+    const previousImageUrl = existingUser.imageUrl ?? null;
+    const hasImageUrlUpdate = Object.prototype.hasOwnProperty.call(updateUserDto, 'imageUrl');
+    const nextImageUrl = hasImageUrlUpdate ? updateUserDto.imageUrl ?? null : previousImageUrl;
+
     // Actualizar el usuario
     const updatedUser = await this.prisma.user.update({
       where: { id },
@@ -140,6 +148,26 @@ export class UsersController {
         updatedAt: true,
       },
     });
+
+    const shouldDeletePreviousImage = Boolean(
+      hasImageUrlUpdate &&
+        previousImageUrl &&
+        previousImageUrl !== nextImageUrl &&
+        previousImageUrl.includes('res.cloudinary.com'),
+    );
+
+    if (shouldDeletePreviousImage && previousImageUrl) {
+      try {
+        const publicId = this.cloudinaryService.extractPublicId(previousImageUrl);
+        await this.cloudinaryService.deleteImage(publicId);
+      } catch (error) {
+        console.warn(
+          `No se pudo limpiar imagen anterior del usuario ${id}: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      }
+    }
 
     return {
       message: 'User profile updated successfully',

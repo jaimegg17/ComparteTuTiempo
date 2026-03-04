@@ -9,9 +9,10 @@ import { PrismaModule } from '../../common/prisma/prisma.module';
 import { GetServiceUseCase } from './application/get-service.use-case';
 import { UpdateServiceUseCase } from './application/update-service.use-case';
 import { DeleteServiceUseCase } from './application/delete-service.use-case';
+import { CloudinaryModule } from '@/common/cloudinary/cloudinary.module';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, CloudinaryModule],
   controllers: [ServicesController],
   providers: [
     CreateServiceUseCase,

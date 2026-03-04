@@ -213,17 +213,21 @@ Nice-to-have y mejoras adicionales.
   - Mostrar imagen subida
   - **Archivo**: `apps/web/src/components/ui/ImageUpload.tsx` (mejorar el existente)
 
-- [ ] **P0.3.4** Integrar subida de imágenes en formularios
+- [x] **P0.3.4** Integrar subida de imágenes en formularios
   - Formulario de creación de servicio
   - Formulario de edición de perfil
-  - Formulario de creación de grupo
+  - Flujos actuales de grupos/comunidades no incluyen `imageUrl` en contrato/modelo
   - **Archivos**: Varios formularios
 
-- [ ] **P0.3.5** Implementar eliminación de imágenes
+- [x] **P0.3.5** Implementar eliminación de imágenes
   - Endpoint `DELETE /api/upload/image/:publicId`
-  - Eliminar imagen de Cloudinary cuando se elimina servicio/usuario
-  - Limpiar imágenes huérfanas
-  - **Archivo**: `apps/api/src/modules/upload/upload.controller.ts`
+  - Eliminar imagen anterior en Cloudinary al reemplazar imagen de servicio/usuario
+  - Eliminar imagen en Cloudinary al borrar servicio
+  - **Archivos**:
+    - `apps/api/src/modules/upload/upload.controller.ts`
+    - `apps/api/src/modules/services/application/update-service.use-case.ts`
+    - `apps/api/src/modules/services/application/delete-service.use-case.ts`
+    - `apps/api/src/modules/users/users.controller.ts`
 
 - [ ] **P0.3.6** Optimizar imágenes en frontend
   - Usar `next/image` para optimización
