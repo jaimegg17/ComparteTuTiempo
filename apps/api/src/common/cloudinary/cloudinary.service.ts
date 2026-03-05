@@ -8,6 +8,8 @@ export interface UploadImageOptions {
   folder?: string;
 }
 
+type CloudinaryTransformation = Record<string, string | number>;
+
 @Injectable()
 export class CloudinaryService {
   private readonly logger = new Logger(CloudinaryService.name);
@@ -39,7 +41,7 @@ export class CloudinaryService {
       const folder = options.folder || 'comparte-tu-tiempo';
       
       // Intelligent transformations based on image dimensions
-      const transformations: any[] = [];
+      const transformations: CloudinaryTransformation[] = [];
       
       // If image is larger than 1200px, resize it
       if (options.width && options.width > 1200) {

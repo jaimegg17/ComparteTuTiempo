@@ -1,14 +1,16 @@
 import { Injectable, ConflictException, BadRequestException, Inject } from '@nestjs/common';
 import type { UserRepositoryPort } from '../domain/user-repository.port';
-import type { UserCreate } from '../domain/user.entity';
+import type { User, UserCreate } from '../domain/user.entity';
 import { SignUp } from '@comparte-tu-tiempo/contracts';
 import * as bcrypt from 'bcrypt';
+
+type PublicUser = Omit<User, 'password'>;
 
 @Injectable()
 export class SignUpUseCase {
   constructor(@Inject('UserRepositoryPort') private readonly userRepository: UserRepositoryPort) {}
 
-  async execute(signUpData: SignUp): Promise<{ user: any; token: string }> {
+  async execute(signUpData: SignUp): Promise<{ user: PublicUser; token: string }> {
     // Check if user already exists
     const existingUser = await this.userRepository.findByEmail(signUpData.email);
     if (existingUser) {
@@ -40,8 +42,8 @@ export class SignUpUseCase {
     const user = await this.userRepository.create(userData);
 
     // Remove password from response
-    const userWithoutPassword = { ...user } as any;
-    delete userWithoutPassword.password;
+    const { password, ...userWithoutPassword } = user;
+    void password;
 
     // TODO: Generate JWT token
     const token = 'mock-jwt-token';

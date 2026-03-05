@@ -1,13 +1,16 @@
 import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import type { UserRepositoryPort } from '../domain/user-repository.port';
+import type { User } from '../domain/user.entity';
 import { SignIn } from '@comparte-tu-tiempo/contracts';
 import * as bcrypt from 'bcrypt';
+
+type PublicUser = Omit<User, 'password'>;
 
 @Injectable()
 export class SignInUseCase {
   constructor(@Inject('UserRepositoryPort') private readonly userRepository: UserRepositoryPort) {}
 
-  async execute(signInData: SignIn): Promise<{ user: any; token: string }> {
+  async execute(signInData: SignIn): Promise<{ user: PublicUser; token: string }> {
     // Find user by email
     const user = await this.userRepository.findByEmail(signInData.email);
     if (!user) {
@@ -21,8 +24,8 @@ export class SignInUseCase {
     }
 
     // Remove password from response
-    const userWithoutPassword = { ...user } as any;
-    delete userWithoutPassword.password;
+    const { password, ...userWithoutPassword } = user;
+    void password;
 
     // TODO: Generate JWT token
     const token = 'mock-jwt-token';
