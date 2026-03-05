@@ -4,6 +4,7 @@ import type { ServiceRepositoryPort } from '../domain/service-repository.port';
 import type { ServiceUpdate } from '@comparte-tu-tiempo/contracts';
 import type { Service } from '../domain/service.entity';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
+import { GoogleMapsService } from '@/common/maps/google-maps.service';
 
 export interface UpdateServiceInput { id: number; data: ServiceUpdate; userId: string }
 export interface UpdateServiceOutput { service: Service }
@@ -16,6 +17,7 @@ export class UpdateServiceUseCase {
     @Inject(SERVICE_REPOSITORY_TOKEN)
     private readonly serviceRepository: ServiceRepositoryPort,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly googleMapsService: GoogleMapsService,
   ) {}
 
   async execute(input: UpdateServiceInput): Promise<UpdateServiceOutput> {
@@ -26,10 +28,35 @@ export class UpdateServiceUseCase {
     const hadImageUrlField = Object.prototype.hasOwnProperty.call(input.data, 'imageUrl');
     const previousImageUrl = existing.imageUrl ?? null;
 
-    const service = await this.serviceRepository.update(input.id, input.data, input.userId);
+    let dataToUpdate: ServiceUpdate = { ...input.data };
+    const nextLocation =
+      typeof input.data.location === 'string' ? input.data.location : undefined;
+
+    const shouldTryGeocoding = Boolean(
+      nextLocation &&
+        (input.data.latitude == null ||
+          input.data.longitude == null ||
+          input.data.formattedAddress == null ||
+          input.data.placeId == null),
+    );
+
+    if (shouldTryGeocoding && nextLocation) {
+      const geocoded = await this.googleMapsService.geocodeAddress(nextLocation);
+      if (geocoded) {
+        dataToUpdate = {
+          ...dataToUpdate,
+          latitude: input.data.latitude ?? geocoded.latitude,
+          longitude: input.data.longitude ?? geocoded.longitude,
+          formattedAddress: input.data.formattedAddress ?? geocoded.formattedAddress,
+          placeId: input.data.placeId ?? geocoded.placeId,
+        };
+      }
+    }
+
+    const service = await this.serviceRepository.update(input.id, dataToUpdate, input.userId);
 
     if (hadImageUrlField) {
-      const nextImageUrl = input.data.imageUrl ?? null;
+      const nextImageUrl = dataToUpdate.imageUrl ?? null;
       const shouldDeletePrevious = Boolean(
         previousImageUrl &&
           previousImageUrl !== nextImageUrl &&

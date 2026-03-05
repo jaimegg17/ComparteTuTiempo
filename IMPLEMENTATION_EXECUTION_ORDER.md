@@ -96,9 +96,9 @@ Ordenar la implementación restante para:
 **Cierre**: datos listos para geobúsqueda.
 
 ### Lote B2 — Geocoding/Places en alta/edición
-- [ ] Módulo `maps` simple en backend (provider Google).
-- [ ] Resolver dirección -> coordenadas en create/update service.
-- [ ] Gestionar fallos de geocoding con error útil.
+- [x] Módulo `maps` simple en backend (provider Google Geocoding).
+- [x] Resolver dirección -> coordenadas en create/update service.
+- [x] Gestionar fallos de geocoding con fallback seguro (no bloquea creación/edición).
 **Cierre**: servicios nuevos/editados quedan georreferenciados.
 
 ### Lote B3 — Endpoint nearby
@@ -155,10 +155,10 @@ Ordenar la implementación restante para:
 
 ## 3) Siguiente acción inmediata (lo que toca ahora)
 
-### ▶ Siguiente foco recomendado: **Lote B2** (Google Geocoding/Places en alta-edición)
-1. Añadir servicio backend de geocoding desacoplado (provider Google con fallback controlado).
-2. Geocodificar en create/update de servicios y persistir coordenadas + `formattedAddress`.
-3. Cubrir con tests unit/integration dirigidos (sin E2E).
+### ▶ Siguiente foco recomendado: **Lote B4/B5** (cerrar flujo y pruebas)
+1. Integrar autocomplete de dirección (Google Places) en create/update frontend.
+2. Añadir validación UX cuando no se pueda geocodificar dirección.
+3. Completar tests de integración del flujo nearby+geocoding (sin E2E).
 
 ---
 
