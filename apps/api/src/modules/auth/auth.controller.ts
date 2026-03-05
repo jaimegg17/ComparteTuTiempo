@@ -1,10 +1,17 @@
-import { Controller, Post, Get, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Get, UseGuards, Request, UnauthorizedException } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
+  private getAuthenticatedUser(req: { user?: { sub?: string; id?: string } }) {
+    if (!req.user) {
+      throw new UnauthorizedException('Usuario no autenticado');
+    }
+    return req.user;
+  }
+
   @Post('signup')
   @ApiOperation({ summary: 'Registrar nuevo usuario' })
   async signup() {
@@ -23,8 +30,8 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener usuario autenticado' })
-  async getMe(@Request() req: any) {
-    return { user: req.user };
+  async getMe(@Request() req: { user?: { sub?: string; id?: string } }) {
+    return { user: this.getAuthenticatedUser(req) };
   }
 
   // 🔑 TEMPORARY ENDPOINT - Extract Access Token for testing
@@ -32,13 +39,17 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: '🔑 TESTING: Extraer Access Token' })
-  async getToken(@Request() req: any) {
-    const token = req.headers.authorization?.replace('Bearer ', '');
+  async getToken(
+    @Request()
+    req: { user?: { sub?: string; id?: string }; headers?: { authorization?: string } },
+  ) {
+    const user = this.getAuthenticatedUser(req);
+    const token = req.headers?.authorization?.replace('Bearer ', '');
     return {
       message: '🔑 Access Token extraído correctamente',
-      userId: req.user?.sub || 'unknown',
+      userId: user.sub || user.id || 'unknown',
       token: token || 'No token found in headers',
-      fullUser: req.user,
+      fullUser: user,
       note: 'Usa este token en tus scripts de prueba'
     };
   }

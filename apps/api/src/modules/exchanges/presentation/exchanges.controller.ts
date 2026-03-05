@@ -3,6 +3,7 @@ import {
   Get, 
   Post, 
   Put, 
+  UnauthorizedException,
   Body, 
   Param, 
   Query, 
@@ -12,9 +13,12 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { createZodDto } from '@anatine/zod-nestjs';
+import { Type } from 'class-transformer';
+import { IsEnum, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 import { 
   ExchangeCreateSchema, 
-  ExchangeUpdateSchema 
+  ExchangeUpdateSchema,
+  ExchangeStatus,
 } from '@comparte-tu-tiempo/contracts';
 import { CreateExchangeUseCase } from '../application/create-exchange.use-case';
 import { ListExchangesUseCase } from '../application/list-exchanges.use-case';
@@ -26,13 +30,44 @@ import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
 export class CreateExchangeDto extends createZodDto(ExchangeCreateSchema) {}
 export class UpdateExchangeDto extends createZodDto(ExchangeUpdateSchema) {}
 
-// Simple query DTO without validation for now
+type AuthenticatedRequest = { user?: { sub?: string; id?: string } };
+
 export class ExchangeListQueryDto {
+  @IsOptional()
+  @IsString()
   requestedById?: string;
+
+  @IsOptional()
+  @IsString()
   offeredById?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
   serviceId?: number;
-  state?: string;
+
+  @IsOptional()
+  @IsEnum([
+    ExchangeStatus.PENDING,
+    ExchangeStatus.CONFIRMED,
+    ExchangeStatus.IN_PROGRESS,
+    ExchangeStatus.COMPLETED,
+    ExchangeStatus.CANCELLED,
+    ExchangeStatus.DISPUTED,
+  ])
+  state?: (typeof ExchangeStatus)[keyof typeof ExchangeStatus];
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
   page?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(100)
   pageSize?: number;
 }
 
@@ -55,12 +90,12 @@ export class ExchangesController {
   @ApiResponse({ status: 401, description: 'No autorizado' })
   async createExchange(
     @Body() createExchangeDto: CreateExchangeDto,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
     const userId = req.user?.sub;
     
     if (!userId) {
-      throw new Error('Usuario no autenticado');
+      throw new UnauthorizedException('Usuario no autenticado');
     }
     
     // Ensure requestedById is set to the current user (override any value from DTO)
@@ -87,12 +122,12 @@ export class ExchangesController {
   @ApiResponse({ status: 200, description: 'Lista de intercambios obtenida' })
   async listExchanges(
     @Query() query: ExchangeListQueryDto,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
     const userId = req.user?.sub;
     
     if (!userId) {
-      throw new Error('Usuario no autenticado');
+      throw new UnauthorizedException('Usuario no autenticado');
     }
     
     // Asegurar que page y pageSize estén presentes
@@ -102,7 +137,7 @@ export class ExchangesController {
       requestedById: query.requestedById,
       offeredById: query.offeredById,
       serviceId: query.serviceId,
-      state: query.state as any,
+      state: query.state,
     };
 
     const result = await this.listExchangesUseCase.execute({ 
@@ -127,12 +162,12 @@ export class ExchangesController {
   @ApiResponse({ status: 403, description: 'No autorizado para ver este intercambio' })
   async getExchange(
     @Param('id', ParseIntPipe) id: number,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
     const userId = req.user?.sub;
     
     if (!userId) {
-      throw new Error('Usuario no autenticado');
+      throw new UnauthorizedException('Usuario no autenticado');
     }
     const result = await this.getExchangeUseCase.execute({ id, userId });
 
@@ -154,12 +189,12 @@ export class ExchangesController {
   async updateExchange(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateExchangeDto: UpdateExchangeDto,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
     const userId = req.user?.sub;
     
     if (!userId) {
-      throw new Error('Usuario no autenticado');
+      throw new UnauthorizedException('Usuario no autenticado');
     }
     
     const result = await this.updateExchangeUseCase.execute({

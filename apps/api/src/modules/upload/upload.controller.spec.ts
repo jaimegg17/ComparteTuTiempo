@@ -45,6 +45,11 @@ describe('UploadController', () => {
   });
 
   describe('uploadImage', () => {
+    const mockReq = {
+      user: { sub: 'auth0|u1' },
+      headers: { authorization: 'Bearer token' },
+    };
+
     const mockFile: Express.Multer.File = {
       fieldname: 'image',
       originalname: 'test.jpg',
@@ -65,7 +70,7 @@ describe('UploadController', () => {
       });
       cloudinaryService.uploadImage.mockResolvedValue('https://res.cloudinary.com/test/image/upload/test.jpg');
 
-      const result = await controller.uploadImage(mockFile, {} as any);
+      const result = await controller.uploadImage(mockFile, mockReq);
 
       expect(result.success).toBe(true);
       expect(result.width).toBe(1920);
@@ -84,7 +89,7 @@ describe('UploadController', () => {
       };
 
       await expect(
-        controller.uploadImage(largeFile, {} as any)
+        controller.uploadImage(largeFile, mockReq)
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -96,7 +101,7 @@ describe('UploadController', () => {
       });
 
       await expect(
-        controller.uploadImage(mockFile, {} as any)
+        controller.uploadImage(mockFile, mockReq)
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -108,7 +113,7 @@ describe('UploadController', () => {
       });
 
       await expect(
-        controller.uploadImage(mockFile, {} as any)
+        controller.uploadImage(mockFile, mockReq)
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -120,7 +125,7 @@ describe('UploadController', () => {
       });
 
       await expect(
-        controller.uploadImage(mockFile, {} as any)
+        controller.uploadImage(mockFile, mockReq)
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -132,7 +137,7 @@ describe('UploadController', () => {
       });
 
       await expect(
-        controller.uploadImage(mockFile, {} as any)
+        controller.uploadImage(mockFile, mockReq)
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -140,13 +145,13 @@ describe('UploadController', () => {
       mockMetadata.mockRejectedValue(new Error('Invalid image'));
 
       await expect(
-        controller.uploadImage(mockFile, {} as any)
+        controller.uploadImage(mockFile, mockReq)
       ).rejects.toThrow(BadRequestException);
     });
 
     it('should reject when no file is provided', async () => {
       await expect(
-        controller.uploadImage(null as any, {} as any)
+        controller.uploadImage(null as any, mockReq as any)
       ).rejects.toThrow(BadRequestException);
     });
   });

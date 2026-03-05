@@ -18,6 +18,7 @@ import { useErrorHandling, ERROR_MESSAGES } from '@/hooks/useErrorHandling';
 import { ErrorAlert } from '@/components/ui/BeautifulAlert';
 import { useAuth } from '@/hooks/useAuth';
 import { apiClient } from '@/shared/api/client';
+import { messagesApi } from '@/shared/api/messages';
 
 interface ChatProps {
   exchangeId: number;
@@ -79,6 +80,18 @@ export function Chat({
       }>(`/messages/exchange/${exchangeId}`);
 
       const fetchedMessages = data.messages || [];
+      const unreadIncomingIds = fetchedMessages
+        .filter(message => message.senderId !== currentUserId && !message.isRead)
+        .map(message => message.id);
+
+      if (unreadIncomingIds.length > 0) {
+        await Promise.all(unreadIncomingIds.map(id => messagesApi.markMessageAsRead(id)));
+        fetchedMessages.forEach(message => {
+          if (unreadIncomingIds.includes(message.id)) {
+            message.isRead = true;
+          }
+        });
+      }
       
       // Check for new messages
       if (lastMessageId !== null && fetchedMessages.length > 0) {
@@ -112,7 +125,7 @@ export function Chat({
         setIsPolling(false);
       }
     }
-  }, [exchangeId, getAccessToken, lastMessageId, loading]);
+  }, [exchangeId, getAccessToken, lastMessageId, loading, currentUserId]);
 
   // Initial fetch
   useEffect(() => {

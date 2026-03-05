@@ -1,4 +1,4 @@
-import { Controller, Post, Delete, Param, UseGuards, Request, UseInterceptors, UploadedFile, BadRequestException, NotFoundException, UseFilters } from '@nestjs/common';
+import { Controller, Post, Delete, Param, UseGuards, Request, UseInterceptors, UploadedFile, BadRequestException, NotFoundException, UseFilters, UnauthorizedException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
@@ -22,6 +22,14 @@ const MIN_ASPECT_RATIO = 1 / MAX_ASPECT_RATIO;
 @UseFilters(HttpUploadExceptionFilter)
 export class UploadController {
   constructor(private readonly cloudinaryService: CloudinaryService) {}
+
+  private getAuthenticatedUserId(req: { user?: { sub?: string; id?: string } }): string {
+    const userId = req.user?.sub || req.user?.id;
+    if (!userId) {
+      throw new UnauthorizedException('Usuario no autenticado');
+    }
+    return userId;
+  }
 
   @Post('image')
   @UseGuards(JwtAuthGuard)
@@ -80,14 +88,19 @@ export class UploadController {
       fileSize: MAX_FILE_SIZE + 1024 * 1024, // Slightly above max so we can return our own 400 message
     },
   }))
-  async uploadImage(@UploadedFile() file: Express.Multer.File, @Request() req: any) {
+  async uploadImage(
+    @UploadedFile() file: Express.Multer.File,
+    @Request() req: { user?: { sub?: string; id?: string }; headers?: { authorization?: string } },
+  ) {
+    const userId = this.getAuthenticatedUserId(req);
+
     // Log request details for debugging
     console.log('📤 Upload request received:', {
       hasFile: !!file,
       fileName: file?.originalname,
       fileSize: file?.size,
       hasUser: !!req.user,
-      userId: req.user?.sub,
+      userId,
       authHeader: req.headers?.authorization ? 'Present' : 'Missing',
     });
 

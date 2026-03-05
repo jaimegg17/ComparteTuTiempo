@@ -23,8 +23,15 @@ describe('RatingsController - delete rating', () => {
   });
 
   it('lanza UnauthorizedException si no hay usuario autenticado', async () => {
-    await expect(controller.deleteRating(10, { user: null })).rejects.toThrow(UnauthorizedException);
+    await expect(controller.deleteRating(10, {})).rejects.toThrow(UnauthorizedException);
     expect(deleteRatingUseCase.execute).not.toHaveBeenCalled();
+  });
+
+  it('lanza UnauthorizedException en createRating si no hay usuario autenticado', async () => {
+    await expect(controller.createRating({ serviceId: 1, score: 5, userId: 'auth0|seed' }, {})).rejects.toThrow(
+      UnauthorizedException,
+    );
+    expect(createRatingUseCase.execute).not.toHaveBeenCalled();
   });
 
   it('ejecuta DeleteRatingUseCase con id y userId', async () => {

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query, UseGuards, Request, Param, ParseIntPipe, Put, Delete, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, UseGuards, Request, Param, ParseIntPipe, Put, Delete, HttpCode, HttpStatus, UnauthorizedException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { IsString, IsNumber, IsOptional, IsEnum, MinLength, Min, IsUrl } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -136,21 +136,25 @@ export class ServiceListQueryDto {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
+  @Min(0)
   minPrice?: number;
   
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
+  @Min(0)
   maxPrice?: number;
   
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
+  @Min(1)
   page?: number;
   
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
+  @Min(1)
   pageSize?: number;
   
   @IsOptional()
@@ -170,6 +174,18 @@ export class ServicesController {
     private readonly prisma: PrismaService,
   ) {}
 
+  private getAuthenticatedUser(req: { user?: { sub?: string; id?: string; email?: string; name?: string } }) {
+    const userId = req.user?.sub || req.user?.id;
+    if (!userId) {
+      throw new UnauthorizedException('Usuario no autenticado');
+    }
+    return {
+      userId,
+      email: req.user?.email,
+      name: req.user?.name,
+    };
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -179,7 +195,7 @@ export class ServicesController {
   @ApiResponse({ status: 401, description: 'No autorizado' })
   async createService(
     @Body() body: CreateServiceDto,
-    @Request() req: any,
+    @Request() req: { user?: { sub?: string; id?: string; email?: string; name?: string } },
   ) {
     // Convert DTO to ServiceCreateWithImage
     const serviceData: ServiceCreateWithImage = {
@@ -194,12 +210,8 @@ export class ServicesController {
       price: body.price,
       imageUrl: body.imageUrl,
     };
-    // Get userId from JWT (no fallback - user must be authenticated)
-    const userId = req.user?.sub;
-    
-    if (!userId) {
-      throw new Error('Usuario no autenticado');
-    }
+    const authUser = this.getAuthenticatedUser(req);
+    const { userId } = authUser;
     
     // Upsert user if doesn't exist
     if (userId) {
@@ -208,9 +220,9 @@ export class ServicesController {
         update: {},  // No actualizar nada si ya existe
         create: {
           id: userId,
-          email: req.user?.email || `${userId}@example.com`,
+          email: authUser.email || `${userId}@example.com`,
           password: 'auth0-user', // Placeholder password for Auth0 users
-          name: req.user?.name || 'Usuario',
+          name: authUser.name || 'Usuario',
         },
       });
     }
@@ -229,7 +241,10 @@ export class ServicesController {
   @Get()
   @ApiOperation({ summary: 'Listar servicios con filtros y paginación' })
   @ApiResponse({ status: 200, description: 'Lista de servicios obtenida' })
-  async listServices(@Query() query: ServiceListQueryDto, @Request() req: any) {
+  async listServices(
+    @Query() query: ServiceListQueryDto,
+    @Request() req: { user?: { sub?: string } },
+  ) {
     // Asegurar que page y pageSize estén presentes
     const queryWithDefaults = {
       page: query.page || 1,
@@ -246,7 +261,7 @@ export class ServicesController {
 
     // Si se proporciona userId, verificar que el usuario solo pueda ver sus propios servicios
     if (queryWithDefaults.userId && req.user && req.user.sub !== queryWithDefaults.userId) {
-      throw new Error('No tienes permisos para ver estos servicios');
+      throw new ForbiddenException('No tienes permisos para ver estos servicios');
     }
 
     const result = await this.listServicesUseCase.execute({ query: queryWithDefaults });
@@ -322,7 +337,7 @@ export class ServicesController {
     });
 
     if (!serviceData) {
-      throw new Error('Servicio no encontrado');
+      throw new NotFoundException('Servicio no encontrado');
     }
 
     // Calculate average rating
@@ -357,13 +372,9 @@ export class ServicesController {
   async updateService(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateServiceDto: UpdateServiceDto,
-    @Request() req: any,
+    @Request() req: { user?: { sub?: string; id?: string } },
   ) {
-    const userId = req.user?.sub;
-    
-    if (!userId) {
-      throw new Error('Usuario no autenticado');
-    }
+    const { userId } = this.getAuthenticatedUser(req);
     
     const result = await this.updateServiceUseCase.execute({ id, data: updateServiceDto, userId });
     return { message: 'Servicio actualizado exitosamente', service: result.service.toContract() };
@@ -376,12 +387,11 @@ export class ServicesController {
   @ApiOperation({ summary: 'Eliminar un servicio por ID' })
   @ApiResponse({ status: 204, description: 'Servicio eliminado' })
   @ApiResponse({ status: 403, description: 'No autorizado para eliminar este servicio' })
-  async deleteService(@Param('id', ParseIntPipe) id: number, @Request() req: any) {
-    const userId = req.user?.sub;
-    
-    if (!userId) {
-      throw new Error('Usuario no autenticado');
-    }
+  async deleteService(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: { user?: { sub?: string; id?: string } },
+  ) {
+    const { userId } = this.getAuthenticatedUser(req);
     
     await this.deleteServiceUseCase.execute({ id, userId });
     return { message: 'Servicio eliminado exitosamente' };

@@ -13,12 +13,14 @@ import {
   HttpCode,
   HttpStatus,
   Logger,
+  UnauthorizedException,
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { IsString, IsBoolean, IsOptional, IsNumber, Min } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
+import { Prisma } from '@prisma/client';
 import { CreateCommunityUseCase } from '../application/create-community.use-case';
 import { ListCommunitiesUseCase } from '../application/list-communities.use-case';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
@@ -75,6 +77,8 @@ export class CommunityListQueryDto {
   pageSize?: number;
 }
 
+type AuthenticatedRequest = { user?: { sub?: string; id?: string } };
+
 @ApiTags('communities')
 @Controller('communities')
 export class CommunitiesController {
@@ -88,6 +92,14 @@ export class CommunitiesController {
     this.logger.log('CommunitiesController initialized');
   }
 
+  private getAuthenticatedUserId(req: AuthenticatedRequest): string {
+    const userId = req.user?.sub || req.user?.id;
+    if (!userId) {
+      throw new UnauthorizedException('Usuario no autenticado');
+    }
+    return userId;
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -96,13 +108,9 @@ export class CommunitiesController {
   @ApiResponse({ status: 400, description: 'Datos inválidos' })
   async createCommunity(
     @Body() createCommunityDto: CreateCommunityDto,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
-    const userId = req.user?.sub || req.user?.id;
-    
-    if (!userId) {
-      throw new Error('Usuario no autenticado');
-    }
+    const userId = this.getAuthenticatedUserId(req);
     
     const result = await this.createCommunityUseCase.execute({
       data: { ...createCommunityDto, creatorId: userId },
@@ -157,31 +165,18 @@ export class CommunitiesController {
     this.logger.log('listCommunities called with query:', query);
     
     try {
-      // Parse query parameters - they come as strings from query string
-      let isPrivate: boolean | undefined;
-      if (query.isPrivate !== undefined && query.isPrivate !== null) {
-        if (typeof query.isPrivate === 'string') {
-          isPrivate = query.isPrivate === 'true' || query.isPrivate === '1';
-        } else {
-          isPrivate = Boolean(query.isPrivate);
-        }
-      }
-
       // Asegurar que page y pageSize estén presentes y sean números
-      const page = query.page ? Number(query.page) : 1;
-      const pageSize = query.pageSize ? Number(query.pageSize) : 20;
-
       const queryWithDefaults = {
-        page: isNaN(page) ? 1 : Math.max(1, Math.floor(page)),
-        pageSize: isNaN(pageSize) ? 20 : Math.max(1, Math.min(100, Math.floor(pageSize))),
+        page: query.page || 1,
+        pageSize: query.pageSize || 20,
         creatorId: query.creatorId,
-        isPrivate,
+        isPrivate: query.isPrivate,
       };
 
       this.logger.log('Query with defaults:', queryWithDefaults);
 
       // Build where clause for direct Prisma query
-      const where: any = {};
+      const where: Prisma.CommunityWhereInput = {};
       if (queryWithDefaults.creatorId) where.creatorId = queryWithDefaults.creatorId;
       if (queryWithDefaults.isPrivate !== undefined) where.isPrivate = queryWithDefaults.isPrivate;
 
@@ -280,13 +275,9 @@ export class CommunitiesController {
   async updateCommunity(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCommunityDto: UpdateCommunityDto,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
-    const userId = req.user?.sub || req.user?.id;
-
-    if (!userId) {
-      throw new Error('Usuario no autenticado');
-    }
+    const userId = this.getAuthenticatedUserId(req);
 
     const existing = await this.prisma.community.findUnique({ where: { id } });
 

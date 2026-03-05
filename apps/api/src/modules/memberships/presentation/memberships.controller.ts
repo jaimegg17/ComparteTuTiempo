@@ -10,6 +10,7 @@ import {
   ParseIntPipe,
   UseGuards,
   Request,
+  UnauthorizedException,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
@@ -87,6 +88,14 @@ export class MembershipsController {
     private readonly updateMembershipUseCase: UpdateMembershipUseCase,
   ) {}
 
+  private getAuthenticatedUserId(req: { user?: { sub?: string; id?: string } }): string {
+    const userId = req.user?.sub || req.user?.id;
+    if (!userId) {
+      throw new UnauthorizedException('Usuario no autenticado');
+    }
+    return userId;
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -94,9 +103,9 @@ export class MembershipsController {
   @ApiResponse({ status: 201, description: 'Membresía creada exitosamente' })
   async createMembership(
     @Body() dto: CreateMembershipDto,
-    @Request() req: any,
+    @Request() req: { user?: { sub?: string; id?: string } },
   ) {
-    const userId = req.user?.id;
+    const userId = this.getAuthenticatedUserId(req);
     const result = await this.createMembershipUseCase.execute({ data: dto, userId });
     return { message: 'Membresía creada exitosamente', membership: result.membership.toContract() };
   }
@@ -124,9 +133,9 @@ export class MembershipsController {
   async updateMembership(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateMembershipDto,
-    @Request() req: any,
+    @Request() req: { user?: { sub?: string; id?: string } },
   ) {
-    const userId = req.user?.id;
+    const userId = this.getAuthenticatedUserId(req);
     const result = await this.updateMembershipUseCase.execute({ id, data: dto, userId });
     return { message: 'Membresía actualizada exitosamente', membership: result.membership.toContract() };
   }

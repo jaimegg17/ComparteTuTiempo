@@ -10,6 +10,7 @@ import {
   ParseIntPipe,
   UseGuards, 
   Request,
+  UnauthorizedException,
   HttpCode,
   HttpStatus
 } from '@nestjs/common';
@@ -95,6 +96,14 @@ export class EventsController {
     private readonly listEventsUseCase: ListEventsUseCase,
   ) {}
 
+  private getAuthenticatedUserId(req: { user?: { sub?: string; id?: string } }): string {
+    const userId = req.user?.sub || req.user?.id;
+    if (!userId) {
+      throw new UnauthorizedException('Usuario no autenticado');
+    }
+    return userId;
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -103,13 +112,9 @@ export class EventsController {
   @ApiResponse({ status: 400, description: 'Datos inválidos' })
   async createEvent(
     @Body() createEventDto: CreateEventDto,
-    @Request() req: any,
+    @Request() req: { user?: { sub?: string; id?: string } },
   ) {
-    const userId = req.user?.sub;
-    
-    if (!userId) {
-      throw new Error('Usuario no autenticado');
-    }
+    const userId = this.getAuthenticatedUserId(req);
     const result = await this.createEventUseCase.execute({
       data: { ...createEventDto, creatorId: userId },
       userId,

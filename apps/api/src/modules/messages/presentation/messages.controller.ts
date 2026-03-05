@@ -3,13 +3,17 @@ import {
   Get, 
   Post, 
   Put,
+  BadRequestException,
   Body, 
   Query, 
   UseGuards, 
+  UnauthorizedException,
   Request,
   Param,
   ParseIntPipe 
 } from '@nestjs/common';
+import { Transform } from 'class-transformer';
+import { IsInt, IsOptional, Min } from 'class-validator';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { createZodDto } from '@anatine/zod-nestjs';
 import { 
@@ -19,6 +23,7 @@ import {
 import { CreateMessageUseCase } from '../application/create-message.use-case';
 import { ListConversationsUseCase } from '../application/list-conversations.use-case';
 import { ListMessagesUseCase } from '../application/list-messages.use-case';
+import { GetMessagesByExchangeUseCase } from '../application/get-messages-by-exchange.use-case';
 import { MarkMessageReadUseCase } from '../application/mark-message-read.use-case';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
 
@@ -28,6 +33,20 @@ export class CreateMessageDto extends createZodDto(MessageCreateSchema) {}
 // Query DTO for listing messages
 export class MessageListQueryDto extends createZodDto(MessageListQuerySchema) {}
 
+class MessagePaginationQueryDto {
+  @IsOptional()
+  @Transform(({ value }) => Number(value))
+  @IsInt()
+  @Min(1)
+  page?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => Number(value))
+  @IsInt()
+  @Min(1)
+  pageSize?: number;
+}
+
 @ApiTags('messages')
 @Controller('messages')
 export class MessagesController {
@@ -35,8 +54,17 @@ export class MessagesController {
     private readonly createMessageUseCase: CreateMessageUseCase,
     private readonly listConversationsUseCase: ListConversationsUseCase,
     private readonly listMessagesUseCase: ListMessagesUseCase,
+    private readonly getMessagesByExchangeUseCase: GetMessagesByExchangeUseCase,
     private readonly markMessageReadUseCase: MarkMessageReadUseCase,
   ) {}
+
+  private getAuthenticatedUserId(req: { user?: { sub?: string; id?: string } }): string {
+    const userId = req.user?.sub || req.user?.id;
+    if (!userId) {
+      throw new UnauthorizedException('User not authenticated');
+    }
+    return userId;
+  }
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -47,16 +75,12 @@ export class MessagesController {
   @ApiResponse({ status: 401, description: 'No autorizado' })
   async createMessage(
     @Body() createMessageDto: CreateMessageDto,
-    @Request() req: any,
+    @Request() req: { user?: { sub?: string; id?: string } },
   ) {
-    const userId = req.user?.sub || req.user?.id;
-    
-    if (!userId) {
-      throw new Error('User not authenticated');
-    }
+    const userId = this.getAuthenticatedUserId(req);
 
     if (!createMessageDto.exchangeId) {
-      throw new Error('exchangeId is required');
+      throw new BadRequestException('exchangeId is required');
     }
 
     const result = await this.createMessageUseCase.execute({
@@ -80,16 +104,12 @@ export class MessagesController {
   @ApiResponse({ status: 200, description: 'Lista de mensajes obtenida' })
   async listMessages(
     @Query() query: MessageListQueryDto,
-    @Request() req: any,
+    @Request() req: { user?: { sub?: string; id?: string } },
   ) {
-    const userId = req.user?.sub || req.user?.id;
-    
-    if (!userId) {
-      throw new Error('User not authenticated');
-    }
+    const userId = this.getAuthenticatedUserId(req);
 
     if (!query.exchangeId) {
-      throw new Error('exchangeId is required in query params');
+      throw new BadRequestException('exchangeId is required in query params');
     }
     
     // Asegurar que page y pageSize estén presentes
@@ -116,12 +136,8 @@ export class MessagesController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Listar conversaciones del usuario' })
   @ApiResponse({ status: 200, description: 'Lista de conversaciones obtenida' })
-  async listConversations(@Request() req: any) {
-    const userId = req.user?.sub || req.user?.id;
-
-    if (!userId) {
-      throw new Error('User not authenticated');
-    }
+  async listConversations(@Request() req: { user?: { sub?: string; id?: string } }) {
+    const userId = this.getAuthenticatedUserId(req);
 
     const result = await this.listConversationsUseCase.execute(userId);
 
@@ -144,25 +160,16 @@ export class MessagesController {
   @ApiResponse({ status: 200, description: 'Mensajes obtenidos exitosamente' })
   async getMessagesByExchange(
     @Param('exchangeId', ParseIntPipe) exchangeId: number,
-    @Query('page') page?: number,
-    @Query('pageSize') pageSize?: number,
-    @Request() req?: any,
+    @Query() query: MessagePaginationQueryDto,
+    @Request() req?: { user?: { sub?: string; id?: string } },
   ) {
-    const userId = req?.user?.sub || req?.user?.id;
-    
-    if (!userId) {
-      throw new Error('User not authenticated');
-    }
+    const userId = this.getAuthenticatedUserId(req ?? {});
 
-    const query = {
+    const result = await this.getMessagesByExchangeUseCase.execute({
       exchangeId,
-      page: page || 1,
-      pageSize: pageSize || 20,
-    };
-
-    const result = await this.listMessagesUseCase.execute({ 
-      query,
-      userId 
+      userId,
+      page: query.page ?? 1,
+      pageSize: query.pageSize ?? 20,
     });
 
     return {
@@ -182,13 +189,9 @@ export class MessagesController {
   @ApiResponse({ status: 403, description: 'No autorizado' })
   async markMessageAsRead(
     @Param('id', ParseIntPipe) messageId: number,
-    @Request() req: any,
+    @Request() req: { user?: { sub?: string; id?: string } },
   ) {
-    const userId = req.user?.sub || req.user?.id;
-    
-    if (!userId) {
-      throw new Error('User not authenticated');
-    }
+    const userId = this.getAuthenticatedUserId(req);
 
     const result = await this.markMessageReadUseCase.execute({
       messageId,

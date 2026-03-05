@@ -1,4 +1,4 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { UsersController } from './users.controller';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
@@ -38,6 +38,16 @@ describe('UsersController', () => {
         { user: { sub: 'auth0|other' } } as any,
       ),
     ).rejects.toThrow(BadRequestException);
+  });
+
+  it('lanza UnauthorizedException si no hay usuario autenticado', async () => {
+    await expect(
+      controller.updateUserProfile(
+        'auth0|owner',
+        { name: 'Owner', email: 'owner@test.com' } as any,
+        {},
+      ),
+    ).rejects.toThrow(UnauthorizedException);
   });
 
   it('lanza NotFound si el usuario no existe', async () => {

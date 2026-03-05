@@ -68,28 +68,39 @@ Nice-to-have y mejoras adicionales.
 
 #### Tareas:
 
-- [ ] **P0.1.1** Corregir `exchangeId` hardcodeado en `messages.controller.ts`
-  - Línea 55: `exchangeId: 1` debe obtenerse del body o query params
-  - Línea 83: `exchangeId: 1` debe obtenerse del query params
+- [x] **P0.1.1** Corregir `exchangeId` hardcodeado en `messages.controller.ts`
+  - `exchangeId` ahora se obtiene explícitamente desde body/query/param según endpoint
+  - Endpoints endurecidos con `BadRequestException` y `UnauthorizedException` (sin `Error` genérico)
   - **Archivo**: `apps/api/src/modules/messages/presentation/messages.controller.ts`
-  - **Impacto**: Sin esto, el chat no funciona correctamente
+  - **Impacto**: elimina riesgo de chat cruzado por intercambio incorrecto
 
-- [ ] **P0.1.2** Implementar endpoint para obtener mensajes por exchangeId
-  - Crear `GetMessagesByExchangeUseCase`
-  - Endpoint: `GET /api/messages/exchange/:exchangeId`
-  - Validar que el usuario pertenece al intercambio
-  - **Archivo**: `apps/api/src/modules/messages/application/get-messages-by-exchange.use-case.ts`
+- [x] **P0.1.2** Implementar endpoint para obtener mensajes por exchangeId
+  - `GetMessagesByExchangeUseCase` creado
+  - Endpoint activo: `GET /api/messages/exchange/:exchangeId`
+  - Validación de pertenencia al intercambio delegada en `ListMessagesUseCase`
+  - Tests añadidos para controlador + use case
+  - **Archivos**:
+    - `apps/api/src/modules/messages/application/get-messages-by-exchange.use-case.ts`
+    - `apps/api/src/modules/messages/application/get-messages-by-exchange.use-case.spec.ts`
+    - `apps/api/src/modules/messages/presentation/messages.controller.spec.ts`
 
-- [ ] **P0.1.3** Implementar funcionalidad de mensajes leídos
-  - Agregar endpoint `PUT /api/messages/:id/read` para marcar como leído
-  - Actualizar `isRead` cuando el usuario ve los mensajes
-  - Mostrar contador de no leídos en frontend
-  - **Archivo**: `apps/api/src/modules/messages/application/mark-message-read.use-case.ts`
+- [x] **P0.1.3** Implementar funcionalidad de mensajes leídos
+  - Endpoint `PUT /api/messages/:id/read` activo con validación de autorización
+  - En chat frontend se marcan como leídos los mensajes entrantes no leídos al cargar
+  - Contador de no leídos visible en lista de conversaciones (`Badge`)
+  - **Archivos**:
+    - `apps/api/src/modules/messages/application/mark-message-read.use-case.ts`
+    - `apps/web/src/components/chat/Chat.tsx`
+    - `apps/web/pages/conversations.tsx`
 
-- [ ] **P0.1.4** Integrar Chat component con Auth0
+- [x] **P0.1.4** Integrar Chat component con Auth0
   - Reemplazar `localStorage.getItem('access_token')` con hook de Auth0
   - Usar `useUser()` de `@auth0/nextjs-auth0/client` para obtener token
-  - **Archivo**: `apps/web/src/components/chat/Chat.tsx`
+  - Integración aplicada en flujo activo de chat vía `useAuth().getAccessToken()` + `apiClient`
+  - Limpieza adicional: eliminado hook legacy `useMessages` que mantenía token en `localStorage`
+  - **Archivos**:
+    - `apps/web/src/components/chat/Chat.tsx`
+    - `apps/web/src/hooks/useMessages.ts` (eliminado)
 
 - [ ] **P0.1.5** Implementar WebSocket o Polling para mensajes en tiempo real
   - Opción 1: WebSocket con Socket.io
@@ -272,11 +283,17 @@ Nice-to-have y mejoras adicionales.
     - `apps/api/src/modules/auth/application/sign-up.use-case.ts`
     - `apps/api/src/modules/auth/application/sign-in.use-case.ts`
 
-- [ ] **P0.4.4** Eliminar fallbacks de test-user
-  - Buscar todos los `'auth0|test-user-1'` en controladores
-  - Requerir autenticación real
-  - Lanzar `UnauthorizedException` si no hay usuario
-  - **Archivos**: Varios controladores
+- [x] **P0.4.4** Eliminar fallbacks de test-user
+  - Verificado: sin usos activos de `'auth0|test-user-1'` en módulos API
+  - Reforzada autenticación real en controladores clave
+  - Sustituidos `throw new Error('Usuario no autenticado')` por `UnauthorizedException`
+  - **Archivos**:
+    - `apps/api/src/modules/services/presentation/services.controller.ts`
+    - `apps/api/src/modules/events/presentation/events.controller.ts`
+    - `apps/api/src/modules/users/presentation/users.controller.ts`
+    - `apps/api/src/modules/communities/presentation/communities.controller.ts`
+    - `apps/api/src/modules/groups/presentation/groups.controller.ts`
+    - `apps/api/src/modules/exchanges/presentation/exchanges.controller.ts`
 
 - [ ] **P0.4.5** Verificar configuración de Auth0
   - Variables de entorno correctas
@@ -303,15 +320,77 @@ Nice-to-have y mejoras adicionales.
   - Crear DTOs desde schemas de `packages/contracts`
   - **Archivos**: Varios controladores
 
-- [ ] **P0.5.3** Agregar validación a query params
+- [x] **P0.5.3** Agregar validación a query params
   - Todos los `@Query()` deben tener DTOs con validación
   - Usar `class-validator` o Zod
+  - ✅ Avance: `exchanges.controller.ts` ya valida query params (`requestedById`, `offeredById`, `serviceId`, `state`, `page`, `pageSize`) con DTO tipado
+  - ✅ Avance: `services.controller.ts` refuerza validación de filtros/paginación (`minPrice`, `maxPrice`, `page`, `pageSize`)
+  - ✅ Avance: `groups.controller.ts` valida `communityId`, `creatorId`, `page`, `pageSize` con DTO tipado + tests dirigidos
+  - ✅ Avance: `communities.controller.ts` y `messages.controller.ts` migrados a query DTOs tipados (incluyendo paginación de `GET /messages/exchange/:exchangeId`)
+  - ✅ Limpieza asociada: eliminado controlador legacy duplicado `messages/infrastructure/messages.controller.ts`
   - **Archivos**: Todos los controladores con query params
 
 - [ ] **P0.5.4** Validar permisos en todos los endpoints
   - Verificar que el usuario puede realizar la acción
   - Ejemplo: Solo el dueño puede editar su servicio
+  - ✅ Avance: `memberships.controller` reforzado con extracción tipada de usuario autenticado y `UnauthorizedException` explícita en create/update
+  - ✅ Avance: `users.controller` (legacy) y `users/presentation/users.controller` reforzados con request autenticada tipada + helper común
+  - ✅ Avance: `services.controller` y `ratings.controller` endurecidos (request tipada + helper auth + tests de regresión)
+  - ✅ Avance: `upload.controller` y controladores de auth (`auth0`, `auth/presentation`, `auth`) migrados a request tipada y validación de usuario autenticado
   - **Archivos**: Todos los controladores con `PUT` y `DELETE`
+
+---
+
+### 5.1 Geolocalización y búsqueda por cercanía (Google Maps) - NUEVO CRÍTICO
+
+**Estado Actual**: Existe `location` textual en servicios, pero no hay coordenadas ni búsqueda geoespacial real.
+
+#### Tareas:
+
+- [ ] **P0.6.1** Extender modelo de datos para ubicación normalizada
+  - Añadir en `Service` campos mínimos: `latitude`, `longitude`, `formattedAddress`, `placeId`
+  - Mantener `location` (texto) por compatibilidad
+  - Añadir índices para `latitude/longitude`
+  - **Archivos**: `apps/api/prisma/schema.prisma` + migración
+
+- [ ] **P0.6.2** Integrar Google Places/Geocoding en creación/edición de servicios
+  - Resolver dirección escrita por usuario a coordenadas (geocoding)
+  - Guardar `placeId` + `formattedAddress` + coordenadas
+  - Si falla geocoding, devolver error validado (mensaje claro)
+  - **Archivos**:
+    - `apps/api/src/modules/services/application/create-service.use-case.ts`
+    - `apps/api/src/modules/services/application/update-service.use-case.ts`
+    - `apps/api/src/common/maps/*` (nuevo módulo)
+
+- [ ] **P0.6.3** Añadir endpoint de servicios cercanos (radio en km)
+  - Endpoint propuesto: `GET /api/services/nearby?lat=...&lng=...&radiusKm=...`
+  - Estrategia simple: filtro por bounding-box + cálculo distancia (Haversine)
+  - Ordenar por distancia ascendente
+  - **Archivos**:
+    - `apps/api/src/modules/services/presentation/services.controller.ts`
+    - `apps/api/src/modules/services/infrastructure/prisma-service-repository.ts`
+
+- [ ] **P0.6.4** Integrar selector de ubicación simple en frontend
+  - En alta/edición de servicio: input con sugerencias de Google Places
+  - Guardar coordenadas reales en payload
+  - **Archivos**:
+    - `apps/web/pages/services/new.tsx`
+    - `apps/web/pages/services/[id]/edit.tsx`
+    - `apps/web/src/components/services/*` (input ubicación)
+
+- [ ] **P0.6.5** Añadir búsqueda “cerca de” en listado de servicios
+  - Filtro por ubicación concreta + radio configurable (ej. 1/3/5/10 km)
+  - Mostrar distancia aproximada en cada tarjeta
+  - **Archivos**:
+    - `apps/web/pages/services/index.tsx`
+    - `apps/web/src/shared/api/services.ts`
+    - `apps/web/src/components/ServiceCard.tsx`
+
+- [ ] **P0.6.6** Tests mínimos correctos (sin E2E)
+  - Unit tests de cálculo y validación de coordenadas
+  - Integration tests de endpoint `/services/nearby`
+  - Test frontend del flujo de selección de ubicación (componente crítico)
+  - **No incluye E2E por decisión de alcance**
 
 ---
 
@@ -474,13 +553,10 @@ Nice-to-have y mejoras adicionales.
   - Tests de reglas de negocio
   - **Archivos**: Todos los `.use-case.spec.ts`
 
-- [ ] **P2.10.2** Tests E2E para endpoints críticos
-  - Autenticación
-  - Crear servicio
-  - Crear intercambio
-  - Enviar mensaje
-  - Crear valoración
-  - **Archivos**: `apps/api/test/e2e/`
+- [ ] **P2.10.2** Tests E2E para endpoints críticos (**despriorizado / fuera de alcance actual**)
+  - Decisión de alcance actual: **no meter E2E** en esta fase
+  - Mantener calidad con tests unitarios + integración dirigidos
+  - Reabrir solo si aparece requisito formal de tribunal/entrega
 
 - [ ] **P2.10.3** Tests de componentes frontend
   - Componentes críticos (Chat, RatingForm, etc.)
@@ -582,4 +658,4 @@ Nice-to-have y mejoras adicionales.
 
 ---
 
-*Última actualización: Diciembre 2024*
+*Última actualización: Marzo 2026*

@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Body, UseGuards, Request, Param } from '@nestjs/common';
+import { Controller, Get, Put, Body, UseGuards, Request, Param, UnauthorizedException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { IsString, IsOptional, IsArray, MinLength } from 'class-validator';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
@@ -40,19 +40,23 @@ export class UsersController {
     private readonly getUserByIdUseCase: GetUserByIdUseCase,
   ) {}
 
+  private getAuthenticatedUserId(req: { user?: { sub?: string; id?: string } }): string {
+    const userId = req.user?.sub || req.user?.id;
+    if (!userId) {
+      throw new UnauthorizedException('Usuario no autenticado');
+    }
+    return userId;
+  }
+
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener mi perfil completo' })
   @ApiResponse({ status: 200, description: 'Perfil obtenido exitosamente' })
   @ApiResponse({ status: 401, description: 'No autorizado' })
-  async getMyProfile(@Request() req: any) {
-    const userId = req.user?.sub;
-    
-    if (!userId) {
-      throw new Error('Usuario no autenticado');
-    }
-    
+  async getMyProfile(@Request() req: { user?: { sub?: string; id?: string } }) {
+    const userId = this.getAuthenticatedUserId(req);
+
     const result = await this.getUserProfileUseCase.execute({ userId });
     return {
       message: 'Perfil obtenido exitosamente',
@@ -67,14 +71,10 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'Perfil actualizado exitosamente' })
   @ApiResponse({ status: 401, description: 'No autorizado' })
   async updateMyProfile(
-    @Request() req: any,
+    @Request() req: { user?: { sub?: string; id?: string } },
     @Body() updateData: UpdateUserProfileDto,
   ) {
-    const userId = req.user?.sub;
-    
-    if (!userId) {
-      throw new Error('Usuario no autenticado');
-    }
+    const userId = this.getAuthenticatedUserId(req);
     const result = await this.updateUserProfileUseCase.execute({
       userId,
       data: updateData,
@@ -99,4 +99,3 @@ export class UsersController {
     };
   }
 }
-

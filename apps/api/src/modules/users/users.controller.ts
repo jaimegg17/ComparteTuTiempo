@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Param, Body, UseGuards, Request, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Put, Param, Body, UseGuards, Request, NotFoundException, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
 import { PrismaService } from '@/common/prisma/prisma.service';
@@ -45,6 +45,14 @@ export class UsersController {
     private readonly prisma: PrismaService,
     private readonly cloudinaryService: CloudinaryService,
   ) {}
+
+  private getAuthenticatedUserId(req: { user?: { sub?: string; id?: string } }): string {
+    const userId = req.user?.sub || req.user?.id;
+    if (!userId) {
+      throw new UnauthorizedException('Usuario no autenticado');
+    }
+    return userId;
+  }
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
@@ -101,10 +109,12 @@ export class UsersController {
   async updateUserProfile(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
-    @Request() req: any,
+    @Request() req: { user?: { sub?: string; id?: string } },
   ) {
+    const userId = this.getAuthenticatedUserId(req);
+
     // Verificar que el usuario solo puede actualizar su propio perfil
-    if (req.user?.sub !== id) {
+    if (userId !== id) {
       throw new BadRequestException('You can only update your own profile');
     }
 

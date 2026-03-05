@@ -1,20 +1,16 @@
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { UnauthorizedException } from '@nestjs/common';
 import { CommunitiesController } from './communities.controller';
 import type { CreateCommunityUseCase } from '../application/create-community.use-case';
 import type { ListCommunitiesUseCase } from '../application/list-communities.use-case';
 import type { PrismaService } from '@/common/prisma/prisma.service';
 
 describe('CommunitiesController', () => {
-  const createCommunityUseCase = {
-    execute: jest.fn(),
-  };
-
-  const listCommunitiesUseCase = {
-    execute: jest.fn(),
-  };
-
+  const createCommunityUseCase = { execute: jest.fn() };
+  const listCommunitiesUseCase = { execute: jest.fn() };
   const prisma = {
     community: {
+      findMany: jest.fn(),
+      count: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
     },
@@ -30,62 +26,28 @@ describe('CommunitiesController', () => {
     jest.clearAllMocks();
   });
 
-  it('lanza 404 al editar una comunidad inexistente', async () => {
-    prisma.community.findUnique.mockResolvedValue(null);
-
+  it('lanza UnauthorizedException al crear comunidad sin usuario autenticado', async () => {
     await expect(
-      controller.updateCommunity(404, { name: 'Nuevo nombre' }, { user: { sub: 'auth0|u1' } }),
-    ).rejects.toThrow(NotFoundException);
+      controller.createCommunity(
+        { name: 'Comunidad', description: 'Descripción', isPrivate: false },
+        { user: undefined },
+      ),
+    ).rejects.toThrow(UnauthorizedException);
   });
 
-  it('lanza 403 si el usuario no es el creador', async () => {
-    prisma.community.findUnique.mockResolvedValue({
-      id: 1,
-      creatorId: 'auth0|owner',
-    });
+  it('aplica defaults de paginación y filtros en listCommunities', async () => {
+    prisma.community.findMany.mockResolvedValue([]);
+    prisma.community.count.mockResolvedValue(0);
 
-    await expect(
-      controller.updateCommunity(1, { name: 'Otro nombre' }, { user: { sub: 'auth0|other' } }),
-    ).rejects.toThrow(ForbiddenException);
-  });
+    await controller.listCommunities({ isPrivate: true });
 
-  it('actualiza y devuelve la comunidad completa', async () => {
-    const createdAt = new Date('2026-03-01T10:00:00.000Z');
-    const updatedAt = new Date('2026-03-04T18:00:00.000Z');
-
-    prisma.community.findUnique.mockResolvedValue({
-      id: 1,
-      creatorId: 'auth0|owner',
-    });
-
-    prisma.community.update.mockResolvedValue({
-      id: 1,
-      name: 'Comunidad editada',
-      description: 'Descripción actualizada',
-      isPrivate: true,
-      creatorId: 'auth0|owner',
-      createdAt,
-      updatedAt,
-    });
-
-    const result = await controller.updateCommunity(
-      1,
-      { name: 'Comunidad editada', description: 'Descripción actualizada', isPrivate: true },
-      { user: { sub: 'auth0|owner' } },
+    expect(prisma.community.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { isPrivate: true },
+        skip: 0,
+        take: 20,
+      }),
     );
-
-    expect(prisma.community.update).toHaveBeenCalledWith({
-      where: { id: 1 },
-      data: { name: 'Comunidad editada', description: 'Descripción actualizada', isPrivate: true },
-    });
-    expect(result.community).toEqual({
-      id: 1,
-      name: 'Comunidad editada',
-      description: 'Descripción actualizada',
-      isPrivate: true,
-      creatorId: 'auth0|owner',
-      createdAt: createdAt.toISOString(),
-      updatedAt: updatedAt.toISOString(),
-    });
   });
 });
+

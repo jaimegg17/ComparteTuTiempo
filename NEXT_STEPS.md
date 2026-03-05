@@ -20,185 +20,82 @@
 15. ✅ Upload P0.3.4/P0.3.5: integración en flujos existentes (servicio/perfil) + limpieza de imágenes al reemplazar/borrar
 16. ✅ Upload P0.3.6: optimización frontend con `next/image` en componentes críticos de imagen
 17. ✅ Refactor/debug perfil: limpieza de estado/efectos, tipado de componentes de perfil y ajustes UI/accesibilidad de edición de avatar
+18. ✅ Mensajería P0.1.1/P0.1.2/P0.1.3: hardcode de `exchangeId` eliminado + caso de uso `GetMessagesByExchange` + marcado de leídos en chat y tests dirigidos
+19. ✅ Auth P0.4.4: eliminación de fallback test-user + endurecimiento de `UnauthorizedException` en controladores críticos
+20. ✅ Validación query (avance P0.5.3): `exchanges.controller` migrado a DTO tipado con `class-validator` para filtros y paginación
+21. ✅ Validación query (avance P0.5.3): `services.controller` + `groups.controller` reforzados con DTOs validados y tests dirigidos en grupos
+22. ✅ Validación query (cierre P0.5.3): `communities.controller` + paginación de `messages/exchange/:exchangeId` migradas a DTOs tipados
+23. ✅ Limpieza técnica: eliminado controlador legacy duplicado `messages/infrastructure/messages.controller.ts`
+24. ✅ Mensajería P0.1.4: flujo de token Auth0 consolidado en chat y retirada de uso legacy de `localStorage` en hooks de mensajes
+25. ✅ Hardening memberships: tipado de request autenticada + `UnauthorizedException` consistente en create/update + test de regresión
+26. ✅ Hardening users: request autenticada tipada en controladores `users` (legacy + presentation), helper unificado de auth y test de regresión para acceso sin usuario
+27. ✅ Hardening services/ratings: eliminación de `req:any` en endpoints protegidos, helper auth unificado y tests de regresión de no autenticado
+28. ✅ Hardening upload/auth: eliminación de `req:any` en `upload.controller` y controladores auth (`auth0`, `auth/presentation`, `auth`), con validación y tests dirigidos
 
 ---
 
 ## 🚀 Próximos Pasos Prioritarios
 
-### P0 - Crítico (Completar Ahora)
+> 📌 Documento operativo detallado: `IMPLEMENTATION_EXECUTION_ORDER.md`  
+> Orden vigente confirmado: **cerrar Fase 2 (estabilidad) antes de Google Maps**.
 
-#### 1. Comunidades Fase B (detalle + acciones)
-**Prioridad**: Alta  
-**Tiempo estimado**: 1-1.5 días
+### Cambio de alcance confirmado
+- ✅ **No se incluirán tests E2E** en esta fase.
+- ✅ Calidad asegurada con **unit + integration tests dirigidos**.
 
-**Tareas:**
-- [x] Completar header con métricas rápidas
-- [x] Sección de miembros y rol del usuario
-- [x] Actividad/eventos según disponibilidad backend
-- [x] Acciones unirse/salir con feedback
-- [x] Endpoints backend de membresías/eventos alineados 100% con comunidades (alias communityId/groupId y endpoint real `/events/community/:communityId`)
-- [x] Tests mínimos de regresión para normalización y listados (events/memberships)
+### Plan Optimizado de Implementación Restante (orden recomendado)
 
-**Archivos:**
-- `apps/web/pages/communities/[id].tsx` (ampliar)
-- `apps/web/src/components/communities/*` (crear)
-- `apps/web/src/shared/api/memberships.ts` (crear)
-- `apps/web/src/shared/api/events.ts` (crear)
-
----
-
-#### 1.1 Bloque técnico: saneamiento lint/typecheck
-**Prioridad**: Alta  
+#### Fase 1 — Cierre de P0 técnico transversal [P0]
+**Objetivo**: estabilidad de entrega.  
 **Tiempo estimado**: 1-2 días
 
-**Tareas:**
-- [ ] Resolver errores históricos de `pnpm lint` en API y Web
-- [ ] Resolver errores históricos de `pnpm typecheck` en tests/módulos no relacionados a Comunidades
-- [ ] Dejar quality gate global en verde
+1. Bloque `P0.Q.1` de lint/typecheck (lotes pequeños, primero web y luego api)
+2. Cerrar P0.1 (mensajería pendiente crítica)
+3. Cerrar P0.4/P0.5 mínimos para auth/validación sin deuda funcional
+4. Gate final: `pnpm lint` + `pnpm typecheck` sin errores
 
 ---
 
-#### 2. Comunidades Fase C (crear/editar MVP)
-**Prioridad**: Alta  
-**Tiempo estimado**: 0.5-1 día
+#### Fase 2 — Geolocalización útil para negocio (Google Maps simple) [P0]
+**Objetivo**: poder buscar servicios “cerca de una ubicación concreta”.  
+**Tiempo estimado**: 2-3 días
 
-**Tareas:**
-- [x] Formulario validado (nombre, descripción, privacidad)
-- [x] Manejo de errores de validación API
-- [x] Submit + redirección post-creación
-- [x] Edición de comunidad (MVP+): ruta `/communities/[id]/edit` con control de propiedad
-
-**Archivos:**
-- `apps/web/pages/communities/new.tsx` (completar)
-- `apps/web/pages/communities/[id]/edit.tsx` (crear opcional)
-- `apps/web/pages/communities/[id].tsx` (añadir acceso a edición para creador)
-- `apps/web/src/components/communities/forms/*` (crear)
+1. Modelo de datos de servicio con coordenadas (`latitude`, `longitude`, `placeId`, `formattedAddress`)
+2. Integración Google Places/Geocoding en alta/edición de servicios
+3. Endpoint backend `/api/services/nearby` con radio (km) y orden por distancia
+4. Filtro “cerca de” en frontend + mostrar distancia en tarjeta
+5. Tests unit/integration de geocoding + nearby (sin E2E)
 
 ---
 
-#### 3. FAQ Fase D
-**Prioridad**: Media  
-**Tiempo estimado**: 0.5 día
+#### Fase 3 — P1 de impacto visible (solo lo que mueve la demo) [P1]
+**Objetivo**: elevar UX sin abrir frentes grandes.  
+**Tiempo estimado**: 2-3 días
 
-**Tareas:**
-- [x] Crear página FAQ con categorías
-- [x] Acordeones accesibles
-- [x] Búsqueda simple por texto
-
-**Archivos:**
-- `apps/web/pages/faq.tsx` (crear)
-- `apps/web/src/components/faq/*` (crear)
+1. Página de intercambios (`P1.7.3`) + acciones clave por estado
+2. Notificaciones/toasts (`P1.6.3`) para feedback de acciones
+3. Manejo de errores consistente (`P1.6.1`)
 
 ---
 
-#### 4. Cálculo de Promedio de Ratings (P0.2.3)
-**Prioridad**: Media
-**Tiempo estimado**: 1 hora
+#### Fase 4 — Hardening final y entrega [P1/P2]
+**Objetivo**: cierre limpio para TFG.  
+**Tiempo estimado**: 1-2 días
 
-**Tareas:**
-- [x] Verificar que `averageRating` se calcula en `GET /api/services/:id`
-- [x] Agregar `averageRating` a la respuesta (con `totalRatings`)
-- [x] Mostrar promedio destacado en frontend
-
-**Archivos:**
-- `apps/api/src/modules/services/presentation/services.controller.ts` (verificar)
-- `apps/api/src/modules/services/presentation/services.controller.spec.ts` (tests)
-- `apps/web/pages/services/[id].tsx` (mejorar)
-- `apps/web/components/services/ServiceDetailHeader.tsx` (destacar promedio)
+1. Tests unitarios/integración en puntos críticos nuevos
+2. Ajustes UI finales (responsive y microcopys importantes)
+3. Actualizar `TASKS.md`, `NEXT_STEPS.md` y checklist de demo/defensa
 
 ---
 
-### P1 - Alto (Completar Después)
+## 📅 Secuencia corta sugerida (ejecución real)
 
-#### 4. Página de Mis Intercambios (P1.7.3)
-**Prioridad**: Media  
-**Tiempo estimado**: 2-3 horas
-
-**Tareas:**
-- [ ] Mejorar página `/exchanges`
-- [ ] Filtros por estado (PENDING, CONFIRMED, etc.)
-- [ ] Acciones por intercambio (aceptar, completar, cancelar)
-- [ ] Indicadores visuales de estado
-
-**Archivos:**
-- `apps/web/pages/exchanges.tsx` (mejorar)
-
----
-
-#### 5. Sistema de Notificaciones (P1.6.3)
-**Prioridad**: Media  
-**Tiempo estimado**: 4-5 horas
-
-**Tareas:**
-- [ ] Crear componente Toast/Notification
-- [ ] Context para notificaciones globales
-- [ ] Notificaciones de nuevos mensajes
-- [ ] Notificaciones de intercambios actualizados
-- [ ] Persistir notificaciones (opcional)
-
-**Archivos:**
-- `apps/web/src/components/ui/Toast.tsx` (crear)
-- `apps/web/src/contexts/NotificationContext.tsx` (crear)
-
----
-
-#### 6. Manejo de Errores Consistente (P1.6.1)
-**Prioridad**: Media  
-**Tiempo estimado**: 2-3 horas
-
-**Tareas:**
-- [ ] Crear ErrorBoundary global
-- [ ] Mensajes de error amigables
-- [ ] Retry automático para errores de red
-- [ ] Página de error 404/500
-
-**Archivos:**
-- `apps/web/src/components/ui/ErrorBoundary.tsx` (crear)
-- `apps/web/pages/_error.tsx` (crear)
-
----
-
-### P2 - Medio (Opcional)
-
-#### 7. Optimización de Queries (P2.9.1)
-**Prioridad**: Baja  
-**Tiempo estimado**: 4-6 horas
-
-**Tareas:**
-- [ ] Revisar queries de Prisma
-- [ ] Usar `select` en lugar de `include` cuando sea posible
-- [ ] Agregar índices en BD
-- [ ] Evitar N+1 queries
-
----
-
-#### 8. Tests Unitarios (P2.10.1)
-**Prioridad**: Baja  
-**Tiempo estimado**: 8-10 horas
-
-**Tareas:**
-- [ ] Tests para todos los casos de uso
-- [ ] Coverage mínimo 80%
-- [ ] Tests de reglas de negocio
-
----
-
-## 📅 Plan de Ejecución Recomendado
-
-### Semana 1
-1. **Día 1-2**: Página de conversaciones (P0.1.6)
-2. **Día 3-4**: Mejorar UI del Chat (P0.1.7)
-3. **Día 5**: Cálculo de promedio de ratings (P0.2.3)
-
-### Semana 2
-1. **Día 1-2**: Página de mis intercambios (P1.7.3)
-2. **Día 3-4**: Sistema de notificaciones (P1.6.3)
-3. **Día 5**: Manejo de errores (P1.6.1)
-
-### Semana 3+
-- Optimizaciones (P2)
-- Tests (P2)
-- Documentación (P2)
+1. **Día 1-2**: Geolocalización backend + migración + endpoint nearby  
+2. **Día 3**: Integración frontend (autocomplete + filtro cercano + distancia)  
+3. **Día 4**: Tests dirigidos + fix warnings del lote activo  
+4. **Día 5**: Cierre P0 pendiente (mensajería/auth/validaciones críticas)  
+5. **Día 6**: P1 demo-impacto (intercambios + toasts + errores)  
+6. **Día 7**: hardening, documentación final y freeze
 
 ---
 

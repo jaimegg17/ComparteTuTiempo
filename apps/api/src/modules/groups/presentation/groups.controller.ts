@@ -4,6 +4,7 @@ import {
   Post, 
   Put,
   Delete,
+  UnauthorizedException,
   Body, 
   Query, 
   Param,
@@ -16,6 +17,8 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { createZodDto } from '@anatine/zod-nestjs';
 import { GroupCreateSchema, GroupUpdateSchema } from '@comparte-tu-tiempo/contracts';
+import { Type } from 'class-transformer';
+import { IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 import { CreateGroupUseCase } from '../application/create-group.use-case';
 import { ListGroupsUseCase } from '../application/list-groups.use-case';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
@@ -24,10 +27,30 @@ import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
 export class CreateGroupDto extends createZodDto(GroupCreateSchema) {}
 export class UpdateGroupDto extends createZodDto(GroupUpdateSchema) {}
 
+type AuthenticatedRequest = { user?: { sub?: string; id?: string } };
+
 export class GroupListQueryDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
   communityId?: number;
+
+  @IsOptional()
+  @IsString()
   creatorId?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
   page?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(100)
   pageSize?: number;
 }
 
@@ -39,6 +62,14 @@ export class GroupsController {
     private readonly listGroupsUseCase: ListGroupsUseCase,
   ) {}
 
+  private getAuthenticatedUserId(req: AuthenticatedRequest): string {
+    const userId = req.user?.sub || req.user?.id;
+    if (!userId) {
+      throw new UnauthorizedException('Usuario no autenticado');
+    }
+    return userId;
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -47,13 +78,9 @@ export class GroupsController {
   @ApiResponse({ status: 400, description: 'Datos inválidos' })
   async createGroup(
     @Body() createGroupDto: CreateGroupDto,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
-    const userId = req.user?.sub;
-    
-    if (!userId) {
-      throw new Error('Usuario no autenticado');
-    }
+    const userId = this.getAuthenticatedUserId(req);
     
     const result = await this.createGroupUseCase.execute({
       data: createGroupDto,
@@ -125,14 +152,10 @@ export class GroupsController {
   @ApiResponse({ status: 403, description: 'No autorizado para actualizar este grupo' })
   async updateGroup(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateGroupDto: UpdateGroupDto,
-    @Request() req: any,
+    @Body() _updateGroupDto: UpdateGroupDto,
+    @Request() req: AuthenticatedRequest,
   ) {
-    const userId = req.user?.sub;
-    
-    if (!userId) {
-      throw new Error('Usuario no autenticado');
-    }
+    this.getAuthenticatedUserId(req);
     
     // This would need an update group use case
     return {
@@ -152,13 +175,9 @@ export class GroupsController {
   @ApiResponse({ status: 403, description: 'No autorizado para eliminar este grupo' })
   async deleteGroup(
     @Param('id', ParseIntPipe) id: number,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
-    const userId = req.user?.sub;
-    
-    if (!userId) {
-      throw new Error('Usuario no autenticado');
-    }
+    this.getAuthenticatedUserId(req);
     
     // This would need a delete group use case
     return {

@@ -3,6 +3,7 @@ import { MessagesController } from './presentation/messages.controller';
 import { CreateMessageUseCase } from './application/create-message.use-case';
 import { ListConversationsUseCase } from './application/list-conversations.use-case';
 import { ListMessagesUseCase } from './application/list-messages.use-case';
+import { GetMessagesByExchangeUseCase } from './application/get-messages-by-exchange.use-case';
 import { UpdateMessageUseCase } from './application/update-message.use-case';
 import { MarkMessageReadUseCase } from './application/mark-message-read.use-case';
 import { PrismaMessageRepository } from './infrastructure/prisma-message-repository';
@@ -16,6 +17,7 @@ import { PrismaModule } from '@/common/prisma/prisma.module';
     CreateMessageUseCase,
     ListConversationsUseCase,
     ListMessagesUseCase,
+    GetMessagesByExchangeUseCase,
     UpdateMessageUseCase,
     MarkMessageReadUseCase,
     {
@@ -27,6 +29,7 @@ import { PrismaModule } from '@/common/prisma/prisma.module';
     CreateMessageUseCase,
     ListConversationsUseCase,
     ListMessagesUseCase,
+    GetMessagesByExchangeUseCase,
     UpdateMessageUseCase,
     MarkMessageReadUseCase,
   ],

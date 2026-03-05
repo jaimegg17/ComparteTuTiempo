@@ -1,3 +1,4 @@
+import { UnauthorizedException } from '@nestjs/common';
 import { ServicesController } from './services.controller';
 import type { PrismaService } from '@/common/prisma/prisma.service';
 import type { CreateServiceUseCase } from '../application/create-service.use-case';
@@ -97,5 +98,21 @@ describe('ServicesController - getService averageRating', () => {
     expect(result.service.averageRating).toBe(4.3);
     expect(result.service.totalRatings).toBe(3);
     expect(result.service.totalExchanges).toBe(8);
+  });
+
+  it('lanza UnauthorizedException en createService si no hay usuario autenticado', async () => {
+    await expect(
+      controller.createService(
+        {
+          title: 'Servicio test',
+          description: 'Descripción suficientemente larga para pasar validación',
+          duration: 1,
+          category: 'EDUCACION',
+          type: 'PRESENCIAL',
+          price: 10,
+        },
+        {},
+      ),
+    ).rejects.toThrow(UnauthorizedException);
   });
 });

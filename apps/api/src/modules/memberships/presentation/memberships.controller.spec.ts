@@ -1,3 +1,4 @@
+import { UnauthorizedException } from '@nestjs/common';
 import {
   MembershipsController,
   normalizeMembershipListQuery,
@@ -60,5 +61,14 @@ describe('MembershipsController', () => {
       query: expect.objectContaining({ groupId: 4, page: 1, pageSize: 20 }),
     });
     expect(result.memberships).toEqual([{ id: 1, groupId: 4, userId: 'auth0|u1' }]);
+  });
+
+  it('lanza UnauthorizedException al crear membresía sin usuario autenticado', async () => {
+    await expect(
+      controller.createMembership(
+        { groupId: 10, userId: 'auth0|u2', role: 'MEMBER', status: 'ACTIVA' },
+        {},
+      ),
+    ).rejects.toThrow(UnauthorizedException);
   });
 });

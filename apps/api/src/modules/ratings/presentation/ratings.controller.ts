@@ -42,6 +42,16 @@ export class RatingsController {
     private readonly deleteRatingUseCase: DeleteRatingUseCase,
   ) {}
 
+  private getAuthenticatedUserId(req: { user?: { sub?: string; id?: string } }): string {
+    const userId = req.user?.sub || req.user?.id;
+
+    if (!userId) {
+      throw new UnauthorizedException('Usuario no autenticado');
+    }
+
+    return userId;
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -51,13 +61,9 @@ export class RatingsController {
   @ApiResponse({ status: 409, description: 'Ya existe una valoración para este servicio' })
   async createRating(
     @Body() createRatingDto: CreateRatingDto,
-    @Request() req: any,
+    @Request() req: { user?: { sub?: string; id?: string } },
   ) {
-    const userId = req.user?.sub || req.user?.id;
-    
-    if (!userId) {
-      throw new UnauthorizedException('Usuario no autenticado');
-    }
+    const userId = this.getAuthenticatedUserId(req);
 
     const result = await this.createRatingUseCase.execute({
       data: { ...createRatingDto, userId },
@@ -105,13 +111,9 @@ export class RatingsController {
   async updateRating(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateRatingDto: UpdateRatingDto,
-    @Request() req: any,
+    @Request() req: { user?: { sub?: string; id?: string } },
   ) {
-    const userId = req.user?.sub || req.user?.id;
-    
-    if (!userId) {
-      throw new UnauthorizedException('Usuario no autenticado');
-    }
+    const userId = this.getAuthenticatedUserId(req);
 
     const result = await this.updateRatingUseCase.execute({
       id,
@@ -136,13 +138,9 @@ export class RatingsController {
   @ApiResponse({ status: 403, description: 'No autorizado para eliminar esta valoración' })
   async deleteRating(
     @Param('id', ParseIntPipe) id: number,
-    @Request() req: any,
+    @Request() req: { user?: { sub?: string; id?: string } },
   ) {
-    const userId = req.user?.sub || req.user?.id;
-    
-    if (!userId) {
-      throw new UnauthorizedException('Usuario no autenticado');
-    }
+    const userId = this.getAuthenticatedUserId(req);
 
     await this.deleteRatingUseCase.execute({ id, userId });
   }
