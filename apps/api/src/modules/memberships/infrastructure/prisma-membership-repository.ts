@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../common/prisma/prisma.service';
 import { MembershipEntity } from '../domain/membership.entity';
 import { MembershipRepositoryPort } from '../domain/membership-repository.port';
@@ -66,7 +67,7 @@ export class PrismaMembershipRepository implements MembershipRepositoryPort {
     const { page, pageSize, userId, groupId, role, status } = query;
     const skip = (page - 1) * pageSize;
 
-    const where: any = {};
+    const where: Prisma.MembershipWhereInput = {};
     if (userId) where.userId = userId;
     if (groupId) where.groupId = groupId;
     if (role) where.role = role;
@@ -86,5 +87,4 @@ export class PrismaMembershipRepository implements MembershipRepositoryPort {
     return { memberships, total, page, pageSize, totalPages };
   }
 }
-
 

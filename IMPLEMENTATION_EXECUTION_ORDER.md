@@ -45,7 +45,7 @@ Ordenar la implementación restante para:
 - `web typecheck` ✅
 - `api typecheck` ✅
 - `web lint` ⚠️ ~54 warnings
-- `api lint` ⚠️ 68 warnings
+- `api lint` ⚠️ 58 warnings
 
 ### Lote A2 — Mensajería crítica pendiente (P0.1.x no cerrado)
 - [x] P0.1.1 eliminar `exchangeId` hardcodeado (`messages.controller.ts`).

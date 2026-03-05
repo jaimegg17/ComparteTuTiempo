@@ -2,6 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { MEMBERSHIP_REPOSITORY_TOKEN } from '../domain/tokens';
 import { MembershipRepositoryPort } from '../domain/membership-repository.port';
 import { MembershipListQuery } from '@comparte-tu-tiempo/contracts';
+import type { MembershipEntity } from '../domain/membership.entity';
 
 export interface ListMembershipsRequest {
   query: MembershipListQuery;
@@ -9,7 +10,7 @@ export interface ListMembershipsRequest {
 
 export interface ListMembershipsResponse {
   memberships: {
-    memberships: any[];
+    memberships: MembershipEntity[];
     total: number;
     page: number;
     pageSize: number;
@@ -30,5 +31,4 @@ export class ListMembershipsUseCase {
     return { memberships };
   }
 }
-
 

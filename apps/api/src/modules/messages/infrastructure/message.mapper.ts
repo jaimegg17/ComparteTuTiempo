@@ -1,7 +1,19 @@
 import { MessageEntity } from '../domain/message.entity';
+import type { MessageCreate } from '@comparte-tu-tiempo/contracts';
+import type { Prisma } from '@prisma/client';
+
+interface MessagePersistence {
+  id: number;
+  exchangeId: number;
+  senderId: string;
+  content: string;
+  isRead: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export class MessageMapper {
-  static toDomain(prismaMessage: any): MessageEntity {
+  static toDomain(prismaMessage: MessagePersistence): MessageEntity {
     return new MessageEntity(
       prismaMessage.id,
       prismaMessage.exchangeId,
@@ -13,7 +25,7 @@ export class MessageMapper {
     );
   }
 
-  static toPrisma(message: MessageEntity): any {
+  static toPrisma(message: MessageEntity): MessagePersistence {
     return {
       id: message.id,
       exchangeId: message.exchangeId,
@@ -25,7 +37,7 @@ export class MessageMapper {
     };
   }
 
-  static toPrismaCreate(data: any): any {
+  static toPrismaCreate(data: MessageCreate & { senderId: string }): Prisma.MessageUncheckedCreateInput {
     return {
       exchangeId: data.exchangeId,
       senderId: data.senderId,

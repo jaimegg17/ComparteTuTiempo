@@ -1,4 +1,5 @@
 import { Message as PrismaMessage } from '@prisma/client';
+import type { Message } from '@comparte-tu-tiempo/contracts';
 
 export class MessageEntity {
   constructor(
@@ -27,7 +28,7 @@ export class MessageEntity {
     return this;
   }
 
-  toContract(): any {
+  toContract(): Message {
     return {
       id: this.id,
       exchangeId: this.exchangeId,

@@ -61,7 +61,7 @@ Nice-to-have y mejoras adicionales.
   - Corregir errores de typecheck en tests y módulos compartidos
   - Ejecutar quality gate final: `pnpm lint` + `pnpm typecheck` en verde
   - **Nota**: este bloque es transversal y no depende de una feature concreta
-  - ✅ Avance: warning debt API reducido a **68** tras lotes de hardening + limpieza de tests
+  - ✅ Avance: warning debt API reducido a **58** tras lotes de hardening + limpieza de tests
 
 ### 1. Sistema de Mensajería (Chat) - COMPLETAR
 
