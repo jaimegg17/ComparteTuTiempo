@@ -19,7 +19,7 @@ export class UpdateServiceUseCase {
   ) {}
 
   async execute(input: UpdateServiceInput): Promise<UpdateServiceOutput> {
-    const existing = await this.serviceRepository.findById(input.id) as any;
+    const existing = await this.serviceRepository.findById(input.id);
     if (!existing) throw new NotFoundException('Servicio no encontrado');
     if (existing.userId !== input.userId) throw new ForbiddenException('No autorizado');
 
@@ -36,7 +36,7 @@ export class UpdateServiceUseCase {
           previousImageUrl.includes('res.cloudinary.com'),
       );
 
-      if (shouldDeletePrevious) {
+      if (shouldDeletePrevious && previousImageUrl) {
         try {
           const publicId = this.cloudinaryService.extractPublicId(previousImageUrl);
           await this.cloudinaryService.deleteImage(publicId);
@@ -53,4 +53,3 @@ export class UpdateServiceUseCase {
     return { service };
   }
 }
-

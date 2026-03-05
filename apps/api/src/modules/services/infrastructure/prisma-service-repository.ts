@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma, ServiceCategory, ServiceStatus, ServiceType } from '@prisma/client';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { ServiceRepositoryPort } from '../domain/service-repository.port';
 import { Service } from '../domain/service.entity';
@@ -21,8 +22,8 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
       description: data.description,
       duration: data.duration,
       location: data.location,
-      category: ServiceEnumMapper.mapCategoryToPrisma(data.category) as any,
-      type: ServiceEnumMapper.mapTypeToPrisma(data.type) as any,
+      category: ServiceEnumMapper.mapCategoryToPrisma(data.category) as ServiceCategory,
+      type: ServiceEnumMapper.mapTypeToPrisma(data.type) as ServiceType,
       price: data.price,
       userId,
       status: 'ACTIVO' as const,
@@ -38,53 +39,16 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
     return this.mapper.toDomain(prismaService);
   }
 
-  async findById(id: number): Promise<any> {
+  async findById(id: number): Promise<Service | null> {
     const prismaService = await this.prisma.service.findUnique({
       where: { id },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            imageUrl: true,
-            location: true,
-            bio: true,
-            skills: true,
-            timeCredits: true,
-            createdAt: true,
-          }
-        },
-        ratings: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                imageUrl: true,
-              }
-            }
-          },
-          orderBy: {
-            createdAt: 'desc'
-          },
-          take: 10, // Limit to 10 most recent ratings
-        },
-        _count: {
-          select: {
-            ratings: true,
-            exchanges: true,
-          }
-        }
-      },
     });
 
     if (!prismaService) {
       return null;
     }
 
-    // Return raw data with relations instead of mapping to domain entity
-    return prismaService;
+    return this.mapper.toDomain(prismaService);
   }
 
   async findByUserId(userId: string): Promise<Service[]> {
@@ -97,12 +61,12 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
 
   async list(query: ServiceListQuery): Promise<ServiceListResponse> {
     const { q, category, location, type, status, page, pageSize, userId } = query;
-    const minPrice = (query as any).minPrice;
-    const maxPrice = (query as any).maxPrice;
+    const minPrice = query.minPrice;
+    const maxPrice = query.maxPrice;
     const skip = (page - 1) * pageSize;
 
     // Construir filtros
-    const where: any = {};
+    const where: Prisma.ServiceWhereInput = {};
     
     if (q) {
       where.OR = [
@@ -111,9 +75,9 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
       ];
     }
     
-    if (category) where.category = ServiceEnumMapper.mapCategoryToPrisma(category) as any;
-    if (type) where.type = ServiceEnumMapper.mapTypeToPrisma(type) as any;
-    if (status) where.status = ServiceEnumMapper.mapStatusToPrisma(status) as any;
+    if (category) where.category = ServiceEnumMapper.mapCategoryToPrisma(category) as ServiceCategory;
+    if (type) where.type = ServiceEnumMapper.mapTypeToPrisma(type) as ServiceType;
+    if (status) where.status = ServiceEnumMapper.mapStatusToPrisma(status) as ServiceStatus;
     if (location) where.location = { contains: location, mode: 'insensitive' };
     if (userId) where.userId = userId; // Filtrar por usuario
     
@@ -174,7 +138,11 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
 
     return {
       services: servicesWithRatings.map(service => {
-        const serviceData = service as any; // Temporary until Prisma types are updated
+        const serviceData = service as typeof service & {
+          detailedDescription?: string | null;
+          availability?: string | null;
+          imageUrl?: string | null;
+        };
         return {
           id: service.id,
           title: service.title,
@@ -183,9 +151,9 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
           duration: service.duration,
           location: service.location,
           availability: serviceData.availability || null,
-          category: service.category.toLowerCase() as any,
-          type: service.type.toLowerCase() as any,
-          status: service.status.toLowerCase() as any,
+          category: service.category.toLowerCase() as unknown as ServiceListResponse['services'][number]['category'],
+          type: service.type.toLowerCase() as unknown as ServiceListResponse['services'][number]['type'],
+          status: service.status.toLowerCase() as unknown as ServiceListResponse['services'][number]['status'],
           price: service.price,
           imageUrl: serviceData.imageUrl || null,
           userId: service.userId,
@@ -206,7 +174,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
 
   async update(id: number, data: ServiceUpdate, userId: string): Promise<Service> {
     // Verificar que el servicio existe y pertenece al usuario
-    const existingService = await this.findById(id) as any;
+    const existingService = await this.findById(id);
     if (!existingService) {
       throw new Error('Service not found');
     }
@@ -214,16 +182,16 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
       throw new Error('Unauthorized to update this service');
     }
 
-    const updateData: any = {};
+    const updateData: Prisma.ServiceUncheckedUpdateInput = {};
     if (data.title) updateData.title = data.title;
     if (data.description) updateData.description = data.description;
     if (data.duration) updateData.duration = data.duration;
     if (data.location !== undefined) updateData.location = data.location;
-    if (data.category) updateData.category = ServiceEnumMapper.mapCategoryToPrisma(data.category) as any;
-    if (data.type) updateData.type = ServiceEnumMapper.mapTypeToPrisma(data.type) as any;
-    if (data.status) updateData.status = ServiceEnumMapper.mapStatusToPrisma(data.status) as any;
+    if (data.category) updateData.category = ServiceEnumMapper.mapCategoryToPrisma(data.category) as ServiceCategory;
+    if (data.type) updateData.type = ServiceEnumMapper.mapTypeToPrisma(data.type) as ServiceType;
+    if (data.status) updateData.status = ServiceEnumMapper.mapStatusToPrisma(data.status) as ServiceStatus;
     if (data.price) updateData.price = data.price;
-    if ((data as any).imageUrl !== undefined) updateData.imageUrl = (data as any).imageUrl as string;
+    if (data.imageUrl !== undefined) updateData.imageUrl = data.imageUrl;
 
     const prismaService = await this.prisma.service.update({
       where: { id },
@@ -235,7 +203,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
 
   async delete(id: number, userId: string): Promise<void> {
     // Verificar que el servicio existe y pertenece al usuario
-    const existingService = await this.findById(id) as any;
+    const existingService = await this.findById(id);
     if (!existingService) {
       throw new Error('Service not found');
     }

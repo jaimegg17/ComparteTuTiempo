@@ -4,6 +4,7 @@ import { RatingRepositoryPort } from '../domain/rating-repository.port';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { RATING_REPOSITORY_TOKEN } from '../domain/tokens';
 import { BadRequestException, ConflictException } from '@nestjs/common';
+import { RatingEntity } from '../domain/rating.entity';
 
 describe('CreateRatingUseCase - Business Logic Validation', () => {
   let useCase: CreateRatingUseCase;
@@ -29,7 +30,7 @@ describe('CreateRatingUseCase - Business Logic Validation', () => {
       exchange: {
         findFirst: jest.fn(),
       },
-    } as any;
+    } as unknown as jest.Mocked<PrismaService>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -220,7 +221,17 @@ describe('CreateRatingUseCase - Business Logic Validation', () => {
         updatedAt: new Date(),
       };
 
-      ratingRepository.create.mockResolvedValue(mockRating as any);
+      ratingRepository.create.mockResolvedValue(
+        new RatingEntity(
+          mockRating.id,
+          mockRating.userId,
+          mockRating.serviceId,
+          mockRating.score,
+          mockRating.comment,
+          mockRating.createdAt,
+          mockRating.updatedAt,
+        ),
+      );
 
       const ratingData = {
         serviceId: 1,
@@ -267,7 +278,17 @@ describe('CreateRatingUseCase - Business Logic Validation', () => {
         updatedAt: new Date(),
       };
 
-      ratingRepository.create.mockResolvedValue(mockRating as any);
+      ratingRepository.create.mockResolvedValue(
+        new RatingEntity(
+          mockRating.id,
+          mockRating.userId,
+          mockRating.serviceId,
+          mockRating.score,
+          mockRating.comment,
+          mockRating.createdAt,
+          mockRating.updatedAt,
+        ),
+      );
 
       const ratingData = {
         serviceId: 1,
@@ -293,15 +314,9 @@ describe('CreateRatingUseCase - Business Logic Validation', () => {
       });
       
       // Mock: Existing rating
-      ratingRepository.findByUserAndService.mockResolvedValue({
-        id: 1,
-        userId: 'user-123',
-        serviceId: 1,
-        score: 4,
-        comment: 'Previous rating',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } as any);
+      ratingRepository.findByUserAndService.mockResolvedValue(
+        new RatingEntity(1, 'user-123', 1, 4, 'Previous rating', new Date(), new Date()),
+      );
 
       const ratingData = {
         serviceId: 1,

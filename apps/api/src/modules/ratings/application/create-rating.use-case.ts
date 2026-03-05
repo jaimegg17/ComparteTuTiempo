@@ -1,4 +1,5 @@
 import { Injectable, Inject, BadRequestException, ConflictException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import type { RatingRepositoryPort } from '../domain/rating-repository.port';
 import { RatingCreate } from '@comparte-tu-tiempo/contracts';
 import { RatingEntity } from '../domain/rating.entity';
@@ -62,7 +63,7 @@ export class CreateRatingUseCase {
           { offeredById: userId }
         ],
         state: 'COMPLETED'
-      } as any,
+      } as Prisma.ExchangeWhereInput,
     });
 
     if (!completedExchange) {

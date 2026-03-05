@@ -2,6 +2,26 @@ import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 import { DeleteServiceUseCase } from './delete-service.use-case';
 import type { ServiceRepositoryPort } from '../domain/service-repository.port';
+import { Service } from '../domain/service.entity';
+
+const buildService = (overrides: Partial<ReturnType<Service['toContract']>> = {}) =>
+  Service.fromContract({
+    id: overrides.id ?? 1,
+    title: overrides.title ?? 'Servicio de prueba',
+    description: overrides.description ?? 'Descripción suficientemente larga para tests',
+    detailedDescription: overrides.detailedDescription ?? null,
+    duration: overrides.duration ?? 2,
+    location: overrides.location ?? 'Madrid',
+    availability: overrides.availability ?? null,
+    category: overrides.category ?? 'EDUCACION',
+    type: overrides.type ?? 'PRESENCIAL',
+    status: overrides.status ?? 'ACTIVO',
+    price: overrides.price ?? 20,
+    imageUrl: overrides.imageUrl ?? null,
+    userId: overrides.userId ?? 'auth0|u1',
+    createdAt: overrides.createdAt ?? new Date(),
+    updatedAt: overrides.updatedAt ?? new Date(),
+  });
 
 describe('DeleteServiceUseCase', () => {
   let useCase: DeleteServiceUseCase;
@@ -29,11 +49,13 @@ describe('DeleteServiceUseCase', () => {
   });
 
   it('elimina imagen en cloudinary al borrar el servicio', async () => {
-    serviceRepository.findById.mockResolvedValue({
-      id: 21,
-      userId: 'auth0|u1',
-      imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/comparte-tu-tiempo/services/to-delete.jpg',
-    } as any);
+    serviceRepository.findById.mockResolvedValue(
+      buildService({
+        id: 21,
+        userId: 'auth0|u1',
+        imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/comparte-tu-tiempo/services/to-delete.jpg',
+      }),
+    );
     serviceRepository.delete.mockResolvedValue(undefined);
     cloudinaryService.extractPublicId.mockReturnValue('v1/comparte-tu-tiempo/services/to-delete');
     cloudinaryService.deleteImage.mockResolvedValue(undefined);
@@ -45,11 +67,13 @@ describe('DeleteServiceUseCase', () => {
   });
 
   it('no falla el borrado del servicio si falla la limpieza en cloudinary', async () => {
-    serviceRepository.findById.mockResolvedValue({
-      id: 22,
-      userId: 'auth0|u1',
-      imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/comparte-tu-tiempo/services/to-delete.jpg',
-    } as any);
+    serviceRepository.findById.mockResolvedValue(
+      buildService({
+        id: 22,
+        userId: 'auth0|u1',
+        imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/comparte-tu-tiempo/services/to-delete.jpg',
+      }),
+    );
     serviceRepository.delete.mockResolvedValue(undefined);
     cloudinaryService.extractPublicId.mockReturnValue('v1/comparte-tu-tiempo/services/to-delete');
     cloudinaryService.deleteImage.mockRejectedValue(new Error('Cloudinary down'));
@@ -58,11 +82,13 @@ describe('DeleteServiceUseCase', () => {
   });
 
   it('lanza ForbiddenException si el usuario no es el dueño', async () => {
-    serviceRepository.findById.mockResolvedValue({
-      id: 23,
-      userId: 'auth0|owner',
-      imageUrl: null,
-    } as any);
+    serviceRepository.findById.mockResolvedValue(
+      buildService({
+        id: 23,
+        userId: 'auth0|owner',
+        imageUrl: null,
+      }),
+    );
 
     await expect(useCase.execute({ id: 23, userId: 'auth0|other' })).rejects.toThrow(ForbiddenException);
   });

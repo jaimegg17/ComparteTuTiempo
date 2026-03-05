@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import type { ServiceRepositoryPort } from '../domain/service-repository.port';
-import { ServiceListQuery } from '@comparte-tu-tiempo/contracts';
+import { ServiceListQuery, ServiceListResponse } from '@comparte-tu-tiempo/contracts';
 import { SERVICE_REPOSITORY_TOKEN } from '../domain/tokens';
 
 export interface ListServicesInput {
@@ -8,7 +8,7 @@ export interface ListServicesInput {
 }
 
 export interface ListServicesOutput {
-  services: any[];
+  services: ServiceListResponse['services'];
   total: number;
   page: number;
   pageSize: number;

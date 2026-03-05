@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../common/prisma/prisma.service';
 import { RatingEntity } from '../domain/rating.entity';
 import { RatingRepositoryPort } from '../domain/rating-repository.port';
@@ -80,7 +81,7 @@ export class PrismaRatingRepository implements RatingRepositoryPort {
     const skip = (page - 1) * pageSize;
 
     // Build where clause
-    const where: any = {};
+    const where: Prisma.RatingWhereInput = {};
     if (userId) where.userId = userId;
     if (serviceId) where.serviceId = serviceId;
     if (score) where.score = score;

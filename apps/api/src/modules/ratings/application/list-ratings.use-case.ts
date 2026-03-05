@@ -2,6 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import type { RatingRepositoryPort } from '../domain/rating-repository.port';
 import { RatingListQuery } from '@comparte-tu-tiempo/contracts';
 import { RATING_REPOSITORY_TOKEN } from '../domain/tokens';
+import type { RatingEntity } from '../domain/rating.entity';
 
 export interface ListRatingsRequest {
   query: RatingListQuery;
@@ -9,7 +10,7 @@ export interface ListRatingsRequest {
 
 export interface ListRatingsResponse {
   ratings: {
-    ratings: any[];
+    ratings: RatingEntity[];
     total: number;
     page: number;
     pageSize: number;

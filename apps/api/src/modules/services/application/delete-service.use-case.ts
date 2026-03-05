@@ -16,7 +16,7 @@ export class DeleteServiceUseCase {
   ) {}
 
   async execute(input: DeleteServiceInput): Promise<void> {
-    const existing = await this.serviceRepository.findById(input.id) as any;
+    const existing = await this.serviceRepository.findById(input.id);
     if (!existing) throw new NotFoundException('Servicio no encontrado');
     if (existing.userId !== input.userId) throw new ForbiddenException('No autorizado');
 
@@ -38,4 +38,3 @@ export class DeleteServiceUseCase {
     }
   }
 }
-

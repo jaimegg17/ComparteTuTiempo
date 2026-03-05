@@ -1,4 +1,4 @@
-import { Service as PrismaService } from '@prisma/client';
+import { Service as PrismaService, ServiceCategory, ServiceStatus, ServiceType } from '@prisma/client';
 import { Service } from '../domain/service.entity';
 import { ServiceWithImage } from '../domain/service.types';
 
@@ -44,11 +44,11 @@ export class ServiceMapper {
       duration: prismaService.duration,
       location: prismaService.location,
       availability: prismaService.availability,
-      category: mapCategory(prismaService.category) as any,
-      type: mapType(prismaService.type) as any,
-      status: mapStatus(prismaService.status) as any,
+      category: mapCategory(prismaService.category) as unknown as ServiceWithImage['category'],
+      type: mapType(prismaService.type) as unknown as ServiceWithImage['type'],
+      status: mapStatus(prismaService.status) as unknown as ServiceWithImage['status'],
       price: prismaService.price,
-      imageUrl: (prismaService as any).imageUrl,
+      imageUrl: prismaService.imageUrl,
       userId: prismaService.userId,
       createdAt: prismaService.createdAt,
       updatedAt: prismaService.updatedAt,
@@ -97,9 +97,9 @@ export class ServiceMapper {
       duration: service.duration,
       location: service.location,
       availability: service.availability || null,
-      category: mapCategoryToPrisma(service.category) as any,
-      type: mapTypeToPrisma(service.type) as any,
-      status: mapStatusToPrisma(service.status) as any,
+      category: mapCategoryToPrisma(service.category) as ServiceCategory,
+      type: mapTypeToPrisma(service.type) as ServiceType,
+      status: mapStatusToPrisma(service.status) as ServiceStatus,
       price: service.price,
       imageUrl: service.imageUrl || null,
       userId: service.userId,

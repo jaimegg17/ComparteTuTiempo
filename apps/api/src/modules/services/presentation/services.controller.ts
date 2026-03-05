@@ -333,7 +333,7 @@ export class ServicesController {
             exchanges: true,
           }
         }
-      } as any,
+      },
     });
 
     if (!serviceData) {
@@ -351,14 +351,19 @@ export class ServicesController {
     const averageRating = ratingsStats._avg.score ? Number(ratingsStats._avg.score.toFixed(1)) : 0;
     const totalRatingsCount = ratingsStats._count.id;
 
-    return { 
-      message: 'Servicio obtenido exitosamente', 
+    const serviceWithMeta = serviceData as typeof serviceData & {
+      imageUrl?: string | null;
+      _count?: { exchanges?: number };
+    };
+
+    return {
+      message: 'Servicio obtenido exitosamente',
       service: {
-        ...serviceData,
-        imageUrl: (serviceData as any).imageUrl || null,
+        ...serviceWithMeta,
+        imageUrl: serviceWithMeta.imageUrl || null,
         averageRating,
         totalRatings: totalRatingsCount,
-        totalExchanges: (serviceData as any)._count?.exchanges || 0,
+        totalExchanges: serviceWithMeta._count?.exchanges || 0,
       }
     };
   }
