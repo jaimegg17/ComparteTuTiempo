@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { User as PrismaUser } from '@prisma/client';
 import { PrismaService } from '../../../common/prisma/prisma.service';
 import { UserRepositoryPort } from '../domain/user-repository.port';
 import { User, UserCreate, UserUpdate } from '../domain/user.entity';
@@ -74,18 +75,18 @@ export class PrismaUserRepository implements UserRepositoryPort {
     return users.map(user => this.mapToDomain(user));
   }
 
-  private mapToDomain(prismaUser: any): User {
+  private mapToDomain(prismaUser: PrismaUser): User {
     return {
       id: prismaUser.id, // Auth0 ID as primary key
       email: prismaUser.email,
       password: prismaUser.password,
       name: prismaUser.name,
-      phoneNumber: prismaUser.phoneNumber,
-      location: prismaUser.location,
-      bio: prismaUser.bio,
+      phoneNumber: prismaUser.phoneNumber ?? undefined,
+      location: prismaUser.location ?? undefined,
+      bio: prismaUser.bio ?? undefined,
       skills: prismaUser.skills,
-      imageUrl: prismaUser.imageUrl,
-      role: prismaUser.role,
+      imageUrl: prismaUser.imageUrl ?? undefined,
+      role: prismaUser.role as User['role'],
       createdAt: prismaUser.createdAt,
       updatedAt: prismaUser.updatedAt,
     };

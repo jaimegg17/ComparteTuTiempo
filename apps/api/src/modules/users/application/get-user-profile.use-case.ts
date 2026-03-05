@@ -6,7 +6,26 @@ export interface GetUserProfileInput {
 }
 
 export interface GetUserProfileOutput {
-  user: any;
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    phoneNumber: string | null;
+    location: string | null;
+    bio: string | null;
+    skills: string[];
+    imageUrl: string | null;
+    role: 'USER' | 'MODERATOR' | 'ADMIN';
+    timeCredits: number;
+    createdAt: Date;
+    updatedAt: Date;
+    stats: {
+      servicesOffered: number;
+      exchangesRequested: number;
+      ratingsGiven: number;
+      averageRating: number;
+    };
+  };
 }
 
 @Injectable()
@@ -40,19 +59,18 @@ export class GetUserProfileUseCase {
     });
 
     // Remove sensitive data
-    const userWithoutPassword = { ...user } as any;
-    delete userWithoutPassword.password;
+    const { password: _password, _count, ...userWithoutPassword } = user;
+    void _password;
 
     return {
       user: {
         ...userWithoutPassword,
         stats: {
-          servicesOffered: user._count.services,
-          exchangesRequested: user._count.requestedExchanges,
-          ratingsGiven: user._count.ratings,
+          servicesOffered: _count.services,
+          exchangesRequested: _count.requestedExchanges,
+          ratingsGiven: _count.ratings,
           averageRating: avgRating._avg.score || 0,
         },
-        _count: undefined, // Remove internal count
       },
     };
   }

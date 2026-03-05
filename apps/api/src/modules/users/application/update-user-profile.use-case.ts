@@ -13,7 +13,19 @@ export interface UpdateUserProfileInput {
 }
 
 export interface UpdateUserProfileOutput {
-  user: any;
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    phoneNumber: string | null;
+    location: string | null;
+    bio: string | null;
+    skills: string[];
+    role: 'USER' | 'MODERATOR' | 'ADMIN';
+    timeCredits: number;
+    createdAt: Date;
+    updatedAt: Date;
+  };
 }
 
 @Injectable()
@@ -62,4 +74,3 @@ export class UpdateUserProfileUseCase {
     };
   }
 }
-

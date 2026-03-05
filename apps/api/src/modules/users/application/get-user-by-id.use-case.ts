@@ -6,7 +6,19 @@ export interface GetUserByIdInput {
 }
 
 export interface GetUserByIdOutput {
-  user: any;
+  user: {
+    id: string;
+    name: string;
+    location: string | null;
+    bio: string | null;
+    skills: string[];
+    createdAt: Date;
+    stats: {
+      servicesOffered: number;
+      averageRating: number;
+      totalRatings: number;
+    };
+  };
 }
 
 @Injectable()
@@ -45,17 +57,17 @@ export class GetUserByIdUseCase {
       _count: true,
     });
 
+    const { _count, ...userWithoutCount } = user;
+
     return {
       user: {
-        ...user,
+        ...userWithoutCount,
         stats: {
-          servicesOffered: user._count.services,
+          servicesOffered: _count.services,
           averageRating: avgRating._avg.score || 0,
           totalRatings: avgRating._count,
         },
-        _count: undefined, // Remove internal count
       },
     };
   }
 }
-
