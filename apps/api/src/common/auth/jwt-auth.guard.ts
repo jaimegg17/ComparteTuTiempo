@@ -1,6 +1,15 @@
 import { Injectable, ExecutionContext, UnauthorizedException, Logger } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
+interface AuthenticatedUser {
+  sub?: string;
+  id?: string;
+}
+
+interface InfoWithMessage {
+  message?: string;
+}
+
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
   private readonly logger = new Logger(JwtAuthGuard.name);
@@ -19,21 +28,34 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     return super.canActivate(context);
   }
 
-  handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
+  handleRequest<TUser = AuthenticatedUser>(
+    err: unknown,
+    user: TUser,
+    info: unknown,
+    context: ExecutionContext,
+    status?: unknown,
+  ): TUser {
     const request = context.switchToHttp().getRequest();
+    const error = err instanceof Error ? err : null;
+    const infoMessage =
+      typeof info === 'string'
+        ? info
+        : (info as InfoWithMessage | undefined)?.message;
     
-    if (err || !user) {
+    if (error || !user) {
       this.logger.error('❌ JWT Auth Guard failed:', {
-        hasError: !!err,
-        errorMessage: err?.message,
-        errorName: err?.name,
+        hasError: !!error,
+        errorMessage: error?.message,
+        errorName: error?.name,
         hasUser: !!user,
-        info: info?.message || info,
+        info: infoMessage || info,
+        status,
         authHeader: request.headers?.authorization ? 'Present' : 'Missing',
       });
-      throw err || new UnauthorizedException('Token inválido o expirado');
+      throw error || new UnauthorizedException('Token inválido o expirado');
     }
-    this.logger.debug('✅ JWT Auth Guard passed, user:', user.sub);
+    const authUser = user as AuthenticatedUser;
+    this.logger.debug('✅ JWT Auth Guard passed, user:', authUser.sub || authUser.id || 'unknown');
     return user;
   }
 }

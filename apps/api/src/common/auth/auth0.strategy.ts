@@ -4,6 +4,17 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { passportJwtSecret } from 'jwks-rsa';
 
+interface Auth0JwtPayload {
+  sub: string;
+  email?: string;
+  name?: string;
+  picture?: string;
+  aud?: string | string[];
+  iss?: string;
+  exp?: number;
+  iat?: number;
+}
+
 @Injectable()
 export class Auth0Strategy extends PassportStrategy(Strategy) {
   constructor(private configService: ConfigService) {
@@ -33,13 +44,14 @@ export class Auth0Strategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any) {
+  async validate(payload: Auth0JwtPayload) {
     // Log payload for debugging
     const expectedAudience = this.configService.get<string>('AUTH0_AUDIENCE');
+    const expectedAudienceValue = expectedAudience ?? '';
     const tokenAudience = payload.aud;
     const isAudienceValid = Array.isArray(tokenAudience) 
-      ? tokenAudience.includes(expectedAudience)
-      : tokenAudience === expectedAudience;
+      ? tokenAudience.includes(expectedAudienceValue)
+      : tokenAudience === expectedAudienceValue;
 
     console.log('🔍 JWT Payload validated:', {
       sub: payload.sub,
@@ -50,14 +62,14 @@ export class Auth0Strategy extends PassportStrategy(Strategy) {
       iss: payload.iss,
       exp: payload.exp,
       iat: payload.iat,
-      isExpired: Date.now() > payload.exp * 1000,
+      isExpired: payload.exp ? Date.now() > payload.exp * 1000 : false,
     });
 
     // Verify audience - Auth0 can return audience as array or string
     if (!isAudienceValid) {
       console.error('❌ Audience validation failed:', {
         tokenAudience,
-        expectedAudience,
+        expectedAudience: expectedAudienceValue,
       });
       throw new Error('Invalid audience');
     }

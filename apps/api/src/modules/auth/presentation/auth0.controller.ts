@@ -6,7 +6,9 @@ import { JwtAuthGuard } from '../../../common/auth/jwt-auth.guard';
 export class Auth0Controller {
   constructor(private readonly auth0UserService: Auth0UserService) {}
 
-  private getAuthenticatedUser(req: { user?: { id?: string; sub?: string } }) {
+  private getAuthenticatedUser(
+    req: { user?: { id?: string; sub?: string; email?: string; name?: string; picture?: string } },
+  ) {
     if (!req.user) {
       throw new UnauthorizedException('Usuario no autenticado');
     }
@@ -15,10 +17,17 @@ export class Auth0Controller {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  async getMe(@Request() req: { user?: { id?: string; sub?: string } }) {
+  async getMe(
+    @Request() req: { user?: { id?: string; sub?: string; email?: string; name?: string; picture?: string } },
+  ) {
     const authUser = this.getAuthenticatedUser(req);
     // req.user contains the Auth0 payload
-    const user = await this.auth0UserService.findOrCreateFromAuth0(authUser);
+    const user = await this.auth0UserService.findOrCreateFromAuth0({
+      id: authUser.id || authUser.sub || '',
+      email: authUser.email || '',
+      name: authUser.name || 'Usuario',
+      picture: authUser.picture,
+    });
     
     // Remove password from response
     const userWithoutPassword = { ...user } as Record<string, unknown>;
@@ -32,7 +41,9 @@ export class Auth0Controller {
 
   @Get('profile')
   @UseGuards(JwtAuthGuard)
-  async getProfile(@Request() req: { user?: { id?: string; sub?: string } }) {
+  async getProfile(
+    @Request() req: { user?: { id?: string; sub?: string; email?: string; name?: string; picture?: string } },
+  ) {
     const authUser = this.getAuthenticatedUser(req);
     // Return the Auth0 user info
     return {

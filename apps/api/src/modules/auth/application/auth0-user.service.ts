@@ -2,6 +2,13 @@ import { Injectable, Inject } from '@nestjs/common';
 import type { UserRepositoryPort } from '../domain/user-repository.port';
 import type { User, UserCreate } from '../domain/user.entity';
 
+interface Auth0Profile {
+  id: string;
+  email: string;
+  name: string;
+  picture?: string;
+}
+
 @Injectable()
 export class Auth0UserService {
   constructor(@Inject('UserRepositoryPort') private readonly userRepository: UserRepositoryPort) {}
@@ -10,7 +17,7 @@ export class Auth0UserService {
    * Find or create user from Auth0 payload
    * This method is called when a user authenticates with Auth0
    */
-  async findOrCreateFromAuth0(auth0User: any): Promise<User> {
+  async findOrCreateFromAuth0(auth0User: Auth0Profile): Promise<User> {
     // Try to find user by Auth0 ID (now the primary key)
     let user = await this.userRepository.findById(auth0User.id);
     
