@@ -2,6 +2,7 @@ import { BadRequestException, NotFoundException, UnauthorizedException } from '@
 import { UsersController } from './users.controller';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
+import { UpdateUserDto } from './users.controller';
 
 describe('UsersController', () => {
   let controller: UsersController;
@@ -12,6 +13,9 @@ describe('UsersController', () => {
     };
   };
   let cloudinaryService: jest.Mocked<CloudinaryService>;
+  const authReq = (sub?: string) => (sub ? { user: { sub } } : {});
+  const updateDto = (partial: Partial<UpdateUserDto>): UpdateUserDto =>
+    partial as unknown as UpdateUserDto;
 
   beforeEach(() => {
     prisma = {
@@ -34,8 +38,8 @@ describe('UsersController', () => {
     await expect(
       controller.updateUserProfile(
         'auth0|owner',
-        { name: 'Owner', email: 'owner@test.com' } as any,
-        { user: { sub: 'auth0|other' } } as any,
+        updateDto({ name: 'Owner', email: 'owner@test.com' }),
+        authReq('auth0|other'),
       ),
     ).rejects.toThrow(BadRequestException);
   });
@@ -44,7 +48,7 @@ describe('UsersController', () => {
     await expect(
       controller.updateUserProfile(
         'auth0|owner',
-        { name: 'Owner', email: 'owner@test.com' } as any,
+        updateDto({ name: 'Owner', email: 'owner@test.com' }),
         {},
       ),
     ).rejects.toThrow(UnauthorizedException);
@@ -56,8 +60,8 @@ describe('UsersController', () => {
     await expect(
       controller.updateUserProfile(
         'auth0|u1',
-        { name: 'User', email: 'user@test.com' } as any,
-        { user: { sub: 'auth0|u1' } } as any,
+        updateDto({ name: 'User', email: 'user@test.com' }),
+        authReq('auth0|u1'),
       ),
     ).rejects.toThrow(NotFoundException);
   });
@@ -66,13 +70,13 @@ describe('UsersController', () => {
     prisma.user.findUnique.mockResolvedValue({
       id: 'auth0|u1',
       imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/comparte-tu-tiempo/profiles/old.jpg',
-    } as any);
+    } as unknown as Record<string, unknown>);
     prisma.user.update.mockResolvedValue({
       id: 'auth0|u1',
       email: 'user@test.com',
       name: 'User',
       imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/comparte-tu-tiempo/profiles/new.jpg',
-    } as any);
+    } as unknown as Record<string, unknown>);
     cloudinaryService.extractPublicId.mockReturnValue('v1/comparte-tu-tiempo/profiles/old');
     cloudinaryService.deleteImage.mockResolvedValue(undefined);
 
@@ -82,8 +86,8 @@ describe('UsersController', () => {
         name: 'User',
         email: 'user@test.com',
         imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/comparte-tu-tiempo/profiles/new.jpg',
-      } as any,
-      { user: { sub: 'auth0|u1' } } as any,
+      } as unknown as UpdateUserDto,
+      authReq('auth0|u1'),
     );
 
     expect(cloudinaryService.deleteImage).toHaveBeenCalledWith('v1/comparte-tu-tiempo/profiles/old');
@@ -94,18 +98,18 @@ describe('UsersController', () => {
     prisma.user.findUnique.mockResolvedValue({
       id: 'auth0|u1',
       imageUrl: sameUrl,
-    } as any);
+    } as unknown as Record<string, unknown>);
     prisma.user.update.mockResolvedValue({
       id: 'auth0|u1',
       email: 'user@test.com',
       name: 'User',
       imageUrl: sameUrl,
-    } as any);
+    } as unknown as Record<string, unknown>);
 
     await controller.updateUserProfile(
       'auth0|u1',
-      { name: 'User', email: 'user@test.com', imageUrl: sameUrl } as any,
-      { user: { sub: 'auth0|u1' } } as any,
+      updateDto({ name: 'User', email: 'user@test.com', imageUrl: sameUrl }),
+      authReq('auth0|u1'),
     );
 
     expect(cloudinaryService.deleteImage).not.toHaveBeenCalled();

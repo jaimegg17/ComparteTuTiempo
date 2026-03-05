@@ -14,6 +14,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UploadController } from './upload.controller';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 import { BadRequestException } from '@nestjs/common';
+import { Readable } from 'stream';
+
+type UploadRequest = {
+  user?: { sub?: string; id?: string };
+  headers?: { authorization?: string };
+};
 
 describe('UploadController', () => {
   let controller: UploadController;
@@ -60,7 +66,7 @@ describe('UploadController', () => {
       destination: '',
       filename: '',
       path: '',
-      stream: null as any,
+      stream: Readable.from([]),
     };
     it('should upload valid image successfully', async () => {
       mockMetadata.mockResolvedValue({
@@ -151,7 +157,7 @@ describe('UploadController', () => {
 
     it('should reject when no file is provided', async () => {
       await expect(
-        controller.uploadImage(null as any, mockReq as any)
+        controller.uploadImage(null as unknown as Express.Multer.File, mockReq as UploadRequest)
       ).rejects.toThrow(BadRequestException);
     });
   });

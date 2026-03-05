@@ -41,11 +41,11 @@ Ordenar la implementación restante para:
 - [ ] Crear lista de lotes de limpieza priorizada (web primero, api después).
 **Cierre**: baseline documentada y backlog técnico ordenado.
 
-**Snapshot actual (05/03/2026 19:26 GMT+1):**
+**Snapshot actual (05/03/2026 19:40 GMT+1):**
 - `web typecheck` ✅
 - `api typecheck` ✅
 - `web lint` ⚠️ ~54 warnings
-- `api lint` ⚠️ 135 warnings
+- `api lint` ⚠️ 119 warnings
 
 ### Lote A2 — Mensajería crítica pendiente (P0.1.x no cerrado)
 - [x] P0.1.1 eliminar `exchangeId` hardcodeado (`messages.controller.ts`).
@@ -73,6 +73,7 @@ Ordenar la implementación restante para:
   - Avance reciente: `users.controller` (legacy + presentation) endurecidos con helper de autenticación tipado.
   - Avance reciente: `services.controller` y `ratings.controller` migrados a request tipada en endpoints protegidos + pruebas de no autenticado.
   - Avance reciente: `upload.controller` + controladores auth (`auth0`, `auth/presentation`, `auth`) migrados a request tipada.
+  - Avance reciente: limpieza de `any` en specs (`users`/`upload`) para seguir reduciendo deuda sin riesgo funcional.
 **Tests**: casos negativos (payload inválido, no autorizado).
 **Cierre**: API robusta ante input inválido y acceso indebido.
 
