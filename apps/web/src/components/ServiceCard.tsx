@@ -1,4 +1,4 @@
-import { Card, CardContent, CardActions, CardMedia, Button, Typography, Box, Chip, Rating } from '@mui/material';
+import { Card, CardContent, CardMedia, Button, Typography, Box, Chip, Rating } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useState } from 'react';
@@ -17,6 +17,8 @@ interface ServiceCardProps {
     imageUrl?: string;
     averageRating?: number;
     totalRatings?: number;
+    formattedAddress?: string | null;
+    distanceKm?: number | null;
   };
 }
 
@@ -154,8 +156,13 @@ export function ServiceCard({ service }: ServiceCardProps) {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 'auto', pt: 1 }}>
           <Box>
             <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontSize: '12px', mb: 0.5 }}>
-              📍 {service.location || 'N/A'}
+              📍 {service.formattedAddress || service.location || 'N/A'}
             </Typography>
+            {typeof service.distanceKm === 'number' && (
+              <Typography variant="body2" color="primary" sx={{ fontSize: '12px', mb: 0.5, fontWeight: 600 }}>
+                A {service.distanceKm.toFixed(1)} km
+              </Typography>
+            )}
             
             <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
               <Typography variant="body2" color="text.secondary" sx={{ fontSize: '12px' }}>

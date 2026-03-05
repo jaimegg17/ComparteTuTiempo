@@ -1,6 +1,6 @@
 # 🧭 Orden de Implementación Detallado (Fuente de Verdad Operativa)
 
-> Fecha de actualización: **5 marzo 2026 (00:12 GMT+1)**  
+> Fecha de actualización: **5 marzo 2026 (20:51 GMT+1)**  
 > Alcance acordado: **sin E2E** en esta fase (solo **unit + integration**)
 
 ---
@@ -90,9 +90,9 @@ Ordenar la implementación restante para:
 **Meta**: buscar servicios cercanos a ubicación concreta.
 
 ### Lote B1 — Modelo de datos geográfico
-- [ ] Añadir en `Service`: `latitude`, `longitude`, `placeId`, `formattedAddress`.
-- [ ] Mantener `location` textual por compatibilidad.
-- [ ] Migración + índices de consulta.
+- [x] Añadir en `Service`: `latitude`, `longitude`, `placeId`, `formattedAddress`.
+- [x] Mantener `location` textual por compatibilidad.
+- [x] Migración + preparación de consulta por coordenadas en repositorio.
 **Cierre**: datos listos para geobúsqueda.
 
 ### Lote B2 — Geocoding/Places en alta/edición
@@ -102,16 +102,16 @@ Ordenar la implementación restante para:
 **Cierre**: servicios nuevos/editados quedan georreferenciados.
 
 ### Lote B3 — Endpoint nearby
-- [ ] `GET /api/services/nearby?lat=&lng=&radiusKm=`.
-- [ ] Filtro bounding box + distancia Haversine + orden por distancia.
-- [ ] Respuesta incluye distancia aproximada.
+- [x] `GET /api/services/nearby/search?nearLat=&nearLng=&radiusKm=`.
+- [x] Filtro por coordenadas + distancia Haversine + orden por distancia.
+- [x] Respuesta incluye `distanceKm` aproximada.
 **Cierre**: endpoint usable por frontend.
 
 ### Lote B4 — Frontend (input ubicación + filtro cercano)
 - [ ] Input de ubicación con sugerencias (Google Places autocomplete simple).
 - [ ] Integrar en crear/editar servicio.
-- [ ] Filtro “cerca de” + radio en listado.
-- [ ] Mostrar distancia en `ServiceCard`.
+- [x] Filtro “cerca de” + radio en listado (MVP con geolocalización del navegador).
+- [x] Mostrar distancia en `ServiceCard`.
 **Cierre**: experiencia de búsqueda cercana operativa.
 
 ### Lote B5 — Tests dirigidos (sin E2E)
@@ -155,10 +155,10 @@ Ordenar la implementación restante para:
 
 ## 3) Siguiente acción inmediata (lo que toca ahora)
 
-### ▶ Arrancar por **Lote A1** (baseline + clasificación)
-1. Ejecutar lint/typecheck web+api y guardar snapshot de estado.
-2. Partir warnings en lotes prácticos (pequeños y cerrables).
-3. Empezar por lote de mayor riesgo funcional (no cosmético).
+### ▶ Siguiente foco recomendado: **Lote B2** (Google Geocoding/Places en alta-edición)
+1. Añadir servicio backend de geocoding desacoplado (provider Google con fallback controlado).
+2. Geocodificar en create/update de servicios y persistir coordenadas + `formattedAddress`.
+3. Cubrir con tests unit/integration dirigidos (sin E2E).
 
 ---
 

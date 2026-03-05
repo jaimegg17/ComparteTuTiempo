@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { Container, Typography, Box, CircularProgress, Button, Tabs, Tab } from '@mui/material';
+import { Typography, Box, CircularProgress, Button, Tabs, Tab } from '@mui/material';
 import { Layout } from '@/components/Layout';
 import { ServiceCard } from '@/components/ServiceCard';
 import { FilterSidebar } from '@/components/filters/FilterSidebar';
@@ -22,6 +22,11 @@ interface Service {
   status: string;
   userId: string;
   imageUrl?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  formattedAddress?: string | null;
+  placeId?: string | null;
+  distanceKm?: number | null;
 }
 
 export default function ServicesPage() {
@@ -40,6 +45,11 @@ export default function ServicesPage() {
   const [location, setLocation] = useState('');
   const [durationRange, setDurationRange] = useState<number[]>([0, 8]);
   const [selectedType, setSelectedType] = useState<string>('');
+  const [nearLat, setNearLat] = useState<number | null>(null);
+  const [nearLng, setNearLng] = useState<number | null>(null);
+  const [radiusKm, setRadiusKm] = useState<number>(10);
+  const [useNearby, setUseNearby] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
 
   // Estados de colapso para cada filtro
   const [openCategories, setOpenCategories] = useState(false);
@@ -80,6 +90,10 @@ export default function ServicesPage() {
     location?: string;
     durationRange?: number[];
     selectedType?: string;
+    nearLat?: number | null;
+    nearLng?: number | null;
+    radiusKm?: number;
+    useNearby?: boolean;
   };
 
   const fetchServices = async (overrides?: FilterOverrides) => {
@@ -88,6 +102,10 @@ export default function ServicesPage() {
     const loc = overrides?.location ?? location;
     const dur = overrides?.durationRange ?? durationRange;
     const typ = overrides?.selectedType ?? selectedType;
+    const lat = overrides?.nearLat ?? nearLat;
+    const lng = overrides?.nearLng ?? nearLng;
+    const radius = overrides?.radiusKm ?? radiusKm;
+    const nearbyEnabled = overrides?.useNearby ?? useNearby;
 
     await handleAsyncOperation(async () => {
       const params = new URLSearchParams();
@@ -97,11 +115,19 @@ export default function ServicesPage() {
       if (dur[0] > 0) params.append('minPrice', (dur[0] * 60).toString());
       if (dur[1] < 8) params.append('maxPrice', (dur[1] * 60).toString());
       if (typ) params.append('type', typ);
+      if (nearbyEnabled && lat !== null && lng !== null) {
+        params.append('nearLat', lat.toString());
+        params.append('nearLng', lng.toString());
+        params.append('radiusKm', radius.toString());
+      }
 
-      let url = `http://localhost:3001/api/services?${params.toString()}`;
+      const endpoint = nearbyEnabled && lat !== null && lng !== null
+        ? '/api/services/nearby/search'
+        : '/api/services';
+      let url = `http://localhost:3001${endpoint}?${params.toString()}`;
       if (activeTab === 1 && user?.sub && accessToken) {
         params.append('userId', user.sub);
-        url = `http://localhost:3001/api/services?${params.toString()}`;
+        url = `http://localhost:3001${endpoint}?${params.toString()}`;
       }
 
       const response = await fetch(url, {
@@ -141,14 +167,59 @@ export default function ServicesPage() {
       location: '',
       durationRange: [0, 8] as number[],
       selectedType: '',
+      nearLat: null,
+      nearLng: null,
+      radiusKm: 10,
+      useNearby: false,
     };
     setSearchTerm('');
     setSelectedCategory('');
     setLocation('');
     setDurationRange([0, 8]);
     setSelectedType('');
+    setNearLat(null);
+    setNearLng(null);
+    setRadiusKm(10);
+    setUseNearby(false);
     // Fetch with empty filters immediately so results update on first click
     fetchServices(emptyFilters);
+  };
+
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) {
+      return;
+    }
+
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        setNearLat(lat);
+        setNearLng(lng);
+        setUseNearby(true);
+        setIsLocating(false);
+        fetchServices({ nearLat: lat, nearLng: lng, useNearby: true, radiusKm });
+      },
+      () => {
+        setIsLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  const handleDisableNearby = () => {
+    setNearLat(null);
+    setNearLng(null);
+    setUseNearby(false);
+    fetchServices({ nearLat: null, nearLng: null, useNearby: false });
+  };
+
+  const handleRadiusChange = (newRadius: number) => {
+    setRadiusKm(newRadius);
+    if (useNearby && nearLat !== null && nearLng !== null) {
+      fetchServices({ radiusKm: newRadius, nearLat, nearLng, useNearby: true });
+    }
   };
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
@@ -282,6 +353,56 @@ export default function ServicesPage() {
                   }}
                 >
                   + {t("services.create")}
+                </Button>
+              </Box>
+            </Box>
+
+            <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
+              <Button
+                variant={useNearby ? 'contained' : 'outlined'}
+                size="small"
+                onClick={handleUseMyLocation}
+                disabled={isLocating}
+                sx={{ textTransform: 'none' }}
+              >
+                {isLocating ? 'Obteniendo ubicación…' : 'Usar mi ubicación'}
+              </Button>
+              <Button
+                variant="text"
+                size="small"
+                onClick={handleDisableNearby}
+                disabled={!useNearby}
+                sx={{ textTransform: 'none' }}
+              >
+                Quitar cercanía
+              </Button>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Radio:
+                </Typography>
+                <Button
+                  size="small"
+                  variant={radiusKm === 5 ? 'contained' : 'outlined'}
+                  onClick={() => handleRadiusChange(5)}
+                  sx={{ minWidth: 56 }}
+                >
+                  5 km
+                </Button>
+                <Button
+                  size="small"
+                  variant={radiusKm === 10 ? 'contained' : 'outlined'}
+                  onClick={() => handleRadiusChange(10)}
+                  sx={{ minWidth: 56 }}
+                >
+                  10 km
+                </Button>
+                <Button
+                  size="small"
+                  variant={radiusKm === 25 ? 'contained' : 'outlined'}
+                  onClick={() => handleRadiusChange(25)}
+                  sx={{ minWidth: 56 }}
+                >
+                  25 km
                 </Button>
               </Box>
             </Box>

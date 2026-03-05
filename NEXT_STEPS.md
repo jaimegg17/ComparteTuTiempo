@@ -40,6 +40,7 @@
 35. ✅ Lote ratings/services (sin romper): warning debt casi cerrada y validación completa (`typecheck`/`lint`)
 36. ✅ Cierre técnico API: eliminación del último bloque de warnings (0 warnings en lint API)
 37. ✅ Inicio Fase 2 (Google Maps backend base): esquema de servicio con coordenadas/dirección + filtros nearby y endpoint `GET /services/nearby/search`
+38. ✅ Fase 2 frontend nearby (MVP): filtro por cercanía con geolocalización del navegador, radio configurable (5/10/25 km) y distancia visible en `ServiceCard`
 
 ---
 
@@ -71,8 +72,8 @@
 
 1. Modelo de datos de servicio con coordenadas (`latitude`, `longitude`, `placeId`, `formattedAddress`)
 2. Integración Google Places/Geocoding en alta/edición de servicios
-3. Endpoint backend `/api/services/nearby` con radio (km) y orden por distancia
-4. Filtro “cerca de” en frontend + mostrar distancia en tarjeta
+3. ✅ Endpoint backend `/api/services/nearby/search` con radio (km) y orden por distancia
+4. ✅ Filtro “cerca de” en frontend + mostrar distancia en tarjeta (MVP sin autocomplete aún)
 5. Tests unit/integration de geocoding + nearby (sin E2E)
 
 ---
