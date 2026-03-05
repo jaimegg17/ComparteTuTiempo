@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query, UseGuards, Request, Param, ParseIntPipe, Put, Delete, HttpCode, HttpStatus, UnauthorizedException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, UseGuards, Request, Param, ParseIntPipe, Put, Delete, HttpCode, HttpStatus, UnauthorizedException, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { IsString, IsNumber, IsOptional, IsEnum, MinLength, Min, IsUrl } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -36,6 +36,24 @@ export class CreateServiceDto {
   @IsOptional()
   @IsString()
   location?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  latitude?: number | null;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  longitude?: number | null;
+
+  @IsOptional()
+  @IsString()
+  formattedAddress?: string;
+
+  @IsOptional()
+  @IsString()
+  placeId?: string;
 
   @IsOptional()
   @IsString()
@@ -82,6 +100,24 @@ export class UpdateServiceDto {
   @IsOptional()
   @IsString()
   location?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  latitude?: number | null;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  longitude?: number | null;
+
+  @IsOptional()
+  @IsString()
+  formattedAddress?: string | null;
+
+  @IsOptional()
+  @IsString()
+  placeId?: string | null;
 
   @IsOptional()
   @IsString()
@@ -144,6 +180,22 @@ export class ServiceListQueryDto {
   @IsNumber()
   @Min(0)
   maxPrice?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  nearLat?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  nearLng?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0.1)
+  radiusKm?: number;
   
   @IsOptional()
   @Type(() => Number)
@@ -204,6 +256,10 @@ export class ServicesController {
       detailedDescription: body.detailedDescription,
       duration: body.duration,
       location: body.location,
+      latitude: body.latitude,
+      longitude: body.longitude,
+      formattedAddress: body.formattedAddress,
+      placeId: body.placeId,
       availability: body.availability,
       category: body.category,
       type: body.type,
@@ -256,6 +312,9 @@ export class ServicesController {
       status: query.status,
       minPrice: query.minPrice,
       maxPrice: query.maxPrice,
+      nearLat: query.nearLat,
+      nearLng: query.nearLng,
+      radiusKm: query.radiusKm,
       userId: query.userId, // Filtrar por usuario si se proporciona
     };
 
@@ -267,6 +326,43 @@ export class ServicesController {
     const result = await this.listServicesUseCase.execute({ query: queryWithDefaults });
     return {
       message: 'Servicios obtenidos exitosamente',
+      services: result.services,
+      total: result.total,
+      page: result.page,
+      pageSize: result.pageSize,
+      totalPages: result.totalPages,
+    };
+  }
+
+  @Get('nearby/search')
+  @ApiOperation({ summary: 'Listar servicios cercanos a una coordenada' })
+  @ApiResponse({ status: 200, description: 'Servicios cercanos obtenidos' })
+  async listNearbyServices(
+    @Query() query: ServiceListQueryDto,
+  ) {
+    if (query.nearLat === undefined || query.nearLng === undefined) {
+      throw new BadRequestException('nearLat y nearLng son requeridos para búsqueda cercana');
+    }
+
+    const queryWithDefaults = {
+      page: query.page || 1,
+      pageSize: query.pageSize || 20,
+      q: query.q,
+      category: query.category,
+      location: query.location,
+      type: query.type,
+      status: query.status,
+      minPrice: query.minPrice,
+      maxPrice: query.maxPrice,
+      nearLat: query.nearLat,
+      nearLng: query.nearLng,
+      radiusKm: query.radiusKm || 10,
+      userId: query.userId,
+    };
+
+    const result = await this.listServicesUseCase.execute({ query: queryWithDefaults });
+    return {
+      message: 'Servicios cercanos obtenidos exitosamente',
       services: result.services,
       total: result.total,
       page: result.page,

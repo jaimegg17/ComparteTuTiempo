@@ -39,6 +39,7 @@
 34. ✅ Lote memberships/messages (sin romper): tipado en casos de uso, mappers, repositorios y contratos de entidad
 35. ✅ Lote ratings/services (sin romper): warning debt casi cerrada y validación completa (`typecheck`/`lint`)
 36. ✅ Cierre técnico API: eliminación del último bloque de warnings (0 warnings en lint API)
+37. ✅ Inicio Fase 2 (Google Maps backend base): esquema de servicio con coordenadas/dirección + filtros nearby y endpoint `GET /services/nearby/search`
 
 ---
 

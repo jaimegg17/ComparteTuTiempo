@@ -12,6 +12,10 @@ export interface ServiceCreateWithImage {
   detailedDescription?: string;
   duration: number;
   location?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  formattedAddress?: string;
+  placeId?: string;
   availability?: string;
   category: ServiceContract['category'];
   type: ServiceContract['type'];

@@ -45,6 +45,10 @@ model Service {
   detailedDescription String?      @db.Text // Long description for detail page
   duration           Int
   location           String?
+  latitude           Float?
+  longitude          Float?
+  formattedAddress   String?
+  placeId            String?
   availability       String?       // e.g., "morning", "afternoon", "evening", "flexible"
   category           ServiceCategory
   type               ServiceType
