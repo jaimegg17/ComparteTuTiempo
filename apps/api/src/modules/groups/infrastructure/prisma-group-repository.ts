@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../common/prisma/prisma.service';
 import { GroupEntity } from '../domain/group.entity';
 import { GroupRepositoryPort } from '../domain/group-repository.port';
@@ -9,7 +10,7 @@ import { GroupMapper } from './group.mapper';
 export class PrismaGroupRepository implements GroupRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(data: GroupCreate): Promise<GroupEntity> {
+  async create(data: GroupCreate & { creatorId: string }): Promise<GroupEntity> {
     const prismaGroup = await this.prisma.group.create({
       data: GroupMapper.toPrismaCreate(data),
     });
@@ -58,11 +59,11 @@ export class PrismaGroupRepository implements GroupRepositoryPort {
     pageSize: number;
     totalPages: number;
   }> {
-    const { page, pageSize, creatorId, type, isPrivate, q } = query as any;
+    const { page, pageSize, creatorId, type, isPrivate, q } = query;
     const skip = (page - 1) * pageSize;
 
     // Build where clause
-    const where: any = {};
+    const where: Prisma.GroupWhereInput = {};
     if (creatorId) where.creatorId = creatorId;
     if (type) where.type = type;
     if (typeof isPrivate === 'boolean') where.isPrivate = isPrivate;

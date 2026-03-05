@@ -46,7 +46,7 @@ export class CreateGroupUseCase {
       creatorId: userId,
     } as GroupCreate & { creatorId: string };
 
-    const group = await this.groupRepository.create(groupData as any);
+    const group = await this.groupRepository.create(groupData);
 
     return { group };
   }

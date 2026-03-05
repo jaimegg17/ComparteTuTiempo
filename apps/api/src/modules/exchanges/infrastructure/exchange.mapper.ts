@@ -1,10 +1,23 @@
 import { ExchangeEntity } from '../domain/exchange.entity';
-import { ExchangeStatus } from '@comparte-tu-tiempo/contracts';
+import { ExchangeStatus, ExchangeCreate, ExchangeUpdate } from '@comparte-tu-tiempo/contracts';
+import { Prisma } from '@prisma/client';
 
 type ExchangeStatusType = keyof typeof ExchangeStatus;
 
+interface ExchangePersistence {
+  id: number;
+  requestedById: string;
+  offeredById: string;
+  serviceId: number;
+  date: Date;
+  state: ExchangeStatusType;
+  exchangedTime: Prisma.Decimal | number | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export class ExchangeMapper {
-  static toDomain(prismaExchange: any): ExchangeEntity {
+  static toDomain(prismaExchange: ExchangePersistence): ExchangeEntity {
     return new ExchangeEntity(
       prismaExchange.id,
       prismaExchange.requestedById,
@@ -18,7 +31,7 @@ export class ExchangeMapper {
     );
   }
 
-  static toPrisma(exchange: ExchangeEntity): any {
+  static toPrisma(exchange: ExchangeEntity): Prisma.ExchangeUncheckedCreateInput {
     return {
       id: exchange.id,
       requestedById: exchange.requestedById,
@@ -32,19 +45,18 @@ export class ExchangeMapper {
     };
   }
 
-  static toPrismaCreate(data: any): any {
+  static toPrismaCreate(data: ExchangeCreate): Prisma.ExchangeUncheckedCreateInput {
     return {
       requestedById: data.requestedById,
       offeredById: data.offeredById,
       serviceId: data.serviceId,
       date: data.date,
-      state: data.state || ExchangeStatus.PENDING,
       exchangedTime: data.exchangedTime,
     };
   }
 
-  static toPrismaUpdate(data: any): any {
-    const updateData: any = {};
+  static toPrismaUpdate(data: ExchangeUpdate): Prisma.ExchangeUncheckedUpdateInput {
+    const updateData: Prisma.ExchangeUncheckedUpdateInput = {};
     
     if (data.date !== undefined) updateData.date = data.date;
     if (data.state !== undefined) updateData.state = data.state;

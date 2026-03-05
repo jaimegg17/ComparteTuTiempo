@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../common/prisma/prisma.service';
 import { ExchangeEntity } from '../domain/exchange.entity';
 import { ExchangeRepositoryPort } from '../domain/exchange-repository.port';
@@ -92,7 +93,7 @@ export class PrismaExchangeRepository implements ExchangeRepositoryPort {
     const skip = (page - 1) * pageSize;
 
     // Build where clause
-    const where: any = {};
+    const where: Prisma.ExchangeWhereInput = {};
     
     if (requestedById) {
       where.requestedById = requestedById;

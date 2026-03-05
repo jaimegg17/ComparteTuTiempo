@@ -1,19 +1,32 @@
 import { GroupEntity } from '../domain/group.entity';
+import type { GroupCreate } from '@comparte-tu-tiempo/contracts';
+
+interface GroupPersistence {
+  id: number;
+  name: string;
+  description: string | null;
+  communityId?: number;
+  type?: 'PUBLICO' | 'PRIVADO' | 'TRABAJO' | 'HOBBY';
+  isPrivate?: boolean;
+  creatorId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export class GroupMapper {
-  static toDomain(prismaGroup: any): GroupEntity {
+  static toDomain(prismaGroup: GroupPersistence): GroupEntity {
     return new GroupEntity(
       prismaGroup.id,
       prismaGroup.name,
-      prismaGroup.description,
-      prismaGroup.communityId,
+      prismaGroup.description ?? '',
+      prismaGroup.communityId ?? 0,
       prismaGroup.creatorId,
       prismaGroup.createdAt,
       prismaGroup.updatedAt,
     );
   }
 
-  static toPrisma(group: GroupEntity): any {
+  static toPrisma(group: GroupEntity): GroupPersistence {
     return {
       id: group.id,
       name: group.name,
@@ -25,10 +38,12 @@ export class GroupMapper {
     };
   }
 
-  static toPrismaCreate(data: any): any {
+  static toPrismaCreate(
+    data: GroupCreate & { creatorId: string },
+  ): Pick<GroupPersistence, 'name' | 'description' | 'type' | 'isPrivate' | 'creatorId'> {
     return {
       name: data.name,
-      description: data.description,
+      description: data.description ?? null,
       type: data.type,
       isPrivate: data.isPrivate,
       creatorId: data.creatorId,

@@ -2,7 +2,7 @@ import { GroupEntity } from './group.entity';
 import { GroupCreate, GroupUpdate, GroupListQuery } from '@comparte-tu-tiempo/contracts';
 
 export interface GroupRepositoryPort {
-  create(data: GroupCreate): Promise<GroupEntity>;
+  create(data: GroupCreate & { creatorId: string }): Promise<GroupEntity>;
   findById(id: number): Promise<GroupEntity | null>;
   findByCreatorId(creatorId: string): Promise<GroupEntity[]>;
   update(id: number, data: GroupUpdate): Promise<GroupEntity>;

@@ -32,7 +32,7 @@ describe('UpdateExchangeUseCase', () => {
         update: jest.fn(),
       },
       $transaction: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<PrismaService>;
 
     useCase = new UpdateExchangeUseCase(exchangeRepository, prismaService);
   });
@@ -276,7 +276,7 @@ describe('UpdateExchangeUseCase', () => {
         timeCredits: 200, // 200 minutes
       };
 
-      (prismaService.service.findUnique as jest.Mock).mockResolvedValue(mockService as any);
+      (prismaService.service.findUnique as jest.Mock).mockResolvedValue(mockService as unknown);
 
       // Mock transaction
       (prismaService.$transaction as jest.Mock).mockImplementation(async (callback) => {
@@ -338,7 +338,7 @@ describe('UpdateExchangeUseCase', () => {
         timeCredits: 60, // Only 60 minutes, needs 120
       };
 
-      (prismaService.service.findUnique as jest.Mock).mockResolvedValue(mockService as any);
+      (prismaService.service.findUnique as jest.Mock).mockResolvedValue(mockService as unknown);
 
       prismaService.$transaction.mockImplementation(async (callback) => {
         const txMock = {
@@ -347,7 +347,7 @@ describe('UpdateExchangeUseCase', () => {
             update: jest.fn(),
           },
         };
-        return (callback as any)(txMock);
+        return (callback as unknown as (tx: typeof txMock) => Promise<unknown>)(txMock);
       });
 
       await expect(
