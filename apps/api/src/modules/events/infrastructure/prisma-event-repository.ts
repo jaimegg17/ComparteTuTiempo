@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../common/prisma/prisma.service';
 import { EventEntity } from '../domain/event.entity';
 import { EventRepositoryPort } from '../domain/event-repository.port';
@@ -75,11 +76,11 @@ export class PrismaEventRepository implements EventRepositoryPort {
     pageSize: number;
     totalPages: number;
   }> {
-    const { page, pageSize, groupId, q, dateFrom, dateTo, location } = query as any;
+    const { page, pageSize, groupId, q, dateFrom, dateTo, location } = query;
     const skip = (page - 1) * pageSize;
 
     // Build where clause
-    const where: any = {};
+    const where: Prisma.EventWhereInput = {};
     if (groupId) where.groupId = groupId;
     if (q) where.title = { contains: q, mode: 'insensitive' };
     if (location) where.location = { contains: location, mode: 'insensitive' };

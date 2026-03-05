@@ -2,6 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import type { CommunityRepositoryPort } from '../domain/community-repository.port';
 import { CommunityListQuery } from '@comparte-tu-tiempo/contracts';
 import { COMMUNITY_REPOSITORY_TOKEN } from '../domain/tokens';
+import type { CommunityEntity } from '../domain/community.entity';
 
 export interface ListCommunitiesRequest {
   query: CommunityListQuery;
@@ -9,7 +10,7 @@ export interface ListCommunitiesRequest {
 
 export interface ListCommunitiesResponse {
   communities: {
-    communities: any[];
+    communities: CommunityEntity[];
     total: number;
     page: number;
     pageSize: number;

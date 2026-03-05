@@ -31,9 +31,10 @@
 26. ✅ Hardening users: request autenticada tipada en controladores `users` (legacy + presentation), helper unificado de auth y test de regresión para acceso sin usuario
 27. ✅ Hardening services/ratings: eliminación de `req:any` en endpoints protegidos, helper auth unificado y tests de regresión de no autenticado
 28. ✅ Hardening upload/auth: eliminación de `req:any` en `upload.controller` y controladores auth (`auth0`, `auth/presentation`, `auth`), con validación y tests dirigidos
-29. ✅ Limpieza técnica de warnings (lote tests/auth): refactor de casts `any` en specs de `users` y `upload` + bajada de warnings API hasta 101
+29. ✅ Limpieza técnica de warnings (lote tests/auth): refactor de casts `any` en specs de `users` y `upload` + bajada de warnings API hasta 88
 30. ✅ Hardening auth/common: tipado fuerte en `auth0.strategy`, `jwt-auth.guard`, `user-upsert.interceptor`, `get-me.use-case` y `auth0.controller` + validación completa (`typecheck`/`lint`)
 31. ✅ Lote warnings infra/auth (sin romper): tipado en `cloudinary.service`, `http-upload-exception.filter`, `sign-in.use-case` y `sign-up.use-case`
+32. ✅ Lote communities/events (sin romper): eliminación de `any` en list use-cases, mappers y repositorios Prisma con validación completa
 
 ---
 

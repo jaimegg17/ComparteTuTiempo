@@ -1,7 +1,18 @@
 import { CommunityEntity } from '../domain/community.entity';
+import type { CommunityCreate } from '@comparte-tu-tiempo/contracts';
+
+interface CommunityPersistence {
+  id: number;
+  name: string;
+  description: string | null;
+  isPrivate: boolean;
+  creatorId: string;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
 
 export class CommunityMapper {
-  static toDomain(prismaCommunity: any): CommunityEntity {
+  static toDomain(prismaCommunity: CommunityPersistence): CommunityEntity {
     try {
       return new CommunityEntity(
         prismaCommunity.id,
@@ -18,7 +29,7 @@ export class CommunityMapper {
     }
   }
 
-  static toPrisma(community: CommunityEntity): any {
+  static toPrisma(community: CommunityEntity): CommunityPersistence {
     return {
       id: community.id,
       name: community.name,
@@ -30,7 +41,7 @@ export class CommunityMapper {
     };
   }
 
-  static toPrismaCreate(data: any): any {
+  static toPrismaCreate(data: CommunityCreate): Pick<CommunityPersistence, 'name' | 'description' | 'isPrivate' | 'creatorId'> {
     return {
       name: data.name,
       description: data.description,

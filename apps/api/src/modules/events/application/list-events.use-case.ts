@@ -2,6 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import type { EventRepositoryPort } from '../domain/event-repository.port';
 import { EventListQuery } from '@comparte-tu-tiempo/contracts';
 import { EVENT_REPOSITORY_TOKEN } from '../domain/tokens';
+import type { EventEntity } from '../domain/event.entity';
 
 export interface ListEventsRequest {
   query: EventListQuery;
@@ -9,7 +10,7 @@ export interface ListEventsRequest {
 
 export interface ListEventsResponse {
   events: {
-    events: any[];
+    events: EventEntity[];
     total: number;
     page: number;
     pageSize: number;

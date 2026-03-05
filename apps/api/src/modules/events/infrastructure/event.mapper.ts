@@ -1,21 +1,36 @@
 import { EventEntity } from '../domain/event.entity';
+import type { EventCreate } from '@comparte-tu-tiempo/contracts';
+import { Prisma } from '@prisma/client';
+
+interface EventPersistence {
+  id: number;
+  title?: string;
+  description?: string | null;
+  date: Date;
+  location?: string | null;
+  groupId: number;
+  communityId?: number;
+  creatorId?: string;
+  createdAt: Date;
+  updatedAt?: Date;
+}
 
 export class EventMapper {
-  static toDomain(prismaEvent: any): EventEntity {
+  static toDomain(prismaEvent: EventPersistence): EventEntity {
     return new EventEntity(
       prismaEvent.id,
-      prismaEvent.title,
-      prismaEvent.description,
+      prismaEvent.title ?? '',
+      prismaEvent.description ?? '',
       prismaEvent.date,
-      prismaEvent.location,
+      prismaEvent.location ?? null,
       prismaEvent.groupId ?? prismaEvent.communityId,
-      prismaEvent.creatorId,
+      prismaEvent.creatorId ?? '',
       prismaEvent.createdAt,
-      prismaEvent.updatedAt,
+      prismaEvent.updatedAt ?? prismaEvent.createdAt,
     );
   }
 
-  static toPrisma(event: EventEntity): any {
+  static toPrisma(event: EventEntity): Prisma.EventUncheckedCreateInput {
     return {
       id: event.id,
       title: event.title,
@@ -23,20 +38,17 @@ export class EventMapper {
       date: event.date,
       location: event.location,
       groupId: event.communityId,
-      creatorId: event.creatorId,
       createdAt: event.createdAt,
-      updatedAt: event.updatedAt,
     };
   }
 
-  static toPrismaCreate(data: any): any {
+  static toPrismaCreate(data: EventCreate): Prisma.EventUncheckedCreateInput {
     return {
       title: data.title,
-      description: data.description,
+      description: data.description ?? null,
       date: data.date,
-      location: data.location,
+      location: data.location ?? null,
       groupId: data.groupId,
-      creatorId: data.creatorId,
     };
   }
 }

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../common/prisma/prisma.service';
 import { CommunityEntity } from '../domain/community.entity';
 import { CommunityRepositoryPort } from '../domain/community-repository.port';
@@ -70,7 +71,7 @@ export class PrismaCommunityRepository implements CommunityRepositoryPort {
       const skip = (page - 1) * pageSize;
 
       // Build where clause
-      const where: any = {};
+      const where: Prisma.CommunityWhereInput = {};
       if (creatorId) where.creatorId = creatorId;
       if (isPrivate !== undefined) where.isPrivate = isPrivate;
 
