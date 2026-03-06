@@ -1,4 +1,4 @@
-import { UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { ServicesController } from './services.controller';
 import type { PrismaService } from '@/common/prisma/prisma.service';
 import type { CreateServiceUseCase } from '../application/create-service.use-case';
@@ -114,5 +114,39 @@ describe('ServicesController - getService averageRating', () => {
         {},
       ),
     ).rejects.toThrow(UnauthorizedException);
+  });
+
+  it('lanza BadRequestException en nearby/search si faltan coordenadas', async () => {
+    await expect(
+      controller.listNearbyServices({
+        page: 1,
+        pageSize: 20,
+      }),
+    ).rejects.toThrow(BadRequestException);
+  });
+
+  it('usa radiusKm por defecto (10) en nearby/search', async () => {
+    listServicesUseCase.execute.mockResolvedValue({
+      services: [],
+      total: 0,
+      page: 1,
+      pageSize: 20,
+      totalPages: 0,
+    });
+
+    await controller.listNearbyServices({
+      nearLat: 40.4168,
+      nearLng: -3.7038,
+      page: 1,
+      pageSize: 20,
+    });
+
+    expect(listServicesUseCase.execute).toHaveBeenCalledWith({
+      query: expect.objectContaining({
+        nearLat: 40.4168,
+        nearLng: -3.7038,
+        radiusKm: 10,
+      }),
+    });
   });
 });

@@ -83,4 +83,65 @@ describe('CreateServiceUseCase', () => {
       'auth0|u1',
     );
   });
+
+  it('no geocodifica cuando ya llegan coordenadas y metadatos completos', async () => {
+    serviceRepository.create.mockResolvedValue(buildService({ id: 21 }));
+
+    await useCase.execute({
+      userId: 'auth0|u1',
+      data: {
+        title: 'Reparación portátil',
+        description: 'Ayudo a reparar portátiles y optimizar su rendimiento general',
+        duration: 1.5,
+        location: 'Valencia',
+        latitude: 39.4699,
+        longitude: -0.3763,
+        formattedAddress: 'Valencia, España',
+        placeId: 'already-set-place',
+        category: 'TECNOLOGIA',
+        type: 'PRESENCIAL',
+        price: 12,
+      },
+    });
+
+    expect(googleMapsService.geocodeAddress).not.toHaveBeenCalled();
+    expect(serviceRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        latitude: 39.4699,
+        longitude: -0.3763,
+        formattedAddress: 'Valencia, España',
+        placeId: 'already-set-place',
+      }),
+      'auth0|u1',
+    );
+  });
+
+  it('mantiene creación aunque geocoding no devuelva resultado', async () => {
+    serviceRepository.create.mockResolvedValue(buildService({ id: 22 }));
+    googleMapsService.geocodeAddress.mockResolvedValue(null);
+
+    await useCase.execute({
+      userId: 'auth0|u1',
+      data: {
+        title: 'Clases de francés',
+        description: 'Clases personalizadas para mejorar conversación y gramática',
+        duration: 2,
+        location: 'Ubicación desconocida',
+        category: 'EDUCACION',
+        type: 'VIRTUAL',
+        price: 15,
+      },
+    });
+
+    expect(googleMapsService.geocodeAddress).toHaveBeenCalledWith('Ubicación desconocida');
+    expect(serviceRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        location: 'Ubicación desconocida',
+        title: 'Clases de francés',
+        category: 'EDUCACION',
+        type: 'VIRTUAL',
+      }),
+      'auth0|u1',
+    );
+  });
 });

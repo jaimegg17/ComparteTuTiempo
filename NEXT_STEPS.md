@@ -45,6 +45,7 @@
 40. ✅ Fase 2 frontend create (B4 parcial): integración de Google Places Autocomplete en creación de servicios + envío de `latitude/longitude/formattedAddress/placeId`
 41. ✅ Fase 2 frontend edit (B4): nueva página de edición de servicios con Places Autocomplete + actualización de metadatos geográficos
 42. ✅ Hardening UX/config Maps: aviso visible cuando falta `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` + `apps/web/env.example` documentado
+43. ✅ Tests dirigidos backend (geocoding + nearby): cobertura reforzada en create/update use-cases y controller nearby
 
 ---
 
@@ -79,7 +80,7 @@
 3. ✅ Endpoint backend `/api/services/nearby/search` con radio (km) y orden por distancia
 4. ✅ Filtro “cerca de” en frontend + mostrar distancia en tarjeta (MVP)
 5. ⏳ Tests unit/integration de geocoding + nearby (sin E2E) — backend cubierto, falta reforzar parte frontend
-6. ⏳ Preparar test UI dirigido del flujo create/edit con geolocalización (sin E2E)
+6. ⏳ Preparar test UI dirigido del flujo create/edit con geolocalización (sin E2E, pendiente infraestructura de test en web)
 
 ---
 

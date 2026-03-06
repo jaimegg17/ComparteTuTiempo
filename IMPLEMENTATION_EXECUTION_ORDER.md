@@ -115,9 +115,9 @@ Ordenar la implementación restante para:
 **Cierre**: experiencia de búsqueda cercana operativa.
 
 ### Lote B5 — Tests dirigidos (sin E2E)
-- [ ] Unit tests de cálculo de distancia y validadores.
-- [ ] Integration tests de `/services/nearby`.
-- [ ] Test de componente crítico de ubicación.
+- [x] Unit tests de geocoding/create/update reforzados.
+- [x] Cobertura de controller para `/services/nearby/search` (validación + defaults).
+- [ ] Test de componente crítico de ubicación (pendiente setup de test runner frontend).
 **Cierre**: cobertura del flujo de negocio principal.
 
 ---
