@@ -30,6 +30,10 @@ export interface Service {
   price: number;
   duration: number;
   location: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  formattedAddress?: string | null;
+  placeId?: string | null;
   availability?: string;
   category: string;
   type: string;
@@ -48,4 +52,3 @@ export interface Service {
     exchanges: number;
   };
 }
-

@@ -143,6 +143,15 @@ export default function ServiceDetailPage() {
           >
             ← Back to services
           </Button>
+          {isOwnService && (
+            <Button
+              onClick={() => router.push(`/services/edit/${service.id}`)}
+              variant="outlined"
+              sx={{ mb: 3, ml: 2, textTransform: 'none' }}
+            >
+              Editar servicio
+            </Button>
+          )}
 
           <Paper sx={{ overflow: 'hidden', mb: 3 }}>
             <Box sx={{ 
