@@ -149,4 +149,62 @@ describe('ServicesController - getService averageRating', () => {
       }),
     });
   });
+
+  it('lanza BadRequestException en nearby/search si falta nearLng', async () => {
+    await expect(
+      controller.listNearbyServices({
+        nearLat: 40.4168,
+        page: 1,
+        pageSize: 20,
+      }),
+    ).rejects.toThrow(BadRequestException);
+  });
+
+  it('respeta radiusKm y filtros enviados en nearby/search', async () => {
+    listServicesUseCase.execute.mockResolvedValue({
+      services: [
+        { id: 1, title: 'Servicio cercano', distanceKm: 3.2 },
+      ],
+      total: 1,
+      page: 2,
+      pageSize: 5,
+      totalPages: 1,
+    });
+
+    const result = await controller.listNearbyServices({
+      nearLat: 40.4168,
+      nearLng: -3.7038,
+      radiusKm: 25,
+      page: 2,
+      pageSize: 5,
+      category: 'EDUCACION',
+      type: 'PRESENCIAL',
+      q: 'idiomas',
+      minPrice: 10,
+      maxPrice: 30,
+      location: 'Madrid',
+    });
+
+    expect(listServicesUseCase.execute).toHaveBeenCalledWith({
+      query: expect.objectContaining({
+        nearLat: 40.4168,
+        nearLng: -3.7038,
+        radiusKm: 25,
+        page: 2,
+        pageSize: 5,
+        category: 'EDUCACION',
+        type: 'PRESENCIAL',
+        q: 'idiomas',
+        minPrice: 10,
+        maxPrice: 30,
+        location: 'Madrid',
+      }),
+    });
+
+    expect(result.message).toBe('Servicios cercanos obtenidos exitosamente');
+    expect(result.services).toHaveLength(1);
+    expect(result.total).toBe(1);
+    expect(result.page).toBe(2);
+    expect(result.pageSize).toBe(5);
+  });
 });
