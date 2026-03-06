@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
+import Script from 'next/script';
 import {
   Container,
   Box,
@@ -32,6 +33,10 @@ interface FormData {
   location: string;
   availability: string;
   imageUrl: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  formattedAddress?: string;
+  placeId?: string;
 }
 
 interface FormErrors {
@@ -65,7 +70,23 @@ export default function CreateServicePage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
+  const [mapsLoaded, setMapsLoaded] = useState(false);
+  const [locating, setLocating] = useState(false);
+  const locationInputRef = useRef<HTMLInputElement | null>(null);
   const uploadImage = useUploadImage();
+  const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+  type PlaceResult = {
+    name?: string;
+    formatted_address?: string;
+    place_id?: string;
+    geometry?: {
+      location?: {
+        lat: () => number;
+        lng: () => number;
+      };
+    };
+  };
 
   // Mapping functions for display
   const getCategoryDisplayName = (category: string) => {
@@ -106,9 +127,18 @@ export default function CreateServicePage() {
   const handleChange = (field: keyof FormData) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
+    const nextValue = e.target.value;
     setFormData(prev => ({
       ...prev,
-      [field]: e.target.value,
+      [field]: nextValue,
+      ...(field === 'location'
+        ? {
+            latitude: undefined,
+            longitude: undefined,
+            formattedAddress: undefined,
+            placeId: undefined,
+          }
+        : {}),
     }));
     
     // Clear error for this field
@@ -118,6 +148,83 @@ export default function CreateServicePage() {
         [field]: undefined,
       }));
     }
+  };
+
+  useEffect(() => {
+    if (!mapsLoaded || !locationInputRef.current || typeof window === 'undefined') return;
+
+    const googleObj = (
+      window as Window & {
+        google?: {
+          maps?: {
+            places?: {
+              Autocomplete: new (
+                input: HTMLInputElement,
+                options?: Record<string, unknown>,
+              ) => {
+                addListener: (
+                  eventName: string,
+                  callback: () => void,
+                ) => { remove: () => void } | void;
+                getPlace: () => PlaceResult;
+              };
+            };
+          };
+        };
+      }
+    ).google;
+
+    const AutocompleteCtor = googleObj?.maps?.places?.Autocomplete;
+    if (!AutocompleteCtor) return;
+
+    const autocomplete = new AutocompleteCtor(locationInputRef.current, {
+      fields: ['formatted_address', 'name', 'geometry', 'place_id'],
+    });
+
+    const listener = autocomplete.addListener('place_changed', () => {
+      const place = autocomplete.getPlace();
+      const lat = place.geometry?.location?.lat?.();
+      const lng = place.geometry?.location?.lng?.();
+      const bestAddress = place.formatted_address || place.name || '';
+
+      setFormData(prev => ({
+        ...prev,
+        location: bestAddress,
+        latitude: typeof lat === 'number' ? lat : undefined,
+        longitude: typeof lng === 'number' ? lng : undefined,
+        formattedAddress: place.formatted_address || bestAddress || undefined,
+        placeId: place.place_id || undefined,
+      }));
+    });
+
+    return () => {
+      if (listener && typeof listener.remove === 'function') listener.remove();
+    };
+  }, [mapsLoaded]);
+
+  const handleUseCurrentLocation = () => {
+    if (!navigator.geolocation) return;
+    setLocating(true);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        setFormData(prev => ({
+          ...prev,
+          location: prev.location || `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
+          latitude: lat,
+          longitude: lng,
+          formattedAddress: prev.formattedAddress,
+          placeId: prev.placeId,
+        }));
+        setLocating(false);
+      },
+      () => {
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
   };
 
   const validateForm = (): boolean => {
@@ -201,6 +308,10 @@ export default function CreateServicePage() {
           category: formData.category,
           type: formData.type,
           location: formData.location.trim(),
+          latitude: formData.latitude,
+          longitude: formData.longitude,
+          formattedAddress: formData.formattedAddress,
+          placeId: formData.placeId,
           availability: formData.availability || undefined,
           imageUrl: imageUrl || undefined,
           price: parseFloat(formData.duration) * 60, // Duration in minutes
@@ -243,6 +354,13 @@ export default function CreateServicePage() {
 
   return (
     <Layout>
+      {googleMapsApiKey && (
+        <Script
+          src={`https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&libraries=places`}
+          strategy="afterInteractive"
+          onLoad={() => setMapsLoaded(true)}
+        />
+      )}
       <Box sx={{ bgcolor: '#f5f5f5', minHeight: '100%', py: 4 }}>
         <Container maxWidth="md">
           <Button 
@@ -389,11 +507,27 @@ export default function CreateServicePage() {
                     placeholder={t("services.form.placeholders.location")}
                     value={formData.location}
                     onChange={handleChange('location')}
+                    inputRef={locationInputRef}
                     error={!!errors.location}
-                    helperText={errors.location}
+                    helperText={
+                      errors.location ||
+                      (googleMapsApiKey
+                        ? 'Puedes escribir o seleccionar una sugerencia de Google Places'
+                        : 'Añade una ubicación textual. Sin API key no hay sugerencias.')
+                    }
                     disabled={loading || success}
                     required
                   />
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
+                  <Button
+                    variant="text"
+                    onClick={handleUseCurrentLocation}
+                    disabled={loading || success || locating}
+                    sx={{ textTransform: 'none', px: 0 }}
+                  >
+                    {locating ? 'Obteniendo ubicación…' : 'Usar mi ubicación actual'}
+                  </Button>
                 </Box>
 
                 {/* Disponibilidad */}
@@ -450,4 +584,3 @@ export default function CreateServicePage() {
     </Layout>
   );
 }
-

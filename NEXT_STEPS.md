@@ -42,6 +42,7 @@
 37. ✅ Inicio Fase 2 (Google Maps backend base): esquema de servicio con coordenadas/dirección + filtros nearby y endpoint `GET /services/nearby/search`
 38. ✅ Fase 2 frontend nearby (MVP): filtro por cercanía con geolocalización del navegador, radio configurable (5/10/25 km) y distancia visible en `ServiceCard`
 39. ✅ Fase 2 backend geocoding (B2): integración Google Geocoding en create/update de servicios con fallback seguro si no hay API key y tests dirigidos
+40. ✅ Fase 2 frontend create (B4 parcial): integración de Google Places Autocomplete en creación de servicios + envío de `latitude/longitude/formattedAddress/placeId`
 
 ---
 
@@ -74,8 +75,9 @@
 1. Modelo de datos de servicio con coordenadas (`latitude`, `longitude`, `placeId`, `formattedAddress`)
 2. ✅ Integración Google Geocoding en alta/edición de servicios (backend, fallback sin bloqueo)
 3. ✅ Endpoint backend `/api/services/nearby/search` con radio (km) y orden por distancia
-4. ✅ Filtro “cerca de” en frontend + mostrar distancia en tarjeta (MVP sin autocomplete aún)
+4. ✅ Filtro “cerca de” en frontend + mostrar distancia en tarjeta (MVP)
 5. ⏳ Tests unit/integration de geocoding + nearby (sin E2E) — backend cubierto, falta reforzar parte frontend
+6. ⏳ Completar B4 en edición de servicio y estandarizar `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` en documentación frontend
 
 ---
 

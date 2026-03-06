@@ -108,8 +108,8 @@ Ordenar la implementación restante para:
 **Cierre**: endpoint usable por frontend.
 
 ### Lote B4 — Frontend (input ubicación + filtro cercano)
-- [ ] Input de ubicación con sugerencias (Google Places autocomplete simple).
-- [ ] Integrar en crear/editar servicio.
+- [x] Input de ubicación con sugerencias (Google Places autocomplete simple) en **crear servicio**.
+- [ ] Integrar en **editar servicio** (pendiente crear/normalizar flujo de edición).
 - [x] Filtro “cerca de” + radio en listado (MVP con geolocalización del navegador).
 - [x] Mostrar distancia en `ServiceCard`.
 **Cierre**: experiencia de búsqueda cercana operativa.
@@ -155,8 +155,8 @@ Ordenar la implementación restante para:
 
 ## 3) Siguiente acción inmediata (lo que toca ahora)
 
-### ▶ Siguiente foco recomendado: **Lote B4/B5** (cerrar flujo y pruebas)
-1. Integrar autocomplete de dirección (Google Places) en create/update frontend.
+### ▶ Siguiente foco recomendado: **cerrar edición + hardening UX**
+1. Añadir flujo de edición de servicio con ubicación georreferenciada (B4 pendiente).
 2. Añadir validación UX cuando no se pueda geocodificar dirección.
 3. Completar tests de integración del flujo nearby+geocoding (sin E2E).
 
