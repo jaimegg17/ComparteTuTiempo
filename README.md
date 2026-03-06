@@ -76,6 +76,18 @@ pnpm db:migrate
 pnpm db:seed
 ```
 
+### Variables de entorno (frontend + maps)
+```bash
+# API
+cp apps/api/env.example apps/api/.env
+
+# Web
+cp apps/web/env.example apps/web/.env.local
+```
+
+> Para autocompletado de ubicación (Google Places) en crear/editar servicios, configura:
+> `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` en `apps/web/.env.local`.
+
 ### Ejecución
 ```bash
 # Ejecutar todas las aplicaciones

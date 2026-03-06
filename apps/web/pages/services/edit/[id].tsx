@@ -360,6 +360,13 @@ export default function EditServicePage() {
               Actualiza los datos de tu servicio y su ubicación.
             </Typography>
 
+            {!googleMapsApiKey && (
+              <Alert severity="warning" sx={{ mb: 3 }}>
+                Google Places no está configurado en frontend (`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`).
+                Puedes editar el servicio igualmente, pero sin sugerencias de ubicación.
+              </Alert>
+            )}
+
             {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
             {success && <Alert severity="success" sx={{ mb: 3 }}>Servicio actualizado correctamente</Alert>}
 

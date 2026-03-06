@@ -156,9 +156,9 @@ Ordenar la implementación restante para:
 ## 3) Siguiente acción inmediata (lo que toca ahora)
 
 ### ▶ Siguiente foco recomendado: **hardening UX + tests dirigidos**
-1. Añadir validación UX cuando no se pueda geocodificar dirección.
+1. [x] Añadir validación UX cuando falte configuración de Google Maps en frontend.
 2. Completar tests de integración del flujo nearby+geocoding (sin E2E).
-3. Documentar setup frontend de Google Maps (`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`) para ejecución reproducible.
+3. [x] Documentar setup frontend de Google Maps (`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`) para ejecución reproducible.
 
 ---
 
