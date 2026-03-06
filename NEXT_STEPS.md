@@ -46,6 +46,7 @@
 41. ✅ Fase 2 frontend edit (B4): nueva página de edición de servicios con Places Autocomplete + actualización de metadatos geográficos
 42. ✅ Hardening UX/config Maps: aviso visible cuando falta `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` + `apps/web/env.example` documentado
 43. ✅ Tests dirigidos backend (geocoding + nearby): cobertura reforzada en create/update use-cases y controller nearby
+44. ✅ Auth P0.4.5: revisión de configuración Auth0 (audience/callback/env) y plantilla `apps/web/env.example` completada con variables Auth0
 
 ---
 

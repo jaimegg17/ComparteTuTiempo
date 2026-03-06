@@ -59,7 +59,7 @@ Ordenar la implementación restante para:
 ### Lote A3 — Auth mínima sólida (P0.4)
 - [ ] Decisión técnica explícita: mantener flujo principal con Auth0 y retirar restos legacy.
 - [x] P0.4.4 eliminar fallbacks `auth0|test-user-1`.
-- [ ] P0.4.5 revisar config Auth0 (audience, callbacks, env).
+- [x] P0.4.5 revisar config Auth0 (audience, callbacks, env).
 - [ ] Revisar si P0.4.1/4.2/4.3 (signin/signup local) siguen en alcance real; si no, marcarlos como “descartados por arquitectura Auth0”.
 **Tests**: integración de guards/autorización en endpoints críticos.
 **Cierre**: autenticación consistente, sin bypasses.

@@ -296,11 +296,16 @@ Nice-to-have y mejoras adicionales.
     - `apps/api/src/modules/groups/presentation/groups.controller.ts`
     - `apps/api/src/modules/exchanges/presentation/exchanges.controller.ts`
 
-- [ ] **P0.4.5** Verificar configuración de Auth0
+- [x] **P0.4.5** Verificar configuración de Auth0
   - Variables de entorno correctas
   - Callback URLs configuradas
   - Audiencia correcta
-  - **Archivo**: `.env` y configuración de Auth0
+  - Estado validado en entorno local:
+    - `AUTH0_AUDIENCE` consistente entre `apps/web/.env.local` y `apps/api/.env`
+    - `AUTH0_ISSUER_BASE_URL` (web) consistente con `AUTH0_DOMAIN` (api)
+    - `AUTH0_BASE_URL` (web) consistente con `CORS_ORIGIN` (api)
+    - login web solicita `audience` explícitamente (`apps/web/pages/api/auth/[...auth0].ts`)
+  - **Archivos**: `.env`, `apps/web/env.example`, endpoints auth web
 
 ---
 
