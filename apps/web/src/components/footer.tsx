@@ -2,6 +2,7 @@
 
 import { Box, Container, Typography, IconButton, Divider } from "@mui/material";
 import Link from "next/link";
+import type { ElementType } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Facebook, Twitter, Instagram, Linkedin } from "iconoir-react";
 
@@ -104,7 +105,7 @@ export function Footer() {
                         </Typography>
                       ) : (
                         <Typography
-                          component={Link as any}
+                          component={Link as ElementType}
                           href={item.href}
                           sx={{
                             color: "#D1D5DB",

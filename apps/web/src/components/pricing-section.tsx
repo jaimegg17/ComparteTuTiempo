@@ -108,7 +108,7 @@ export function PricingSection() {
         </div>
 
         <div className="text-center mt-12">
-          <p className="text-muted-foreground mb-4">Need a custom solution? We've got you covered.</p>
+          <p className="text-muted-foreground mb-4">Need a custom solution? We&apos;ve got you covered.</p>
           <Button variant="outline">Contact Sales</Button>
         </div>
       </div>

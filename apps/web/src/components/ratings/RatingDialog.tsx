@@ -139,7 +139,7 @@ export function RatingDialog({
         <Box sx={{ py: 2 }}>
           <Typography variant="body1" sx={{ mb: 2.5 }}>
             {isEditMode ? 'Actualiza tu valoración para' : '¿Cómo calificarías el servicio'}{' '}
-            <strong>"{serviceTitle}"</strong>?
+            <strong>&quot;{serviceTitle}&quot;</strong>?
           </Typography>
           
           {error && (
