@@ -1,6 +1,7 @@
 import React from 'react';
 import { Alert, AlertTitle, Box, Button, Collapse, IconButton } from '@mui/material';
 import { Close as CloseIcon, Refresh as RefreshIcon, Warning as WarningIcon, Error as ErrorIcon, Info as InfoIcon } from '@mui/icons-material';
+import type { SxProps, Theme } from '@mui/material/styles';
 
 export type AlertSeverity = 'error' | 'warning' | 'info' | 'success';
 
@@ -13,7 +14,7 @@ interface BeautifulAlertProps {
   retryText?: string;
   closable?: boolean;
   variant?: 'filled' | 'outlined' | 'standard';
-  sx?: any;
+  sx?: SxProps<Theme>;
 }
 
 const getIcon = (severity: AlertSeverity) => {

@@ -47,6 +47,14 @@ export function RatingDialog({
   const [error, setError] = useState<string | null>(null);
   const isEditMode = Boolean(ratingId);
   const isSubmitting = createRating.isPending || updateRating.isPending;
+  const getErrorMessage = (err: unknown, fallback: string) => {
+    if (!err || typeof err !== 'object') return fallback;
+    const parsedError = err as {
+      response?: { data?: { message?: string } };
+      message?: string;
+    };
+    return parsedError.response?.data?.message || parsedError.message || fallback;
+  };
 
   const handleSubmit = async () => {
     if (rating === 0) {
@@ -92,8 +100,8 @@ export function RatingDialog({
       onRatingSubmitted();
       handleClose();
       
-    } catch (err: any) {
-      const errorMessage = err?.response?.data?.message || err?.message || 'Error inesperado al enviar la valoración';
+    } catch (err: unknown) {
+      const errorMessage = getErrorMessage(err, 'Error inesperado al enviar la valoración');
       setError(errorMessage);
     }
   };

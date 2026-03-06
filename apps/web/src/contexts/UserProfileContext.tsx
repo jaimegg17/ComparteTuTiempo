@@ -1,14 +1,15 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import type { UserProfile } from '@/hooks/useUserProfile';
 
 interface UserProfileContextType {
-  userProfile: any;
+  userProfile: UserProfile | null;
   profileLoading: boolean;
   displayName: string;
   displayEmail: string;
   displayImage?: string;
-  updateUserProfile: (newProfile: Partial<any>) => void;
-  loadUserProfile: () => void;
+  updateUserProfile: (newProfile: Partial<UserProfile>) => void;
+  loadUserProfile: () => Promise<void>;
 }
 
 const UserProfileContext = createContext<UserProfileContextType | undefined>(undefined);

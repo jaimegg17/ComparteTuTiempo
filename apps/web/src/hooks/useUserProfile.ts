@@ -2,19 +2,19 @@ import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { useAuth } from './useAuth';
 
-interface UserProfile {
+export interface UserProfile {
   id: string;
   name: string;
   email: string;
-  imageUrl?: string;
-  bio?: string;
-  location?: string;
-  phoneNumber?: string;
-  skills?: string[];
-  dateOfBirth?: string;
-  gender?: string;
-  preferredLanguage?: string;
-  timeCredits?: number;
+  imageUrl?: string | null;
+  bio?: string | null;
+  location?: string | null;
+  phoneNumber?: string | null;
+  skills?: string[] | null;
+  dateOfBirth?: string | null;
+  gender?: string | null;
+  preferredLanguage?: string | null;
+  timeCredits?: number | null;
 }
 
 export const useUserProfile = () => {
