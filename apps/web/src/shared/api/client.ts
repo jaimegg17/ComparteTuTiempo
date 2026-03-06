@@ -1,5 +1,10 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
+interface ApiError extends Error {
+  status?: number;
+  response?: Response;
+}
+
 export class ApiClient {
   private baseUrl: string;
   private token?: string;
@@ -70,9 +75,9 @@ export class ApiClient {
           errorMessage = response.statusText || errorMessage;
         }
 
-        const error = new Error(errorMessage);
-        (error as any).status = response.status;
-        (error as any).response = response;
+        const error: ApiError = new Error(errorMessage);
+        error.status = response.status;
+        error.response = response;
         throw error;
       }
 
@@ -88,7 +93,7 @@ export class ApiClient {
     return this.request<T>(endpoint, { method: 'GET' });
   }
 
-  async post<T>(endpoint: string, data?: any, isFormData: boolean = false): Promise<T> {
+  async post<T>(endpoint: string, data?: unknown, isFormData: boolean = false): Promise<T> {
     // For FormData, we don't set Content-Type (browser will set it with boundary)
     // But we still need to pass the Authorization header
     const headers: Record<string, string> = {};
@@ -104,14 +109,18 @@ export class ApiClient {
       headers.Authorization = `Bearer ${this.token}`;
     }
 
+    const requestBody: BodyInit | undefined = isFormData
+      ? (data as BodyInit | undefined)
+      : (data ? JSON.stringify(data) : undefined);
+
     return this.request<T>(endpoint, {
       method: 'POST',
       headers,
-      body: isFormData ? data : (data ? JSON.stringify(data) : undefined),
+      body: requestBody,
     });
   }
 
-  async put<T>(endpoint: string, data?: any): Promise<T> {
+  async put<T>(endpoint: string, data?: unknown): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined,

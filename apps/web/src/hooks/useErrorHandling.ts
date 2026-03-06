@@ -88,22 +88,38 @@ export const ERROR_MESSAGES = {
 } as const;
 
 // Helper function to extract error message from API responses
-export function extractErrorMessage(error: any): string {
+interface ExtractableError {
+  message?: string;
+  error?: string;
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
+
+export function extractErrorMessage(error: unknown): string {
   if (typeof error === 'string') {
     return error;
   }
-  
-  if (error?.response?.data?.message) {
-    return error.response.data.message;
+
+  if (!error || typeof error !== 'object') {
+    return ERROR_MESSAGES.UNKNOWN_ERROR;
   }
-  
-  if (error?.message) {
-    return error.message;
+
+  const parsedError = error as ExtractableError;
+
+  if (parsedError.response?.data?.message) {
+    return parsedError.response.data.message;
   }
-  
-  if (error?.error) {
-    return error.error;
+
+  if (parsedError.message) {
+    return parsedError.message;
   }
-  
+
+  if (parsedError.error) {
+    return parsedError.error;
+  }
+
   return ERROR_MESSAGES.UNKNOWN_ERROR;
 }

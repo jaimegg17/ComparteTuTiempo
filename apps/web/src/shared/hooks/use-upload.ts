@@ -3,6 +3,11 @@ import { uploadApi } from '../api/upload';
 import { apiClient } from '../api/client';
 import { useAuth } from '@/hooks/useAuth';
 
+interface UploadError {
+  status?: number;
+  message?: string;
+}
+
 /**
  * Hook to upload an image
  * @returns Mutation object with uploadImage function
@@ -55,9 +60,15 @@ export const useUploadImage = () => {
         const result = await uploadApi.uploadImage(file);
         console.log('✅ Image upload successful');
         return result;
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const uploadError = (error ?? {}) as UploadError;
         // If we get a 401, the token might be expired
-        if (error.status === 401 || error.message?.includes('401') || error.message?.includes('Unauthorized') || error.message?.includes('Token inválido')) {
+        if (
+          uploadError.status === 401 ||
+          uploadError.message?.includes('401') ||
+          uploadError.message?.includes('Unauthorized') ||
+          uploadError.message?.includes('Token inválido')
+        ) {
           console.log('🔄 Token expired or invalid, trying to get a fresh one...');
           // Force a fresh token fetch (don't use cache)
           const freshToken = await getAccessToken(true); // forceRefresh = true

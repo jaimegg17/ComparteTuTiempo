@@ -1,6 +1,18 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getAccessToken, getSession } from '@auth0/nextjs-auth0';
 
+type SessionWithAccessToken = {
+  accessToken?: string;
+};
+
+type ErrorWithMeta = {
+  message?: string;
+  status?: number;
+  code?: string;
+  error?: string;
+  stack?: string;
+};
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     // First check if user has a session
@@ -16,7 +28,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('✅ Session found for user:', session.user.sub);
     console.log('🔍 Session keys:', Object.keys(session));
-    console.log('🔍 Session has accessToken?', !!(session as any).accessToken);
+    const sessionAccessToken = (session as SessionWithAccessToken).accessToken;
+    console.log('🔍 Session has accessToken?', !!sessionAccessToken);
 
     // Get AUTH0_AUDIENCE from environment
     const audience = process.env.AUTH0_AUDIENCE;
@@ -25,8 +38,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let accessToken: string | undefined;
     
     // First, check if access token is already in the session (from login)
-    if ((session as any).accessToken) {
-      accessToken = (session as any).accessToken;
+    if (sessionAccessToken) {
+      accessToken = sessionAccessToken;
       console.log('✅ Access token found in session');
     } else {
       // Try to get access token - if AUTH0_AUDIENCE is not set, this will return null
@@ -46,12 +59,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           console.warn('⚠️ getAccessToken returned null/undefined');
           console.warn('⚠️ This usually means the login did not request an access token with audience');
         }
-      } catch (tokenError: any) {
-        console.error('❌ getAccessToken error:', tokenError.message);
+      } catch (tokenError: unknown) {
+        const parsedTokenError = (tokenError ?? {}) as ErrorWithMeta;
+        console.error('❌ getAccessToken error:', parsedTokenError.message);
         console.error('Error details:', {
-          status: tokenError.status,
-          code: tokenError.code,
-          error: tokenError.error,
+          status: parsedTokenError.status,
+          code: parsedTokenError.code,
+          error: parsedTokenError.error,
         });
       }
     }
@@ -78,18 +92,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('✅ Access token obtained successfully, length:', accessToken.length);
     return res.status(200).json({ accessToken });
-  } catch (error: any) {
-    console.error('❌ Error getting access token:', error);
+  } catch (error: unknown) {
+    const parsedError = (error ?? {}) as ErrorWithMeta;
+    console.error('❌ Error getting access token:', parsedError);
     console.error('Error details:', {
-      message: error.message,
-      status: error.status,
-      code: error.code,
-      stack: error.stack?.substring(0, 500), // Limit stack trace
+      message: parsedError.message,
+      status: parsedError.status,
+      code: parsedError.code,
+      stack: parsedError.stack?.substring(0, 500), // Limit stack trace
     });
-    return res.status(error.status || 500).json({ 
-      error: error.message || 'Failed to get access token',
+    return res.status(parsedError.status || 500).json({ 
+      error: parsedError.message || 'Failed to get access token',
       message: 'Error al obtener el token de autenticación. Por favor, intenta iniciar sesión nuevamente.'
     });
   }
 }
-
