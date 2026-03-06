@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 
 export function LanguageSwitcher() {
-  const { changeLanguage, currentLanguage } = useTranslation();
+  const { changeLanguage } = useTranslation();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 

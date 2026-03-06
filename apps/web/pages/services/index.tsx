@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { Typography, Box, CircularProgress, Button, Tabs, Tab } from '@mui/material';
 import { Layout } from '@/components/Layout';
@@ -96,7 +96,7 @@ export default function ServicesPage() {
     useNearby?: boolean;
   };
 
-  const fetchServices = async (overrides?: FilterOverrides) => {
+  const fetchServices = useCallback(async (overrides?: FilterOverrides) => {
     const q = overrides?.searchTerm ?? searchTerm;
     const cat = overrides?.selectedCategory ?? selectedCategory;
     const loc = overrides?.location ?? location;
@@ -150,15 +150,25 @@ export default function ServicesPage() {
       setServices(filteredServices);
       setTotal(filteredServices.length);
     }, ERROR_MESSAGES.NETWORK_ERROR);
-  };
+  }, [
+    searchTerm,
+    selectedCategory,
+    location,
+    durationRange,
+    selectedType,
+    nearLat,
+    nearLng,
+    radiusKm,
+    useNearby,
+    handleAsyncOperation,
+    activeTab,
+    user?.sub,
+    accessToken,
+  ]);
 
   useEffect(() => {
     fetchServices();
-  }, []);
-
-  useEffect(() => {
-    fetchServices();
-  }, [activeTab]);
+  }, [fetchServices]);
 
   const handleClearFilters = () => {
     const emptyFilters = {

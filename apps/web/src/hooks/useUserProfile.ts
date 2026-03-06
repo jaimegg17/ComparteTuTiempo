@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { useAuth } from './useAuth';
 
@@ -18,12 +18,12 @@ interface UserProfile {
 }
 
 export const useUserProfile = () => {
-  const { user, isLoading } = useUser();
+  const { user } = useUser();
   const { accessToken, getAccessToken } = useAuth();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
 
-  const loadUserProfile = async () => {
+  const loadUserProfile = useCallback(async () => {
     if (!user?.sub) return;
 
     setProfileLoading(true);
@@ -57,13 +57,13 @@ export const useUserProfile = () => {
     } finally {
       setProfileLoading(false);
     }
-  };
+  }, [user?.sub, accessToken, getAccessToken]);
 
   useEffect(() => {
     if (user && accessToken && !profileLoading) {
       loadUserProfile();
     }
-  }, [user, accessToken]);
+  }, [user, accessToken, profileLoading, loadUserProfile]);
 
   const updateUserProfile = (newProfile: Partial<UserProfile>) => {
     console.log('🔄 Updating user profile context:', newProfile);

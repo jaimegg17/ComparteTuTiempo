@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Chip } from '@mui/material';
+import { Button } from '@mui/material';
 import { Star } from '@mui/icons-material';
 import { useTranslation } from '@/hooks/useTranslation';
 import { RatingDialog } from './RatingDialog';
@@ -19,6 +19,7 @@ export function RatingButton({
 }: RatingButtonProps) {
   const { t } = useTranslation();
   const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
+  void exchangeId;
 
   return (
     <>

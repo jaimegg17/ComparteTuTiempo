@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import {
   Box,
@@ -6,7 +6,6 @@ import {
   CircularProgress,
   Button,
   Paper,
-  Grid,
   Chip,
   Divider,
 } from '@mui/material';
@@ -17,6 +16,7 @@ import { ErrorAlert } from '@/components/ui/BeautifulAlert';
 import { useErrorHandling, ERROR_MESSAGES } from '@/hooks/useErrorHandling';
 import type { Exchange } from '@/types/exchange.types';
 import type { ChatUser } from '@/types/message.types';
+import type { ChipProps } from '@mui/material';
 
 export default function ExchangeDetailPage() {
   const router = useRouter();
@@ -27,7 +27,7 @@ export default function ExchangeDetailPage() {
   const [otherUser, setOtherUser] = useState<ChatUser | null>(null);
   const { error, loading, handleAsyncOperation, clearError } = useErrorHandling();
 
-  const fetchExchange = async () => {
+  const fetchExchange = useCallback(async () => {
     if (!id || !user) return;
 
     await handleAsyncOperation(async () => {
@@ -67,15 +67,14 @@ export default function ExchangeDetailPage() {
         imageUrl: otherUserData.imageUrl,
       });
     }, ERROR_MESSAGES.NETWORK_ERROR);
-  };
+  }, [id, user, handleAsyncOperation]);
 
   useEffect(() => {
     fetchExchange();
-  }, [id, user]);
+  }, [fetchExchange]);
 
-  const handleMessageSent = (message: any) => {
+  const handleMessageSent = () => {
     // Optional: Update exchange state or show notification
-    console.log('New message sent:', message);
   };
 
   if (loading) {
@@ -125,7 +124,7 @@ export default function ExchangeDetailPage() {
     );
   }
 
-  const getStateColor = (state: string) => {
+  const getStateColor = (state: string): ChipProps['color'] => {
     switch (state) {
       case 'PENDING': return 'warning';
       case 'CONFIRMED': return 'info';
@@ -171,7 +170,7 @@ export default function ExchangeDetailPage() {
                   </Typography>
                   <Chip 
                     label={exchange.state} 
-                    color={getStateColor(exchange.state) as any}
+                    color={getStateColor(exchange.state)}
                     size="small"
                   />
                 </Box>

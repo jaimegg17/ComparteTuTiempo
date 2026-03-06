@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import {
   Box,
@@ -11,6 +11,7 @@ import {
   Badge,
   Chip,
 } from '@mui/material';
+import type { ChipProps } from '@mui/material';
 import { Layout } from '@/components/Layout';
 import { ErrorAlert } from '@/components/ui/BeautifulAlert';
 import { useErrorHandling, ERROR_MESSAGES } from '@/hooks/useErrorHandling';
@@ -25,7 +26,7 @@ export default function ConversationsPage() {
   const { error, loading, handleAsyncOperation, clearError } = useErrorHandling();
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
 
-  const fetchConversations = async () => {
+  const fetchConversations = useCallback(async () => {
     if (!user) return;
 
     await handleAsyncOperation(async () => {
@@ -36,13 +37,13 @@ export default function ConversationsPage() {
       const data = await messagesApi.getConversations();
       setConversations(data.conversations || []);
     }, ERROR_MESSAGES.NETWORK_ERROR);
-  };
+  }, [user, getAccessToken, handleAsyncOperation]);
 
   useEffect(() => {
     if (!isLoading && user) {
       fetchConversations();
     }
-  }, [user, isLoading]);
+  }, [user, isLoading, fetchConversations]);
 
   const formatTimestamp = (value: string) => {
     const date = new Date(value);
@@ -50,7 +51,7 @@ export default function ConversationsPage() {
     return date.toLocaleString();
   };
 
-  const getStateColor = (state: string) => {
+  const getStateColor = (state: string): ChipProps['color'] => {
     switch (state) {
       case 'PENDING':
         return 'warning';
@@ -168,7 +169,7 @@ export default function ConversationsPage() {
                       <Chip
                         label={conversation.exchangeState}
                         size="small"
-                        color={getStateColor(conversation.exchangeState) as any}
+                        color={getStateColor(conversation.exchangeState)}
                       />
                     </Box>
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import {
-  Container,
   Box,
   Button,
   Paper,
@@ -33,6 +32,8 @@ export default function ServiceDetailPage() {
   const [requestLoading, setRequestLoading] = useState(false);
   const [requestSuccess, setRequestSuccess] = useState(false);
   const [requestError, setRequestError] = useState<string | null>(null);
+  const getErrorMessage = (err: unknown, fallback: string) =>
+    err instanceof Error ? err.message : fallback;
 
   useEffect(() => {
     if (!id) return;
@@ -50,9 +51,9 @@ export default function ServiceDetailPage() {
         
         const data = await response.json();
         setService(data.service);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Error fetching service:', err);
-        setError(err.message || 'Error al cargar el servicio');
+        setError(getErrorMessage(err, 'Error al cargar el servicio'));
       } finally {
         setLoading(false);
       }
@@ -100,9 +101,9 @@ export default function ServiceDetailPage() {
         router.push('/exchanges');
       }, 2000);
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error requesting service:', err);
-      setRequestError(err.message || 'Error al solicitar el servicio');
+      setRequestError(getErrorMessage(err, 'Error al solicitar el servicio'));
     } finally {
       setRequestLoading(false);
     }

@@ -6,10 +6,7 @@ import {
   IconButton,
   Typography,
   Avatar,
-  Divider,
   CircularProgress,
-  Alert,
-  Badge,
   Chip,
 } from '@mui/material';
 import { Send as SendIcon, Refresh as RefreshIcon } from '@mui/icons-material';
@@ -130,7 +127,7 @@ export function Chat({
   // Initial fetch
   useEffect(() => {
     fetchMessages(false).finally(() => setLoading(false));
-  }, [exchangeId]);
+  }, [fetchMessages]);
 
   // Polling for real-time updates
   useEffect(() => {

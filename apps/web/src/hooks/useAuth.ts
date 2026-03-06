@@ -1,12 +1,12 @@
 import { useUser } from '@auth0/nextjs-auth0/client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export const useAuth = () => {
   const { user, isLoading, error } = useUser();
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [tokenLoading, setTokenLoading] = useState(false);
 
-  const getAccessToken = async (forceRefresh = false) => {
+  const getAccessToken = useCallback(async (forceRefresh = false) => {
     if (!user) return null;
     
     // If we have a cached token and not forcing refresh, return it
@@ -69,13 +69,13 @@ export const useAuth = () => {
     } finally {
       setTokenLoading(false);
     }
-  };
+  }, [user, accessToken]);
 
   useEffect(() => {
     if (user && !accessToken) {
       getAccessToken();
     }
-  }, [user]);
+  }, [user, accessToken, getAccessToken]);
 
   return {
     user,

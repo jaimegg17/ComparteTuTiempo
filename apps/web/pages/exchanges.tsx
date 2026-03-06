@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import {
-  Container,
   Box,
   Typography,
   CircularProgress,
@@ -11,7 +10,7 @@ import {
 import { Layout } from '@/components/Layout';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { ExchangeCard, ExchangeFilters } from '@/components/exchanges';
-import type { Exchange, ExchangeState, ExchangesListResponse } from '@/types/exchange.types';
+import type { Exchange, ExchangeState } from '@/types/exchange.types';
 
 export default function ExchangesPage() {
   const router = useRouter();
@@ -26,7 +25,10 @@ export default function ExchangesPage() {
   const [activeTab, setActiveTab] = useState<'all' | 'received' | 'sent'>('all');
   const [activeState, setActiveState] = useState<ExchangeState | 'all'>('all');
 
-  const fetchExchanges = async () => {
+  const getErrorMessage = (err: unknown, fallback: string) =>
+    err instanceof Error ? err.message : fallback;
+
+  const fetchExchanges = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -70,19 +72,19 @@ export default function ExchangesPage() {
 
       const data = await response.json();
       setExchanges(data.exchanges || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching exchanges:', err);
-      setError(err.message || 'Error al cargar los intercambios');
+      setError(getErrorMessage(err, 'Error al cargar los intercambios'));
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, activeTab, activeState]);
 
   useEffect(() => {
     if (!userLoading && user) {
       fetchExchanges();
     }
-  }, [user, userLoading, activeTab, activeState]);
+  }, [user, userLoading, fetchExchanges]);
 
   const handleAction = async (id: number, newState: ExchangeState) => {
     if (!user) return;
@@ -107,18 +109,18 @@ export default function ExchangesPage() {
 
       // Refresh list
       await fetchExchanges();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error updating exchange:', err);
-      alert(err.message || 'Error al actualizar el intercambio');
+      alert(getErrorMessage(err, 'Error al actualizar el intercambio'));
     } finally {
       setActionLoading(false);
     }
   };
 
-  const handleRatingSubmitted = async () => {
+  const handleRatingSubmitted = useCallback(async () => {
     // Refresh exchanges to show updated data
     await fetchExchanges();
-  };
+  }, [fetchExchanges]);
 
   if (userLoading) {
     return (
@@ -212,4 +214,3 @@ export default function ExchangesPage() {
     </Layout>
   );
 }
-

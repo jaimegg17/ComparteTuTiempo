@@ -22,7 +22,7 @@ const STATES: Array<{ value: ExchangeState | 'all'; label: string }> = [
   { value: 'COMPLETED', label: 'Completados' },
 ];
 
-export function ExchangeFilters({ activeTab, onTabChange, activeState = 'all', onStateChange, counts }: ExchangeFiltersProps) {
+export function ExchangeFilters({ activeTab, onTabChange, activeState = 'all', onStateChange }: ExchangeFiltersProps) {
   return (
     <Box sx={{ mb: 3 }}>
       {/* Tab selector */}
@@ -65,4 +65,3 @@ export function ExchangeFilters({ activeTab, onTabChange, activeState = 'all', o
     </Box>
   );
 }
-
