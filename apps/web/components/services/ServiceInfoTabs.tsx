@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Box, Tabs, Tab } from '@mui/material';
+import { Box, Paper, Tab, Tabs } from '@mui/material';
 import { ServiceDetailsTab } from './ServiceDetailsTab';
-import { ServiceRatingsTab } from './ServiceRatingsTab';
 import { ServiceLocationTab } from './ServiceLocationTab';
+import { ServiceRatingsTab } from './ServiceRatingsTab';
 import type { Service } from '@/types/service.types';
 
 interface ServiceInfoTabsProps {
@@ -14,33 +14,48 @@ export function ServiceInfoTabs({ service }: ServiceInfoTabsProps) {
 
   return (
     <Box sx={{ flexGrow: 1, minHeight: 0 }}>
-      <Tabs 
-        value={currentTab} 
-        onChange={(_, newValue) => setCurrentTab(newValue)}
-        sx={{ 
-          borderBottom: 1, 
-          borderColor: 'divider',
-          mb: 2,
-          minHeight: 40,
-          '& .MuiTab-root': {
-            minHeight: 40,
-            textTransform: 'none',
-            fontSize: '14px',
-            fontWeight: 600,
-          }
-        }}
-      >
-        <Tab label="Detalles" />
-        <Tab label="Valoraciones" />
-        <Tab label="Ubicación" />
-      </Tabs>
+      <Paper variant="outlined" sx={{ p: 0.75, mb: 2.5, borderRadius: 3, bgcolor: 'grey.50' }}>
+        <Tabs
+          value={currentTab}
+          onChange={(_, newValue) => setCurrentTab(newValue)}
+          aria-label="Secciones de información del servicio"
+          variant="scrollable"
+          allowScrollButtonsMobile
+          sx={{
+            minHeight: 44,
+            '& .MuiTabs-indicator': { display: 'none' },
+            '& .MuiTab-root': {
+              minHeight: 40,
+              textTransform: 'none',
+              fontSize: '0.95rem',
+              fontWeight: 700,
+              borderRadius: 2,
+              mr: 0.5,
+            },
+            '& .Mui-selected': {
+              bgcolor: '#fff',
+              boxShadow: '0 8px 18px rgba(15, 23, 42, 0.06)',
+            },
+          }}
+        >
+          <Tab label="Detalles" />
+          <Tab label="Valoraciones" />
+          <Tab label="Ubicación" />
+        </Tabs>
+      </Paper>
 
-      <Box sx={{ overflow: 'auto', maxHeight: 400 }}>
+      <Box sx={{ overflow: 'auto', maxHeight: 440, pr: 0.5 }}>
         {currentTab === 0 && <ServiceDetailsTab service={service} />}
         {currentTab === 1 && <ServiceRatingsTab service={service} />}
-        {currentTab === 2 && <ServiceLocationTab location={service.location} />}
+        {currentTab === 2 && (
+          <ServiceLocationTab
+            location={service.location}
+            latitude={service.latitude}
+            longitude={service.longitude}
+            formattedAddress={service.formattedAddress}
+          />
+        )}
       </Box>
     </Box>
   );
 }
-

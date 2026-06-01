@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useCallback } from 'react';
 import { uploadApi } from '../api/upload';
 import { apiClient } from '../api/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -8,6 +9,18 @@ interface UploadError {
   message?: string;
 }
 
+interface SafeUploadSuccess<T> {
+  success: true;
+  data: T;
+}
+
+interface SafeUploadFailure {
+  success: false;
+  error: unknown;
+}
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+
 /**
  * Hook to upload an image
  * @returns Mutation object with uploadImage function
@@ -16,8 +29,7 @@ export const useUploadImage = () => {
   const queryClient = useQueryClient();
   const { getAccessToken, user, isLoading } = useAuth();
 
-  return useMutation({
-    mutationFn: async (file: File) => {
+  const performUpload = useCallback(async (file: File) => {
       // Ensure user is authenticated
       if (!user) {
         console.error('❌ User not authenticated');
@@ -82,13 +94,99 @@ export const useUploadImage = () => {
         }
         throw error;
       }
-    },
+    }, [getAccessToken, isLoading, user]);
+
+  const performUploadSafely = useCallback(async (file: File) => {
+    if (!user) {
+      return {
+        success: false as const,
+        error: new Error('Debes iniciar sesión para subir imágenes. Por favor, inicia sesión e intenta nuevamente.'),
+      };
+    }
+
+    if (isLoading) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
+    const token = await getAccessToken(true);
+
+    if (!token) {
+      return {
+        success: false as const,
+        error: new Error('No se pudo obtener el token de autenticación. Por favor, recarga la página e inicia sesión nuevamente.'),
+      };
+    }
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/upload/image`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          const raw = errorData.message ?? errorData.error;
+          errorMessage = Array.isArray(raw) ? raw[0] ?? raw.join(' ') : (raw || errorMessage);
+        } catch {
+          errorMessage = response.statusText || errorMessage;
+        }
+
+        return {
+          success: false as const,
+          error: Object.assign(new Error(errorMessage), { status: response.status, response }),
+        };
+      }
+
+      const data = await response.json();
+      queryClient.invalidateQueries({ queryKey: ['services'] });
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+
+      return {
+        success: true as const,
+        data,
+      };
+    } catch (error) {
+      return {
+        success: false as const,
+        error,
+      };
+    }
+  }, [getAccessToken, isLoading, queryClient, user]);
+
+  const mutation = useMutation({
+    mutationFn: performUpload,
+    throwOnError: false,
+    retry: false,
     onSuccess: () => {
       // Invalidate any queries that might depend on uploaded images
       queryClient.invalidateQueries({ queryKey: ['services'] });
       queryClient.invalidateQueries({ queryKey: ['user'] });
     },
   });
+
+  const safeUploadImage = useCallback(
+    async (file: File): Promise<SafeUploadSuccess<Awaited<ReturnType<typeof performUpload>>> | SafeUploadFailure> => {
+      const result = await performUploadSafely(file);
+      if (result.success) {
+        return { success: true, data: result.data };
+      }
+      return { success: false, error: result.error };
+    },
+    [performUploadSafely],
+  );
+
+  return {
+    ...mutation,
+    safeUploadImage,
+  };
 };
 
 /**

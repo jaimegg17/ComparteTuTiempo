@@ -18,9 +18,12 @@ import { useUser } from '@auth0/nextjs-auth0/client';
 import { useTranslation } from '@/hooks/useTranslation';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 import { useUploadImage } from '@/shared/hooks/use-upload';
+import { getFriendlyErrorMessage } from '@/shared/utils/error-messages';
+import { useToast } from '@/components/ui/ToastProvider';
 
 const CATEGORIES = ['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'ARTE', 'OTROS'];
 const TYPES = ['PRESENCIAL', 'VIRTUAL', 'HIBRIDO'];
+const INTENTS = ['OFFER', 'REQUEST'] as const;
 const AVAILABILITY = ['mañana', 'tarde', 'noche', 'mañana-tarde', 'tarde-noche', 'flexible'];
 
 interface FormData {
@@ -30,6 +33,7 @@ interface FormData {
   duration: string;
   category: string;
   type: string;
+  intent: 'OFFER' | 'REQUEST';
   location: string;
   availability: string;
   imageUrl: string;
@@ -60,6 +64,7 @@ export default function CreateServicePage() {
     duration: '',
     category: '',
     type: '',
+    intent: 'OFFER',
     location: '',
     availability: '',
     imageUrl: '',
@@ -75,6 +80,7 @@ export default function CreateServicePage() {
   const locationInputRef = useRef<HTMLInputElement | null>(null);
   const uploadImage = useUploadImage();
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const { showToast } = useToast();
 
   type PlaceResult = {
     name?: string;
@@ -110,6 +116,8 @@ export default function CreateServicePage() {
     };
     return typeMap[type] || type;
   };
+
+  const getIntentDisplayName = (intent: 'OFFER' | 'REQUEST') => intent === 'REQUEST' ? 'Solicitud de ayuda' : 'Servicio ofrecido';
 
   const getAvailabilityDisplayName = (availability: string) => {
     const availabilityMap: Record<string, string> = {
@@ -203,7 +211,12 @@ export default function CreateServicePage() {
   }, [mapsLoaded]);
 
   const handleUseCurrentLocation = () => {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+      const geolocationError = 'Tu navegador no soporta geolocalización.';
+      setError(geolocationError);
+      showToast({ message: geolocationError, severity: 'warning' });
+      return;
+    }
     setLocating(true);
 
     navigator.geolocation.getCurrentPosition(
@@ -221,6 +234,9 @@ export default function CreateServicePage() {
         setLocating(false);
       },
       () => {
+        const geolocationError = 'No se pudo obtener tu ubicación. Revisa los permisos del navegador e inténtalo de nuevo.';
+        setError(geolocationError);
+        showToast({ message: geolocationError, severity: 'warning' });
         setLocating(false);
       },
       { enableHighAccuracy: true, timeout: 10000 }
@@ -307,6 +323,7 @@ export default function CreateServicePage() {
           duration: parseFloat(formData.duration),
           category: formData.category,
           type: formData.type,
+          intent: formData.intent,
           location: formData.location.trim(),
           latitude: formData.latitude,
           longitude: formData.longitude,
@@ -325,13 +342,16 @@ export default function CreateServicePage() {
       
       const data = await response.json();
       setSuccess(true);
+      showToast({ message: formData.intent === 'REQUEST' ? 'Solicitud creada correctamente.' : 'Servicio creado correctamente.', severity: 'success' });
       
       // Redirect to the created service
       setTimeout(() => {
         router.push(`/services/${data.service.id}`);
       }, 1500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al crear el servicio');
+      const message = getFriendlyErrorMessage(err, 'Error al crear el servicio');
+      setError(message);
+      showToast({ message, severity: 'error' });
     } finally {
       setLoading(false);
     }
@@ -372,10 +392,10 @@ export default function CreateServicePage() {
 
           <Paper sx={{ p: 4 }}>
             <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-              {t("services.form.submit")}
+              {formData.intent === 'REQUEST' ? 'Crear solicitud' : t("services.form.submit")}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-              {t("services.subtitle")}
+              {formData.intent === 'REQUEST' ? 'Publica una necesidad concreta para que otras personas puedan ofrecerte ayuda.' : t("services.subtitle")}
             </Typography>
 
             {!googleMapsApiKey && (
@@ -451,8 +471,22 @@ export default function CreateServicePage() {
                   disabled={loading || success}
                 />
 
-                {/* Categoría y Tipo */}
-                <Box sx={{ display: 'flex', gap: 2 }}>
+                {/* Tipo de publicación, categoría y formato */}
+                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                  <TextField
+                    select
+                    fullWidth
+                    label="Tipo de publicación"
+                    value={formData.intent}
+                    onChange={handleChange('intent')}
+                    disabled={loading || success}
+                  >
+                    {INTENTS.map((intent) => (
+                      <MenuItem key={intent} value={intent}>
+                        {getIntentDisplayName(intent)}
+                      </MenuItem>
+                    ))}
+                  </TextField>
                   <TextField
                     select
                     fullWidth
@@ -519,7 +553,7 @@ export default function CreateServicePage() {
                     helperText={
                       errors.location ||
                       (googleMapsApiKey
-                        ? 'Puedes escribir o seleccionar una sugerencia de Google Places'
+                        ? 'Puedes escribir una dirección, seleccionar una sugerencia o usar tu ubicación actual.'
                         : 'Añade una ubicación textual. Sin API key no hay sugerencias.')
                     }
                     disabled={loading || success}

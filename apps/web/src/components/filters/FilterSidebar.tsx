@@ -6,6 +6,7 @@ import { DurationFilter } from './DurationFilter';
 import { useTranslation } from '@/hooks/useTranslation';
 
 interface FilterSidebarProps {
+  drawerMode?: boolean;
   // Categories
   categories: string[];
   selectedCategories: string[];
@@ -46,6 +47,7 @@ interface FilterSidebarProps {
 }
 
 export function FilterSidebar({
+  drawerMode = false,
   categories,
   selectedCategories,
   openCategories,
@@ -78,29 +80,34 @@ export function FilterSidebar({
   const { t } = useTranslation();
   return (
     <Paper sx={{ 
-      width: 280, 
+      width: drawerMode ? '100%' : 280, 
       p: 0, 
       height: 'fit-content', 
-      position: 'sticky', 
-      top: 20,
-      overflow: 'hidden'
+      position: drawerMode ? 'static' : 'sticky', 
+      top: drawerMode ? 0 : 20,
+      overflow: 'hidden',
+      borderRadius: drawerMode ? 0 : 3,
+      border: drawerMode ? 'none' : '1px solid rgba(148,163,184,0.14)',
+      boxShadow: drawerMode ? 'none' : '0 16px 36px rgba(15,23,42,0.06)',
+      backgroundColor: '#fff',
     }}>
-      {/* Header */}
-      <Box sx={{ 
-        p: 2, 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        borderBottom: '1px solid',
-        borderColor: 'divider'
-      }}>
-        <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '16px' }}>
-          {t("services.filters.title")}
-        </Typography>
-        <Box component="span" sx={{ fontSize: '18px' }}>⚙️</Box>
-      </Box>
+      {!drawerMode && (
+        <Box sx={{ 
+          p: 2, 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          borderBottom: '1px solid',
+          borderColor: 'divider'
+        }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '16px' }}>
+            {t("services.filters.title")}
+          </Typography>
+          <Box component="span" sx={{ fontSize: '18px' }}>⚙️</Box>
+        </Box>
+      )}
       
-      <Box sx={{ p: 2 }}>
+      <Box sx={{ p: drawerMode ? 0 : 2 }}>
         <Stack spacing={1.5}>
           {/* Categorías */}
           <CategoryFilter
@@ -188,4 +195,3 @@ export function FilterSidebar({
     </Paper>
   );
 }
-

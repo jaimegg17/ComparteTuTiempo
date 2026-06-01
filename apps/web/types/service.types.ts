@@ -37,6 +37,7 @@ export interface Service {
   availability?: string;
   category: string;
   type: string;
+  intent: 'OFFER' | 'REQUEST';
   status: string;
   imageUrl?: string;
   createdAt: string;

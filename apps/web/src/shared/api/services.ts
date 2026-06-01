@@ -15,6 +15,7 @@ export const servicesApi = {
     if (query.category) searchParams.append('category', query.category);
     if (query.location) searchParams.append('location', query.location);
     if (query.type) searchParams.append('type', query.type);
+    if (query.intent) searchParams.append('intent', query.intent);
     if (query.status) searchParams.append('status', query.status);
     if (query.nearLat !== undefined) searchParams.append('nearLat', query.nearLat.toString());
     if (query.nearLng !== undefined) searchParams.append('nearLng', query.nearLng.toString());
@@ -32,6 +33,7 @@ export const servicesApi = {
     if (query.category) searchParams.append('category', query.category);
     if (query.location) searchParams.append('location', query.location);
     if (query.type) searchParams.append('type', query.type);
+    if (query.intent) searchParams.append('intent', query.intent);
     if (query.status) searchParams.append('status', query.status);
     if (query.nearLat !== undefined) searchParams.append('nearLat', query.nearLat.toString());
     if (query.nearLng !== undefined) searchParams.append('nearLng', query.nearLng.toString());

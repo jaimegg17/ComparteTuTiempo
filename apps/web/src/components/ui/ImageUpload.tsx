@@ -3,7 +3,9 @@ import { Box, Button, Typography, IconButton, Alert, LinearProgress, CircularPro
 import { CloudUpload, Delete, Image as ImageIcon } from '@mui/icons-material';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useUploadImage } from '@/shared/hooks/use-upload';
+import { getFriendlyErrorMessage } from '@/shared/utils/error-messages';
 import { useUser } from '@auth0/nextjs-auth0/client';
+import { useToast } from '@/components/ui/ToastProvider';
 
 interface ImageUploadProps {
   onImageSelect?: (file: File | null) => void;
@@ -26,6 +28,7 @@ export function ImageUpload({
   const { t } = useTranslation();
   const { user, isLoading: userLoading } = useUser();
   const uploadImage = useUploadImage();
+  const { showToast } = useToast();
   
   const [preview, setPreview] = useState<string | null>(currentImage || null);
   const [error, setError] = useState<string | null>(null);
@@ -69,6 +72,7 @@ export function ImageUpload({
     const validationError = validateFile(file);
     if (validationError) {
       setError(validationError);
+      showToast({ message: validationError, severity: 'warning' });
       return;
     }
 
@@ -81,14 +85,18 @@ export function ImageUpload({
     if (autoUpload) {
       // Check if user is authenticated
       if (!user && !userLoading) {
-        setError('Debes iniciar sesión para subir imágenes. Por favor, inicia sesión e intenta nuevamente.');
+        const authError = 'Debes iniciar sesión para subir imágenes. Por favor, inicia sesión e inténtalo de nuevo.';
+        setError(authError);
+        showToast({ message: authError, severity: 'warning' });
         setPreview(null);
         selectedFileRef.current = null;
         return;
       }
 
       if (userLoading) {
-        setError('Cargando autenticación... Por favor, espera un momento.');
+        const loadingAuthError = 'Cargando autenticación... Espera un momento antes de subir la imagen.';
+        setError(loadingAuthError);
+        showToast({ message: loadingAuthError, severity: 'info' });
         return;
       }
 
@@ -112,25 +120,27 @@ export function ImageUpload({
         }
       };
 
-      uploadImage
-        .mutateAsync(file)
-        .then((result) => {
+      void (async () => {
+        const result = await uploadImage.safeUploadImage(file);
+
+        if (result.success) {
           clearProgress();
           setUploadProgress(100);
-          onImageUploaded?.(result.url);
+          onImageUploaded?.(result.data.url);
           // Reset progress after a short delay so it doesn't stay at "Subiendo imagen... 100%"
           setTimeout(() => setUploadProgress(0), 600);
-        })
-        .catch((err: unknown) => {
-          clearProgress();
-          const msg =
-            err instanceof Error ? err.message : typeof err === 'string' ? err : 'Error al subir la imagen. Inténtalo de nuevo.';
-          setError(msg);
-          setUploadProgress(0);
-          selectedFileRef.current = file;
-        });
+          return;
+        }
+
+        clearProgress();
+        const msg = getFriendlyErrorMessage(result.error, 'Error al subir la imagen. Inténtalo de nuevo.');
+        setError(msg);
+        showToast({ message: msg, severity: 'error' });
+        setUploadProgress(0);
+        selectedFileRef.current = file;
+      })();
     }
-  }, [autoUpload, onImageSelect, onImageUploaded, createPreview, uploadImage, user, userLoading]);
+  }, [autoUpload, onImageSelect, onImageUploaded, createPreview, uploadImage, user, userLoading, showToast]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

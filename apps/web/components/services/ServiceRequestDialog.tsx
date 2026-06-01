@@ -8,6 +8,7 @@ interface ServiceRequestDialogProps {
   message: string;
   providerName?: string;
   duration?: number;
+  intent?: 'OFFER' | 'REQUEST';
   onClose: () => void;
   onMessageChange: (message: string) => void;
   onSubmit: () => void;
@@ -21,10 +22,13 @@ export function ServiceRequestDialog({
   message,
   providerName,
   duration,
+  intent = 'OFFER',
   onClose,
   onMessageChange,
   onSubmit
 }: ServiceRequestDialogProps) {
+  const isRequest = intent === 'REQUEST';
+
   return (
     <Dialog 
       open={open} 
@@ -32,16 +36,18 @@ export function ServiceRequestDialog({
       maxWidth="sm"
       fullWidth
     >
-      <DialogTitle>Solicitar Servicio</DialogTitle>
+      <DialogTitle>{isRequest ? 'Responder solicitud' : 'Solicitar servicio'}</DialogTitle>
       <DialogContent>
         {success ? (
           <Alert severity="success" sx={{ mb: 2 }}>
-            ¡Solicitud enviada exitosamente! Redirigiendo...
+            {isRequest ? '¡Respuesta enviada correctamente! Redirigiendo...' : '¡Solicitud enviada exitosamente! Redirigiendo...'}
           </Alert>
         ) : (
           <>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Envía una solicitud a <strong>{providerName}</strong> para intercambiar <strong>{duration} horas</strong>.
+              {isRequest
+                ? <>Envía una propuesta a <strong>{providerName}</strong> para ayudar con esta necesidad durante <strong>{duration} horas</strong>.</>
+                : <>Envía una solicitud a <strong>{providerName}</strong> para intercambiar <strong>{duration} horas</strong>.</>}
             </Typography>
             
             {error && (
@@ -51,13 +57,13 @@ export function ServiceRequestDialog({
             )}
 
             <TextField
-              label="Mensaje (opcional)"
+              label={isRequest ? 'Mensaje de respuesta (opcional)' : 'Mensaje (opcional)'}
               multiline
               rows={4}
               fullWidth
               value={message}
               onChange={(e) => onMessageChange(e.target.value)}
-              placeholder="Escribe un mensaje para el proveedor del servicio..."
+              placeholder={isRequest ? 'Explica cómo podrías ayudar, tu disponibilidad o cualquier detalle útil...' : 'Escribe un mensaje para el proveedor del servicio...'}
               disabled={loading}
             />
           </>
@@ -72,10 +78,9 @@ export function ServiceRequestDialog({
           variant="contained" 
           disabled={loading || success}
         >
-          {loading ? 'Enviando...' : 'Enviar Solicitud'}
+          {loading ? 'Enviando...' : isRequest ? 'Enviar respuesta' : 'Enviar solicitud'}
         </Button>
       </DialogActions>
     </Dialog>
   );
 }
-
