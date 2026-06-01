@@ -2,7 +2,9 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import type { ReactNode } from 'react';
-import CreateServicePage from '../create';
+import CreateServicePage from '@/../pages/services/create';
+
+const mockShowToast = vi.fn();
 
 vi.mock('next/router', () => ({
   useRouter: () => ({
@@ -29,6 +31,13 @@ vi.mock('@/hooks/useTranslation', () => ({
 
 vi.mock('@/components/Layout', () => ({
   Layout: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+}));
+
+vi.mock('@/components/ui/ToastProvider', () => ({
+  useToast: () => ({
+    showToast: mockShowToast,
+    hideToast: vi.fn(),
+  }),
 }));
 
 vi.mock('@/components/ui/ImageUpload', () => ({

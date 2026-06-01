@@ -2,13 +2,15 @@ import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { ReactNode } from 'react';
-import ServicesPage from '../index';
+import ServicesPage from '@/../pages/services';
 
 const mockPush = vi.fn();
 
 vi.mock('next/router', () => ({
   useRouter: () => ({
     push: mockPush,
+    isReady: true,
+    query: {},
   }),
 }));
 
@@ -44,6 +46,13 @@ vi.mock('@/hooks/useErrorHandling', () => ({
 
 vi.mock('@/components/Layout', () => ({
   Layout: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+}));
+
+vi.mock('@/components/ui/ToastProvider', () => ({
+  useToast: () => ({
+    showToast: vi.fn(),
+    hideToast: vi.fn(),
+  }),
 }));
 
 vi.mock('@/components/ServiceCard', () => ({
