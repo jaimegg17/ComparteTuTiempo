@@ -1,4 +1,4 @@
-import { Box, Tabs, Tab, Chip } from '@mui/material';
+import { Box, Chip, Paper, Tab, Tabs, Typography } from '@mui/material';
 import type { ExchangeState } from '@/types/exchange.types';
 
 interface ExchangeFiltersProps {
@@ -14,30 +14,42 @@ interface ExchangeFiltersProps {
   };
 }
 
-const STATES: Array<{ value: ExchangeState | 'all'; label: string }> = [
+const STATES: Array<{ value: ExchangeState | 'all'; label: string; countKey?: keyof NonNullable<ExchangeFiltersProps['counts']> }> = [
   { value: 'all', label: 'Todos' },
-  { value: 'PENDING', label: 'Pendientes' },
-  { value: 'CONFIRMED', label: 'Confirmados' },
-  { value: 'IN_PROGRESS', label: 'En progreso' },
-  { value: 'COMPLETED', label: 'Completados' },
+  { value: 'PENDING', label: 'Pendientes', countKey: 'pending' },
+  { value: 'CONFIRMED', label: 'Confirmados', countKey: 'confirmed' },
+  { value: 'IN_PROGRESS', label: 'En progreso', countKey: 'inProgress' },
+  { value: 'COMPLETED', label: 'Completados', countKey: 'completed' },
 ];
 
-export function ExchangeFilters({ activeTab, onTabChange, activeState = 'all', onStateChange }: ExchangeFiltersProps) {
+export function ExchangeFilters({ activeTab, onTabChange, activeState = 'all', onStateChange, counts }: ExchangeFiltersProps) {
   return (
-    <Box sx={{ mb: 3 }}>
-      {/* Tab selector */}
-      <Tabs 
-        value={activeTab} 
+    <Paper sx={{ mb: 3, p: { xs: 2, md: 2.5 }, borderRadius: 4 }}>
+      <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 800, letterSpacing: '0.08em' }}>
+        FILTRAR ACTIVIDAD
+      </Typography>
+
+      <Tabs
+        value={activeTab}
         onChange={(_, newValue) => onTabChange(newValue)}
-        sx={{ 
+        aria-label="Tipos de intercambios"
+        variant="scrollable"
+        allowScrollButtonsMobile
+        sx={{
+          mt: 1,
           mb: 2,
-          borderBottom: 1,
-          borderColor: 'divider',
+          minHeight: 44,
+          '& .MuiTabs-indicator': {
+            height: 3,
+            borderRadius: 999,
+          },
           '& .MuiTab-root': {
             textTransform: 'none',
-            fontSize: '14px',
-            fontWeight: 600
-          }
+            fontSize: '0.95rem',
+            fontWeight: 700,
+            minHeight: 44,
+            px: 2,
+          },
         }}
       >
         <Tab label="Todos" value="all" />
@@ -45,23 +57,29 @@ export function ExchangeFilters({ activeTab, onTabChange, activeState = 'all', o
         <Tab label="Enviados" value="sent" />
       </Tabs>
 
-      {/* State filters */}
       <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-        {STATES.map(state => (
-          <Chip
-            key={state.value}
-            label={state.label}
-            onClick={() => onStateChange(state.value)}
-            color={activeState === state.value ? 'primary' : 'default'}
-            variant={activeState === state.value ? 'filled' : 'outlined'}
-            sx={{ 
-              fontSize: '12px',
-              height: '28px',
-              cursor: 'pointer'
-            }}
-          />
-        ))}
+        {STATES.map((state) => {
+          const count = state.countKey && counts ? counts[state.countKey] : undefined;
+          const isActive = activeState === state.value;
+
+          return (
+            <Chip
+              key={state.value}
+              label={count === undefined ? state.label : `${state.label} · ${count}`}
+              onClick={() => onStateChange(state.value)}
+              color={isActive ? 'primary' : 'default'}
+              variant={isActive ? 'filled' : 'outlined'}
+              sx={{
+                fontSize: '0.8rem',
+                height: 32,
+                cursor: 'pointer',
+                fontWeight: 600,
+                borderRadius: 999,
+              }}
+            />
+          );
+        })}
       </Box>
-    </Box>
+    </Paper>
   );
 }

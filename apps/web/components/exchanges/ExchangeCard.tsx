@@ -1,7 +1,7 @@
-import { Card, CardContent, Box, Typography, Chip, Avatar, Button, Stack } from '@mui/material';
-import { Clock, ChatBubble } from 'iconoir-react';
-import { useRouter } from 'next/router';
+import { Avatar, Box, Button, Card, CardContent, Chip, Stack, Typography } from '@mui/material';
+import { ChatBubble, Clock } from 'iconoir-react';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 import { RatingButton } from '@/components/ratings';
 import type { Exchange, ExchangeState } from '@/types/exchange.types';
 
@@ -32,195 +32,190 @@ export function ExchangeCard({ exchange, currentUserId, onAccept, onReject, onSt
   const otherUser = isProvider ? exchange.requestedBy : exchange.offeredBy;
 
   const stateConfig = STATE_CONFIG[exchange.state];
-
-  // Only provider can accept/reject
   const canAccept = isProvider && exchange.state === 'PENDING';
   const canReject = isProvider && exchange.state === 'PENDING';
-  
-  // Only requester can start the exchange
   const canStart = isRequester && exchange.state === 'CONFIRMED';
-  
-  // Only provider can complete the exchange
   const canComplete = isProvider && exchange.state === 'IN_PROGRESS';
-  
-  // Only requester can rate completed exchanges
   const canRate = isRequester && exchange.state === 'COMPLETED';
+  const relationshipCopy = isProvider ? 'Te han solicitado este servicio' : 'Has solicitado este servicio';
 
   return (
-    <Card sx={{ mb: 2, '&:hover': { boxShadow: 3 }, transition: 'box-shadow 0.2s' }}>
-      <CardContent>
+    <Card
+      sx={{
+        borderRadius: 4,
+        border: '1px solid rgba(148, 163, 184, 0.16)',
+        boxShadow: '0 16px 40px rgba(15, 23, 42, 0.05)',
+        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          boxShadow: '0 18px 48px rgba(15, 23, 42, 0.08)',
+        },
+      }}
+    >
+      <CardContent sx={{ p: { xs: 2, md: 2.5 } }}>
         <Box sx={{ display: 'flex', gap: 2, flexWrap: { xs: 'wrap', md: 'nowrap' } }}>
-          {/* Service Image */}
-          <Box 
-            sx={{ 
-              width: { xs: '100%', md: 120 }, 
-              height: 120, 
-              bgcolor: 'grey.200', 
-              borderRadius: 2,
+          <Box
+            role="button"
+            tabIndex={0}
+            aria-label={`Abrir servicio ${exchange.service?.title || 'Servicio'}`}
+            sx={{
+              width: { xs: '100%', sm: 180, md: 148 },
+              height: { xs: 180, sm: 160, md: 148 },
+              bgcolor: 'grey.200',
+              borderRadius: 3,
               overflow: 'hidden',
               flexShrink: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
               cursor: 'pointer',
               position: 'relative',
             }}
             onClick={() => router.push(`/services/${exchange.serviceId}`)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                router.push(`/services/${exchange.serviceId}`);
+              }
+            }}
           >
             {exchange.service?.imageUrl ? (
               <Image
                 src={exchange.service.imageUrl}
                 alt={exchange.service.title}
                 fill
-                sizes="(max-width: 900px) 100vw, 120px"
+                sizes="(max-width: 900px) 100vw, 148px"
                 style={{ objectFit: 'cover' }}
               />
             ) : (
-              <Typography sx={{ fontSize: '48px' }}>📦</Typography>
+              <Box sx={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center' }}>
+                <Typography sx={{ fontSize: '3rem' }}>📦</Typography>
+              </Box>
             )}
           </Box>
 
-          {/* Info */}
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            {/* Header */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1, gap: 1 }}>
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Typography 
-                  variant="h6" 
-                  sx={{ 
-                    fontWeight: 600, 
-                    fontSize: '16px',
-                    mb: 0.5,
+            <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" spacing={1.5} sx={{ mb: 1.25 }}>
+              <Box sx={{ minWidth: 0 }}>
+                <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 800, letterSpacing: '0.08em' }}>
+                  {relationshipCopy}
+                </Typography>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 800,
+                    fontSize: '1.05rem',
+                    lineHeight: 1.35,
+                    mt: 0.25,
+                    mb: 0.75,
                     cursor: 'pointer',
-                    '&:hover': { color: 'primary.main' },
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
                     overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
+                    '&:hover': { color: 'primary.main' },
                   }}
                   onClick={() => router.push(`/services/${exchange.serviceId}`)}
                 >
                   {exchange.service?.title || 'Servicio'}
                 </Typography>
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
-                  <Chip label={stateConfig.label} color={stateConfig.color} size="small" sx={{ height: 20, fontSize: '11px' }} />
-                  {exchange.service?.category && (
-                    <Chip label={exchange.service.category} size="small" variant="outlined" sx={{ height: 20, fontSize: '10px' }} />
-                  )}
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} useFlexGap flexWrap="wrap" sx={{ alignItems: { xs: 'stretch', sm: 'center' } }}>
+                  <Chip label={stateConfig.label} color={stateConfig.color} size="small" sx={{ fontWeight: 700 }} />
+                  {exchange.service?.category && <Chip label={exchange.service.category} size="small" variant="outlined" />}
+                </Stack>
+              </Box>
+
+              <Box sx={{ textAlign: { xs: 'left', md: 'right' }, alignSelf: { xs: 'flex-start', md: 'auto' } }}>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                  Actualizado
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {new Date(exchange.updatedAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </Typography>
+              </Box>
+            </Stack>
+
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mb: 1.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Avatar src={otherUser?.imageUrl} alt={otherUser?.name} sx={{ width: 34, height: 34 }}>
+                  {otherUser?.name?.[0]?.toUpperCase()}
+                </Avatar>
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 700, wordBreak: 'break-word' }}>
+                    {isProvider ? 'Solicitado por' : 'Ofrecido por'} {otherUser?.name}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Creado el {new Date(exchange.createdAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </Typography>
                 </Box>
               </Box>
-            </Box>
 
-            {/* User Info */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-              <Avatar src={otherUser?.imageUrl} alt={otherUser?.name} sx={{ width: 28, height: 28 }}>
-                {otherUser?.name?.[0]?.toUpperCase()}
-              </Avatar>
-              <Box>
-                <Typography variant="body2" sx={{ fontSize: '13px', fontWeight: 500 }}>
-                  {isProvider ? 'Solicitado por' : 'Ofrecido por'}: {otherUser?.name}
-                </Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '11px' }}>
-                  {new Date(exchange.createdAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                <Clock width={16} height={16} />
+                <Typography variant="body2" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                  {exchange.service?.duration || 0}h de intercambio
                 </Typography>
               </Box>
-            </Box>
+            </Stack>
 
-            {/* Duration */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5 }}>
-              <Clock width={16} height={16} />
-              <Typography variant="body2" sx={{ fontSize: '13px', fontWeight: 600, color: 'primary.main' }}>
-                {exchange.service?.duration || 0}h
-              </Typography>
-            </Box>
-
-            {/* Message */}
             {exchange.message && (
-              <Typography 
-                variant="body2" 
-                color="text.secondary" 
-                sx={{ 
-                  fontSize: '12px', 
+              <Box
+                sx={{
                   mb: 2,
-                  fontStyle: 'italic',
-                  p: 1,
+                  p: 1.5,
                   bgcolor: 'grey.50',
-                  borderRadius: 1,
-                  borderLeft: '3px solid',
-                  borderColor: 'primary.main'
+                  borderRadius: 2.5,
+                  border: '1px solid rgba(148, 163, 184, 0.14)',
                 }}
               >
-                &quot;{exchange.message}&quot;
-              </Typography>
+                <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', display: 'block', mb: 0.5 }}>
+                  Mensaje inicial
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.65 }}>
+                  {exchange.message}
+                </Typography>
+              </Box>
             )}
 
-            {/* Actions */}
-            <Stack direction="row" spacing={1} flexWrap="wrap">
-              {/* Chat Button - Always available for active exchanges */}
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} useFlexGap flexWrap="wrap" sx={{ alignItems: { xs: 'stretch', sm: 'center' } }}>
               {(exchange.state === 'PENDING' || exchange.state === 'CONFIRMED' || exchange.state === 'IN_PROGRESS') && (
-                <Button 
-                  size="small" 
+                <Button
+                  size="small"
                   variant="outlined"
                   startIcon={<ChatBubble width={16} height={16} />}
                   onClick={() => router.push(`/exchanges/${exchange.id}`)}
-                  sx={{ textTransform: 'none', fontSize: '13px' }}
+                  sx={{ textTransform: 'none', fontWeight: 700, width: { xs: '100%', sm: 'auto' } }}
                 >
-                  Chat
+                  Abrir chat
                 </Button>
               )}
-              
-              {/* Other Actions */}
-              {(canAccept || canReject || canStart || canComplete) && (
-                <>
-                  {canAccept && (
-                  <Button 
-                    size="small" 
-                    variant="contained" 
-                    onClick={() => onAccept?.(exchange.id)}
-                    disabled={loading}
-                    sx={{ textTransform: 'none', fontSize: '13px' }}
-                  >
-                    Aceptar
-                  </Button>
-                )}
-                {canReject && (
-                  <Button 
-                    size="small" 
-                    variant="outlined" 
-                    color="error"
-                    onClick={() => onReject?.(exchange.id)}
-                    disabled={loading}
-                    sx={{ textTransform: 'none', fontSize: '13px' }}
-                  >
-                    Rechazar
-                  </Button>
-                )}
-                {canStart && (
-                  <Button 
-                    size="small" 
-                    variant="contained"
-                    onClick={() => onStart?.(exchange.id)}
-                    disabled={loading}
-                    sx={{ textTransform: 'none', fontSize: '13px' }}
-                  >
-                    Iniciar intercambio
-                  </Button>
-                )}
-                {canComplete && (
-                  <Button 
-                    size="small" 
-                    variant="contained"
-                    color="success"
-                    onClick={() => onComplete?.(exchange.id)}
-                    disabled={loading}
-                    sx={{ textTransform: 'none', fontSize: '13px' }}
-                  >
-                    Completar
-                  </Button>
-                )}
-                </>
+
+              <Button
+                size="small"
+                variant="text"
+                onClick={() => router.push(`/services/${exchange.serviceId}`)}
+                sx={{ textTransform: 'none', fontWeight: 700 }}
+              >
+                Ver servicio
+              </Button>
+
+              {canAccept && (
+                <Button size="small" variant="contained" onClick={() => onAccept?.(exchange.id)} disabled={loading} sx={{ textTransform: 'none', fontWeight: 700, width: { xs: '100%', sm: 'auto' } }}>
+                  Aceptar
+                </Button>
               )}
-              
-              {/* Rating Button for completed exchanges */}
+              {canReject && (
+                <Button size="small" variant="outlined" color="error" onClick={() => onReject?.(exchange.id)} disabled={loading} sx={{ textTransform: 'none', fontWeight: 700, width: { xs: '100%', sm: 'auto' } }}>
+                  Rechazar
+                </Button>
+              )}
+              {canStart && (
+                <Button size="small" variant="contained" onClick={() => onStart?.(exchange.id)} disabled={loading} sx={{ textTransform: 'none', fontWeight: 700, width: { xs: '100%', sm: 'auto' } }}>
+                  Iniciar intercambio
+                </Button>
+              )}
+              {canComplete && (
+                <Button size="small" variant="contained" color="success" onClick={() => onComplete?.(exchange.id)} disabled={loading} sx={{ textTransform: 'none', fontWeight: 700, width: { xs: '100%', sm: 'auto' } }}>
+                  Completar
+                </Button>
+              )}
               {canRate && (
                 <RatingButton
                   exchangeId={exchange.id}
