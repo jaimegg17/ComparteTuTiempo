@@ -47,6 +47,7 @@
 42. ✅ Hardening UX/config Maps: aviso visible cuando falta `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` + `apps/web/env.example` documentado
 43. ✅ Tests dirigidos backend (geocoding + nearby): cobertura reforzada en create/update use-cases y controller nearby
 44. ✅ Auth P0.4.5: revisión de configuración Auth0 (audience/callback/env) y plantilla `apps/web/env.example` completada con variables Auth0
+45. ✅ Configuración local Google Maps realizada: APIs habilitadas, clave local cargada en frontend/backend y verificación inicial completada
 
 ---
 
@@ -82,6 +83,7 @@
 4. ✅ Filtro “cerca de” en frontend + mostrar distancia en tarjeta (MVP)
 5. ⏳ Tests unit/integration de geocoding + nearby (sin E2E) — backend cubierto, falta reforzar parte frontend
 6. ⏳ Preparar test UI dirigido del flujo create/edit con geolocalización (sin E2E, pendiente infraestructura de test en web)
+7. ⏳ Resolver incidencia de entorno local: `pnpm/corepack` y arranque de PostgreSQL/monorepo en macOS para validar manualmente el autocomplete end-to-end
 
 ---
 
@@ -176,3 +178,16 @@ docker compose logs postgres
 # Reiniciar base de datos
 pnpm db:reset
 ```
+
+## ▶ Siguiente paso recomendado ahora mismo
+
+1. **Estabilizar arranque local**:
+   - levantar PostgreSQL (`docker compose up postgres -d`)
+   - arrancar frontend y backend por separado si `pnpm dev` del monorepo falla
+2. **Validación manual del autocomplete** en:
+   - `http://localhost:3000/services/create`
+   - comprobar sugerencias al escribir una dirección real en el campo ubicación
+3. **Si sigue sin funcionar**, revisar consola del navegador para detectar:
+   - `RefererNotAllowedMapError`
+   - `ApiNotActivatedMapError`
+   - `BillingNotEnabledMapError`
