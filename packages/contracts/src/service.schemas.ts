@@ -18,6 +18,7 @@ export const ServiceSchema = z.object({
   availability: z.string().nullable().optional(),
   category: z.enum(['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'ARTE', 'OTROS']),
   type: z.enum(['PRESENCIAL', 'VIRTUAL', 'HIBRIDO']),
+  intent: z.enum(['OFFER', 'REQUEST']).default('OFFER'),
   status: z.enum(['ACTIVO', 'INACTIVO', 'COMPLETADO']),
   price: z.number().positive('El precio debe ser positivo'),
   distanceKm: z.number().nullable().optional(),
@@ -39,6 +40,7 @@ export const ServiceCreateSchema = z.object({
   availability: z.string().optional(),
   category: z.enum(['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'ARTE', 'OTROS']),
   type: z.enum(['PRESENCIAL', 'VIRTUAL', 'HIBRIDO']),
+  intent: z.enum(['OFFER', 'REQUEST']).default('OFFER'),
   price: z.number().positive('El precio debe ser positivo'),
   imageUrl: z.string().url('La URL de la imagen debe ser válida').optional().nullable(),
 });
@@ -56,6 +58,7 @@ export const ServiceUpdateSchema = z.object({
   availability: z.string().optional(),
   category: z.enum(['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'ARTE', 'OTROS']).optional(),
   type: z.enum(['PRESENCIAL', 'VIRTUAL', 'HIBRIDO']).optional(),
+  intent: z.enum(['OFFER', 'REQUEST']).optional(),
   status: z.enum(['ACTIVO', 'INACTIVO', 'COMPLETADO']).optional(),
   price: z.number().positive('El precio debe ser positivo').optional(),
   imageUrl: z.string().url('La URL de la imagen debe ser válida').optional().nullable(),
@@ -66,6 +69,7 @@ export const ServiceListQuerySchema = z.object({
   category: z.enum(['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'ARTE', 'OTROS']).optional(),
   location: z.string().optional(),
   type: z.enum(['PRESENCIAL', 'VIRTUAL', 'HIBRIDO']).optional(),
+  intent: z.enum(['OFFER', 'REQUEST']).optional(),
   status: z.enum(['ACTIVO', 'INACTIVO', 'COMPLETADO']).optional(),
   minPrice: z.number().optional(),
   maxPrice: z.number().optional(),
@@ -119,4 +123,9 @@ export const ServiceStatus = {
   ACTIVO: 'ACTIVO',
   INACTIVO: 'INACTIVO',
   COMPLETADO: 'COMPLETADO',
+} as const;
+
+export const ServiceIntent = {
+  OFFER: 'OFFER',
+  REQUEST: 'REQUEST',
 } as const;

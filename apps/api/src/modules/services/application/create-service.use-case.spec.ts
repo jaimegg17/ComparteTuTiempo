@@ -18,6 +18,7 @@ const buildService = (overrides: Partial<ReturnType<Service['toContract']>> = {}
     availability: overrides.availability ?? null,
     category: overrides.category ?? 'EDUCACION',
     type: overrides.type ?? 'PRESENCIAL',
+    intent: overrides.intent ?? 'OFFER',
     status: overrides.status ?? 'ACTIVO',
     price: overrides.price ?? 20,
     imageUrl: overrides.imageUrl ?? null,
@@ -67,6 +68,7 @@ describe('CreateServiceUseCase', () => {
         location: 'Madrid',
         category: 'EDUCACION',
         type: 'PRESENCIAL',
+        intent: 'OFFER',
         price: 10,
       },
     });
@@ -100,6 +102,7 @@ describe('CreateServiceUseCase', () => {
         placeId: 'already-set-place',
         category: 'TECNOLOGIA',
         type: 'PRESENCIAL',
+        intent: 'OFFER',
         price: 12,
       },
     });
@@ -129,6 +132,7 @@ describe('CreateServiceUseCase', () => {
         location: 'Ubicación desconocida',
         category: 'EDUCACION',
         type: 'VIRTUAL',
+        intent: 'OFFER',
         price: 15,
       },
     });
@@ -140,6 +144,7 @@ describe('CreateServiceUseCase', () => {
         title: 'Clases de francés',
         category: 'EDUCACION',
         type: 'VIRTUAL',
+        intent: 'OFFER',
       }),
       'auth0|u1',
     );

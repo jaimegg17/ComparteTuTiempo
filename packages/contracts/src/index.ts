@@ -49,6 +49,12 @@ export type {
 } from './event.schemas';
 export type {
   Community,
+  CommunityResource,
+  CommunityKind,
+  CommunityVerificationStatus,
+  CommunityMembership,
+  CommunityMembershipRole,
+  CommunityMembershipStatus,
   CommunityCreate,
   CommunityUpdate,
   CommunityListQuery,
@@ -81,7 +87,13 @@ export type {
 } from './message.schemas';
 
 export { UserRole } from './user.schemas';
-export { ServiceCategory, ServiceType, ServiceStatus } from './service.schemas';
+export { ServiceCategory, ServiceType, ServiceStatus, ServiceIntent } from './service.schemas';
 export { ExchangeStatus } from './exchange.schemas';
 export { GroupType } from './group.schemas';
 export { MembershipRole, MembershipStatus } from './membership.schemas';
+export {
+  CommunityKind as CommunityKindValues,
+  CommunityVerificationStatus as CommunityVerificationStatusValues,
+  CommunityMembershipRole as CommunityMembershipRoleValues,
+  CommunityMembershipStatus as CommunityMembershipStatusValues,
+} from './community.schemas';

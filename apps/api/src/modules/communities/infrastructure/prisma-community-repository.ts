@@ -11,8 +11,31 @@ export class PrismaCommunityRepository implements CommunityRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: CommunityCreate): Promise<CommunityEntity> {
-    const prismaCommunity = await this.prisma.community.create({
-      data: CommunityMapper.toPrismaCreate(data),
+    const prismaCommunity = await this.prisma.$transaction(async (tx) => {
+      const createdCommunity = await tx.community.create({
+        data: CommunityMapper.toPrismaCreate(data),
+      });
+
+      await tx.communityMembership.upsert({
+        where: {
+          communityId_userId: {
+            communityId: createdCommunity.id,
+            userId: data.creatorId,
+          },
+        },
+        update: {
+          role: 'OWNER',
+          status: 'ACTIVE',
+        },
+        create: {
+          communityId: createdCommunity.id,
+          userId: data.creatorId,
+          role: 'OWNER',
+          status: 'ACTIVE',
+        },
+      });
+
+      return createdCommunity;
     });
 
     return CommunityMapper.toDomain(prismaCommunity);
@@ -67,13 +90,15 @@ export class PrismaCommunityRepository implements CommunityRepositoryPort {
     totalPages: number;
   }> {
     try {
-      const { page, pageSize, creatorId, isPrivate } = query;
+      const { page, pageSize, creatorId, isPrivate, kind, verificationStatus } = query;
       const skip = (page - 1) * pageSize;
 
       // Build where clause
       const where: Prisma.CommunityWhereInput = {};
       if (creatorId) where.creatorId = creatorId;
       if (isPrivate !== undefined) where.isPrivate = isPrivate;
+      if (kind) where.kind = kind;
+      if (verificationStatus) where.verificationStatus = verificationStatus;
 
       // Get total count
       const total = await this.prisma.community.count({ where });

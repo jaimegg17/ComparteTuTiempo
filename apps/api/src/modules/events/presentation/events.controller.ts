@@ -18,6 +18,8 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam } from '@ne
 import { CreateEventUseCase } from '../application/create-event.use-case';
 import { ListEventsUseCase } from '../application/list-events.use-case';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
+import { PrismaService } from '@/common/prisma/prisma.service';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { IsDateString, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 import type { EventListQuery } from '@comparte-tu-tiempo/contracts';
@@ -28,7 +30,8 @@ export class CreateEventDto {
   description!: string;
   date!: Date;
   location?: string;
-  groupId!: number;
+  capacity?: number;
+  communityId!: number;
 }
 
 export class UpdateEventDto {
@@ -43,11 +46,6 @@ export class EventListQueryDto {
   @IsNumber()
   @Type(() => Number)
   communityId?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
-  groupId?: number;
 
   @IsOptional()
   @IsString()
@@ -81,7 +79,7 @@ export class EventListQueryDto {
 export const normalizeEventListQuery = (query: EventListQueryDto): EventListQuery => ({
   page: query.page || 1,
   pageSize: query.pageSize || 20,
-  groupId: query.groupId ?? query.communityId,
+  communityId: query.communityId,
   q: query.q,
   dateFrom: query.dateFrom ? new Date(query.dateFrom) : undefined,
   dateTo: query.dateTo ? new Date(query.dateTo) : undefined,
@@ -94,6 +92,7 @@ export class EventsController {
   constructor(
     private readonly createEventUseCase: CreateEventUseCase,
     private readonly listEventsUseCase: ListEventsUseCase,
+    private readonly prisma: PrismaService,
   ) {}
 
   private getAuthenticatedUserId(req: { user?: { sub?: string; id?: string } }): string {
@@ -102,6 +101,27 @@ export class EventsController {
       throw new UnauthorizedException('Usuario no autenticado');
     }
     return userId;
+  }
+
+  private async canManageCommunity(communityId: number, userId: string): Promise<boolean> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    if (user?.role === 'ADMIN') return true;
+
+    const membership = await this.prisma.communityMembership.findUnique({
+      where: {
+        communityId_userId: {
+          communityId,
+          userId,
+        },
+      },
+      select: { role: true, status: true },
+    });
+
+    return membership?.role === 'OWNER' && membership?.status === 'ACTIVE';
   }
 
   @Post()
@@ -115,6 +135,9 @@ export class EventsController {
     @Request() req: { user?: { sub?: string; id?: string } },
   ) {
     const userId = this.getAuthenticatedUserId(req);
+    if (!(await this.canManageCommunity(createEventDto.communityId, userId))) {
+      throw new ForbiddenException('No autorizado para crear eventos en esta comunidad');
+    }
     const result = await this.createEventUseCase.execute({
       data: { ...createEventDto, creatorId: userId },
       userId,
@@ -182,6 +205,147 @@ export class EventsController {
     };
   }
 
+  @Get('me/registrations')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Listar mis inscripciones a eventos' })
+  @ApiResponse({ status: 200, description: 'Inscripciones obtenidas' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  async listMyRegistrations(@Request() req: { user?: { sub?: string; id?: string } }) {
+    const userId = this.getAuthenticatedUserId(req);
+
+    const registrations = await this.prisma.eventRegistration.findMany({
+      where: { userId },
+      orderBy: { registeredAt: 'desc' },
+      select: {
+        eventId: true,
+      },
+    });
+
+    return {
+      message: 'Inscripciones obtenidas exitosamente',
+      registeredEventIds: registrations.map((registration) => registration.eventId),
+    };
+  }
+
+  @Post(':id/register')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Inscribirse en un evento' })
+  @ApiResponse({ status: 201, description: 'Inscripción realizada' })
+  @ApiResponse({ status: 400, description: 'Aforo completo o inscripción inválida' })
+  @ApiResponse({ status: 404, description: 'Evento no encontrado' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  async registerForEvent(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: { user?: { sub?: string; id?: string } },
+  ) {
+    const userId = this.getAuthenticatedUserId(req);
+
+    const event = await this.prisma.event.findUnique({
+      where: { id },
+      include: {
+        _count: {
+          select: {
+            registrations: true,
+          },
+        },
+      },
+    });
+
+    if (!event) {
+      throw new NotFoundException('Evento no encontrado');
+    }
+
+    if (typeof event.capacity === 'number' && event._count.registrations >= event.capacity) {
+      throw new ForbiddenException('El evento ha alcanzado su aforo máximo');
+    }
+
+    await this.prisma.eventRegistration.upsert({
+      where: {
+        eventId_userId: {
+          eventId: id,
+          userId,
+        },
+      },
+      update: {},
+      create: {
+        eventId: id,
+        userId,
+      },
+    });
+
+    await this.prisma.userNotification.create({
+      data: {
+        userId,
+        type: 'EVENT_REGISTRATION',
+        title: 'Inscripción confirmada',
+        body: `Te has apuntado al evento "${event.title}".`,
+        link: `/communities/${event.communityId}`,
+      },
+    });
+
+    const registrationsCount = await this.prisma.eventRegistration.count({
+      where: { eventId: id },
+    });
+
+    return {
+      message: 'Inscripción realizada exitosamente',
+      eventId: id,
+      registrationsCount,
+    };
+  }
+
+  @Delete(':id/register')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Cancelar inscripción a un evento' })
+  @ApiResponse({ status: 200, description: 'Inscripción cancelada' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  async unregisterFromEvent(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: { user?: { sub?: string; id?: string } },
+  ) {
+    const userId = this.getAuthenticatedUserId(req);
+
+    const event = await this.prisma.event.findUnique({
+      where: { id },
+      select: {
+        title: true,
+        communityId: true,
+      },
+    });
+
+    await this.prisma.eventRegistration.deleteMany({
+      where: {
+        eventId: id,
+        userId,
+      },
+    });
+
+    if (event) {
+      await this.prisma.userNotification.create({
+        data: {
+          userId,
+          type: 'EVENT_UNREGISTRATION',
+          title: 'Inscripción cancelada',
+          body: `Has cancelado tu inscripción al evento "${event.title}".`,
+          link: `/communities/${event.communityId}`,
+        },
+      });
+    }
+
+    const registrationsCount = await this.prisma.eventRegistration.count({
+      where: { eventId: id },
+    });
+
+    return {
+      message: 'Inscripción cancelada exitosamente',
+      eventId: id,
+      registrationsCount,
+    };
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Obtener un evento por ID' })
   @ApiParam({ name: 'id', description: 'ID del evento' })
@@ -205,11 +369,33 @@ export class EventsController {
   @ApiResponse({ status: 403, description: 'No autorizado para actualizar este evento' })
   async updateEvent(
     @Param('id', ParseIntPipe) id: number,
+    @Body() updateEventDto: UpdateEventDto,
+    @Request() req: { user?: { sub?: string; id?: string } },
   ) {
-    // This would need an update event use case
+    const userId = this.getAuthenticatedUserId(req);
+    const existing = await this.prisma.event.findUnique({ where: { id } });
+
+    if (!existing) {
+      throw new NotFoundException('Evento no encontrado');
+    }
+
+    if (!(await this.canManageCommunity(existing.communityId, userId))) {
+      throw new ForbiddenException('No autorizado para actualizar este evento');
+    }
+
+    const updated = await this.prisma.event.update({
+      where: { id },
+      data: {
+        ...(updateEventDto.title !== undefined ? { title: updateEventDto.title } : {}),
+        ...(updateEventDto.description !== undefined ? { description: updateEventDto.description } : {}),
+        ...(updateEventDto.date !== undefined ? { date: updateEventDto.date } : {}),
+        ...(updateEventDto.location !== undefined ? { location: updateEventDto.location } : {}),
+      },
+    });
+
     return {
       message: 'Evento actualizado exitosamente',
-      event: { id },
+      event: updated,
     };
   }
 
@@ -224,8 +410,21 @@ export class EventsController {
   @ApiResponse({ status: 403, description: 'No autorizado para eliminar este evento' })
   async deleteEvent(
     @Param('id', ParseIntPipe) id: number,
+    @Request() req: { user?: { sub?: string; id?: string } },
   ) {
-    // This would need a delete event use case
+    const userId = this.getAuthenticatedUserId(req);
+    const existing = await this.prisma.event.findUnique({ where: { id } });
+
+    if (!existing) {
+      throw new NotFoundException('Evento no encontrado');
+    }
+
+    if (!(await this.canManageCommunity(existing.communityId, userId))) {
+      throw new ForbiddenException('No autorizado para eliminar este evento');
+    }
+
+    await this.prisma.event.delete({ where: { id } });
+
     return {
       message: 'Evento eliminado exitosamente',
       event: { id },
