@@ -6,7 +6,8 @@
       "services": "Services",
       "communities": "Communities",
       "exchanges": "My Exchanges",
-      "faq": "FAQ"
+      "faq": "FAQ",
+      "organizations": "Organizations"
     },
     "search": {
       "placeholder": "Search services..."
@@ -174,30 +175,30 @@
     "empty_states": {
       "no_services": "No services found",
       "no_my_services": "You haven't published any services yet",
-    "create_first": "Publish your first service"
-  },
-  "ratings": {
-    "title": "Ratings",
-    "rate_service": "Rate service",
-    "rating": "Rating",
-    "comment": "Comment",
-    "comment_placeholder": "Share your experience with this service...",
-    "submit": "Submit rating",
-    "submitting": "Submitting...",
-    "cancel": "Cancel",
-    "required": "Please select a rating",
-    "success": "Rating submitted successfully",
-    "error": "Error submitting rating",
-    "ratings_count": "ratings",
-    "rating_count": "rating",
-    "no_ratings": "This service has no ratings yet",
-    "view_all": "View all ratings",
-    "excellent": "Excellent",
-    "good": "Good",
-    "average": "Average",
-    "poor": "Poor",
-    "terrible": "Terrible"
-  },
+      "create_first": "Publish your first service"
+    },
+    "ratings": {
+      "title": "Ratings",
+      "rate_service": "Rate service",
+      "rating": "Rating",
+      "comment": "Comment",
+      "comment_placeholder": "Share your experience with this service...",
+      "submit": "Submit rating",
+      "submitting": "Submitting...",
+      "cancel": "Cancel",
+      "required": "Please select a rating",
+      "success": "Rating submitted successfully",
+      "error": "Error submitting rating",
+      "ratings_count": "ratings",
+      "rating_count": "rating",
+      "no_ratings": "This service has no ratings yet",
+      "view_all": "View all ratings",
+      "excellent": "Excellent",
+      "good": "Good",
+      "average": "Average",
+      "poor": "Poor",
+      "terrible": "Terrible"
+    },
     "filters": {
       "title": "Filters",
       "category": "Category",
@@ -262,7 +263,7 @@
       },
       "availability_options": {
         "morning": "Morning",
-        "afternoon": "Afternoon", 
+        "afternoon": "Afternoon",
         "evening": "Evening",
         "morning_afternoon": "Morning and Afternoon",
         "afternoon_evening": "Afternoon and Evening",
@@ -456,13 +457,19 @@
     "accountInfo": "Account Information",
     "accountDescription": "Information about your account and time credits.",
     "accountDetails": "Account Details",
-    "timeCredits": "Time Credits",
+    "timeCredits": {
+      "title": "Time Credits",
+      "credits": "credits"
+    },
     "timeCreditsDescription": "Minutes available for exchanges",
     "role": "Role",
     "roleDescription": "Your role on the platform",
     "memberSince": "Member since",
     "memberSinceDescription": "Registration date on the platform",
-    "notifications": "Notifications",
+    "notifications": {
+      "description": "Coming soon: notification settings.",
+      "comingSoon": "COMING SOON"
+    },
     "notificationsDescription": "Coming soon: notification settings.",
     "comingSoon": "Coming Soon",
     "notificationsComingSoon": "Notification settings will be available in future updates.",
@@ -505,14 +512,6 @@
     "image": {
       "edit": "Edit"
     },
-    "timeCredits": {
-      "title": "Time Credits",
-      "credits": "credits"
-    },
-    "notifications": {
-      "description": "Coming soon: notification settings.",
-      "comingSoon": "COMING SOON"
-    },
     "success": {
       "message": "Profile updated successfully"
     },
@@ -521,6 +520,37 @@
       "description": "There was a problem loading your profile. You can try logging out and logging back in, or reload the page.",
       "logoutAndRetry": "Logout and Retry",
       "reload": "Reload Page"
+    }
+  },
+  "communities": {
+    "title": "Communities",
+    "subtitle": "Discover and join communities that match your interests",
+    "create": "Create community",
+    "edit": "Edit community",
+    "delete": "Delete community",
+    "public": "Public",
+    "private": "Private",
+    "view_details": "View community",
+    "no_description": "No description yet",
+    "topics": "Topics",
+    "rules": "Rules",
+    "resources": "Resources",
+    "tabs": {
+      "all": "All",
+      "my_communities": "My communities",
+      "public": "Public"
+    },
+    "empty_states": {
+      "no_communities": "No communities found",
+      "no_my_communities": "You have not created any communities yet",
+      "create_first": "Create your first community"
+    },
+    "not_found": "No communities found",
+    "error": "Error loading communities",
+    "success": {
+      "created": "Community created successfully",
+      "updated": "Community updated successfully",
+      "deleted": "Community deleted successfully"
     }
   }
 }

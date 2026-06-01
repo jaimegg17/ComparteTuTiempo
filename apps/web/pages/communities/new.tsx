@@ -36,7 +36,7 @@ export default function NewCommunityPage() {
         apiClient.setToken(accessToken);
       }
 
-      const response = await communitiesApi.createCommunity(communityFormToPayload(values, user.sub));
+      const response = await communitiesApi.createCommunity(communityFormToPayload(values, user.sub, 'COMMUNITY'));
       await router.push(`/communities/${response.community.id}`);
     } catch (submitError) {
       setError(
@@ -85,6 +85,13 @@ export default function NewCommunityPage() {
           )}
 
           <CommunityForm
+            initialValues={{
+              name: '',
+              description: '',
+              topicsText: '',
+              rulesText: '',
+              isPrivate: false,
+            }}
             submitting={submitting}
             submitLabel="Crear comunidad"
             serverError={error}

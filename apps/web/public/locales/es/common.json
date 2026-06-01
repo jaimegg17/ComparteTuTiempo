@@ -6,7 +6,8 @@
       "services": "Servicios",
       "communities": "Comunidades",
       "exchanges": "Mis Intercambios",
-      "faq": "FAQ"
+      "faq": "FAQ",
+      "organizations": "Organizaciones"
     },
     "search": {
       "placeholder": "Buscar servicios..."
@@ -174,30 +175,30 @@
     "empty_states": {
       "no_services": "No se encontraron servicios",
       "no_my_services": "Aún no has publicado ningún servicio",
-    "create_first": "Publica tu primer servicio"
-  },
-  "ratings": {
-    "title": "Valoraciones",
-    "rate_service": "Valorar servicio",
-    "rating": "Valoración",
-    "comment": "Comentario",
-    "comment_placeholder": "Comparte tu experiencia con este servicio...",
-    "submit": "Enviar valoración",
-    "submitting": "Enviando...",
-    "cancel": "Cancelar",
-    "required": "Por favor, selecciona una valoración",
-    "success": "Valoración enviada exitosamente",
-    "error": "Error al enviar la valoración",
-    "ratings_count": "valoraciones",
-    "rating_count": "valoración",
-    "no_ratings": "Este servicio aún no tiene valoraciones",
-    "view_all": "Ver todas las valoraciones",
-    "excellent": "Excelente",
-    "good": "Bueno",
-    "average": "Regular",
-    "poor": "Malo",
-    "terrible": "Muy malo"
-  },
+      "create_first": "Publica tu primer servicio"
+    },
+    "ratings": {
+      "title": "Valoraciones",
+      "rate_service": "Valorar servicio",
+      "rating": "Valoración",
+      "comment": "Comentario",
+      "comment_placeholder": "Comparte tu experiencia con este servicio...",
+      "submit": "Enviar valoración",
+      "submitting": "Enviando...",
+      "cancel": "Cancelar",
+      "required": "Por favor, selecciona una valoración",
+      "success": "Valoración enviada exitosamente",
+      "error": "Error al enviar la valoración",
+      "ratings_count": "valoraciones",
+      "rating_count": "valoración",
+      "no_ratings": "Este servicio aún no tiene valoraciones",
+      "view_all": "Ver todas las valoraciones",
+      "excellent": "Excelente",
+      "good": "Bueno",
+      "average": "Regular",
+      "poor": "Malo",
+      "terrible": "Muy malo"
+    },
     "filters": {
       "title": "Filtros",
       "category": "Categoría",
@@ -389,7 +390,7 @@
     "delete": "Eliminar Comunidad",
     "public": "Pública",
     "private": "Privada",
-    "view_details": "Ver Detalles",
+    "view_details": "Ver comunidad",
     "no_description": "Sin descripción",
     "tabs": {
       "all": "Todas",
@@ -407,7 +408,10 @@
       "created": "Comunidad creada exitosamente",
       "updated": "Comunidad actualizada exitosamente",
       "deleted": "Comunidad eliminada exitosamente"
-    }
+    },
+    "topics": "Temas",
+    "rules": "Reglas",
+    "resources": "Recursos"
   },
   "auth": {
     "login": "Iniciar Sesión",
@@ -484,13 +488,19 @@
     "accountInfo": "Información de la Cuenta",
     "accountDescription": "Información sobre tu cuenta y créditos de tiempo.",
     "accountDetails": "Detalles de la Cuenta",
-    "timeCredits": "Créditos de Tiempo",
+    "timeCredits": {
+      "title": "Créditos de Tiempo",
+      "credits": "créditos"
+    },
     "timeCreditsDescription": "Minutos disponibles para intercambios",
     "role": "Rol",
     "roleDescription": "Tu rol en la plataforma",
     "memberSince": "Miembro desde",
     "memberSinceDescription": "Fecha de registro en la plataforma",
-    "notifications": "Notificaciones",
+    "notifications": {
+      "description": "Próximamente: configuración de notificaciones.",
+      "comingSoon": "PRÓXIMAMENTE"
+    },
     "notificationsDescription": "Próximamente: configuración de notificaciones.",
     "comingSoon": "Próximamente",
     "notificationsComingSoon": "La configuración de notificaciones estará disponible en futuras actualizaciones.",
@@ -532,14 +542,6 @@
     },
     "image": {
       "edit": "Editar"
-    },
-    "timeCredits": {
-      "title": "Créditos de Tiempo",
-      "credits": "créditos"
-    },
-    "notifications": {
-      "description": "Próximamente: configuración de notificaciones.",
-      "comingSoon": "PRÓXIMAMENTE"
     },
     "success": {
       "message": "Perfil actualizado correctamente"
