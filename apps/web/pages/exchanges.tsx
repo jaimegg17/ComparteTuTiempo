@@ -13,6 +13,7 @@ import { Layout } from '@/components/Layout';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { ExchangeCard, ExchangeFilters } from '@/components/exchanges';
 import type { Exchange, ExchangeState } from '@/types/exchange.types';
+import { buildApiUrl } from '@/shared/api/config';
 
 const STATE_COPY: Partial<Record<ExchangeState, string>> = {
   PENDING: 'Pendiente',
@@ -64,7 +65,7 @@ export default function ExchangesPage() {
         params.append('requestedById', user.sub!);
       }
 
-      const response = await fetch(`http://localhost:3001/api/exchanges?${params.toString()}`, {
+      const response = await fetch(buildApiUrl(`/exchanges?${params.toString()}`), {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -119,7 +120,7 @@ export default function ExchangesPage() {
       setNotice(null);
       const token = await fetch('/api/auth/token').then((res) => res.json()).then((data) => data.accessToken);
 
-      const response = await fetch(`http://localhost:3001/api/exchanges/${id}`, {
+      const response = await fetch(buildApiUrl(`/exchanges/${id}`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

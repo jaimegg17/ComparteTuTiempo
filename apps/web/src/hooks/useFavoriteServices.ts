@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from './useAuth';
+import { buildApiUrl } from '@/shared/api/config';
 
 const storageKeyFor = (userId?: string | null) => `ctt:favorites:${userId || 'guest'}`;
 
@@ -31,7 +32,7 @@ export function useFavoriteServices(userId?: string | null) {
           return;
         }
 
-        const response = await fetch('http://localhost:3001/api/users/me/favorites', {
+        const response = await fetch(buildApiUrl('/users/me/favorites'), {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -82,7 +83,7 @@ export function useFavoriteServices(userId?: string | null) {
         return alreadyFavorite;
       }
 
-      const response = await fetch(`http://localhost:3001/api/users/me/favorites/${serviceId}`, {
+      const response = await fetch(buildApiUrl(`/users/me/favorites/${serviceId}`), {
         method: alreadyFavorite ? 'DELETE' : 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

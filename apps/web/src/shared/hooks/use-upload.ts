@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import { uploadApi } from '../api/upload';
 import { apiClient } from '../api/client';
 import { useAuth } from '@/hooks/useAuth';
+import { API_BASE_URL } from '../api/config';
 
 interface UploadError {
   status?: number;
@@ -19,7 +20,6 @@ interface SafeUploadFailure {
   error: unknown;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
 /**
  * Hook to upload an image

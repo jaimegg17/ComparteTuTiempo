@@ -14,6 +14,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useFavoriteServices } from '@/hooks/useFavoriteServices';
 import Script from 'next/script';
 import { FilterListRounded, CloseRounded, MapRounded, ViewListRounded, PlaceRounded } from '@mui/icons-material';
+import { buildApiUrl } from '@/shared/api/config';
 
 type MapCenter = { lat: number; lng: number };
 
@@ -220,10 +221,10 @@ export default function ServicesPage() {
       const endpoint = nearbyEnabled && lat !== null && lng !== null
         ? '/api/services/nearby/search'
         : '/api/services';
-      let url = `http://localhost:3001${endpoint}?${params.toString()}`;
+      let url = buildApiUrl(`${endpoint.replace(/^\/api/, '')}?${params.toString()}`);
       if (activeTab === 1 && user?.sub && accessToken) {
         params.append('userId', user.sub);
-        url = `http://localhost:3001${endpoint}?${params.toString()}`;
+        url = buildApiUrl(`${endpoint.replace(/^\/api/, '')}?${params.toString()}`);
       }
 
       const response = await fetch(url, {

@@ -21,6 +21,7 @@ import { ServiceImageSection } from '@/components/services/ServiceImageSection';
 import { ServiceInfoTabs } from '@/components/services/ServiceInfoTabs';
 import { ServiceRequestDialog } from '@/components/services/ServiceRequestDialog';
 import { useFavoriteServices } from '@/hooks/useFavoriteServices';
+import { buildApiUrl } from '@/shared/api/config';
 import type { Service } from '@/types/service.types';
 
 export default function ServiceDetailPage() {
@@ -48,7 +49,7 @@ export default function ServiceDetailPage() {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`http://localhost:3001/api/services/${id}`);
+        const response = await fetch(buildApiUrl(`/services/${id}`));
         if (!response.ok) {
           throw new Error('Error al cargar el servicio');
         }
@@ -86,7 +87,7 @@ export default function ServiceDetailPage() {
 
       const token = await fetch('/api/auth/token').then((res) => res.json()).then((data) => data.accessToken);
 
-      const response = await fetch('http://localhost:3001/api/exchanges', {
+      const response = await fetch(buildApiUrl('/exchanges'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

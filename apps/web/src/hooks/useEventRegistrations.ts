@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from './useAuth';
+import { buildApiUrl } from '@/shared/api/config';
 
 const storageKeyFor = (userId?: string | null) => `ctt:event-registrations:${userId || 'guest'}`;
 
@@ -30,7 +31,7 @@ export function useEventRegistrations(userId?: string | null) {
           return;
         }
 
-        const response = await fetch('http://localhost:3001/api/events/me/registrations', {
+        const response = await fetch(buildApiUrl('/events/me/registrations'), {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -78,7 +79,7 @@ export function useEventRegistrations(userId?: string | null) {
         return alreadyRegistered;
       }
 
-      const response = await fetch(`http://localhost:3001/api/events/${eventId}/register`, {
+      const response = await fetch(buildApiUrl(`/events/${eventId}/register`), {
         method: alreadyRegistered ? 'DELETE' : 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

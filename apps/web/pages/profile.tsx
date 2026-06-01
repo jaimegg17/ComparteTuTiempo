@@ -14,6 +14,7 @@ import { useFavoriteServices } from '@/hooks/useFavoriteServices';
 import { useNotificationPreferences } from '@/hooks/useNotificationPreferences';
 import { useEventRegistrations } from '@/hooks/useEventRegistrations';
 import { useNotifications } from '@/hooks/useNotifications';
+import { buildApiUrl } from '@/shared/api/config';
 
 interface ProfileFormValues {
   name: string;
@@ -159,7 +160,7 @@ const ProfilePage = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:3001/api/users/profile/${user.sub}`, {
+      const response = await fetch(buildApiUrl(`/users/profile/${user.sub}`), {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -205,13 +206,13 @@ const ProfilePage = () => {
       if (!token) return;
 
       const [servicesResponse, requestedResponse, offeredResponse] = await Promise.all([
-        fetch(`http://localhost:3001/api/services?userId=${encodeURIComponent(user.sub)}`, {
+        fetch(buildApiUrl(`/services?userId=${encodeURIComponent(user.sub)}`), {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch(`http://localhost:3001/api/exchanges?requestedById=${encodeURIComponent(user.sub)}`, {
+        fetch(buildApiUrl(`/exchanges?requestedById=${encodeURIComponent(user.sub)}`), {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch(`http://localhost:3001/api/exchanges?offeredById=${encodeURIComponent(user.sub)}`, {
+        fetch(buildApiUrl(`/exchanges?offeredById=${encodeURIComponent(user.sub)}`), {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -266,7 +267,7 @@ const ProfilePage = () => {
       if (!token) token = await getAccessToken();
       if (!token) throw new Error('No access token available');
 
-      const response = await fetch(`http://localhost:3001/api/users/profile/${user.sub}`, {
+      const response = await fetch(buildApiUrl(`/users/profile/${user.sub}`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -19,6 +19,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { useToast } from '@/components/ui/ToastProvider';
 import { getFriendlyErrorMessage } from '@/shared/utils/error-messages';
 import type { Service } from '@/types/service.types';
+import { buildApiUrl } from '@/shared/api/config';
 
 const CATEGORIES = ['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'ARTE', 'OTROS'];
 const TYPES = ['PRESENCIAL', 'VIRTUAL', 'HIBRIDO'];
@@ -135,7 +136,7 @@ export default function EditServicePage() {
     const fetchService = async () => {
       try {
         setLoadingService(true);
-        const response = await fetch(`http://localhost:3001/api/services/${id}`);
+        const response = await fetch(buildApiUrl(`/services/${id}`));
         if (!response.ok) throw new Error('No se pudo cargar el servicio');
         const data = await response.json();
         const service: Service = data.service;
@@ -308,7 +309,7 @@ export default function EditServicePage() {
       const tokenData = await tokenResponse.json();
       const token = tokenData.accessToken;
 
-      const response = await fetch(`http://localhost:3001/api/services/${id}`, {
+      const response = await fetch(buildApiUrl(`/services/${id}`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

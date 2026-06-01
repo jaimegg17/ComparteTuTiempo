@@ -20,6 +20,7 @@ import { ImageUpload } from '@/components/ui/ImageUpload';
 import { useUploadImage } from '@/shared/hooks/use-upload';
 import { getFriendlyErrorMessage } from '@/shared/utils/error-messages';
 import { useToast } from '@/components/ui/ToastProvider';
+import { buildApiUrl } from '@/shared/api/config';
 
 const CATEGORIES = ['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'ARTE', 'OTROS'];
 const TYPES = ['PRESENCIAL', 'VIRTUAL', 'HIBRIDO'];
@@ -310,7 +311,7 @@ export default function CreateServicePage() {
       const tokenData = await tokenResponse.json();
       const token = tokenData.accessToken;
 
-      const response = await fetch('http://localhost:3001/api/services', {
+      const response = await fetch(buildApiUrl('/services'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

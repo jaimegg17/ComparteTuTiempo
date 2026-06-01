@@ -18,8 +18,16 @@ async function bootstrap() {
     prefix: '/uploads/',
   });
   
+  const configuredOrigins = process.env.FRONTEND_URL || process.env.CORS_ORIGIN || '';
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:3002',
+    'http://localhost:3004',
+    ...configuredOrigins.split(',').map((origin) => origin.trim()).filter(Boolean),
+  ];
+
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:3002', 'http://localhost:3004'],
+    origin: allowedOrigins,
     credentials: true,
   });
 

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { useAuth } from './useAuth';
+import { buildApiUrl } from '@/shared/api/config';
 
 export interface UserProfile {
   id: string;
@@ -40,7 +41,7 @@ export const useUserProfile = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:3001/api/users/me`, {
+      const response = await fetch(buildApiUrl('/users/me'), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

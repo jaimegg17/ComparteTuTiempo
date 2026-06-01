@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from './useAuth';
+import { buildApiUrl } from '@/shared/api/config';
 
 export interface UserNotification {
   id: number;
@@ -35,7 +36,7 @@ export function useNotifications(userId?: string | null) {
       const token = accessToken || await getAccessToken();
       if (!token) return;
 
-      const response = await fetch('http://localhost:3001/api/users/me/notifications', {
+      const response = await fetch(buildApiUrl('/users/me/notifications'), {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -66,7 +67,7 @@ export function useNotifications(userId?: string | null) {
     const token = accessToken || await getAccessToken();
     if (!token) return;
 
-    const response = await fetch(`http://localhost:3001/api/users/me/notifications/${notificationId}/read`, {
+    const response = await fetch(buildApiUrl(`/users/me/notifications/${notificationId}/read`), {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -93,7 +94,7 @@ export function useNotifications(userId?: string | null) {
     const token = accessToken || await getAccessToken();
     if (!token) return;
 
-    const response = await fetch('http://localhost:3001/api/users/me/notifications/read-all', {
+    const response = await fetch(buildApiUrl('/users/me/notifications/read-all'), {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
