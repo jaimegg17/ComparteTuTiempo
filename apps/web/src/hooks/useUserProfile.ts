@@ -6,6 +6,7 @@ export interface UserProfile {
   id: string;
   name: string;
   email: string;
+  role?: 'USER' | 'MODERATOR' | 'ADMIN';
   imageUrl?: string | null;
   bio?: string | null;
   location?: string | null;
@@ -39,7 +40,7 @@ export const useUserProfile = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:3001/api/users/${user.sub}`, {
+      const response = await fetch(`http://localhost:3001/api/users/me`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -60,31 +61,18 @@ export const useUserProfile = () => {
   }, [user?.sub, accessToken, getAccessToken]);
 
   useEffect(() => {
-    if (user && accessToken && !profileLoading) {
-      loadUserProfile();
+    if (user && accessToken) {
+      void loadUserProfile();
     }
-  }, [user, accessToken, profileLoading, loadUserProfile]);
+  }, [user, accessToken, loadUserProfile]);
 
   const updateUserProfile = (newProfile: Partial<UserProfile>) => {
-    console.log('🔄 Updating user profile context:', newProfile);
-    setUserProfile(prev => {
-      const updated = prev ? { ...prev, ...newProfile } : null;
-      console.log('🔄 Updated profile context:', updated);
-      return updated;
-    });
+    setUserProfile(prev => prev ? { ...prev, ...newProfile } : null);
   };
 
   const displayName = userProfile?.name || user?.name || '';
   const displayEmail = userProfile?.email || user?.email || '';
   const displayImage = userProfile?.imageUrl || user?.picture || undefined;
-
-  console.log('🔄 useUserProfile return:', {
-    userProfile,
-    displayName,
-    displayEmail,
-    displayImage,
-    auth0Image: user?.picture
-  });
 
   return {
     userProfile,
