@@ -3,7 +3,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagg
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
-import { IsString, IsOptional, IsEmail, MaxLength, IsArray } from 'class-validator';
+import { IsString, IsOptional, IsEmail, MaxLength, IsArray, IsDateString } from 'class-validator';
 
 export class UpdateUserDto {
   @IsString()
@@ -36,6 +36,20 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   imageUrl?: string;
+
+  @IsOptional()
+  @IsDateString({}, { message: 'Please provide a valid date of birth' })
+  dateOfBirth?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50, { message: 'Gender must not exceed 50 characters' })
+  gender?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(10, { message: 'Preferred language must not exceed 10 characters' })
+  preferredLanguage?: string;
 }
 
 @ApiTags('users')
@@ -129,6 +143,9 @@ export class UsersController {
         imageUrl: true,
         role: true,
         timeCredits: true,
+        dateOfBirth: true,
+        gender: true,
+        preferredLanguage: true,
         createdAt: true,
         updatedAt: true,
         _count: {
@@ -384,12 +401,15 @@ export class UsersController {
       where: { id },
       data: {
         name: updateUserDto.name,
-        email: updateUserDto.email,
+        email: existingUser.email,
         bio: updateUserDto.bio,
         location: updateUserDto.location,
         phoneNumber: updateUserDto.phoneNumber,
         skills: updateUserDto.skills || [],
         imageUrl: updateUserDto.imageUrl,
+        dateOfBirth: updateUserDto.dateOfBirth ? new Date(updateUserDto.dateOfBirth) : null,
+        gender: updateUserDto.gender || null,
+        preferredLanguage: updateUserDto.preferredLanguage || 'es',
       },
       select: {
         id: true,
@@ -402,6 +422,9 @@ export class UsersController {
         imageUrl: true,
         role: true,
         timeCredits: true,
+        dateOfBirth: true,
+        gender: true,
+        preferredLanguage: true,
         createdAt: true,
         updatedAt: true,
       },

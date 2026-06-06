@@ -87,8 +87,9 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
             type="email"
             placeholder="tu@email.com"
             value={formData.email}
-            onChange={(e) => onInputChange('email', e.target.value)}
             fullWidth
+            disabled
+            helperText="El email proviene de tu cuenta de inicio de sesión y no se puede editar aquí."
           />
 
           <TextField

@@ -6,6 +6,8 @@ import type {
   CommunityListResponse,
 } from '@comparte-tu-tiempo/contracts';
 
+type CommunityCreateRequest = Omit<CommunityCreate, 'creatorId'>;
+
 type RawCommunity = Omit<Community, 'createdAt' | 'updatedAt'> & {
   createdAt: string | Date;
   updatedAt: string | Date;
@@ -69,7 +71,7 @@ export const communitiesApi = {
   },
 
   // Crear nueva comunidad
-  async createCommunity(data: CommunityCreate): Promise<{ community: Community }> {
+  async createCommunity(data: CommunityCreateRequest): Promise<{ community: Community }> {
     const response = await apiClient.post<{ community?: RawCommunity }>('/communities', data);
     if (!response?.community) {
       throw new Error('No se pudo crear la comunidad');

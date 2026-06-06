@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Box, Typography, CircularProgress, Button, Chip, Stack } from '@mui/material';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { useErrorHandling } from '@/hooks/useErrorHandling';
@@ -64,6 +64,11 @@ const defaultValues: ProfileFormValues = {
   preferredLanguage: 'es',
 };
 
+const toDateInputValue = (value?: string | null) => {
+  if (!value) return '';
+  return value.includes('T') ? value.slice(0, 10) : value;
+};
+
 const emptyStats: ProfileStats = {
   ratingsCount: 0,
   completedExchanges: 0,
@@ -79,6 +84,8 @@ const ProfilePage = () => {
   const [profileData, setProfileData] = useState<UserProfileData | null>(null);
   const [formData, setFormData] = useState<ProfileFormValues>(defaultValues);
   const [stats, setStats] = useState<ProfileStats>(emptyStats);
+  const profileLoadedRef = useRef(false);
+  const formDirtyRef = useRef(false);
   const uploadImage = useUploadImage();
   const { favoritesCount } = useFavoriteServices(user?.sub);
   const { preferences, setPreference } = useNotificationPreferences(user?.sub);
@@ -103,16 +110,19 @@ const ProfilePage = () => {
   }, [formData, user?.email, user?.picture]);
 
   const handleInputChange = (field: keyof ProfileFormValues, value: string | string[]) => {
+    formDirtyRef.current = true;
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSkillAdd = (skill: string) => {
     if (skill && !formData.skills.includes(skill)) {
+      formDirtyRef.current = true;
       setFormData((prev) => ({ ...prev, skills: [...prev.skills, skill] }));
     }
   };
 
   const handleSkillRemove = (index: number) => {
+    formDirtyRef.current = true;
     setFormData((prev) => ({
       ...prev,
       skills: prev.skills.filter((_, i) => i !== index),
@@ -182,10 +192,12 @@ const ProfilePage = () => {
           phoneNumber: userData.phoneNumber || '',
           skills: userData.skills || [],
           imageUrl: userData.imageUrl || user.picture || '',
-          dateOfBirth: userData.dateOfBirth || '',
+          dateOfBirth: toDateInputValue(userData.dateOfBirth),
           gender: userData.gender || '',
           preferredLanguage: userData.preferredLanguage || 'es',
         });
+        profileLoadedRef.current = true;
+        formDirtyRef.current = false;
       } else if (response.status === 401) {
         window.location.href = '/api/auth/login';
       } else {
@@ -249,7 +261,9 @@ const ProfilePage = () => {
   useEffect(() => {
     if (!isLoading) {
       if (user) {
-        void loadProfile();
+        if (!profileLoadedRef.current && !formDirtyRef.current) {
+          void loadProfile();
+        }
         void loadStats();
       } else {
         window.location.href = '/api/auth/login';
@@ -275,7 +289,7 @@ const ProfilePage = () => {
         },
         body: JSON.stringify({
           ...formData,
-          email: user.email || formData.email,
+          email: user.email || profileData?.email || formData.email,
         }),
       });
 
@@ -284,6 +298,20 @@ const ProfilePage = () => {
         const updatedUser = result.user as UserProfileData | undefined;
         if (updatedUser) {
           setProfileData(updatedUser);
+          setFormData((prev) => ({
+            ...prev,
+            ...updatedUser,
+            email: user.email || updatedUser.email || prev.email,
+            bio: updatedUser.bio || '',
+            location: updatedUser.location || '',
+            phoneNumber: updatedUser.phoneNumber || '',
+            skills: updatedUser.skills || [],
+            imageUrl: updatedUser.imageUrl || '',
+            dateOfBirth: toDateInputValue(updatedUser.dateOfBirth),
+            gender: updatedUser.gender || '',
+            preferredLanguage: updatedUser.preferredLanguage || 'es',
+          }));
+          formDirtyRef.current = false;
           updateUserProfile(updatedUser);
         }
         setSuccess(true);

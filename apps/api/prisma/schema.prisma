@@ -16,13 +16,16 @@ model User {
   email       String   @unique
   password    String
   name        String
-  phoneNumber String?
-  location    String?
-  bio         String?
-  skills      String[] @default([])
-  imageUrl    String?
-  role        UserRole @default(USER)
-  timeCredits Int      @default(0) // Minutes available
+  phoneNumber       String?
+  location          String?
+  bio               String?
+  skills            String[] @default([])
+  imageUrl          String?
+  role              UserRole @default(USER)
+  timeCredits       Int      @default(300) // Minutes available
+  dateOfBirth       DateTime?
+  gender            String?
+  preferredLanguage String?  @default("es")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

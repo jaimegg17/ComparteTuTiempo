@@ -28,7 +28,7 @@ export class UserUpsertInterceptor implements NestInterceptor {
           email: user.email || `${user.sub}@example.com`,
           password: 'auth0-user', // Placeholder password for Auth0 users
           name: user.name || 'Usuario',
-          timeCredits: 0, // Default time credits for new users
+          timeCredits: 300, // 5 initial hours in minutes so new users can start exchanging
         },
       });
     }

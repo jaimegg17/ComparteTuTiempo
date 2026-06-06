@@ -48,11 +48,13 @@ const NAME_MAX = 100;
 const DESCRIPTION_MIN = 10;
 const DESCRIPTION_MAX = 500;
 
+type CommunityCreateRequest = Omit<CommunityCreate, 'creatorId'>;
+
 const toCreatePayload = (
   values: CommunityFormValues,
-  creatorId: string,
+  _creatorId: string,
   kind: CommunityKind = 'COMMUNITY',
-): CommunityCreate => ({
+): CommunityCreateRequest => ({
   name: values.name.trim(),
   description: values.description.trim(),
   topics: values.topicsText
@@ -66,7 +68,6 @@ const toCreatePayload = (
   resources: [],
   kind,
   isPrivate: values.isPrivate,
-  creatorId,
 });
 
 export const communityFormToPayload = toCreatePayload;
