@@ -17,6 +17,7 @@ export const servicesApi = {
     if (query.type) searchParams.append('type', query.type);
     if (query.intent) searchParams.append('intent', query.intent);
     if (query.status) searchParams.append('status', query.status);
+    if (query.communityId !== undefined) searchParams.append('communityId', query.communityId.toString());
     if (query.nearLat !== undefined) searchParams.append('nearLat', query.nearLat.toString());
     if (query.nearLng !== undefined) searchParams.append('nearLng', query.nearLng.toString());
     if (query.radiusKm !== undefined) searchParams.append('radiusKm', query.radiusKm.toString());
@@ -35,6 +36,7 @@ export const servicesApi = {
     if (query.type) searchParams.append('type', query.type);
     if (query.intent) searchParams.append('intent', query.intent);
     if (query.status) searchParams.append('status', query.status);
+    if (query.communityId !== undefined) searchParams.append('communityId', query.communityId.toString());
     if (query.nearLat !== undefined) searchParams.append('nearLat', query.nearLat.toString());
     if (query.nearLng !== undefined) searchParams.append('nearLng', query.nearLng.toString());
     if (query.radiusKm !== undefined) searchParams.append('radiusKm', query.radiusKm.toString());

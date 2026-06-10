@@ -21,6 +21,8 @@ import { useUploadImage } from '@/shared/hooks/use-upload';
 import { getFriendlyErrorMessage } from '@/shared/utils/error-messages';
 import { useToast } from '@/components/ui/ToastProvider';
 import { buildApiUrl } from '@/shared/api/config';
+import { communitiesApi } from '@/shared/api/communities';
+import type { Community } from '@comparte-tu-tiempo/contracts';
 
 const CATEGORIES = ['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'ARTE', 'OTROS'];
 const TYPES = ['PRESENCIAL', 'VIRTUAL', 'HIBRIDO'];
@@ -42,6 +44,7 @@ interface FormData {
   longitude?: number | null;
   formattedAddress?: string;
   placeId?: string;
+  communityId?: string;
 }
 
 interface FormErrors {
@@ -69,6 +72,7 @@ export default function CreateServicePage() {
     location: '',
     availability: '',
     imageUrl: '',
+    communityId: '',
   });
   
   const [errors, setErrors] = useState<FormErrors>({});
@@ -77,11 +81,27 @@ export default function CreateServicePage() {
   const [success, setSuccess] = useState(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   const [mapsLoaded, setMapsLoaded] = useState(false);
+  const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
   const [locating, setLocating] = useState(false);
   const locationInputRef = useRef<HTMLInputElement | null>(null);
   const uploadImage = useUploadImage();
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   const { showToast } = useToast();
+
+  useEffect(() => {
+    const rawCommunityId = router.query?.communityId;
+    const communityId = Array.isArray(rawCommunityId) ? rawCommunityId[0] : rawCommunityId;
+    if (!communityId) return;
+
+    const parsedCommunityId = Number(communityId);
+    if (!Number.isInteger(parsedCommunityId) || parsedCommunityId <= 0) return;
+
+    setFormData((prev) => ({ ...prev, communityId: String(parsedCommunityId) }));
+    void communitiesApi
+      .getCommunity(parsedCommunityId)
+      .then((response) => setSelectedCommunity(response.community))
+      .catch(() => setSelectedCommunity(null));
+  }, [router.query?.communityId]);
 
   type PlaceResult = {
     name?: string;
@@ -332,6 +352,7 @@ export default function CreateServicePage() {
           placeId: formData.placeId,
           availability: formData.availability || undefined,
           imageUrl: imageUrl || undefined,
+          communityId: formData.communityId ? Number(formData.communityId) : undefined,
           price: parseFloat(formData.duration) * 60, // Duration in minutes
         }),
       });
@@ -471,6 +492,12 @@ export default function CreateServicePage() {
                   }}
                   disabled={loading || success}
                 />
+
+                {selectedCommunity && (
+                  <Alert severity="info">
+                    {t('services.form.communityNotice', { name: selectedCommunity.name })}
+                  </Alert>
+                )}
 
                 {/* Tipo de publicación, categoría y formato */}
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>

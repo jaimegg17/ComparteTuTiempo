@@ -23,6 +23,7 @@ export const ServiceSchema = z.object({
   price: z.number().positive('El precio debe ser positivo'),
   distanceKm: z.number().nullable().optional(),
   userId: z.string(),
+  communityId: z.number().nullable().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -43,6 +44,7 @@ export const ServiceCreateSchema = z.object({
   intent: z.enum(['OFFER', 'REQUEST']).default('OFFER'),
   price: z.number().positive('El precio debe ser positivo'),
   imageUrl: z.string().url('La URL de la imagen debe ser válida').optional().nullable(),
+  communityId: z.number().positive().optional().nullable(),
 });
 
 export const ServiceUpdateSchema = z.object({
@@ -62,6 +64,7 @@ export const ServiceUpdateSchema = z.object({
   status: z.enum(['ACTIVO', 'INACTIVO', 'COMPLETADO']).optional(),
   price: z.number().positive('El precio debe ser positivo').optional(),
   imageUrl: z.string().url('La URL de la imagen debe ser válida').optional().nullable(),
+  communityId: z.number().positive().optional().nullable(),
 });
 
 export const ServiceListQuerySchema = z.object({
@@ -77,6 +80,7 @@ export const ServiceListQuerySchema = z.object({
   nearLng: z.number().optional(),
   radiusKm: z.number().positive().optional(),
   userId: z.string().optional(), // Filter by user ID
+  communityId: z.number().positive().optional(),
   page: z.number().min(1, 'La página debe ser mayor a 0').default(1),
   pageSize: z.number().min(1, 'El tamaño de página debe ser mayor a 0').max(100, 'El tamaño de página no puede exceder 100').default(20),
 });

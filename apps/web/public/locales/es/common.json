@@ -275,7 +275,8 @@
         "subtitle": "Arrastra y suelta una imagen o haz clic para explorar (máx. 10MB)",
         "button": "Elegir Imagen",
         "help": "Dimensiones: mínimo 50x50px, máximo 6000x6000px. Tamaño máximo: 10MB."
-      }
+      },
+      "communityNotice": "Este servicio se publicará dentro de la comunidad “{{name}}”."
     },
     "card": {
       "request_service": "Solicitar Servicio",
@@ -472,7 +473,8 @@
       "roleError": "No se pudo actualizar el rol del miembro.",
       "statusApproved": "Solicitud aprobada correctamente.",
       "statusRejected": "Solicitud rechazada correctamente.",
-      "statusError": "No se pudo actualizar el estado de la solicitud."
+      "statusError": "No se pudo actualizar el estado de la solicitud.",
+      "publishService": "Publicar servicio"
     },
     "editPage": {
       "organizationPanel": "Panel de gestión de la organización",
@@ -564,6 +566,11 @@
       "approve": "Aprobar",
       "reject": "Rechazar",
       "requested": "Solicitud: {{date}}"
+    },
+    "services": {
+      "title": "Servicios de la comunidad",
+      "description": "Ofertas y solicitudes publicadas dentro de este espacio por sus miembros.",
+      "empty": "Todavía no hay servicios asociados a esta comunidad."
     }
   },
   "auth": {

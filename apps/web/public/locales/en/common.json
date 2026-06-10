@@ -275,7 +275,8 @@
         "subtitle": "Drag and drop an image or click to browse (max 10MB)",
         "button": "Choose Image",
         "help": "Dimensions: min 50x50px, max 6000x6000px. Max size: 10MB."
-      }
+      },
+      "communityNotice": "This service will be published inside the community “{{name}}”."
     },
     "card": {
       "request_service": "Request Service",
@@ -634,7 +635,8 @@
       "roleError": "The member role could not be updated.",
       "statusApproved": "Request approved successfully.",
       "statusRejected": "Request rejected successfully.",
-      "statusError": "The request status could not be updated."
+      "statusError": "The request status could not be updated.",
+      "publishService": "Publish service"
     },
     "editPage": {
       "organizationPanel": "Organization management panel",
@@ -726,6 +728,11 @@
       "approve": "Approve",
       "reject": "Reject",
       "requested": "Requested: {{date}}"
+    },
+    "services": {
+      "title": "Community services",
+      "description": "Offers and requests published in this space by its members.",
+      "empty": "There are no services associated with this community yet."
     }
   },
   "organizations": {

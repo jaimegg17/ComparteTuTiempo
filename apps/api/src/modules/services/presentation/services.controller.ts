@@ -79,6 +79,12 @@ export class CreateServiceDto {
   @IsUrl()
   @IsString()
   imageUrl?: string | null;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Type(() => Number)
+  communityId?: number | null;
 }
 
 export class UpdateServiceDto {
@@ -154,6 +160,12 @@ export class UpdateServiceDto {
   @IsUrl()
   @IsString()
   imageUrl?: string | null;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Type(() => Number)
+  communityId?: number | null;
 }
 
 // Query DTO for searching and filtering services
@@ -225,6 +237,12 @@ export class ServiceListQueryDto {
   @IsOptional()
   @IsString()
   userId?: string; // Filter by user ID
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  communityId?: number;
 }
 
 @ApiTags('services')
@@ -238,6 +256,27 @@ export class ServicesController {
     private readonly deleteServiceUseCase: DeleteServiceUseCase,
     private readonly prisma: PrismaService,
   ) {}
+
+  private async canAttachServiceToCommunity(communityId: number, userId: string): Promise<boolean> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { role: true } });
+    if (user?.role === 'ADMIN') return true;
+
+    const community = await this.prisma.community.findUnique({
+      where: { id: communityId },
+      select: { creatorId: true },
+    });
+    if (!community) {
+      throw new NotFoundException('Comunidad no encontrada');
+    }
+    if (community.creatorId === userId) return true;
+
+    const membership = await this.prisma.communityMembership.findUnique({
+      where: { communityId_userId: { communityId, userId } },
+      select: { status: true },
+    });
+
+    return membership?.status === 'ACTIVE';
+  }
 
   private getAuthenticatedUser(req: { user?: { sub?: string; id?: string; email?: string; name?: string } }) {
     const userId = req.user?.sub || req.user?.id;
@@ -279,9 +318,14 @@ export class ServicesController {
       intent: body.intent || 'OFFER',
       price: body.price,
       imageUrl: body.imageUrl,
+      communityId: body.communityId ?? null,
     };
     const authUser = this.getAuthenticatedUser(req);
     const { userId } = authUser;
+
+    if (serviceData.communityId && !(await this.canAttachServiceToCommunity(serviceData.communityId, userId))) {
+      throw new ForbiddenException('Debes pertenecer a la comunidad para publicar servicios en ella');
+    }
     
     // Upsert user if doesn't exist
     if (userId) {
@@ -331,6 +375,7 @@ export class ServicesController {
       nearLng: query.nearLng,
       radiusKm: query.radiusKm,
       userId: query.userId, // Filtrar por usuario si se proporciona
+      communityId: query.communityId,
     };
 
     // Si se proporciona userId, verificar que el usuario solo pueda ver sus propios servicios
@@ -493,6 +538,10 @@ export class ServicesController {
     @Request() req: { user?: { sub?: string; id?: string } },
   ) {
     const { userId } = this.getAuthenticatedUser(req);
+
+    if (updateServiceDto.communityId && !(await this.canAttachServiceToCommunity(updateServiceDto.communityId, userId))) {
+      throw new ForbiddenException('Debes pertenecer a la comunidad para publicar servicios en ella');
+    }
     
     const result = await this.updateServiceUseCase.execute({ id, data: updateServiceDto, userId });
     return { message: 'Servicio actualizado exitosamente', service: result.service.toContract() };

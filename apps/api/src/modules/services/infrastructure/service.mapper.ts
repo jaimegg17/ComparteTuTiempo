@@ -54,6 +54,7 @@ export class ServiceMapper {
       status: mapStatus(prismaService.status) as unknown as ServiceWithImage['status'],
       price: prismaService.price,
       imageUrl: prismaService.imageUrl,
+      communityId: prismaService.communityId,
       userId: prismaService.userId,
       createdAt: prismaService.createdAt,
       updatedAt: prismaService.updatedAt,
@@ -112,6 +113,7 @@ export class ServiceMapper {
       status: mapStatusToPrisma(service.status) as ServiceStatus,
       price: service.price,
       imageUrl: service.imageUrl || null,
+      communityId: service.communityId ?? null,
       userId: service.userId,
     };
   }

@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
-import { Alert, Box, Button, CircularProgress, Stack, Chip } from '@mui/material';
-import { ArrowBack, EventAvailable, ExitToApp, GroupAdd, PendingActionsOutlined } from '@mui/icons-material';
+import { Alert, Box, Button, CircularProgress, Stack, Chip, Typography } from '@mui/material';
+import { ArrowBack, EventAvailable, ExitToApp, GroupAdd, HandymanOutlined, PendingActionsOutlined } from '@mui/icons-material';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { Layout } from '@/components/Layout';
 import { ErrorAlert } from '@/components/ui/BeautifulAlert';
 import { communitiesApi } from '@/shared/api/communities';
 import { eventsApi } from '@/shared/api/events';
 import { communityMembershipsApi } from '@/shared/api/community-memberships';
+import { servicesApi } from '@/shared/api/services';
 import { useErrorHandling, ERROR_MESSAGES } from '@/hooks/useErrorHandling';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useAuth } from '@/hooks/useAuth';
@@ -18,8 +19,9 @@ import { CommunityMembersSection } from '@/components/communities/CommunityMembe
 import { CommunityActivitySection } from '@/components/communities/CommunityActivitySection';
 import { CommunityRulesSection } from '@/components/communities/CommunityRulesSection';
 import { CommunityResourcesSection } from '@/components/communities/CommunityResourcesSection';
-import type { Community, CommunityMembership, CommunityMembershipRole, Event } from '@comparte-tu-tiempo/contracts';
+import type { Community, CommunityMembership, CommunityMembershipRole, Event, Service } from '@comparte-tu-tiempo/contracts';
 import { apiClient } from '@/shared/api/client';
+import { ServiceCard } from '@/components/ServiceCard';
 
 export default function CommunityDetailPage() {
   const router = useRouter();
@@ -32,6 +34,7 @@ export default function CommunityDetailPage() {
   const [community, setCommunity] = useState<Community | null>(null);
   const [memberships, setMemberships] = useState<CommunityMembership[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
+  const [communityServices, setCommunityServices] = useState<Service[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const { error, loading, handleAsyncOperation, clearError } = useErrorHandling();
@@ -53,9 +56,10 @@ export default function CommunityDetailPage() {
       const detailResponse = await communitiesApi.getCommunity(communityId);
       setCommunity(detailResponse.community);
 
-      const [membershipsResult, eventsResult] = await Promise.allSettled([
+      const [membershipsResult, eventsResult, servicesResult] = await Promise.allSettled([
         communityMembershipsApi.getMemberships(communityId),
         eventsApi.getEventsByCommunity(communityId),
+        servicesApi.getServices({ communityId, page: 1, pageSize: 6 }),
       ]);
 
       if (membershipsResult.status === 'fulfilled') {
@@ -68,6 +72,12 @@ export default function CommunityDetailPage() {
         setEvents(eventsResult.value);
       } else {
         setEvents([]);
+      }
+
+      if (servicesResult.status === 'fulfilled') {
+        setCommunityServices(servicesResult.value.services);
+      } else {
+        setCommunityServices([]);
       }
     }, ERROR_MESSAGES.NETWORK_ERROR);
   }, [communityId, accessToken, handleAsyncOperation]);
@@ -284,6 +294,16 @@ export default function CommunityDetailPage() {
                     </Button>
                   </>
                 )}
+                {(isMember || canManage) && (
+                  <Button
+                    variant="outlined"
+                    startIcon={<HandymanOutlined />}
+                    onClick={() => router.push(`/services/create?communityId=${community.id}`)}
+                    sx={{ textTransform: 'none', fontWeight: 600, alignSelf: 'flex-start' }}
+                  >
+                    {t('communities.detail.publishService')}
+                  </Button>
+                )}
                 <Button
                   variant={isMember || myPendingMembership ? 'outlined' : 'contained'}
                   color={isMember || myPendingMembership ? 'inherit' : 'primary'}
@@ -317,6 +337,54 @@ export default function CommunityDetailPage() {
                   {t('communities.detail.pendingReview', { count: pendingMemberships.length })}
                 </Alert>
               )}
+
+              <Box
+                sx={{
+                  bgcolor: '#fff',
+                  borderRadius: 3,
+                  border: '1px solid rgba(148,163,184,0.16)',
+                  boxShadow: '0 12px 28px rgba(15,23,42,0.06)',
+                  p: { xs: 2.25, md: 2.75 },
+                }}
+              >
+                <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={1.5} sx={{ mb: 2 }}>
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 800 }}>
+                      {t('communities.services.title')}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {t('communities.services.description')}
+                    </Typography>
+                  </Box>
+                  {(isMember || canManage) && (
+                    <Button
+                      variant="outlined"
+                      startIcon={<HandymanOutlined />}
+                      onClick={() => router.push(`/services/create?communityId=${community.id}`)}
+                      sx={{ textTransform: 'none', fontWeight: 700, alignSelf: { xs: 'stretch', sm: 'flex-start' } }}
+                    >
+                      {t('communities.detail.publishService')}
+                    </Button>
+                  )}
+                </Stack>
+
+                {communityServices.length === 0 ? (
+                  <Alert severity="info">{t('communities.services.empty')}</Alert>
+                ) : (
+                  <Box
+                    sx={{
+                      display: 'grid',
+                      gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))', xl: 'repeat(3, minmax(0, 1fr))' },
+                      gap: 2,
+                      '& > *': { maxWidth: 'none' },
+                    }}
+                  >
+                    {communityServices.map((service) => (
+                      <ServiceCard key={service.id} service={{ ...service, location: service.location ?? '' }} />
+                    ))}
+                  </Box>
+                )}
+              </Box>
 
               <Box
                 sx={{

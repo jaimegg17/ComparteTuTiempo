@@ -35,6 +35,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
       detailedDescription: data.detailedDescription || null,
       availability: data.availability || null,
       imageUrl: data.imageUrl || null,
+      communityId: data.communityId ?? null,
     };
     
     const prismaService = await this.prisma.service.create({
@@ -65,7 +66,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
   }
 
   async list(query: ServiceListQuery): Promise<ServiceListResponse> {
-    const { q, category, location, type, intent, status, page, pageSize, userId, nearLat, nearLng } = query;
+    const { q, category, location, type, intent, status, page, pageSize, userId, communityId, nearLat, nearLng } = query;
     const minPrice = query.minPrice;
     const maxPrice = query.maxPrice;
     const radiusKm = query.radiusKm ?? 10;
@@ -87,6 +88,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
     if (status) where.status = ServiceEnumMapper.mapStatusToPrisma(status) as ServiceStatus;
     if (location) where.location = { contains: location, mode: 'insensitive' };
     if (userId) where.userId = userId; // Filtrar por usuario
+    if (communityId) where.communityId = communityId;
     if (nearLat !== undefined && nearLng !== undefined) {
       where.latitude = { not: null };
       where.longitude = { not: null };
@@ -185,6 +187,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
           status: service.status.toLowerCase() as unknown as ServiceListResponse['services'][number]['status'],
           price: service.price,
           imageUrl: serviceData.imageUrl || null,
+          communityId: service.communityId ?? null,
           userId: service.userId,
           createdAt: service.createdAt,
           updatedAt: service.updatedAt,
@@ -227,6 +230,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
     if (data.status) updateData.status = ServiceEnumMapper.mapStatusToPrisma(data.status) as ServiceStatus;
     if (data.price) updateData.price = data.price;
     if (data.imageUrl !== undefined) updateData.imageUrl = data.imageUrl;
+    if (data.communityId !== undefined) updateData.communityId = data.communityId;
 
     const prismaService = await this.prisma.service.update({
       where: { id },
