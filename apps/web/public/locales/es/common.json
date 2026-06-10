@@ -366,6 +366,7 @@
   "ratings": {
     "title": "Valoraciones",
     "subtitle": "Valora tu experiencia",
+    "rate_service": "Valorar servicio",
     "create": "Crear Valoración",
     "edit": "Editar Valoración",
     "delete": "Eliminar Valoración",

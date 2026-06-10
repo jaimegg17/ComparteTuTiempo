@@ -366,6 +366,7 @@
   "ratings": {
     "title": "Ratings",
     "subtitle": "Rate your experience",
+    "rate_service": "Rate service",
     "create": "Create Rating",
     "edit": "Edit Rating",
     "delete": "Delete Rating",

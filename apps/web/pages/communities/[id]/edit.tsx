@@ -100,6 +100,7 @@ export default function EditCommunityPage() {
           .split('\n')
           .map((rule) => rule.trim())
           .filter(Boolean),
+        imageUrl: values.imageUrl.trim() || null,
         resources: resources
           .map((resource) => ({
             title: resource.title.trim(),
@@ -356,6 +357,7 @@ export default function EditCommunityPage() {
                   description: community.description ?? '',
                   topicsText: community.topics.join(', '),
                   rulesText: community.rules.join('\n'),
+                  imageUrl: community.imageUrl ?? '',
                   isPrivate: community.isPrivate,
                 }}
                 submitting={submitting}
@@ -370,14 +372,16 @@ export default function EditCommunityPage() {
                 onChange={setResources}
               />
 
-              <CommunityEventsManager
-                events={events}
+              <Box id="events">
+                <CommunityEventsManager
+                  events={events}
                 submitting={submitting}
                 serverError={eventError}
                 onCreate={handleCreateEvent}
-                onUpdate={handleUpdateEvent}
-                onDelete={handleDeleteEvent}
-              />
+                  onUpdate={handleUpdateEvent}
+                  onDelete={handleDeleteEvent}
+                />
+              </Box>
 
               {pendingMemberships.length > 0 && (
                 <Alert severity="warning">

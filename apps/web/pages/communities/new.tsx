@@ -75,7 +75,7 @@ export default function NewCommunityPage() {
             {t('communities.create')}
           </Typography>
           <Typography color="text.secondary" sx={{ mb: 3 }}>
-            Crea una comunidad definiendo nombre, descripción y visibilidad.
+Crea una comunidad definiendo nombre, imagen, descripción y visibilidad.
           </Typography>
 
           {!user?.sub && (
@@ -90,6 +90,7 @@ export default function NewCommunityPage() {
               description: '',
               topicsText: '',
               rulesText: '',
+              imageUrl: '',
               isPrivate: false,
             }}
             submitting={submitting}

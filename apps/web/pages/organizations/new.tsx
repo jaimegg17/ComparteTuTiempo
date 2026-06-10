@@ -171,6 +171,7 @@ export default function NewOrganizationPage() {
                 description: '',
                 topicsText: '',
                 rulesText: '',
+                imageUrl: '',
                 isPrivate: false,
               }}
               submitting={submitting}

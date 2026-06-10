@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { Alert, Box, Button, CircularProgress, Stack, Chip } from '@mui/material';
-import { ArrowBack, ExitToApp, GroupAdd, PendingActionsOutlined } from '@mui/icons-material';
+import { ArrowBack, EventAvailable, ExitToApp, GroupAdd, PendingActionsOutlined } from '@mui/icons-material';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { Layout } from '@/components/Layout';
 import { ErrorAlert } from '@/components/ui/BeautifulAlert';
@@ -266,13 +266,23 @@ export default function CommunityDetailPage() {
 
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ '& .MuiButton-root': { width: { xs: '100%', sm: 'auto' } } }}>
                 {canManage && (
-                  <Button
-                    variant="outlined"
-                    onClick={() => router.push(`/communities/${community.id}/edit`)}
-                    sx={{ textTransform: 'none', fontWeight: 600, alignSelf: 'flex-start' }}
-                  >
-                    Gestionar {community.kind === 'ORGANIZATION' ? 'organización' : 'comunidad'}
-                  </Button>
+                  <>
+                    <Button
+                      variant="contained"
+                      startIcon={<EventAvailable />}
+                      onClick={() => router.push(`/communities/${community.id}/edit#events`)}
+                      sx={{ textTransform: 'none', fontWeight: 700, alignSelf: 'flex-start' }}
+                    >
+                      Publicar evento
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      onClick={() => router.push(`/communities/${community.id}/edit`)}
+                      sx={{ textTransform: 'none', fontWeight: 600, alignSelf: 'flex-start' }}
+                    >
+                      Gestionar {community.kind === 'ORGANIZATION' ? 'organización' : 'comunidad'}
+                    </Button>
+                  </>
                 )}
                 <Button
                   variant={isMember || myPendingMembership ? 'outlined' : 'contained'}

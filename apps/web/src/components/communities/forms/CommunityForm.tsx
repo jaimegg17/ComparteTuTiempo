@@ -10,12 +10,14 @@ import {
   Typography,
 } from '@mui/material';
 import type { CommunityCreate, CommunityKind } from '@comparte-tu-tiempo/contracts';
+import { ImageUpload } from '@/components/ui/ImageUpload';
 
 export interface CommunityFormValues {
   name: string;
   description: string;
   topicsText: string;
   rulesText: string;
+  imageUrl: string;
   isPrivate: boolean;
 }
 
@@ -65,6 +67,7 @@ const toCreatePayload = (
     .split('\n')
     .map((rule) => rule.trim())
     .filter(Boolean),
+  imageUrl: values.imageUrl.trim() || null,
   resources: [],
   kind,
   isPrivate: values.isPrivate,
@@ -103,6 +106,7 @@ export function CommunityForm({
       description: '',
       topicsText: '',
       rulesText: '',
+      imageUrl: '',
       isPrivate: false,
     },
   );
@@ -187,6 +191,23 @@ export function CommunityForm({
               : `${values.description.trim().length}/${DESCRIPTION_MAX}`
           }
         />
+
+        <Box>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
+            Imagen de la comunidad
+          </Typography>
+          <ImageUpload
+            currentImage={values.imageUrl}
+            autoUpload
+            disabled={submitting}
+            onImageUploaded={(url) => setValues((prev) => ({ ...prev, imageUrl: url }))}
+            onImageSelect={(file) => {
+              if (!file) {
+                setValues((prev) => ({ ...prev, imageUrl: '' }));
+              }
+            }}
+          />
+        </Box>
 
         <TextField
           label={mergedLabels.topicsLabel}
