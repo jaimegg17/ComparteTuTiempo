@@ -76,3 +76,7 @@ build/
 .next/
 out/
 *.tsbuildinfo
+
+# Local environment backups
+.env*.bak
+*.env.bak
