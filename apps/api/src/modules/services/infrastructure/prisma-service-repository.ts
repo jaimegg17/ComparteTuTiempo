@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, ServiceCategory, ServiceStatus, ServiceType } from '@prisma/client';
+import { Prisma, ServiceCategory, ServiceIntent, ServiceStatus, ServiceType } from '@prisma/client';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { ServiceRepositoryPort } from '../domain/service-repository.port';
 import { Service } from '../domain/service.entity';
@@ -28,6 +28,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
       placeId: data.placeId ?? null,
       category: ServiceEnumMapper.mapCategoryToPrisma(data.category) as ServiceCategory,
       type: ServiceEnumMapper.mapTypeToPrisma(data.type) as ServiceType,
+      intent: data.intent as ServiceIntent,
       price: data.price,
       userId,
       status: 'ACTIVO' as const,
@@ -64,7 +65,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
   }
 
   async list(query: ServiceListQuery): Promise<ServiceListResponse> {
-    const { q, category, location, type, status, page, pageSize, userId, nearLat, nearLng } = query;
+    const { q, category, location, type, intent, status, page, pageSize, userId, nearLat, nearLng } = query;
     const minPrice = query.minPrice;
     const maxPrice = query.maxPrice;
     const radiusKm = query.radiusKm ?? 10;
@@ -82,6 +83,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
     
     if (category) where.category = ServiceEnumMapper.mapCategoryToPrisma(category) as ServiceCategory;
     if (type) where.type = ServiceEnumMapper.mapTypeToPrisma(type) as ServiceType;
+    if (intent) where.intent = intent as ServiceIntent;
     if (status) where.status = ServiceEnumMapper.mapStatusToPrisma(status) as ServiceStatus;
     if (location) where.location = { contains: location, mode: 'insensitive' };
     if (userId) where.userId = userId; // Filtrar por usuario
@@ -179,6 +181,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
           availability: serviceData.availability || null,
           category: service.category.toLowerCase() as unknown as ServiceListResponse['services'][number]['category'],
           type: service.type.toLowerCase() as unknown as ServiceListResponse['services'][number]['type'],
+          intent: service.intent as ServiceListResponse['services'][number]['intent'],
           status: service.status.toLowerCase() as unknown as ServiceListResponse['services'][number]['status'],
           price: service.price,
           imageUrl: serviceData.imageUrl || null,
@@ -220,6 +223,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
     if (data.placeId !== undefined) updateData.placeId = data.placeId;
     if (data.category) updateData.category = ServiceEnumMapper.mapCategoryToPrisma(data.category) as ServiceCategory;
     if (data.type) updateData.type = ServiceEnumMapper.mapTypeToPrisma(data.type) as ServiceType;
+    if (data.intent) updateData.intent = data.intent as ServiceIntent;
     if (data.status) updateData.status = ServiceEnumMapper.mapStatusToPrisma(data.status) as ServiceStatus;
     if (data.price) updateData.price = data.price;
     if (data.imageUrl !== undefined) updateData.imageUrl = data.imageUrl;

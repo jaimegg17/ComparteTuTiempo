@@ -76,12 +76,12 @@ export class PrismaEventRepository implements EventRepositoryPort {
     pageSize: number;
     totalPages: number;
   }> {
-    const { page, pageSize, groupId, q, dateFrom, dateTo, location } = query;
+    const { page, pageSize, communityId, q, dateFrom, dateTo, location } = query;
     const skip = (page - 1) * pageSize;
 
     // Build where clause
     const where: Prisma.EventWhereInput = {};
-    if (groupId) where.groupId = groupId;
+    if (communityId) where.communityId = communityId;
     if (q) where.title = { contains: q, mode: 'insensitive' };
     if (location) where.location = { contains: location, mode: 'insensitive' };
     if (dateFrom || dateTo) {

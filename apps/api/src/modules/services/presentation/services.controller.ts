@@ -13,6 +13,7 @@ import { DeleteServiceUseCase } from '../application/delete-service.use-case';
 
 const CATEGORIES = ['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'ARTE', 'OTROS'] as const;
 const TYPES = ['PRESENCIAL', 'VIRTUAL', 'HIBRIDO'] as const;
+const INTENTS = ['OFFER', 'REQUEST'] as const;
 
 // DTOs con class-validator para compatibilidad con ValidationPipe global
 export class CreateServiceDto {
@@ -64,6 +65,10 @@ export class CreateServiceDto {
 
   @IsEnum(TYPES)
   type: (typeof TYPES)[number];
+
+  @IsOptional()
+  @IsEnum(INTENTS)
+  intent?: (typeof INTENTS)[number];
 
   @IsNumber()
   @Min(0)
@@ -132,6 +137,10 @@ export class UpdateServiceDto {
   type?: (typeof TYPES)[number];
 
   @IsOptional()
+  @IsEnum(INTENTS)
+  intent?: (typeof INTENTS)[number];
+
+  @IsOptional()
   @IsEnum(['ACTIVO', 'INACTIVO', 'COMPLETADO'])
   status?: 'ACTIVO' | 'INACTIVO' | 'COMPLETADO';
 
@@ -164,6 +173,10 @@ export class ServiceListQueryDto {
   @IsOptional()
   @IsEnum(['PRESENCIAL', 'VIRTUAL', 'HIBRIDO'])
   type?: 'PRESENCIAL' | 'VIRTUAL' | 'HIBRIDO';
+
+  @IsOptional()
+  @IsEnum(['OFFER', 'REQUEST'])
+  intent?: 'OFFER' | 'REQUEST';
   
   @IsOptional()
   @IsEnum(['ACTIVO', 'INACTIVO', 'COMPLETADO'])
@@ -263,6 +276,7 @@ export class ServicesController {
       availability: body.availability,
       category: body.category,
       type: body.type,
+      intent: body.intent || 'OFFER',
       price: body.price,
       imageUrl: body.imageUrl,
     };
@@ -309,6 +323,7 @@ export class ServicesController {
       category: query.category,
       location: query.location,
       type: query.type,
+      intent: query.intent,
       status: query.status,
       minPrice: query.minPrice,
       maxPrice: query.maxPrice,
@@ -351,6 +366,7 @@ export class ServicesController {
       category: query.category,
       location: query.location,
       type: query.type,
+      intent: query.intent,
       status: query.status,
       minPrice: query.minPrice,
       maxPrice: query.maxPrice,
@@ -390,6 +406,7 @@ export class ServicesController {
         availability: true,
         category: true,
         type: true,
+        intent: true,
         status: true,
         price: true,
         imageUrl: true, // Include imageUrl

@@ -1,11 +1,30 @@
-import { Box, Typography, Alert } from '@mui/material';
+import { Box, Typography, Alert, Button } from '@mui/material';
 import { MapPin } from 'iconoir-react';
+import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 
 interface ServiceLocationTabProps {
   location: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  formattedAddress?: string | null;
 }
 
-export function ServiceLocationTab({ location }: ServiceLocationTabProps) {
+export function ServiceLocationTab({
+  location,
+  latitude,
+  longitude,
+  formattedAddress,
+}: ServiceLocationTabProps) {
+  const displayLocation = formattedAddress || location;
+  const hasCoordinates = typeof latitude === 'number' && typeof longitude === 'number';
+  const mapQuery = hasCoordinates
+    ? `${latitude},${longitude}`
+    : encodeURIComponent(displayLocation);
+  const embedUrl = `https://www.google.com/maps?q=${mapQuery}&z=15&output=embed`;
+  const externalMapUrl = hasCoordinates
+    ? `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(displayLocation)}`;
+
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2, p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
@@ -15,31 +34,47 @@ export function ServiceLocationTab({ location }: ServiceLocationTabProps) {
             UBICACIÓN
           </Typography>
           <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            {location}
+            {displayLocation}
           </Typography>
         </Box>
       </Box>
 
-      {/* Mini mapa placeholder */}
-      <Box 
-        sx={{ 
-          width: '100%', 
-          height: 200, 
-          bgcolor: 'grey.100', 
+      <Box
+        sx={{
+          width: '100%',
+          height: 240,
           borderRadius: 2,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          border: '2px dashed',
-          borderColor: 'grey.300'
+          overflow: 'hidden',
+          border: '1px solid',
+          borderColor: 'rgba(148, 163, 184, 0.24)',
+          bgcolor: 'grey.100',
         }}
       >
-        <Box sx={{ textAlign: 'center' }}>
-          <MapPin width={32} height={32} color="#9e9e9e" />
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, fontSize: '11px' }}>
-            Mapa próximamente
-          </Typography>
-        </Box>
+        <Box
+          component="iframe"
+          src={embedUrl}
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+          sx={{
+            width: '100%',
+            height: '100%',
+            border: 0,
+          }}
+        />
+      </Box>
+
+      <Box sx={{ mt: 1.5, display: 'flex', justifyContent: 'flex-end' }}>
+        <Button
+          component="a"
+          href={externalMapUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          endIcon={<OpenInNewRoundedIcon />}
+          size="small"
+          sx={{ textTransform: 'none', fontWeight: 600 }}
+        >
+          Abrir en Google Maps
+        </Button>
       </Box>
 
       <Alert severity="info" sx={{ mt: 2, fontSize: '11px', py: 0.5 }}>
@@ -48,4 +83,3 @@ export function ServiceLocationTab({ location }: ServiceLocationTabProps) {
     </Box>
   );
 }
-

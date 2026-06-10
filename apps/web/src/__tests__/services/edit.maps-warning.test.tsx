@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import type { ReactNode } from 'react';
-import EditServicePage from '../edit/[id]';
+import EditServicePage from '@/../pages/services/edit/[id]';
 
 const mockRouter = {
   query: { id: '1' },
@@ -21,6 +21,7 @@ const mockAuthState = {
   user: { sub: 'auth0|u1' },
   isLoading: false,
 };
+const mockShowToast = vi.fn();
 
 vi.mock('@auth0/nextjs-auth0/client', () => ({
   useUser: () => mockAuthState,
@@ -34,6 +35,13 @@ vi.mock('@/hooks/useTranslation', () => ({
 
 vi.mock('@/components/Layout', () => ({
   Layout: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+}));
+
+vi.mock('@/components/ui/ToastProvider', () => ({
+  useToast: () => ({
+    showToast: mockShowToast,
+    hideToast: vi.fn(),
+  }),
 }));
 
 describe('EditServicePage maps warning', () => {

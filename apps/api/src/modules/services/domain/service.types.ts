@@ -19,6 +19,7 @@ export interface ServiceCreateWithImage {
   availability?: string;
   category: ServiceContract['category'];
   type: ServiceContract['type'];
+  intent: ServiceContract['intent'];
   price: number;
   imageUrl?: string | null;
 }

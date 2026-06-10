@@ -8,11 +8,11 @@ interface EventPersistence {
   description?: string | null;
   date: Date;
   location?: string | null;
-  groupId: number;
-  communityId?: number;
-  creatorId?: string;
+  capacity?: number | null;
+  communityId: number;
+  createdById?: string;
   createdAt: Date;
-  updatedAt?: Date;
+  updatedAt: Date;
 }
 
 export class EventMapper {
@@ -23,10 +23,11 @@ export class EventMapper {
       prismaEvent.description ?? '',
       prismaEvent.date,
       prismaEvent.location ?? null,
-      prismaEvent.groupId ?? prismaEvent.communityId,
-      prismaEvent.creatorId ?? '',
+      prismaEvent.capacity ?? null,
+      prismaEvent.communityId,
+      prismaEvent.createdById ?? '',
       prismaEvent.createdAt,
-      prismaEvent.updatedAt ?? prismaEvent.createdAt,
+      prismaEvent.updatedAt,
     );
   }
 
@@ -37,8 +38,11 @@ export class EventMapper {
       description: event.description,
       date: event.date,
       location: event.location,
-      groupId: event.communityId,
+      capacity: event.capacity,
+      communityId: event.communityId,
+      createdById: event.creatorId,
       createdAt: event.createdAt,
+      updatedAt: event.updatedAt,
     };
   }
 
@@ -48,7 +52,9 @@ export class EventMapper {
       description: data.description ?? null,
       date: data.date,
       location: data.location ?? null,
-      groupId: data.groupId,
+      capacity: data.capacity ?? null,
+      communityId: data.communityId,
+      createdById: data.creatorId,
     };
   }
 }

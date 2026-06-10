@@ -25,6 +25,7 @@ import { ListExchangesUseCase } from '../application/list-exchanges.use-case';
 import { UpdateExchangeUseCase } from '../application/update-exchange.use-case';
 import { GetExchangeUseCase } from '../application/get-exchange.use-case';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
+import { PrismaService } from '@/common/prisma/prisma.service';
 
 // DTOs generados desde Zod
 export class CreateExchangeDto extends createZodDto(ExchangeCreateSchema) {}
@@ -79,6 +80,7 @@ export class ExchangesController {
     private readonly listExchangesUseCase: ListExchangesUseCase,
     private readonly updateExchangeUseCase: UpdateExchangeUseCase,
     private readonly getExchangeUseCase: GetExchangeUseCase,
+    private readonly prisma: PrismaService,
   ) {}
 
   @Post()
@@ -98,10 +100,23 @@ export class ExchangesController {
       throw new UnauthorizedException('Usuario no autenticado');
     }
     
-    // Ensure requestedById is set to the current user (override any value from DTO)
+    const service = await this.prisma.service.findUnique({
+      where: { id: createExchangeDto.serviceId },
+      select: { id: true, userId: true, intent: true },
+    });
+
+    if (!service) {
+      throw new UnauthorizedException('Servicio no encontrado');
+    }
+
+    if (service.userId === userId) {
+      throw new UnauthorizedException('No puedes iniciar un intercambio sobre tu propia publicación');
+    }
+
     const exchangeData = {
       ...createExchangeDto,
-      requestedById: userId,
+      requestedById: service.intent === 'REQUEST' ? service.userId : userId,
+      offeredById: service.intent === 'REQUEST' ? userId : service.userId,
     };
     
     const result = await this.createExchangeUseCase.execute({

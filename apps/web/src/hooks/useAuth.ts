@@ -1,17 +1,22 @@
 import { useUser } from '@auth0/nextjs-auth0/client';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 export const useAuth = () => {
   const { user, isLoading, error } = useUser();
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [tokenLoading, setTokenLoading] = useState(false);
+  const accessTokenRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    accessTokenRef.current = accessToken;
+  }, [accessToken]);
 
   const getAccessToken = useCallback(async (forceRefresh = false) => {
     if (!user) return null;
     
     // If we have a cached token and not forcing refresh, return it
     // But we'll still fetch a fresh one to ensure it's valid
-    if (!forceRefresh && accessToken) {
+    if (!forceRefresh && accessTokenRef.current) {
       // Still fetch fresh token but return cached one immediately
       // The fresh fetch will update the cache in the background
       fetch('/api/auth/token')
@@ -23,7 +28,7 @@ export const useAuth = () => {
         })
         .catch(err => console.error('🔑 Background token refresh failed:', err));
       
-      return accessToken;
+      return accessTokenRef.current;
     }
     
     setTokenLoading(true);
@@ -69,7 +74,7 @@ export const useAuth = () => {
     } finally {
       setTokenLoading(false);
     }
-  }, [user, accessToken]);
+  }, [user]);
 
   useEffect(() => {
     if (user && !accessToken) {

@@ -15,6 +15,7 @@ export class Service {
   private readonly _availability: string | null | undefined;
   private readonly _category: ServiceContract['category'];
   private readonly _type: ServiceContract['type'];
+  private readonly _intent: ServiceContract['intent'];
   private readonly _status: ServiceContract['status'];
   private readonly _price: number;
   private readonly _imageUrl: string | null | undefined;
@@ -36,6 +37,7 @@ export class Service {
     this._availability = props.availability;
     this._category = props.category;
     this._type = props.type;
+    this._intent = props.intent;
     this._status = props.status;
     this._price = props.price;
     this._imageUrl = props.imageUrl;
@@ -58,6 +60,7 @@ export class Service {
   get availability(): string | null | undefined { return this._availability; }
   get category(): ServiceContract['category'] { return this._category; }
   get type(): ServiceContract['type'] { return this._type; }
+  get intent(): ServiceContract['intent'] { return this._intent; }
   get status(): ServiceContract['status'] { return this._status; }
   get price(): number { return this._price; }
   get imageUrl(): string | null | undefined { return this._imageUrl; }
@@ -111,6 +114,7 @@ export class Service {
       availability: this._availability,
       category: this._category,
       type: this._type,
+      intent: this._intent,
       status: this._status,
       price: this._price,
       imageUrl: this._imageUrl,

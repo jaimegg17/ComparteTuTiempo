@@ -8,6 +8,8 @@ Estos archivos SQL pueblan la base de datos local de forma **idempotente**.
 2. `002_services.sql`
 3. `003_exchanges_messages.sql`
 4. `004_ratings_communities_groups_events.sql`
+5. `005_images_for_services_and_communities.sql`
+6. `006_expand_demo_dataset.sql`
 
 ## Ejecución
 

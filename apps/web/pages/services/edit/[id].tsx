@@ -16,10 +16,14 @@ import {
 import { Layout } from '@/components/Layout';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useToast } from '@/components/ui/ToastProvider';
+import { getFriendlyErrorMessage } from '@/shared/utils/error-messages';
 import type { Service } from '@/types/service.types';
+import { buildApiUrl } from '@/shared/api/config';
 
 const CATEGORIES = ['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'ARTE', 'OTROS'];
 const TYPES = ['PRESENCIAL', 'VIRTUAL', 'HIBRIDO'];
+const INTENTS = ['OFFER', 'REQUEST'] as const;
 const AVAILABILITY = ['mañana', 'tarde', 'noche', 'mañana-tarde', 'tarde-noche', 'flexible'];
 
 interface FormData {
@@ -29,6 +33,7 @@ interface FormData {
   duration: string;
   category: string;
   type: string;
+  intent: 'OFFER' | 'REQUEST';
   location: string;
   availability: string;
   imageUrl: string;
@@ -72,6 +77,7 @@ export default function EditServicePage() {
     duration: '',
     category: '',
     type: '',
+    intent: 'OFFER',
     location: '',
     availability: '',
     imageUrl: '',
@@ -86,6 +92,7 @@ export default function EditServicePage() {
   const [locating, setLocating] = useState(false);
   const locationInputRef = useRef<HTMLInputElement | null>(null);
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const { showToast } = useToast();
 
   const getCategoryDisplayName = (category: string) => {
     const categoryMap: Record<string, string> = {
@@ -109,6 +116,8 @@ export default function EditServicePage() {
     return typeMap[type] || type;
   };
 
+  const getIntentDisplayName = (intent: 'OFFER' | 'REQUEST') => intent === 'REQUEST' ? 'Solicitud de ayuda' : 'Servicio ofrecido';
+
   const getAvailabilityDisplayName = (availability: string) => {
     const availabilityMap: Record<string, string> = {
       mañana: t('services.form.availability_options.morning'),
@@ -127,7 +136,7 @@ export default function EditServicePage() {
     const fetchService = async () => {
       try {
         setLoadingService(true);
-        const response = await fetch(`http://localhost:3001/api/services/${id}`);
+        const response = await fetch(buildApiUrl(`/services/${id}`));
         if (!response.ok) throw new Error('No se pudo cargar el servicio');
         const data = await response.json();
         const service: Service = data.service;
@@ -145,6 +154,7 @@ export default function EditServicePage() {
           duration: service.duration ? String(service.duration) : '',
           category: service.category || '',
           type: service.type || '',
+          intent: service.intent || 'OFFER',
           location: service.formattedAddress || service.location || '',
           availability: service.availability || '',
           imageUrl: service.imageUrl || '',
@@ -154,14 +164,16 @@ export default function EditServicePage() {
           placeId: service.placeId ?? undefined,
         });
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error al cargar el servicio');
+        const message = getFriendlyErrorMessage(err, 'Error al cargar el servicio');
+        setError(message);
+        showToast({ message, severity: 'error' });
       } finally {
         setLoadingService(false);
       }
     };
 
     fetchService();
-  }, [id, user, router]);
+  }, [id, user, router, showToast]);
 
   useEffect(() => {
     if (!mapsLoaded || !locationInputRef.current || typeof window === 'undefined') return;
@@ -254,7 +266,12 @@ export default function EditServicePage() {
   };
 
   const handleUseCurrentLocation = () => {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+      const geolocationError = 'Tu navegador no soporta geolocalización.';
+      setError(geolocationError);
+      showToast({ message: geolocationError, severity: 'warning' });
+      return;
+    }
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -268,7 +285,12 @@ export default function EditServicePage() {
         }));
         setLocating(false);
       },
-      () => setLocating(false),
+      () => {
+        const geolocationError = 'No se pudo obtener tu ubicación. Revisa los permisos del navegador e inténtalo de nuevo.';
+        setError(geolocationError);
+        showToast({ message: geolocationError, severity: 'warning' });
+        setLocating(false);
+      },
       { enableHighAccuracy: true, timeout: 10000 },
     );
   };
@@ -287,7 +309,7 @@ export default function EditServicePage() {
       const tokenData = await tokenResponse.json();
       const token = tokenData.accessToken;
 
-      const response = await fetch(`http://localhost:3001/api/services/${id}`, {
+      const response = await fetch(buildApiUrl(`/services/${id}`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -300,6 +322,7 @@ export default function EditServicePage() {
           duration: parseFloat(formData.duration),
           category: formData.category,
           type: formData.type,
+          intent: formData.intent,
           location: formData.location.trim(),
           availability: formData.availability || undefined,
           imageUrl: formData.imageUrl || undefined,
@@ -317,11 +340,14 @@ export default function EditServicePage() {
       }
 
       setSuccess(true);
+      showToast({ message: 'Servicio actualizado correctamente.', severity: 'success' });
       setTimeout(() => {
         router.push(`/services/${id}`);
       }, 1200);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al actualizar el servicio');
+      const message = getFriendlyErrorMessage(err, 'Error al actualizar el servicio');
+      setError(message);
+      showToast({ message, severity: 'error' });
     } finally {
       setLoading(false);
     }
@@ -354,10 +380,10 @@ export default function EditServicePage() {
 
           <Paper sx={{ p: 4 }}>
             <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-              Editar servicio
+              {formData.intent === 'REQUEST' ? 'Editar solicitud' : 'Editar servicio'}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-              Actualiza los datos de tu servicio y su ubicación.
+              {formData.intent === 'REQUEST' ? 'Actualiza los datos de tu solicitud y facilita que otras personas puedan ayudarte.' : 'Actualiza los datos de tu servicio y su ubicación.'}
             </Typography>
 
             {!googleMapsApiKey && (
@@ -376,7 +402,10 @@ export default function EditServicePage() {
                 <TextField fullWidth multiline rows={2} label={t("services.form.description")} value={formData.description} onChange={handleChange('description')} error={!!errors.description} helperText={errors.description} />
                 <TextField fullWidth multiline rows={4} label={t("services.form.detailed_description")} value={formData.detailedDescription} onChange={handleChange('detailedDescription')} />
 
-                <Box sx={{ display: 'flex', gap: 2 }}>
+                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                  <TextField select fullWidth label="Tipo de publicación" value={formData.intent} onChange={handleChange('intent')}>
+                    {INTENTS.map((intent) => <MenuItem key={intent} value={intent}>{getIntentDisplayName(intent)}</MenuItem>)}
+                  </TextField>
                   <TextField select fullWidth label={t("services.form.category")} value={formData.category} onChange={handleChange('category')} error={!!errors.category} helperText={errors.category}>
                     <MenuItem value="">{t("services.filters.category")}</MenuItem>
                     {CATEGORIES.map((cat) => <MenuItem key={cat} value={cat}>{getCategoryDisplayName(cat)}</MenuItem>)}

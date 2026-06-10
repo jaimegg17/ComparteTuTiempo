@@ -13,12 +13,12 @@ import { EventsModule } from './modules/events/events.module';
 import { MembershipsModule } from './modules/memberships/memberships.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { Auth0Module } from './common/auth/auth0.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
     }),
     PrismaModule,
     Auth0Module,
@@ -33,6 +33,7 @@ import { Auth0Module } from './common/auth/auth0.module';
     EventsModule,
     MembershipsModule,
     UploadModule,
+    HealthModule,
   ],
 })
 export class AppModule {}

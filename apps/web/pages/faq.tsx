@@ -1,108 +1,16 @@
 import { useMemo, useState } from 'react';
-import { Box, Stack, Typography } from '@mui/material';
+import { Alert, Box, Chip, Paper, Stack, Typography } from '@mui/material';
 import { Layout } from '@/components/Layout';
 import { useTranslation } from '@/hooks/useTranslation';
 import { FaqSearch } from '@/components/faq/FaqSearch';
 import { FaqCategoryAccordion } from '@/components/faq/FaqCategoryAccordion';
 import type { FaqCategory } from '@/components/faq/types';
 
-const FAQ_CONTENT: Record<'es' | 'en', FaqCategory[]> = {
-  es: [
-    {
-      key: 'cuenta',
-      title: 'Cuenta y perfil',
-      items: [
-        {
-          question: '¿Cómo edito mi perfil?',
-          answer: 'Ve a "Mi Perfil", actualiza tus datos y pulsa guardar.',
-        },
-        {
-          question: '¿Puedo cambiar mi idioma?',
-          answer: 'Sí. Usa el selector de idioma en la interfaz para cambiar entre español e inglés.',
-        },
-      ],
-    },
-    {
-      key: 'servicios',
-      title: 'Servicios e intercambios',
-      items: [
-        {
-          question: '¿Cómo solicito un servicio?',
-          answer: 'Entra en el detalle del servicio y pulsa "Solicitar Servicio".',
-        },
-        {
-          question: '¿Cómo se completan los intercambios?',
-          answer: 'Ambas partes deben seguir el flujo de estados: pendiente, confirmado, en progreso y completado.',
-        },
-      ],
-    },
-    {
-      key: 'comunidades',
-      title: 'Comunidades',
-      items: [
-        {
-          question: '¿Cómo creo una comunidad?',
-          answer: 'Desde la página de Comunidades, pulsa "Crear Comunidad" y completa el formulario.',
-        },
-        {
-          question: '¿Quién puede editar una comunidad?',
-          answer: 'Solo el creador de la comunidad puede editar su nombre, descripción y privacidad.',
-        },
-      ],
-    },
-  ],
-  en: [
-    {
-      key: 'account',
-      title: 'Account and profile',
-      items: [
-        {
-          question: 'How do I edit my profile?',
-          answer: 'Go to "My Profile", update your information, and save.',
-        },
-        {
-          question: 'Can I change the language?',
-          answer: 'Yes. Use the language switcher to move between Spanish and English.',
-        },
-      ],
-    },
-    {
-      key: 'services',
-      title: 'Services and exchanges',
-      items: [
-        {
-          question: 'How do I request a service?',
-          answer: 'Open the service detail page and click "Request Service".',
-        },
-        {
-          question: 'How are exchanges completed?',
-          answer: 'Both users must move the exchange through pending, confirmed, in-progress, and completed states.',
-        },
-      ],
-    },
-    {
-      key: 'communities',
-      title: 'Communities',
-      items: [
-        {
-          question: 'How do I create a community?',
-          answer: 'From Communities, click "Create Community" and complete the form.',
-        },
-        {
-          question: 'Who can edit a community?',
-          answer: 'Only the community creator can edit its name, description, and privacy.',
-        },
-      ],
-    },
-  ],
-};
-
 export default function FaqPage() {
-  const { t, currentLanguage } = useTranslation();
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
 
-  const languageKey: 'es' | 'en' = currentLanguage === 'en' ? 'en' : 'es';
-  const categories = FAQ_CONTENT[languageKey];
+  const categories = t('faq.categories', { returnObjects: true }) as FaqCategory[];
 
   const filteredCategories = useMemo(() => {
     const normalized = searchTerm.trim().toLowerCase();
@@ -120,33 +28,77 @@ export default function FaqPage() {
       .filter((category) => category.items.length > 0);
   }, [categories, searchTerm]);
 
-  const subtitle =
-    languageKey === 'es'
-      ? 'Resuelve dudas frecuentes sobre cuenta, servicios y comunidades.'
-      : 'Find answers about account, services, and communities.';
-  const searchPlaceholder = languageKey === 'es' ? 'Buscar en FAQ...' : 'Search FAQ...';
-  const noResults =
-    languageKey === 'es'
-      ? 'No se encontraron preguntas para tu búsqueda.'
-      : 'No questions found for your search.';
+  const subtitle = t('faq.subtitle');
+  const searchPlaceholder = t('faq.searchPlaceholder');
+  const noResults = t('faq.noResults');
+  const quickChips = t('faq.chips', { returnObjects: true }) as string[];
+
+  const totalVisibleQuestions = filteredCategories.reduce((total, category) => total + category.items.length, 0);
 
   return (
     <Layout>
       <Box sx={{ bgcolor: '#f5f5f5', minHeight: '100%', py: 4 }}>
-        <Box sx={{ maxWidth: 980, mx: 'auto', px: { xs: 2, md: 3 } }}>
-          <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-            {t('header.navigation.faq')}
-          </Typography>
-          <Typography color="text.secondary" sx={{ mb: 3 }}>
-            {subtitle}
-          </Typography>
+        <Box sx={{ maxWidth: 1040, mx: 'auto', px: { xs: 2, sm: 2.5, md: 3 } }}>
+          <Paper
+            sx={{
+              mb: 3,
+              p: { xs: 2.5, md: 3.5 },
+              borderRadius: 4,
+              background: 'linear-gradient(135deg, #ffffff 0%, #f8f5ff 100%)',
+              border: '1px solid rgba(148, 163, 184, 0.16)',
+              boxShadow: '0 18px 50px rgba(15, 23, 42, 0.05)',
+            }}
+          >
+            <Typography variant="overline" sx={{ color: '#8A33FD', fontWeight: 800, letterSpacing: '0.08em' }}>
+              {t('faq.overline')}
+            </Typography>
+            <Typography variant="h4" sx={{ fontWeight: 800, mb: 1, fontSize: { xs: '1.7rem', md: '2.125rem' } }}>
+              {t('header.navigation.faq')}
+            </Typography>
+            <Typography color="text.secondary" sx={{ mb: 2.5, maxWidth: 780, lineHeight: 1.7, fontSize: { xs: '0.95rem', md: '1rem' } }}>
+              {subtitle}
+            </Typography>
 
-          <Box sx={{ mb: 3 }}>
+            <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ rowGap: 1 }}>
+              {quickChips.map((chip) => (
+                <Chip
+                  key={chip}
+                  label={chip}
+                  size="small"
+                  onClick={() => setSearchTerm(chip)}
+                  sx={{
+                    bgcolor: '#fff',
+                    border: '1px solid rgba(148, 163, 184, 0.18)',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                />
+              ))}
+            </Stack>
+          </Paper>
+
+          <Paper sx={{ mb: 3, p: { xs: 1.5, sm: 2, md: 2.5 }, borderRadius: 4 }}>
             <FaqSearch value={searchTerm} onChange={setSearchTerm} placeholder={searchPlaceholder} />
-          </Box>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25} sx={{ mt: 2 }}>
+              <Typography variant="body2" color="text.secondary">
+                {t('faq.visibleCount', { questions: totalVisibleQuestions, sections: filteredCategories.length })}
+              </Typography>
+              {searchTerm && (
+                <Chip
+                  label={t('faq.activeFilter', { term: searchTerm })}
+                  onDelete={() => setSearchTerm('')}
+                  color="primary"
+                  variant="outlined"
+                  sx={{ alignSelf: 'flex-start' }}
+                />
+              )}
+            </Stack>
+          </Paper>
 
           {filteredCategories.length === 0 ? (
-            <Typography color="text.secondary">{noResults}</Typography>
+            <Alert severity="info" sx={{ borderRadius: 3 }}>
+              {noResults}
+            </Alert>
           ) : (
             <Stack spacing={3}>
               {filteredCategories.map((category) => (

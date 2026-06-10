@@ -1,6 +1,6 @@
 # 🧭 Orden de Implementación Detallado (Fuente de Verdad Operativa)
 
-> Fecha de actualización: **5 marzo 2026 (20:51 GMT+1)**  
+> Fecha de actualización: **19 marzo 2026 (00:06 GMT+1)**  
 > Alcance acordado: **sin E2E** en esta fase (solo **unit + integration**)
 
 ---
@@ -112,12 +112,14 @@ Ordenar la implementación restante para:
 - [x] Integrar en **editar servicio** con ruta dedicada `/services/edit/[id]`.
 - [x] Filtro “cerca de” + radio en listado (MVP con geolocalización del navegador).
 - [x] Mostrar distancia en `ServiceCard`.
+- [x] Configuración local de Google Maps completada (API key en `.env` local y restricciones básicas aplicadas).
 **Cierre**: experiencia de búsqueda cercana operativa.
 
 ### Lote B5 — Tests dirigidos (sin E2E)
 - [x] Unit tests de geocoding/create/update reforzados.
 - [x] Cobertura de controller para `/services/nearby/search` (validación + defaults).
-- [ ] Test de componente crítico de ubicación (pendiente setup de test runner frontend).
+- [x] Cobertura frontend dirigida del flujo nearby (filtro cercano y radio).
+- [ ] Test de componente crítico de ubicación/autocomplete (pendiente infraestructura/mocks más finos de Google Places).
 **Cierre**: cobertura del flujo de negocio principal.
 
 ---
@@ -157,8 +159,10 @@ Ordenar la implementación restante para:
 
 ### ▶ Siguiente foco recomendado: **hardening UX + tests dirigidos**
 1. [x] Añadir validación UX cuando falte configuración de Google Maps en frontend.
-2. Completar tests de integración del flujo nearby+geocoding (sin E2E).
+2. [x] Completar tests de integración del flujo nearby+geocoding (sin E2E) en backend y flujo nearby en frontend.
 3. [x] Documentar setup frontend de Google Maps (`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`) para ejecución reproducible.
+4. [ ] Resolver incidencia de entorno local (`pnpm/corepack` / PostgreSQL) para validar manualmente Google Places.
+5. [ ] Validar manualmente autocomplete real en `/services/create` y `/services/edit/[id]`.
 
 ---
 

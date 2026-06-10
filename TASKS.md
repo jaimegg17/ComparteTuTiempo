@@ -349,54 +349,56 @@ Nice-to-have y mejoras adicionales.
 
 ### 5.1 Geolocalización y búsqueda por cercanía (Google Maps) - NUEVO CRÍTICO
 
-**Estado Actual**: Existe `location` textual en servicios, pero no hay coordenadas ni búsqueda geoespacial real.
+**Estado Actual**: Backend y frontend MVP ya implementados; pendiente validación manual completa del autocomplete real en entorno local y remate de tests frontend específicos.
 
 #### Tareas:
 
-- [ ] **P0.6.1** Extender modelo de datos para ubicación normalizada
+- [x] **P0.6.1** Extender modelo de datos para ubicación normalizada
   - Añadir en `Service` campos mínimos: `latitude`, `longitude`, `formattedAddress`, `placeId`
   - Mantener `location` (texto) por compatibilidad
   - Añadir índices para `latitude/longitude`
   - **Archivos**: `apps/api/prisma/schema.prisma` + migración
 
-- [ ] **P0.6.2** Integrar Google Places/Geocoding en creación/edición de servicios
+- [x] **P0.6.2** Integrar Google Places/Geocoding en creación/edición de servicios
   - Resolver dirección escrita por usuario a coordenadas (geocoding)
   - Guardar `placeId` + `formattedAddress` + coordenadas
-  - Si falla geocoding, devolver error validado (mensaje claro)
+  - Si falla geocoding, fallback seguro sin bloquear creación/edición
   - **Archivos**:
     - `apps/api/src/modules/services/application/create-service.use-case.ts`
     - `apps/api/src/modules/services/application/update-service.use-case.ts`
     - `apps/api/src/common/maps/*` (nuevo módulo)
 
-- [ ] **P0.6.3** Añadir endpoint de servicios cercanos (radio en km)
-  - Endpoint propuesto: `GET /api/services/nearby?lat=...&lng=...&radiusKm=...`
+- [x] **P0.6.3** Añadir endpoint de servicios cercanos (radio en km)
+  - Endpoint implementado: `GET /api/services/nearby/search?nearLat=...&nearLng=...&radiusKm=...`
   - Estrategia simple: filtro por bounding-box + cálculo distancia (Haversine)
   - Ordenar por distancia ascendente
   - **Archivos**:
     - `apps/api/src/modules/services/presentation/services.controller.ts`
     - `apps/api/src/modules/services/infrastructure/prisma-service-repository.ts`
 
-- [ ] **P0.6.4** Integrar selector de ubicación simple en frontend
+- [x] **P0.6.4** Integrar selector de ubicación simple en frontend
   - En alta/edición de servicio: input con sugerencias de Google Places
   - Guardar coordenadas reales en payload
   - **Archivos**:
-    - `apps/web/pages/services/new.tsx`
-    - `apps/web/pages/services/[id]/edit.tsx`
+    - `apps/web/pages/services/create.tsx`
+    - `apps/web/pages/services/edit/[id].tsx`
     - `apps/web/src/components/services/*` (input ubicación)
 
-- [ ] **P0.6.5** Añadir búsqueda “cerca de” en listado de servicios
+- [x] **P0.6.5** Añadir búsqueda “cerca de” en listado de servicios
   - Filtro por ubicación concreta + radio configurable (ej. 1/3/5/10 km)
   - Mostrar distancia aproximada en cada tarjeta
   - **Archivos**:
     - `apps/web/pages/services/index.tsx`
     - `apps/web/src/shared/api/services.ts`
-    - `apps/web/src/components/ServiceCard.tsx`
+    - `apps/web/components/services/ServiceCard.tsx`
 
 - [ ] **P0.6.6** Tests mínimos correctos (sin E2E)
   - Unit tests de cálculo y validación de coordenadas
-  - Integration tests de endpoint `/services/nearby`
-  - Test frontend del flujo de selección de ubicación (componente crítico)
+  - ✅ Integration tests de endpoint `/services/nearby/search`
+  - ✅ Tests frontend del flujo nearby (geolocalización + radio)
+  - ⏳ Pendiente: test frontend específico del autocomplete de Google Places (componente crítico)
   - **No incluye E2E por decisión de alcance**
+  - ⏳ Pendiente complementaria: validación manual final en local del autocomplete real
 
 ---
 

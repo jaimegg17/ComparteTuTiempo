@@ -1,6 +1,7 @@
 import { EventsController, normalizeEventListQuery } from './events.controller';
 import type { CreateEventUseCase } from '../application/create-event.use-case';
 import type { ListEventsUseCase } from '../application/list-events.use-case';
+import type { PrismaService } from '@/common/prisma/prisma.service';
 
 describe('EventsController', () => {
   const createEventUseCase = {
@@ -11,16 +12,31 @@ describe('EventsController', () => {
     execute: jest.fn(),
   };
 
+  const prisma = {
+    user: {
+      findUnique: jest.fn(),
+    },
+    communityMembership: {
+      findUnique: jest.fn(),
+    },
+    event: {
+      findUnique: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    },
+  };
+
   const controller = new EventsController(
     createEventUseCase as unknown as CreateEventUseCase,
     listEventsUseCase as unknown as ListEventsUseCase,
+    prisma as unknown as PrismaService,
   );
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('normaliza communityId como groupId para listados', () => {
+  it('normaliza communityId para listados', () => {
     const query = normalizeEventListQuery({
       communityId: 15,
       page: 2,
@@ -29,14 +45,14 @@ describe('EventsController', () => {
       dateTo: '2026-03-10T00:00:00.000Z',
     });
 
-    expect(query.groupId).toBe(15);
+    expect(query.communityId).toBe(15);
     expect(query.page).toBe(2);
     expect(query.pageSize).toBe(10);
     expect(query.dateFrom).toBeInstanceOf(Date);
     expect(query.dateTo).toBeInstanceOf(Date);
   });
 
-  it('usa groupId normalizado en listEvents', async () => {
+  it('usa communityId normalizado en listEvents', async () => {
     const toContract = jest.fn().mockReturnValue({ id: 1, title: 'Evento' });
     listEventsUseCase.execute.mockResolvedValue({
       events: {
@@ -51,7 +67,7 @@ describe('EventsController', () => {
     const result = await controller.listEvents({ communityId: 3, page: 1, pageSize: 20 });
 
     expect(listEventsUseCase.execute).toHaveBeenCalledWith({
-      query: expect.objectContaining({ groupId: 3, page: 1, pageSize: 20 }),
+      query: expect.objectContaining({ communityId: 3, page: 1, pageSize: 20 }),
     });
     expect(result.events).toEqual([{ id: 1, title: 'Evento' }]);
   });
@@ -71,9 +87,58 @@ describe('EventsController', () => {
     const result = await controller.listEventsByCommunity(77);
 
     expect(listEventsUseCase.execute).toHaveBeenCalledWith({
-      query: expect.objectContaining({ groupId: 77, page: 1, pageSize: 20 }),
+      query: expect.objectContaining({ communityId: 77, page: 1, pageSize: 20 }),
     });
     expect(result.communityId).toBe(77);
     expect(result.events).toEqual([{ id: 2, title: 'Evento comunidad' }]);
+  });
+
+  it('bloquea la creación de eventos si el usuario no es owner ni admin', async () => {
+    prisma.user.findUnique.mockResolvedValue({ role: 'USER' });
+    prisma.communityMembership.findUnique.mockResolvedValue(null);
+
+    await expect(
+      controller.createEvent(
+        {
+          communityId: 4,
+          title: 'Evento demo',
+          description: 'Descripción suficientemente larga',
+          date: new Date('2026-04-01T10:00:00.000Z'),
+          location: 'Madrid',
+        },
+        { user: { sub: 'auth0|user' } },
+      ),
+    ).rejects.toThrow('No autorizado para crear eventos en esta comunidad');
+  });
+
+  it('bloquea la actualización de eventos si el usuario no es owner ni admin', async () => {
+    prisma.event.findUnique.mockResolvedValue({
+      id: 8,
+      communityId: 4,
+    });
+    prisma.user.findUnique.mockResolvedValue({ role: 'USER' });
+    prisma.communityMembership.findUnique.mockResolvedValue(null);
+
+    await expect(
+      controller.updateEvent(
+        8,
+        { title: 'Nuevo título' },
+        { user: { sub: 'auth0|user' } },
+      ),
+    ).rejects.toThrow('No autorizado para actualizar este evento');
+  });
+
+  it('permite eliminar un evento si el usuario es admin', async () => {
+    prisma.event.findUnique.mockResolvedValue({
+      id: 11,
+      communityId: 5,
+    });
+    prisma.user.findUnique.mockResolvedValue({ role: 'ADMIN' });
+    prisma.event.delete.mockResolvedValue({ id: 11 });
+
+    const result = await controller.deleteEvent(11, { user: { sub: 'auth0|admin' } });
+
+    expect(prisma.event.delete).toHaveBeenCalledWith({ where: { id: 11 } });
+    expect(result.event).toEqual({ id: 11 });
   });
 });

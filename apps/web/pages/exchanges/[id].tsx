@@ -16,6 +16,7 @@ import { ErrorAlert } from '@/components/ui/BeautifulAlert';
 import { useErrorHandling, ERROR_MESSAGES } from '@/hooks/useErrorHandling';
 import type { Exchange } from '@/types/exchange.types';
 import type { ChatUser } from '@/types/message.types';
+import { buildApiUrl } from '@/shared/api/config';
 import type { ChipProps } from '@mui/material';
 
 export default function ExchangeDetailPage() {
@@ -44,7 +45,7 @@ export default function ExchangeDetailPage() {
       }
 
       // Fetch exchange details
-      const response = await fetch(`http://localhost:3001/api/exchanges/${id}`, {
+      const response = await fetch(buildApiUrl(`/exchanges/${id}`), {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

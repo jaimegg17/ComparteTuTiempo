@@ -53,6 +53,7 @@ export default function CommunitiesPage() {
       const query = {
         page,
         pageSize,
+        kind: 'COMMUNITY' as const,
         creatorId: activeTab === 1 && user?.sub ? user.sub : undefined,
         isPrivate:
           activeTab === 2 ? false : visibilityFilter === 'all' ? undefined : visibilityFilter === 'private',
@@ -85,7 +86,8 @@ export default function CommunitiesPage() {
     return communities.filter((community) => {
       const name = community.name?.toLowerCase() ?? '';
       const description = community.description?.toLowerCase() ?? '';
-      return name.includes(normalizedSearch) || description.includes(normalizedSearch);
+      const topics = community.topics.join(' ').toLowerCase();
+      return name.includes(normalizedSearch) || description.includes(normalizedSearch) || topics.includes(normalizedSearch);
     });
   }, [communities, searchTerm]);
 
@@ -94,11 +96,17 @@ export default function CommunitiesPage() {
   };
 
   const resultCount = filteredCommunities.length;
+  const pageContentSx = {
+    width: '100%',
+    maxWidth: 1240,
+    mx: 'auto',
+    px: { xs: 2, md: 3 },
+  };
 
   return (
     <Layout>
       <Box sx={{ bgcolor: '#f5f5f5', minHeight: '100%', py: 4 }}>
-        <Box sx={{ px: { xs: 2, md: 3 } }}>
+        <Box sx={pageContentSx}>
           {error && (
             <Box sx={{ mb: 3 }}>
               <ErrorAlert
@@ -110,8 +118,17 @@ export default function CommunitiesPage() {
             </Box>
           )}
           
-          <Box sx={{ flex: 1 }}>
-            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+          <Box sx={{ width: '100%' }}>
+            <Box
+              sx={{
+                mb: 3,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: 2,
+                flexWrap: 'wrap',
+              }}
+            >
               {/* Tab Controller */}
               <Tabs
                 value={activeTab}
@@ -143,7 +160,7 @@ export default function CommunitiesPage() {
               </Tabs>
               
               {/* Número de resultados y botón */}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
                 <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '18px' }}>
                   {loading
                     ? t('common.loading')
@@ -174,7 +191,7 @@ export default function CommunitiesPage() {
               </Box>
             </Box>
 
-            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 3 }}>
+            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 3, width: '100%' }}>
               <TextField
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
@@ -216,8 +233,9 @@ export default function CommunitiesPage() {
               <Box
                 sx={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                  gap: 2.5,
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 380px))',
+                  justifyContent: 'center',
+                  gap: 3,
                 }}
               >
                 {filteredCommunities.map((community) => (

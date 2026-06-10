@@ -43,24 +43,28 @@ export function TestimonialsSection() {
     <Box
       sx={{
         bgcolor: "#FFFFFF",
-        py: 8,
-        minHeight: "60vh",
+        pt: { xs: 6, md: 8 },
+        pb: { xs: 3.5, md: 4.5 },
       }}
     >
-      <Container maxWidth="xl">
+      <Container maxWidth="lg" sx={{ px: { xs: 2, md: 3 } }}>
         <Box sx={{ mb: 6 }}>
           <Typography
             variant="h4"
             sx={{
-              fontSize: { xs: 24, md: 28 },
-              fontWeight: 600,
+              fontSize: { xs: 24, md: 30 },
+              fontWeight: 700,
               color: "rgba(0, 0, 0, 0.87)",
               borderLeft: "4px solid",
               borderColor: "#9333EA",
               pl: 2,
+              mb: 1,
             }}
           >
             {t("testimonials.title")}
+          </Typography>
+          <Typography sx={{ color: "text.secondary", maxWidth: 760, lineHeight: 1.7, pl: 2.5 }}>
+            Opiniones de personas que ya han usado la plataforma para compartir conocimientos, apoyo cotidiano y tiempo de calidad.
           </Typography>
         </Box>
 
@@ -80,15 +84,16 @@ export function TestimonialsSection() {
               key={testimonial.id}
               elevation={1}
               sx={{
-                p: 3,
+                p: 3.25,
                 borderRadius: 3,
                 border: "1px solid",
-                borderColor: "rgba(0, 0, 0, 0.08)",
+                borderColor: "rgba(148,163,184,0.18)",
                 bgcolor: "#FFFFFF",
+                boxShadow: "0 10px 24px rgba(15,23,42,0.06)",
                 transition: "all 0.3s ease",
                 "&:hover": {
                   transform: "translateY(-4px)",
-                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+                  boxShadow: "0 18px 32px rgba(15,23,42,0.12)",
                 },
               }}
             >
@@ -96,7 +101,8 @@ export function TestimonialsSection() {
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
                 <Avatar
                   sx={{
-                    bgcolor: "#FFD700",
+                    bgcolor: "rgba(147,51,234,0.12)",
+                    color: "#7A2EF6",
                     width: 56,
                     height: 56,
                     fontSize: 18,
@@ -151,4 +157,3 @@ export function TestimonialsSection() {
     </Box>
   );
 }
-
