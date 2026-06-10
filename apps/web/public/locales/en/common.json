@@ -746,6 +746,29 @@
     "new": {
       "loginError": "You need to sign in to request an organization.",
       "submitError": "The organization request could not be submitted."
+    },
+    "list": {
+      "loadError": "Organizations could not be loaded.",
+      "summaryVisible": "Visible organizations",
+      "summaryTopics": "Represented areas",
+      "summaryResults": "Current results",
+      "summaryPending": "Pending requests",
+      "badge": "Verified and under-review entities",
+      "title": "Organizations with a more institutional and trustworthy profile",
+      "subtitle": "Here we bring together associations, NGOs and official groups with more context, governance and trust signals. Approved organizations are shown publicly and new requests go through administrative review.",
+      "request": "Request organization",
+      "review": "Review requests",
+      "whatToExpect": "What to expect here",
+      "expectations": [
+        "Visible organizations with a verification badge once approved.",
+        "Topics and activity areas to quickly identify each entity mission.",
+        "A differentiated request process to maintain a higher level of trust."
+      ],
+      "pendingAlert": "You have {{count}} pending organization requests to review.",
+      "searchPlaceholder": "Search organizations by name, description or topics...",
+      "clearSearch": "Clear search",
+      "emptyTitle": "No organizations match your search",
+      "emptyDescription": "Try another term or request a new organization if it does not exist on the platform yet."
     }
   },
   "faq": {
@@ -874,5 +897,66 @@
         ]
       }
     ]
+  },
+  "exchangesPage": {
+    "states": {
+      "PENDING": "Pending",
+      "CONFIRMED": "Confirmed",
+      "IN_PROGRESS": "In progress",
+      "COMPLETED": "Completed",
+      "REJECTED": "Rejected",
+      "CANCELLED": "Cancelled"
+    },
+    "loadTokenError": "The authentication token could not be obtained",
+    "missingTokenError": "Authentication token is not available",
+    "loadError": "Error loading exchanges",
+    "updateError": "Error updating the exchange",
+    "updateFallback": "The exchange could not be updated",
+    "updated": "Exchange updated to “{{state}}”.",
+    "ratingSubmitted": "Thanks for your rating. We updated the exchange.",
+    "loginWarning": "Sign in to view your requests, manage statuses and follow your active exchanges.",
+    "login": "Sign in",
+    "overline": "EXCHANGE TRACKING",
+    "title": "My exchanges",
+    "subtitle": "Review your requests, confirm next steps and keep track of where each collaboration stands.",
+    "currentView": "Current view",
+    "total": "Total",
+    "pending": "Pending",
+    "inProgress": "In progress",
+    "completed": "Completed",
+    "tabReceived": "Requests sent to you",
+    "tabSent": "Requests you have sent",
+    "tabAll": "Global view of all your exchanges",
+    "emptyTitle": "There are no exchanges in this status",
+    "emptyReceived": "You have not received requests for this filter yet. Publishing clear and complete services usually helps generate more activity.",
+    "emptySent": "You have not sent requests matching this filter yet. You can explore services and try new categories.",
+    "emptyAll": "You have no exchanges matching the current selection. Change tabs or adjust the status to see more activity.",
+    "exploreServices": "Explore services",
+    "filters": {
+      "overline": "FILTER ACTIVITY",
+      "aria": "Exchange types",
+      "all": "All",
+      "received": "Received",
+      "sent": "Sent",
+      "confirmed": "Confirmed"
+    },
+    "card": {
+      "requestedService": "Someone requested this service from you",
+      "sentService": "You requested this service",
+      "openService": "Open service {{title}}",
+      "serviceFallback": "Service",
+      "updated": "Updated",
+      "requestedBy": "Requested by",
+      "offeredBy": "Offered by",
+      "created": "Created on {{date}}",
+      "duration": "{{hours}}h exchange",
+      "initialMessage": "Initial message",
+      "openChat": "Open chat",
+      "viewService": "View service",
+      "accept": "Accept",
+      "reject": "Reject",
+      "start": "Start exchange",
+      "complete": "Complete"
+    }
   }
 }

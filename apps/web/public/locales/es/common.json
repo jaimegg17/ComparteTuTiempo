@@ -746,6 +746,29 @@
     "new": {
       "loginError": "Necesitas iniciar sesión para solicitar una organización.",
       "submitError": "No se pudo registrar la solicitud de organización."
+    },
+    "list": {
+      "loadError": "No se pudieron cargar las organizaciones.",
+      "summaryVisible": "Organizaciones visibles",
+      "summaryTopics": "Ámbitos representados",
+      "summaryResults": "Resultados actuales",
+      "summaryPending": "Solicitudes pendientes",
+      "badge": "Entidades verificadas y en revisión",
+      "title": "Organizaciones con un perfil más institucional y fiable",
+      "subtitle": "Aquí reunimos asociaciones, ONG y colectivos oficiales con mayor contexto, gobernanza y señal de confianza. Las organizaciones aprobadas se muestran públicamente y las nuevas solicitudes pasan por revisión administrativa.",
+      "request": "Solicitar organización",
+      "review": "Revisar solicitudes",
+      "whatToExpect": "Qué esperar aquí",
+      "expectations": [
+        "Organizaciones visibles con badge de verificación cuando han sido aprobadas.",
+        "Temas y áreas de actividad para identificar rápido la misión de cada entidad.",
+        "Proceso de solicitud diferenciado para mantener un nivel de confianza más alto."
+      ],
+      "pendingAlert": "Tienes {{count}} solicitudes de organización pendientes de revisar.",
+      "searchPlaceholder": "Buscar organizaciones por nombre, descripción o temas...",
+      "clearSearch": "Limpiar búsqueda",
+      "emptyTitle": "No hay organizaciones que coincidan con la búsqueda",
+      "emptyDescription": "Prueba con otro término o solicita una nueva organización si todavía no existe en la plataforma."
     }
   },
   "faq": {
@@ -874,5 +897,66 @@
         ]
       }
     ]
+  },
+  "exchangesPage": {
+    "states": {
+      "PENDING": "Pendiente",
+      "CONFIRMED": "Confirmado",
+      "IN_PROGRESS": "En progreso",
+      "COMPLETED": "Completado",
+      "REJECTED": "Rechazado",
+      "CANCELLED": "Cancelado"
+    },
+    "loadTokenError": "No se pudo obtener el token de autenticación",
+    "missingTokenError": "Token de autenticación no disponible",
+    "loadError": "Error al cargar los intercambios",
+    "updateError": "Error al actualizar el intercambio",
+    "updateFallback": "No se pudo actualizar el intercambio",
+    "updated": "Intercambio actualizado a “{{state}}”.",
+    "ratingSubmitted": "Gracias por tu valoración. Hemos actualizado el intercambio.",
+    "loginWarning": "Inicia sesión para consultar tus solicitudes, gestionar estados y seguir tus intercambios activos.",
+    "login": "Iniciar sesión",
+    "overline": "SEGUIMIENTO DE INTERCAMBIOS",
+    "title": "Mis intercambios",
+    "subtitle": "Consulta tus solicitudes, confirma próximos pasos y mantén claro en qué punto está cada colaboración.",
+    "currentView": "Vista actual",
+    "total": "Total",
+    "pending": "Pendientes",
+    "inProgress": "En curso",
+    "completed": "Completados",
+    "tabReceived": "Solicitudes que te han enviado",
+    "tabSent": "Solicitudes que has enviado",
+    "tabAll": "Vista global de todos tus intercambios",
+    "emptyTitle": "No hay intercambios en este estado",
+    "emptyReceived": "Todavía no has recibido solicitudes para este filtro. Publicar servicios claros y completos suele ayudar a generar más movimiento.",
+    "emptySent": "Aún no has enviado solicitudes que encajen con este filtro. Puedes explorar servicios y probar nuevas categorías.",
+    "emptyAll": "No tienes intercambios que coincidan con la selección actual. Cambia de pestaña o ajusta el estado para ver más actividad.",
+    "exploreServices": "Explorar servicios",
+    "filters": {
+      "overline": "FILTRAR ACTIVIDAD",
+      "aria": "Tipos de intercambios",
+      "all": "Todos",
+      "received": "Recibidos",
+      "sent": "Enviados",
+      "confirmed": "Confirmados"
+    },
+    "card": {
+      "requestedService": "Te han solicitado este servicio",
+      "sentService": "Has solicitado este servicio",
+      "openService": "Abrir servicio {{title}}",
+      "serviceFallback": "Servicio",
+      "updated": "Actualizado",
+      "requestedBy": "Solicitado por",
+      "offeredBy": "Ofrecido por",
+      "created": "Creado el {{date}}",
+      "duration": "{{hours}}h de intercambio",
+      "initialMessage": "Mensaje inicial",
+      "openChat": "Abrir chat",
+      "viewService": "Ver servicio",
+      "accept": "Aceptar",
+      "reject": "Rechazar",
+      "start": "Iniciar intercambio",
+      "complete": "Completar"
+    }
   }
 }

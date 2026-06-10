@@ -20,25 +20,61 @@ import { ListEventsUseCase } from '../application/list-events.use-case';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
-import { IsDateString, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { IsDateString, IsNumber, IsOptional, IsString, Min, MinLength } from 'class-validator';
 import { Type } from 'class-transformer';
 import type { EventListQuery } from '@comparte-tu-tiempo/contracts';
 
-// Simple DTOs without Zod for now
 export class CreateEventDto {
+  @IsString()
+  @MinLength(3)
   title!: string;
+
+  @IsString()
+  @MinLength(10)
   description!: string;
-  date!: Date;
+
+  @IsDateString()
+  date!: string | Date;
+
+  @IsOptional()
+  @IsString()
   location?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Type(() => Number)
   capacity?: number;
+
+  @IsNumber()
+  @Type(() => Number)
   communityId!: number;
 }
 
 export class UpdateEventDto {
+  @IsOptional()
+  @IsString()
+  @MinLength(3)
   title?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(10)
   description?: string;
-  date?: Date;
+
+  @IsOptional()
+  @IsDateString()
+  date?: string | Date;
+
+  @IsOptional()
+  @IsString()
   location?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Type(() => Number)
+  capacity?: number;
 }
 
 export class EventListQueryDto {
@@ -139,7 +175,7 @@ export class EventsController {
       throw new ForbiddenException('No autorizado para crear eventos en esta comunidad');
     }
     const result = await this.createEventUseCase.execute({
-      data: { ...createEventDto, creatorId: userId },
+      data: { ...createEventDto, date: new Date(createEventDto.date), creatorId: userId },
       userId,
     });
 
@@ -388,8 +424,9 @@ export class EventsController {
       data: {
         ...(updateEventDto.title !== undefined ? { title: updateEventDto.title } : {}),
         ...(updateEventDto.description !== undefined ? { description: updateEventDto.description } : {}),
-        ...(updateEventDto.date !== undefined ? { date: updateEventDto.date } : {}),
+        ...(updateEventDto.date !== undefined ? { date: new Date(updateEventDto.date) } : {}),
         ...(updateEventDto.location !== undefined ? { location: updateEventDto.location } : {}),
+        ...(updateEventDto.capacity !== undefined ? { capacity: updateEventDto.capacity } : {}),
       },
     });
 

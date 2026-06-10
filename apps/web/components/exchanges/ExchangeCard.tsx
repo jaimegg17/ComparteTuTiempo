@@ -3,6 +3,7 @@ import { ChatBubble, Clock } from 'iconoir-react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { RatingButton } from '@/components/ratings';
+import { useTranslation } from '@/hooks/useTranslation';
 import type { Exchange, ExchangeState } from '@/types/exchange.types';
 
 interface ExchangeCardProps {
@@ -16,17 +17,19 @@ interface ExchangeCardProps {
   loading?: boolean;
 }
 
-const STATE_CONFIG: Record<ExchangeState, { label: string; color: 'default' | 'warning' | 'success' | 'info' | 'error' }> = {
-  PENDING: { label: 'Pendiente', color: 'warning' },
-  CONFIRMED: { label: 'Confirmado', color: 'info' },
-  IN_PROGRESS: { label: 'En progreso', color: 'info' },
-  COMPLETED: { label: 'Completado', color: 'success' },
-  REJECTED: { label: 'Rechazado', color: 'error' },
-  CANCELLED: { label: 'Cancelado', color: 'default' },
+const STATE_CONFIG: Record<ExchangeState, { labelKey: string; color: 'default' | 'warning' | 'success' | 'info' | 'error' }> = {
+  PENDING: { labelKey: 'exchangesPage.states.PENDING', color: 'warning' },
+  CONFIRMED: { labelKey: 'exchangesPage.states.CONFIRMED', color: 'info' },
+  IN_PROGRESS: { labelKey: 'exchangesPage.states.IN_PROGRESS', color: 'info' },
+  COMPLETED: { labelKey: 'exchangesPage.states.COMPLETED', color: 'success' },
+  REJECTED: { labelKey: 'exchangesPage.states.REJECTED', color: 'error' },
+  CANCELLED: { labelKey: 'exchangesPage.states.CANCELLED', color: 'default' },
 };
 
 export function ExchangeCard({ exchange, currentUserId, onAccept, onReject, onStart, onComplete, onRatingSubmitted, loading }: ExchangeCardProps) {
   const router = useRouter();
+  const { t, currentLanguage } = useTranslation();
+  const locale = currentLanguage === 'en' ? 'en-US' : 'es-ES';
   const isProvider = currentUserId === exchange.offeredById;
   const isRequester = currentUserId === exchange.requestedById;
   const otherUser = isProvider ? exchange.requestedBy : exchange.offeredBy;
@@ -37,7 +40,7 @@ export function ExchangeCard({ exchange, currentUserId, onAccept, onReject, onSt
   const canStart = isRequester && exchange.state === 'CONFIRMED';
   const canComplete = isProvider && exchange.state === 'IN_PROGRESS';
   const canRate = isRequester && exchange.state === 'COMPLETED';
-  const relationshipCopy = isProvider ? 'Te han solicitado este servicio' : 'Has solicitado este servicio';
+  const relationshipCopy = isProvider ? t('exchangesPage.card.requestedService') : t('exchangesPage.card.sentService');
 
   return (
     <Card
@@ -57,7 +60,7 @@ export function ExchangeCard({ exchange, currentUserId, onAccept, onReject, onSt
           <Box
             role="button"
             tabIndex={0}
-            aria-label={`Abrir servicio ${exchange.service?.title || 'Servicio'}`}
+            aria-label={t('exchangesPage.card.openService', { title: exchange.service?.title || t('exchangesPage.card.serviceFallback') })}
             sx={{
               width: { xs: '100%', sm: 180, md: 148 },
               height: { xs: 180, sm: 160, md: 148 },
@@ -114,20 +117,20 @@ export function ExchangeCard({ exchange, currentUserId, onAccept, onReject, onSt
                   }}
                   onClick={() => router.push(`/services/${exchange.serviceId}`)}
                 >
-                  {exchange.service?.title || 'Servicio'}
+                  {exchange.service?.title || t('exchangesPage.card.serviceFallback')}
                 </Typography>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} useFlexGap flexWrap="wrap" sx={{ alignItems: { xs: 'stretch', sm: 'center' } }}>
-                  <Chip label={stateConfig.label} color={stateConfig.color} size="small" sx={{ fontWeight: 700 }} />
+                  <Chip label={t(stateConfig.labelKey)} color={stateConfig.color} size="small" sx={{ fontWeight: 700 }} />
                   {exchange.service?.category && <Chip label={exchange.service.category} size="small" variant="outlined" />}
                 </Stack>
               </Box>
 
               <Box sx={{ textAlign: { xs: 'left', md: 'right' }, alignSelf: { xs: 'flex-start', md: 'auto' } }}>
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                  Actualizado
+                  {t('exchangesPage.card.updated')}
                 </Typography>
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {new Date(exchange.updatedAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  {new Date(exchange.updatedAt).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })}
                 </Typography>
               </Box>
             </Stack>
@@ -139,10 +142,10 @@ export function ExchangeCard({ exchange, currentUserId, onAccept, onReject, onSt
                 </Avatar>
                 <Box sx={{ minWidth: 0 }}>
                   <Typography variant="body2" sx={{ fontWeight: 700, wordBreak: 'break-word' }}>
-                    {isProvider ? 'Solicitado por' : 'Ofrecido por'} {otherUser?.name}
+                    {isProvider ? t('exchangesPage.card.requestedBy') : t('exchangesPage.card.offeredBy')} {otherUser?.name}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    Creado el {new Date(exchange.createdAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    {t('exchangesPage.card.created', { date: new Date(exchange.createdAt).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' }) })}
                   </Typography>
                 </Box>
               </Box>
@@ -150,7 +153,7 @@ export function ExchangeCard({ exchange, currentUserId, onAccept, onReject, onSt
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
                 <Clock width={16} height={16} />
                 <Typography variant="body2" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                  {exchange.service?.duration || 0}h de intercambio
+                  {t('exchangesPage.card.duration', { hours: exchange.service?.duration || 0 })}
                 </Typography>
               </Box>
             </Stack>
@@ -166,7 +169,7 @@ export function ExchangeCard({ exchange, currentUserId, onAccept, onReject, onSt
                 }}
               >
                 <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', display: 'block', mb: 0.5 }}>
-                  Mensaje inicial
+                  {t('exchangesPage.card.initialMessage')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.65 }}>
                   {exchange.message}
@@ -183,7 +186,7 @@ export function ExchangeCard({ exchange, currentUserId, onAccept, onReject, onSt
                   onClick={() => router.push(`/exchanges/${exchange.id}`)}
                   sx={{ textTransform: 'none', fontWeight: 700, width: { xs: '100%', sm: 'auto' } }}
                 >
-                  Abrir chat
+                  {t('exchangesPage.card.openChat')}
                 </Button>
               )}
 
@@ -193,34 +196,34 @@ export function ExchangeCard({ exchange, currentUserId, onAccept, onReject, onSt
                 onClick={() => router.push(`/services/${exchange.serviceId}`)}
                 sx={{ textTransform: 'none', fontWeight: 700 }}
               >
-                Ver servicio
+                {t('exchangesPage.card.viewService')}
               </Button>
 
               {canAccept && (
                 <Button size="small" variant="contained" onClick={() => onAccept?.(exchange.id)} disabled={loading} sx={{ textTransform: 'none', fontWeight: 700, width: { xs: '100%', sm: 'auto' } }}>
-                  Aceptar
+                  {t('exchangesPage.card.accept')}
                 </Button>
               )}
               {canReject && (
                 <Button size="small" variant="outlined" color="error" onClick={() => onReject?.(exchange.id)} disabled={loading} sx={{ textTransform: 'none', fontWeight: 700, width: { xs: '100%', sm: 'auto' } }}>
-                  Rechazar
+                  {t('exchangesPage.card.reject')}
                 </Button>
               )}
               {canStart && (
                 <Button size="small" variant="contained" onClick={() => onStart?.(exchange.id)} disabled={loading} sx={{ textTransform: 'none', fontWeight: 700, width: { xs: '100%', sm: 'auto' } }}>
-                  Iniciar intercambio
+                  {t('exchangesPage.card.start')}
                 </Button>
               )}
               {canComplete && (
                 <Button size="small" variant="contained" color="success" onClick={() => onComplete?.(exchange.id)} disabled={loading} sx={{ textTransform: 'none', fontWeight: 700, width: { xs: '100%', sm: 'auto' } }}>
-                  Completar
+                  {t('exchangesPage.card.complete')}
                 </Button>
               )}
               {canRate && (
                 <RatingButton
                   exchangeId={exchange.id}
                   serviceId={exchange.serviceId}
-                  serviceTitle={exchange.service?.title || 'Servicio'}
+                  serviceTitle={exchange.service?.title || t('exchangesPage.card.serviceFallback')}
                   onRatingSubmitted={onRatingSubmitted ?? (() => {})}
                 />
               )}
