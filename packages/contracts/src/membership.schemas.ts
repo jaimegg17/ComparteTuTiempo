@@ -6,30 +6,30 @@ import { z } from 'zod';
 
 export const MembershipSchema = z.object({
   id: z.number(),
-  userId: z.number(),
+  userId: z.string(),
   groupId: z.number(),
-  role: z.enum(['member', 'moderator', 'admin']),
-  status: z.enum(['activa', 'pendiente', 'suspendida']),
+  role: z.enum(['MEMBER', 'MODERATOR', 'ADMIN']),
+  status: z.enum(['ACTIVA', 'PENDIENTE', 'SUSPENDIDA']),
   joinedAt: z.date(),
 });
 
 export const MembershipCreateSchema = z.object({
-  userId: z.number(),
+  userId: z.string(),
   groupId: z.number(),
-  role: z.enum(['member', 'moderator', 'admin']).default('member'),
-  status: z.enum(['activa', 'pendiente', 'suspendida']).default('activa'),
+  role: z.enum(['MEMBER', 'MODERATOR', 'ADMIN']).default('MEMBER'),
+  status: z.enum(['ACTIVA', 'PENDIENTE', 'SUSPENDIDA']).default('ACTIVA'),
 });
 
 export const MembershipUpdateSchema = z.object({
-  role: z.enum(['member', 'moderator', 'admin']).optional(),
-  status: z.enum(['activa', 'pendiente', 'suspendida']).optional(),
+  role: z.enum(['MEMBER', 'MODERATOR', 'ADMIN']).optional(),
+  status: z.enum(['ACTIVA', 'PENDIENTE', 'SUSPENDIDA']).optional(),
 });
 
 export const MembershipListQuerySchema = z.object({
-  userId: z.number().optional(),
+  userId: z.string().optional(),
   groupId: z.number().optional(),
-  role: z.enum(['member', 'moderator', 'admin']).optional(),
-  status: z.enum(['activa', 'pendiente', 'suspendida']).optional(),
+  role: z.enum(['MEMBER', 'MODERATOR', 'ADMIN']).optional(),
+  status: z.enum(['ACTIVA', 'PENDIENTE', 'SUSPENDIDA']).optional(),
   page: z.number().min(1, 'La página debe ser mayor a 0').default(1),
   pageSize: z.number().min(1, 'El tamaño de página debe ser mayor a 0').max(100, 'El tamaño de página no puede exceder 100').default(20),
 });
@@ -57,13 +57,13 @@ export type MembershipListResponse = z.infer<typeof MembershipListResponseSchema
 // ============================================================================
 
 export const MembershipRole = {
-  MEMBER: 'member',
-  MODERATOR: 'moderator',
-  ADMIN: 'admin',
+  MEMBER: 'MEMBER',
+  MODERATOR: 'MODERATOR',
+  ADMIN: 'ADMIN',
 } as const;
 
 export const MembershipStatus = {
-  ACTIVA: 'activa',
-  PENDIENTE: 'pendiente',
-  SUSPENDIDA: 'suspendida',
+  ACTIVA: 'ACTIVA',
+  PENDIENTE: 'PENDIENTE',
+  SUSPENDIDA: 'SUSPENDIDA',
 } as const;

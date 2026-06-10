@@ -2,23 +2,48 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { UserUpsertInterceptor } from './common/auth/user-upsert.interceptor';
+import { PrismaService } from './common/prisma/prisma.service';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // Configuración global
   app.setGlobalPrefix('api');
+  
+  // Configurar archivos estáticos
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+    prefix: '/uploads/',
+  });
+  
+  const configuredOrigins = process.env.FRONTEND_URL || process.env.CORS_ORIGIN || '';
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:3002',
+    'http://localhost:3004',
+    ...configuredOrigins.split(',').map((origin) => origin.trim()).filter(Boolean),
+  ];
+
   app.enableCors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: allowedOrigins,
     credentials: true,
   });
 
-  // Validación global con Zod
+  // Global validation pipe con transform habilitado para query params
   app.useGlobalPipes(new ValidationPipe({
-    transform: true,
-    whitelist: true,
-    forbidNonWhitelisted: true,
+    transform: true, // Convierte tipos automáticamente (string → number)
+    whitelist: true, // Elimina propiedades que no están en el DTO
+    forbidNonWhitelisted: true, // Lanza error si hay propiedades no permitidas
+    transformOptions: {
+      enableImplicitConversion: true, // Convierte tipos automáticamente
+    },
   }));
+
+  // Interceptor global para upsert de usuarios
+  const prismaService = app.get(PrismaService);
+  app.useGlobalInterceptors(new UserUpsertInterceptor(prismaService));
 
   // Configuración de Swagger
   const config = new DocumentBuilder()

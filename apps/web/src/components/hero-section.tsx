@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Play } from "lucide-react"
+import Image from "next/image"
 
 export function HeroSection() {
   return (
@@ -42,7 +43,14 @@ export function HeroSection() {
           {/* Hero image placeholder */}
           <div className="relative max-w-4xl mx-auto">
             <div className="relative rounded-lg overflow-hidden shadow-2xl">
-              <img src="/modern-saas-dashboard.png" alt="StreamLine Dashboard" className="w-full h-auto" />
+              <Image
+                src="/modern-saas-dashboard.png"
+                alt="StreamLine Dashboard"
+                width={1536}
+                height={1024}
+                className="w-full h-auto"
+                priority
+              />
               <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent" />
             </div>
           </div>

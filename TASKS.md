@@ -1,0 +1,669 @@
+# 📋 Tareas Pendientes - ComparteTuTiempo
+
+> **Objetivo**: Completar un TFG de alta calidad con módulos funcionales, UX/UI fluida y optimizada para cualquier tipo de usuario.
+
+---
+
+## 🎯 Prioridades
+
+### **P0 - Crítico (Completar Primero)**
+Funcionalidades core que deben funcionar perfectamente para una experiencia de usuario fluida.
+
+### **P1 - Alto (Completar Segundo)**
+Funcionalidades importantes que mejoran significativamente la experiencia.
+
+### **P2 - Medio (Completar Tercero)**
+Mejoras y optimizaciones que elevan la calidad del proyecto.
+
+### **P3 - Bajo (Completar Último)**
+Nice-to-have y mejoras adicionales.
+
+---
+
+## 🔴 P0 - CRÍTICO
+
+### 0. Roadmap UI Comunidades + FAQ (nuevo foco)
+
+- [x] **P0.C.1** Fase A completada: listado de comunidades mejorado
+  - Búsqueda por texto y filtro de visibilidad
+  - Estados loading/empty/error y CTA claros
+  - Navegación a detalle y ruta de creación preparada
+  - **Archivos**:
+    - `apps/web/pages/communities.tsx`
+    - `apps/web/src/components/CommunityCard.tsx`
+    - `apps/web/src/shared/api/communities.ts`
+    - `apps/web/pages/communities/[id].tsx`
+    - `apps/web/pages/communities/new.tsx`
+
+- [x] **P0.C.2** Fase B: detalle de comunidad con acciones clave
+  - Header, miembros, actividad y acciones de unirse/salir
+  - Alineación backend `communityId/groupId` en eventos/membresías
+  - Tests dirigidos de regresión para listados y normalización de query
+
+- [x] **P0.C.3** Fase C: crear comunidad (MVP)
+  - Formulario completo con validación frontend (nombre, descripción, privacidad)
+  - Manejo de errores de API y redirección al detalle tras crear
+  - Alineación de normalización en `communitiesApi.create/update`
+- [x] **P0.C.3.1** Editar comunidad (MVP+)
+  - Ruta `/communities/[id]/edit` implementada
+  - Control de propiedad: solo creador puede editar
+  - Endpoint backend `PUT /communities/:id` implementado con validación de autorización
+
+- [x] **P0.C.4** Fase D: sección FAQ
+  - Categorías de ayuda (cuenta, servicios, comunidades)
+  - Acordeones accesibles para preguntas/respuestas
+  - Búsqueda simple por texto (pregunta + respuesta)
+
+### 0.1 Saneamiento técnico (lint + typecheck monorepo)
+
+- [ ] **P0.Q.1** Bloque de estabilización de calidad global
+  - Resolver errores de lint históricos en API/Web (no-explicit-any, no-unused-vars, unescaped-entities)
+  - Corregir errores de typecheck en tests y módulos compartidos
+  - Ejecutar quality gate final: `pnpm lint` + `pnpm typecheck` en verde
+  - **Nota**: este bloque es transversal y no depende de una feature concreta
+  - ✅ Avance: warning debt API reducido a **0** tras lotes de hardening + limpieza de tests
+
+### 1. Sistema de Mensajería (Chat) - COMPLETAR
+
+**Estado Actual**: Parcialmente implementado, tiene bugs críticos.
+
+#### Tareas:
+
+- [x] **P0.1.1** Corregir `exchangeId` hardcodeado en `messages.controller.ts`
+  - `exchangeId` ahora se obtiene explícitamente desde body/query/param según endpoint
+  - Endpoints endurecidos con `BadRequestException` y `UnauthorizedException` (sin `Error` genérico)
+  - **Archivo**: `apps/api/src/modules/messages/presentation/messages.controller.ts`
+  - **Impacto**: elimina riesgo de chat cruzado por intercambio incorrecto
+
+- [x] **P0.1.2** Implementar endpoint para obtener mensajes por exchangeId
+  - `GetMessagesByExchangeUseCase` creado
+  - Endpoint activo: `GET /api/messages/exchange/:exchangeId`
+  - Validación de pertenencia al intercambio delegada en `ListMessagesUseCase`
+  - Tests añadidos para controlador + use case
+  - **Archivos**:
+    - `apps/api/src/modules/messages/application/get-messages-by-exchange.use-case.ts`
+    - `apps/api/src/modules/messages/application/get-messages-by-exchange.use-case.spec.ts`
+    - `apps/api/src/modules/messages/presentation/messages.controller.spec.ts`
+
+- [x] **P0.1.3** Implementar funcionalidad de mensajes leídos
+  - Endpoint `PUT /api/messages/:id/read` activo con validación de autorización
+  - En chat frontend se marcan como leídos los mensajes entrantes no leídos al cargar
+  - Contador de no leídos visible en lista de conversaciones (`Badge`)
+  - **Archivos**:
+    - `apps/api/src/modules/messages/application/mark-message-read.use-case.ts`
+    - `apps/web/src/components/chat/Chat.tsx`
+    - `apps/web/pages/conversations.tsx`
+
+- [x] **P0.1.4** Integrar Chat component con Auth0
+  - Reemplazar `localStorage.getItem('access_token')` con hook de Auth0
+  - Usar `useUser()` de `@auth0/nextjs-auth0/client` para obtener token
+  - Integración aplicada en flujo activo de chat vía `useAuth().getAccessToken()` + `apiClient`
+  - Limpieza adicional: eliminado hook legacy `useMessages` que mantenía token en `localStorage`
+  - **Archivos**:
+    - `apps/web/src/components/chat/Chat.tsx`
+    - `apps/web/src/hooks/useMessages.ts` (eliminado)
+
+- [ ] **P0.1.5** Implementar WebSocket o Polling para mensajes en tiempo real
+  - Opción 1: WebSocket con Socket.io
+  - Opción 2: Polling cada 2-3 segundos
+  - Mostrar notificaciones de nuevos mensajes
+  - **Prioridad**: WebSocket es mejor UX, pero polling es más simple
+
+- [x] **P0.1.6** Crear página de conversaciones
+  - Lista de todas las conversaciones del usuario
+  - Mostrar último mensaje, timestamp, no leídos
+  - Navegación a chat individual
+  - **Archivos**: `apps/web/pages/conversations.tsx`, `apps/web/src/shared/api/messages.ts`, `apps/api/src/modules/messages/application/list-conversations.use-case.ts`
+
+- [ ] **P0.1.7** Mejorar UI del Chat component
+  - Indicadores de "escribiendo..."
+  - Timestamps formateados mejor
+  - Avatares de usuarios
+  - Estados de entrega (enviado, entregado, leído)
+  - **Archivo**: `apps/web/src/components/chat/Chat.tsx`
+
+---
+
+### 2. Sistema de Valoraciones (Ratings) - COMPLETAR
+
+**Estado Actual**: Funcional pero incompleto.
+
+#### Tareas:
+
+- [x] **P0.2.1** Implementar endpoint DELETE para valoraciones
+  - `DeleteRatingUseCase` implementado
+  - Validación de autoría (solo el creador puede eliminar)
+  - Endpoint activo: `DELETE /api/ratings/:id`
+  - Tests de regresión en use case + controller
+  - **Archivos**:
+    - `apps/api/src/modules/ratings/application/delete-rating.use-case.ts`
+    - `apps/api/src/modules/ratings/application/delete-rating.use-case.spec.ts`
+    - `apps/api/src/modules/ratings/presentation/ratings.controller.spec.ts`
+
+- [x] **P0.2.2** Mejorar validación de creación de valoraciones
+  - Verificar que el usuario completó el intercambio
+  - Verificar que no haya valorado antes
+  - Validar que el servicio existe
+  - Validar score (1-5), longitud de comentario y suplantación de `userId`
+  - Tests de regresión ampliados en create-rating use case
+  - **Archivos**:
+    - `apps/api/src/modules/ratings/application/create-rating.use-case.ts`
+    - `apps/api/src/modules/ratings/application/create-rating.use-case.spec.ts`
+
+- [x] **P0.2.3** Implementar cálculo de promedio de ratings por servicio
+  - Campo `averageRating` + `totalRatings` en `GET /api/services/:id`
+  - Mostrar promedio destacado en frontend de detalle de servicio
+  - Tests dirigidos para casos con/sin valoraciones
+  - **Archivos**:
+    - `apps/api/src/modules/services/presentation/services.controller.ts`
+    - `apps/api/src/modules/services/presentation/services.controller.spec.ts`
+    - `apps/web/pages/services/[id].tsx`
+    - `apps/web/components/services/ServiceDetailHeader.tsx`
+
+- [x] **P0.2.4** Crear componente de valoración en frontend
+  - Formulario reutilizable para crear/editar valoración
+  - Selector de estrellas (1-5)
+  - Campo de comentario con contador de caracteres (máx. 500)
+  - Validación en frontend y mensajes de error
+  - Integrado en diálogo de creación/edición de rating
+  - **Archivos**:
+    - `apps/web/src/components/ratings/RatingForm.tsx`
+    - `apps/web/src/components/ratings/RatingDialog.tsx`
+    - `apps/web/src/components/ratings/RatingsList.tsx`
+
+- [x] **P0.2.5** Mostrar valoraciones en página de servicio
+  - Lista de valoraciones con usuario, estrellas y comentario
+  - Promedio de estrellas destacado
+  - Paginación en listado de valoraciones (5 por página)
+  - **Archivos**:
+    - `apps/web/components/services/ServiceRatingsTab.tsx`
+    - `apps/web/src/components/ratings/RatingsList.tsx`
+
+- [x] **P0.2.6** Agregar validación con DTOs Zod
+  - Reemplazar DTOs manuales con Zod schemas
+  - Usar `createZodDto` de `@anatine/zod-nestjs`
+  - DTOs de create/update/query conectados a `RatingCreateSchema`, `RatingUpdateSchema` y `RatingListQuerySchema`
+  - **Archivo**: `apps/api/src/modules/ratings/presentation/ratings.controller.ts`
+
+- [x] **P0.2.7** Implementar edición de valoraciones
+  - Editar comentario y estrellas desde el diálogo de valoración
+  - Validación de autoría en backend (`UpdateRatingUseCase`)
+  - **Archivos**:
+    - `apps/web/src/components/ratings/RatingDialog.tsx`
+    - `apps/web/src/components/ratings/RatingsList.tsx`
+    - `apps/api/src/modules/ratings/application/update-rating.use-case.ts`
+
+---
+
+### 3. Sistema de Subida de Imágenes - COMPLETAR
+
+**Estado Actual**: Funcional pero necesita mejoras.
+
+#### Tareas:
+
+- [x] **P0.3.1** Verificar configuración de Cloudinary
+  - Asegurar que variables de entorno estén configuradas
+  - Probar subida de imagen
+  - Verificar que las URLs se guardan correctamente
+  - Añadidos tests unitarios de servicio Cloudinary (upload/delete/extractPublicId)
+  - **Archivo**: `apps/api/src/common/cloudinary/cloudinary.service.ts`
+  - **Test**: `apps/api/src/common/cloudinary/cloudinary.service.spec.ts`
+
+- [x] **P0.3.2** Mejorar validación de archivos
+  - Validar tipos MIME específicos (jpeg, png, webp)
+  - Validar dimensiones mínimas/máximas
+  - Validar ratio de aspecto si es necesario
+  - Mensajes de error más descriptivos
+  - **Archivo**: `apps/api/src/modules/upload/upload.controller.ts`
+  - **Test**: `apps/api/src/modules/upload/upload.controller.spec.ts`
+
+- [x] **P0.3.3** Implementar componente de subida de imágenes en frontend
+  - Drag & drop
+  - Preview antes de subir
+  - Indicador de progreso
+  - Validación de tamaño y tipo
+  - Mostrar imagen subida
+  - **Archivo**: `apps/web/src/components/ui/ImageUpload.tsx` (mejorar el existente)
+
+- [x] **P0.3.4** Integrar subida de imágenes en formularios
+  - Formulario de creación de servicio
+  - Formulario de edición de perfil
+  - Flujos actuales de grupos/comunidades no incluyen `imageUrl` en contrato/modelo
+  - **Archivos**: Varios formularios
+
+- [x] **P0.3.5** Implementar eliminación de imágenes
+  - Endpoint `DELETE /api/upload/image/:publicId`
+  - Eliminar imagen anterior en Cloudinary al reemplazar imagen de servicio/usuario
+  - Eliminar imagen en Cloudinary al borrar servicio
+  - **Archivos**:
+    - `apps/api/src/modules/upload/upload.controller.ts`
+    - `apps/api/src/modules/services/application/update-service.use-case.ts`
+    - `apps/api/src/modules/services/application/delete-service.use-case.ts`
+    - `apps/api/src/modules/users/users.controller.ts`
+
+- [x] **P0.3.6** Optimizar imágenes en frontend
+  - Usar `next/image` para optimización
+  - Lazy loading
+  - Placeholders mientras carga
+  - **Archivos**:
+    - `apps/web/components/exchanges/ExchangeCard.tsx`
+    - `apps/web/components/services/ServiceImageSection.tsx`
+    - `apps/web/src/components/hero-section.tsx`
+    - `apps/web/src/components/testimonials-section.tsx`
+    - `apps/web/src/features/service/service-marketplace/service-marketplace.tsx`
+
+- [ ] **P0.3.7** Agregar soporte para múltiples imágenes
+  - Permitir subir varias imágenes para un servicio
+  - Galería de imágenes en detalle de servicio
+  - **Archivo**: Nuevo modelo o campo JSON en Service
+
+---
+
+### 4. Autenticación - COMPLETAR TODOs
+
+**Estado Actual**: Auth0 funciona, pero hay TODOs pendientes.
+
+#### Tareas:
+
+- [ ] **P0.4.1** Completar lógica de signup en `auth.controller.ts`
+  - Implementar endpoint `POST /api/auth/signup`
+  - Hash de contraseña con bcrypt
+  - Validación de email único
+  - **Archivo**: `apps/api/src/modules/auth/presentation/auth.controller.ts`
+
+- [ ] **P0.4.2** Completar lógica de signin en `auth.controller.ts`
+  - Implementar endpoint `POST /api/auth/signin`
+  - Verificar contraseña
+  - Generar JWT token (o usar Auth0)
+  - **Archivo**: `apps/api/src/modules/auth/presentation/auth.controller.ts`
+
+- [ ] **P0.4.3** Generar tokens JWT en use cases
+  - `SignUpUseCase`: Generar token después de crear usuario
+  - `SignInUseCase`: Generar token después de validar credenciales
+  - **Archivos**: 
+    - `apps/api/src/modules/auth/application/sign-up.use-case.ts`
+    - `apps/api/src/modules/auth/application/sign-in.use-case.ts`
+
+- [x] **P0.4.4** Eliminar fallbacks de test-user
+  - Verificado: sin usos activos de `'auth0|test-user-1'` en módulos API
+  - Reforzada autenticación real en controladores clave
+  - Sustituidos `throw new Error('Usuario no autenticado')` por `UnauthorizedException`
+  - **Archivos**:
+    - `apps/api/src/modules/services/presentation/services.controller.ts`
+    - `apps/api/src/modules/events/presentation/events.controller.ts`
+    - `apps/api/src/modules/users/presentation/users.controller.ts`
+    - `apps/api/src/modules/communities/presentation/communities.controller.ts`
+    - `apps/api/src/modules/groups/presentation/groups.controller.ts`
+    - `apps/api/src/modules/exchanges/presentation/exchanges.controller.ts`
+
+- [x] **P0.4.5** Verificar configuración de Auth0
+  - Variables de entorno correctas
+  - Callback URLs configuradas
+  - Audiencia correcta
+  - Estado validado en entorno local:
+    - `AUTH0_AUDIENCE` consistente entre `apps/web/.env.local` y `apps/api/.env`
+    - `AUTH0_ISSUER_BASE_URL` (web) consistente con `AUTH0_DOMAIN` (api)
+    - `AUTH0_BASE_URL` (web) consistente con `CORS_ORIGIN` (api)
+    - login web solicita `audience` explícitamente (`apps/web/pages/api/auth/[...auth0].ts`)
+  - **Archivos**: `.env`, `apps/web/env.example`, endpoints auth web
+
+---
+
+### 5. Validaciones y DTOs - COMPLETAR
+
+**Estado Actual**: Algunas validaciones deshabilitadas temporalmente.
+
+#### Tareas:
+
+- [ ] **P0.5.1** Habilitar validación global completa
+  - Habilitar `whitelist: true` en `ValidationPipe`
+  - Habilitar `forbidNonWhitelisted: true`
+  - **Archivo**: `apps/api/src/main.ts`
+
+- [ ] **P0.5.2** Reemplazar `body: any` con DTOs Zod
+  - `exchanges.controller.ts`: Líneas 59, 150
+  - `messages.controller.ts`: Ya tiene DTOs, verificar que funcionen
+  - Crear DTOs desde schemas de `packages/contracts`
+  - **Archivos**: Varios controladores
+
+- [x] **P0.5.3** Agregar validación a query params
+  - Todos los `@Query()` deben tener DTOs con validación
+  - Usar `class-validator` o Zod
+  - ✅ Avance: `exchanges.controller.ts` ya valida query params (`requestedById`, `offeredById`, `serviceId`, `state`, `page`, `pageSize`) con DTO tipado
+  - ✅ Avance: `services.controller.ts` refuerza validación de filtros/paginación (`minPrice`, `maxPrice`, `page`, `pageSize`)
+  - ✅ Avance: `groups.controller.ts` valida `communityId`, `creatorId`, `page`, `pageSize` con DTO tipado + tests dirigidos
+  - ✅ Avance: `communities.controller.ts` y `messages.controller.ts` migrados a query DTOs tipados (incluyendo paginación de `GET /messages/exchange/:exchangeId`)
+  - ✅ Limpieza asociada: eliminado controlador legacy duplicado `messages/infrastructure/messages.controller.ts`
+  - **Archivos**: Todos los controladores con query params
+
+- [ ] **P0.5.4** Validar permisos en todos los endpoints
+  - Verificar que el usuario puede realizar la acción
+  - Ejemplo: Solo el dueño puede editar su servicio
+  - ✅ Avance: `memberships.controller` reforzado con extracción tipada de usuario autenticado y `UnauthorizedException` explícita en create/update
+  - ✅ Avance: `users.controller` (legacy) y `users/presentation/users.controller` reforzados con request autenticada tipada + helper común
+  - ✅ Avance: `services.controller` y `ratings.controller` endurecidos (request tipada + helper auth + tests de regresión)
+  - ✅ Avance: `upload.controller` y controladores de auth (`auth0`, `auth/presentation`, `auth`) migrados a request tipada y validación de usuario autenticado
+  - **Archivos**: Todos los controladores con `PUT` y `DELETE`
+
+---
+
+### 5.1 Geolocalización y búsqueda por cercanía (Google Maps) - NUEVO CRÍTICO
+
+**Estado Actual**: Backend y frontend MVP ya implementados; pendiente validación manual completa del autocomplete real en entorno local y remate de tests frontend específicos.
+
+#### Tareas:
+
+- [x] **P0.6.1** Extender modelo de datos para ubicación normalizada
+  - Añadir en `Service` campos mínimos: `latitude`, `longitude`, `formattedAddress`, `placeId`
+  - Mantener `location` (texto) por compatibilidad
+  - Añadir índices para `latitude/longitude`
+  - **Archivos**: `apps/api/prisma/schema.prisma` + migración
+
+- [x] **P0.6.2** Integrar Google Places/Geocoding en creación/edición de servicios
+  - Resolver dirección escrita por usuario a coordenadas (geocoding)
+  - Guardar `placeId` + `formattedAddress` + coordenadas
+  - Si falla geocoding, fallback seguro sin bloquear creación/edición
+  - **Archivos**:
+    - `apps/api/src/modules/services/application/create-service.use-case.ts`
+    - `apps/api/src/modules/services/application/update-service.use-case.ts`
+    - `apps/api/src/common/maps/*` (nuevo módulo)
+
+- [x] **P0.6.3** Añadir endpoint de servicios cercanos (radio en km)
+  - Endpoint implementado: `GET /api/services/nearby/search?nearLat=...&nearLng=...&radiusKm=...`
+  - Estrategia simple: filtro por bounding-box + cálculo distancia (Haversine)
+  - Ordenar por distancia ascendente
+  - **Archivos**:
+    - `apps/api/src/modules/services/presentation/services.controller.ts`
+    - `apps/api/src/modules/services/infrastructure/prisma-service-repository.ts`
+
+- [x] **P0.6.4** Integrar selector de ubicación simple en frontend
+  - En alta/edición de servicio: input con sugerencias de Google Places
+  - Guardar coordenadas reales en payload
+  - **Archivos**:
+    - `apps/web/pages/services/create.tsx`
+    - `apps/web/pages/services/edit/[id].tsx`
+    - `apps/web/src/components/services/*` (input ubicación)
+
+- [x] **P0.6.5** Añadir búsqueda “cerca de” en listado de servicios
+  - Filtro por ubicación concreta + radio configurable (ej. 1/3/5/10 km)
+  - Mostrar distancia aproximada en cada tarjeta
+  - **Archivos**:
+    - `apps/web/pages/services/index.tsx`
+    - `apps/web/src/shared/api/services.ts`
+    - `apps/web/components/services/ServiceCard.tsx`
+
+- [ ] **P0.6.6** Tests mínimos correctos (sin E2E)
+  - Unit tests de cálculo y validación de coordenadas
+  - ✅ Integration tests de endpoint `/services/nearby/search`
+  - ✅ Tests frontend del flujo nearby (geolocalización + radio)
+  - ⏳ Pendiente: test frontend específico del autocomplete de Google Places (componente crítico)
+  - **No incluye E2E por decisión de alcance**
+  - ⏳ Pendiente complementaria: validación manual final en local del autocomplete real
+
+---
+
+## 🟠 P1 - ALTO
+
+### 6. UX/UI - Mejoras de Experiencia
+
+#### Tareas:
+
+- [ ] **P1.6.1** Implementar manejo de errores consistente en frontend
+  - Componente de error global
+  - Mensajes de error amigables
+  - Retry automático para errores de red
+  - **Archivo**: `apps/web/src/components/ui/ErrorBoundary.tsx` (crear)
+
+- [ ] **P1.6.2** Agregar loading states en todas las operaciones
+  - Spinners durante carga
+  - Skeletons para listas
+  - Disable buttons durante submit
+  - **Archivos**: Todos los componentes
+
+- [ ] **P1.6.3** Implementar notificaciones/toasts
+  - Notificaciones de éxito/error
+  - Notificaciones de nuevos mensajes
+  - Notificaciones de intercambios
+  - **Archivo**: `apps/web/src/components/ui/Toast.tsx` (crear)
+
+- [ ] **P1.6.4** Mejorar responsive design
+  - Mobile-first approach
+  - Tablas responsivas
+  - Menú móvil
+  - **Archivos**: Todos los componentes
+
+- [ ] **P1.6.5** Agregar animaciones y transiciones
+  - Transiciones suaves entre páginas
+  - Animaciones de carga
+  - Hover effects
+  - **Archivos**: CSS y componentes
+
+- [ ] **P1.6.6** Implementar búsqueda y filtros avanzados
+  - Búsqueda en tiempo real
+  - Filtros combinados
+  - Guardar filtros favoritos
+  - **Archivo**: `apps/web/src/components/filters/FilterSidebar.tsx` (mejorar)
+
+---
+
+### 7. Páginas del Frontend - Completar
+
+#### Tareas:
+
+- [ ] **P1.7.1** Página de detalle de servicio
+  - Mostrar información completa
+  - Galería de imágenes
+  - Valoraciones
+  - Botón de solicitar intercambio
+  - **Archivo**: `apps/web/src/app/services/[id]/page.tsx` (crear)
+
+- [ ] **P1.7.2** Página de perfil de usuario
+  - Información del usuario
+  - Servicios del usuario
+  - Valoraciones recibidas
+  - Editar perfil
+  - ✅ Refactor/debug de `pages/profile.tsx`: carga estable de perfil, tipado fuerte y UX de edición de avatar mejorada
+  - **Archivo**: `apps/web/src/app/profile/page.tsx` (crear)
+
+- [ ] **P1.7.3** Página de mis intercambios
+  - Lista de intercambios (solicitados y ofrecidos)
+  - Filtros por estado
+  - Acciones por intercambio
+  - **Archivo**: `apps/web/src/app/exchanges/page.tsx` (crear)
+
+- [ ] **P1.7.4** Página de detalle de intercambio
+  - Información del intercambio
+  - Chat integrado
+  - Acciones (aceptar, completar, cancelar)
+  - **Archivo**: `apps/web/src/app/exchanges/[id]/page.tsx` (crear)
+
+- [ ] **P1.7.5** Página de grupos
+  - Lista de grupos
+  - Crear grupo
+  - Detalle de grupo
+  - **Archivo**: `apps/web/src/app/groups/page.tsx` (crear)
+
+- [ ] **P1.7.6** Página de eventos
+  - Lista de eventos
+  - Crear evento
+  - Detalle de evento
+  - Inscripción
+  - **Archivo**: `apps/web/src/app/events/page.tsx` (crear)
+
+---
+
+### 8. Lógica de Negocio - Completar
+
+#### Tareas:
+
+- [ ] **P1.8.1** Implementar transferencia de créditos de tiempo
+  - Al completar intercambio, transferir créditos
+  - Validar que el usuario tiene suficientes créditos
+  - Actualizar `timeCredits` de ambos usuarios
+  - **Archivo**: `apps/api/src/modules/exchanges/application/update-exchange.use-case.ts`
+
+- [ ] **P1.8.2** Validar máquina de estados de intercambios
+  - Solo transiciones válidas permitidas
+  - PENDING → CONFIRMED → IN_PROGRESS → COMPLETED
+  - PENDING → CANCELLED (en cualquier momento)
+  - **Archivo**: `apps/api/src/modules/exchanges/domain/exchange.entity.ts`
+
+- [ ] **P1.8.3** Implementar sistema de permisos en grupos
+  - ADMIN: Todo
+  - MODERATOR: Gestionar miembros, crear eventos
+  - MEMBER: Ver, participar
+  - **Archivo**: `apps/api/src/modules/groups/application/` (varios use cases)
+
+- [ ] **P1.8.4** Control de capacidad en eventos
+  - Validar que no se exceda `capacity`
+  - Mostrar lugares disponibles
+  - Lista de espera si está lleno
+  - **Archivo**: `apps/api/src/modules/events/application/create-event.use-case.ts`
+
+---
+
+## 🟡 P2 - MEDIO
+
+### 9. Optimización y Performance
+
+#### Tareas:
+
+- [ ] **P2.9.1** Optimizar queries de Prisma
+  - Usar `select` en lugar de `include` cuando sea posible
+  - Agregar índices en BD para queries frecuentes
+  - Evitar N+1 queries
+  - **Archivos**: Todos los repositorios
+
+- [ ] **P2.9.2** Implementar caché
+  - Cachear promedios de ratings
+  - Cachear listados frecuentes (Redis opcional)
+  - **Archivos**: Varios
+
+- [ ] **P2.9.3** Implementar paginación eficiente
+  - Cursor-based pagination para grandes listas
+  - Infinite scroll en frontend
+  - **Archivos**: Listados
+
+- [ ] **P2.9.4** Optimizar imágenes
+  - Lazy loading
+  - WebP format
+  - Responsive images
+  - **Archivos**: Componentes de imágenes
+
+---
+
+### 10. Testing
+
+#### Tareas:
+
+- [ ] **P2.10.1** Tests unitarios para todos los casos de uso
+  - Coverage mínimo 80%
+  - Tests de reglas de negocio
+  - **Archivos**: Todos los `.use-case.spec.ts`
+
+- [ ] **P2.10.2** Tests E2E para endpoints críticos (**despriorizado / fuera de alcance actual**)
+  - Decisión de alcance actual: **no meter E2E** en esta fase
+  - Mantener calidad con tests unitarios + integración dirigidos
+  - Reabrir solo si aparece requisito formal de tribunal/entrega
+
+- [ ] **P2.10.3** Tests de componentes frontend
+  - Componentes críticos (Chat, RatingForm, etc.)
+  - Hooks personalizados
+  - **Archivos**: `apps/web/src/**/*.test.tsx`
+
+---
+
+### 11. Documentación
+
+#### Tareas:
+
+- [ ] **P2.11.1** Completar documentación Swagger
+  - Ejemplos en todos los endpoints
+  - Descripciones detalladas
+  - Códigos de respuesta documentados
+  - **Archivo**: Controladores
+
+- [ ] **P2.11.2** Documentar casos de uso complejos
+  - Flujo de intercambio completo
+  - Sistema de créditos
+  - Permisos de grupos
+  - **Archivo**: `docs/USER_FLOWS.md` (crear)
+
+- [ ] **P2.11.3** README actualizado
+  - Instrucciones de instalación
+  - Configuración de variables de entorno
+  - Ejemplos de uso
+  - **Archivo**: `README.md`
+
+---
+
+## 🟢 P3 - BAJO
+
+### 12. Mejoras Adicionales
+
+#### Tareas:
+
+- [ ] **P3.12.1** Internacionalización completa
+  - Todas las cadenas traducibles
+  - Múltiples idiomas
+  - **Archivo**: `apps/web/src/lib/i18n.ts` (completar)
+
+- [ ] **P3.12.2** Dark mode
+  - Toggle dark/light theme
+  - Persistir preferencia
+  - **Archivo**: `apps/web/src/lib/theme.ts` (mejorar)
+
+- [ ] **P3.12.3** Notificaciones push
+  - Nuevos mensajes
+  - Intercambios actualizados
+  - **Archivo**: Nuevo módulo
+
+- [ ] **P3.12.4** Analytics
+  - Tracking de eventos
+  - Métricas de uso
+  - **Archivo**: Nuevo módulo
+
+- [ ] **P3.12.5** SEO
+  - Meta tags
+  - Sitemap
+  - Structured data
+  - **Archivos**: Layouts y páginas
+
+---
+
+## 📊 Resumen de Prioridades
+
+### Para Completar el TFG (Mínimo Viable)
+
+**Completar todas las tareas P0 y P1.6, P1.7, P1.8:**
+
+- ✅ Sistema de mensajería funcional
+- ✅ Sistema de valoraciones completo
+- ✅ Subida de imágenes funcionando
+- ✅ Autenticación completa
+- ✅ Validaciones correctas
+- ✅ UX/UI fluida
+- ✅ Páginas principales implementadas
+- ✅ Lógica de negocio completa
+
+### Para un TFG de Alta Calidad
+
+**Además, completar P2:**
+
+- ✅ Optimizaciones
+- ✅ Tests
+- ✅ Documentación completa
+
+---
+
+## 🎯 Orden de Ejecución Recomendado
+
+1. **Semana 1-2**: P0.1 (Mensajería) + P0.3 (Imágenes)
+2. **Semana 3**: P0.2 (Valoraciones) + P0.4 (Auth)
+3. **Semana 4**: P0.5 (Validaciones) + P1.6 (UX/UI)
+4. **Semana 5**: P1.7 (Páginas) + P1.8 (Lógica)
+5. **Semana 6**: P2 (Optimización, Tests, Documentación)
+
+---
+
+*Última actualización: Marzo 2026*

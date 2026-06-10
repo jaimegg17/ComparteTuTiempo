@@ -1,0 +1,878 @@
+{
+  "header": {
+    "logo": "ComparteTuTiempo",
+    "navigation": {
+      "home": "Home",
+      "services": "Services",
+      "communities": "Communities",
+      "exchanges": "My Exchanges",
+      "faq": "FAQ",
+      "organizations": "Organizations"
+    },
+    "search": {
+      "placeholder": "Search services..."
+    },
+    "auth": {
+      "login": "Login",
+      "register": "Register",
+      "logout": "Logout",
+      "profile": "My Profile",
+      "welcome": "Hello, {{name}}!",
+      "loading": "Loading...",
+      "error": "Error: {{message}}"
+    }
+  },
+  "pages": {
+    "home": {
+      "title": "Welcome to ComparteTuTiempo!",
+      "subtitle": "Your platform to exchange skills using hours as currency",
+      "description": "The frontend is working correctly.\nNow you can access the complete application."
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "retry": "Retry",
+    "close": "Close",
+    "search": "Search",
+    "filter": "Filter",
+    "clear": "Clear",
+    "apply": "Apply",
+    "submit": "Submit",
+    "create": "Create",
+    "update": "Update",
+    "view": "View",
+    "details": "Details",
+    "actions": "Actions",
+    "status": "Status",
+    "date": "Date",
+    "time": "Time",
+    "location": "Location",
+    "duration": "Duration",
+    "price": "Price",
+    "rating": "Rating",
+    "reviews": "Reviews",
+    "category": "Category",
+    "type": "Type",
+    "description": "Description",
+    "availability": "Availability",
+    "user": "User",
+    "service": "Service",
+    "exchange": "Exchange",
+    "message": "Message",
+    "messages": "Messages",
+    "chat": "Chat",
+    "send": "Send",
+    "reply": "Reply",
+    "read": "Read",
+    "unread": "Unread",
+    "online": "Online",
+    "offline": "Offline",
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "in_progress": "In Progress",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "rejected": "Rejected",
+    "accepted": "Accepted",
+    "request": "Request",
+    "offer": "Offer",
+    "provider": "Provider",
+    "requester": "Requester",
+    "participant": "Participant",
+    "participants": "Participants",
+    "found": "found",
+    "min": "Min",
+    "max": "Max",
+    "not_found": "Not Found",
+    "unauthorized": "Unauthorized",
+    "forbidden": "Forbidden",
+    "network_error": "Network Error",
+    "unknown_error": "Unknown Error",
+    "validation_error": "Validation Error",
+    "server_error": "Server Error",
+    "bad_request": "Bad Request",
+    "timeout": "Timeout",
+    "conflict": "Conflict",
+    "gone": "Gone",
+    "length_required": "Length Required",
+    "precondition_failed": "Precondition Failed",
+    "payload_too_large": "Payload Too Large",
+    "uri_too_long": "URI Too Long",
+    "unsupported_media_type": "Unsupported Media Type",
+    "range_not_satisfiable": "Range Not Satisfiable",
+    "expectation_failed": "Expectation Failed",
+    "im_a_teapot": "I'm a teapot",
+    "misdirected_request": "Misdirected Request",
+    "unprocessable_entity": "Unprocessable Entity",
+    "locked": "Locked",
+    "failed_dependency": "Failed Dependency",
+    "too_early": "Too Early",
+    "upgrade_required": "Upgrade Required",
+    "precondition_required": "Precondition Required",
+    "too_many_requests": "Too Many Requests",
+    "request_header_fields_too_large": "Request Header Fields Too Large",
+    "unavailable_for_legal_reasons": "Unavailable For Legal Reasons",
+    "internal_server_error": "Internal Server Error",
+    "not_implemented": "Not Implemented",
+    "bad_gateway": "Bad Gateway",
+    "service_unavailable": "Service Unavailable",
+    "gateway_timeout": "Gateway Timeout",
+    "http_version_not_supported": "HTTP Version Not Supported",
+    "variant_also_negotiates": "Variant Also Negotiates",
+    "insufficient_storage": "Insufficient Storage",
+    "loop_detected": "Loop Detected",
+    "not_extended": "Not Extended",
+    "network_authentication_required": "Network Authentication Required"
+  },
+  "sections": {
+    "title": "Find your section",
+    "languages": "Languages",
+    "music": "Music",
+    "sports": "Sports",
+    "education": "Education"
+  },
+  "testimonials": {
+    "title": "Rate your experience",
+    "user1": {
+      "text": "This app has been a game changer for me! I highly recommend it to anyone looking to streamline their workflow.",
+      "author": "John Doe",
+      "role": "CEO"
+    },
+    "user2": {
+      "text": "I've tried a lot of different apps, but this one really stands out. It's so easy to use, and the features are exactly what I need.",
+      "author": "Jane Smith",
+      "role": "Designer"
+    },
+    "user3": {
+      "text": "I love how customizable this app is. I can really make it work for me, no matter what project I'm working on.",
+      "author": "Bob Johnson",
+      "role": "Developer"
+    }
+  },
+  "services": {
+    "title": "Services",
+    "subtitle": "Discover and offer services in your community",
+    "create": "Publish Service",
+    "edit": "Edit Service",
+    "delete": "Delete Service",
+    "request": "Request Service",
+    "offer": "Offer Service",
+    "search": "Search services...",
+    "tabs": {
+      "offers": "Offers",
+      "my_services": "My Services"
+    },
+    "empty_states": {
+      "no_services": "No services found",
+      "no_my_services": "You haven't published any services yet",
+      "create_first": "Publish your first service"
+    },
+    "ratings": {
+      "title": "Ratings",
+      "rate_service": "Rate service",
+      "rating": "Rating",
+      "comment": "Comment",
+      "comment_placeholder": "Share your experience with this service...",
+      "submit": "Submit rating",
+      "submitting": "Submitting...",
+      "cancel": "Cancel",
+      "required": "Please select a rating",
+      "success": "Rating submitted successfully",
+      "error": "Error submitting rating",
+      "ratings_count": "ratings",
+      "rating_count": "rating",
+      "no_ratings": "This service has no ratings yet",
+      "view_all": "View all ratings",
+      "excellent": "Excellent",
+      "good": "Good",
+      "average": "Average",
+      "poor": "Poor",
+      "terrible": "Terrible"
+    },
+    "filters": {
+      "title": "Filters",
+      "category": "Category",
+      "type": "Type",
+      "location": "Location",
+      "duration": "Duration (hours)",
+      "rating": "Minimum Rating",
+      "availability": "Availability",
+      "language": "Language",
+      "clear": "Clear Filters",
+      "apply": "Apply Filters"
+    },
+    "categories": {
+      "education": "Education",
+      "home": "Home",
+      "technology": "Technology",
+      "health": "Health",
+      "sports": "Sports",
+      "art": "Art",
+      "others": "Others"
+    },
+    "types": {
+      "online": "Online",
+      "in_person": "In Person",
+      "hybrid": "Hybrid"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "pending": "Pending",
+      "rejected": "Rejected"
+    },
+    "form": {
+      "title": "Service Title",
+      "description": "Short Description",
+      "detailed_description": "Detailed Description (optional)",
+      "duration": "Duration (hours)",
+      "location": "Location",
+      "availability": "Availability",
+      "category": "Category",
+      "type": "Type",
+      "price": "Price",
+      "image": "Service Image",
+      "submit": "Publish Service",
+      "update": "Update Service",
+      "cancel": "Cancel",
+      "back_to_services": "← Back to services",
+      "success_message": "Service created successfully! Redirecting...",
+      "placeholders": {
+        "title": "E.g: English classes for beginners",
+        "description": "Brief summary for the service listing (max. 150 characters)",
+        "detailed_description": "Describe your service in detail: what you offer, what it includes, prerequisites, necessary materials...",
+        "duration": "E.g: 2",
+        "location": "E.g: Madrid, Barcelona...",
+        "availability": "Select your availability"
+      },
+      "help_text": {
+        "description": "characters",
+        "detailed_description": "characters - Will be shown on the detail page",
+        "duration": "Approximate duration of a session",
+        "availability": "When you can offer this service"
+      },
+      "availability_options": {
+        "morning": "Morning",
+        "afternoon": "Afternoon",
+        "evening": "Evening",
+        "morning_afternoon": "Morning and Afternoon",
+        "afternoon_evening": "Afternoon and Evening",
+        "flexible": "Flexible"
+      },
+      "info_note": "Note: The service duration represents the credit hours you will receive when an exchange is completed.",
+      "image_upload": {
+        "title": "Upload Service Image",
+        "subtitle": "Drag and drop an image or click to browse (max 10MB)",
+        "button": "Choose Image",
+        "help": "Dimensions: min 50x50px, max 6000x6000px. Max size: 10MB."
+      }
+    },
+    "card": {
+      "request_service": "Request Service",
+      "view_details": "View Details",
+      "hours": "hours",
+      "rating": "Rating",
+      "reviews": "reviews",
+      "exchanges": "exchanges completed"
+    },
+    "detail": {
+      "back_to_services": "← Back to services",
+      "request_service": "Request Service",
+      "tabs": {
+        "details": "Details",
+        "ratings": "Ratings",
+        "location": "Location"
+      },
+      "info": {
+        "provider": "Provider",
+        "duration": "Duration",
+        "location": "Location",
+        "availability": "Availability",
+        "category": "Category",
+        "type": "Type",
+        "rating": "Rating",
+        "reviews": "Reviews",
+        "exchanges": "Completed Exchanges"
+      }
+    },
+    "not_found": "No services found",
+    "error": "Error loading services",
+    "success": {
+      "created": "Service created successfully",
+      "updated": "Service updated successfully",
+      "deleted": "Service deleted successfully"
+    }
+  },
+  "exchanges": {
+    "title": "My Exchanges",
+    "subtitle": "Manage your service requests and offers",
+    "create": "Create Exchange",
+    "edit": "Edit Exchange",
+    "delete": "Delete Exchange",
+    "accept": "Accept",
+    "reject": "Reject",
+    "start": "Start Exchange",
+    "complete": "Complete Exchange",
+    "cancel": "Cancel Exchange",
+    "chat": "Chat",
+    "status": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "rejected": "Rejected"
+    },
+    "detail": {
+      "title": "Exchange Details",
+      "back_to_exchanges": "← Back to exchanges",
+      "chat_with": "Chat with {{name}}",
+      "service": "Service",
+      "date": "Date",
+      "exchanged_time": "Exchanged Time",
+      "requested_by": "Requested by",
+      "offered_by": "Offered by"
+    },
+    "not_found": "No exchanges found",
+    "error": "Error loading exchanges",
+    "success": {
+      "created": "Exchange created successfully",
+      "updated": "Exchange updated successfully",
+      "deleted": "Exchange deleted successfully"
+    }
+  },
+  "chat": {
+    "title": "Chat",
+    "placeholder": "Type your message...",
+    "send": "Send",
+    "typing": "{{name}} is typing...",
+    "online": "Online",
+    "offline": "Offline",
+    "last_seen": "Last seen {{time}}",
+    "no_messages": "No messages yet",
+    "error": "Error loading messages",
+    "success": "Message sent successfully"
+  },
+  "ratings": {
+    "title": "Ratings",
+    "subtitle": "Rate your experience",
+    "rate_service": "Rate service",
+    "create": "Create Rating",
+    "edit": "Edit Rating",
+    "delete": "Delete Rating",
+    "score": "Score",
+    "comment": "Comment",
+    "submit": "Submit Rating",
+    "update": "Update Rating",
+    "cancel": "Cancel",
+    "not_found": "No ratings found",
+    "error": "Error loading ratings",
+    "success": {
+      "created": "Rating created successfully",
+      "updated": "Rating updated successfully",
+      "deleted": "Rating deleted successfully"
+    }
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "profile": "My Profile",
+    "welcome": "Welcome, {{name}}!",
+    "loading": "Loading...",
+    "error": "Authentication error",
+    "success": "Authentication successful",
+    "required": "You must log in to access this page",
+    "unauthorized": "You are not authorized to perform this action",
+    "forbidden": "You do not have permission to access this resource"
+  },
+  "footer": {
+    "help": {
+      "title": "Help",
+      "contact": "Contact Us",
+      "incidents": "Incidents",
+      "faq": "FAQ's"
+    },
+    "about": {
+      "title": "About Us",
+      "history": "History",
+      "blog": "Blog",
+      "collaborations": "Collaborations"
+    },
+    "moreInfo": {
+      "title": "More Information",
+      "terms": "Terms and Conditions",
+      "privacy": "Privacy Policy",
+      "address": "Eklingpura Chouraha, Ahmedabad Main Road\n(NH 8- Near Mahadev Hotel) Udaipur, India- 313002"
+    },
+    "copyright": "Copyright © {{year}} ComparteTuTiempo Arroyo Pvt Ltd. All rights reserved."
+  },
+  "promo": {
+    "title": "Share to achieve",
+    "subtitle": "On this platform you will find everything you need. You only need time.",
+    "button": "Search now"
+  },
+  "video": {
+    "title": "How does our platform work?",
+    "subtitle": "Discover in this video how you can exchange your time for services and unique experiences.",
+    "playButton": "Watch explanatory video"
+  },
+  "hero": {
+    "title": "Share your time",
+    "subtitle": "Connect, share and learn",
+    "button": "Get started"
+  },
+  "profile": {
+    "title": "Profile",
+    "description": "This information will be displayed publicly so be careful what you share.",
+    "basicInfo": "Basic Information",
+    "name": "Name",
+    "namePlaceholder": "Your full name",
+    "email": "Email",
+    "emailPlaceholder": "your@email.com",
+    "bio": "Bio",
+    "bioPlaceholder": "Tell us something about yourself...",
+    "bioDescription": "Write a few sentences about yourself.",
+    "photo": "Profile Photo",
+    "photoAlt": "Profile photo",
+    "personalInfo": "Personal Information",
+    "personalDescription": "Additional information about yourself.",
+    "contactInfo": "Contact Information",
+    "location": "Location",
+    "locationPlaceholder": "City, Country",
+    "phone": "Phone",
+    "phonePlaceholder": "+1 234 567 890",
+    "skills": "Skills",
+    "skillsPlaceholder": "Type a skill and press Enter",
+    "skillsDescription": "Add your main skills.",
+    "accountInfo": "Account Information",
+    "accountDescription": "Information about your account and time credits.",
+    "accountDetails": "Account Details",
+    "timeCredits": {
+      "title": "Time Credits",
+      "credits": "credits"
+    },
+    "timeCreditsDescription": "Minutes available for exchanges",
+    "role": "Role",
+    "roleDescription": "Your role on the platform",
+    "memberSince": "Member since",
+    "memberSinceDescription": "Registration date on the platform",
+    "notifications": {
+      "description": "Coming soon: notification settings.",
+      "comingSoon": "COMING SOON"
+    },
+    "notificationsDescription": "Coming soon: notification settings.",
+    "comingSoon": "Coming Soon",
+    "notificationsComingSoon": "Notification settings will be available in future updates.",
+    "cancel": "Cancel",
+    "saving": "Saving...",
+    "save": "Save",
+    "saveChanges": "Save Changes",
+    "sections": {
+      "myInformation": "My Information",
+      "notifications": "Notifications"
+    },
+    "form": {
+      "personalInfo": "Personal Information",
+      "additionalInfo": "Additional Information",
+      "name": "Name",
+      "email": "Email address",
+      "phoneNumber": "Phone",
+      "location": "Location",
+      "dateOfBirth": "Date of Birth",
+      "gender": "Gender",
+      "genderOptions": {
+        "male": "Male",
+        "female": "Female",
+        "other": "Other",
+        "preferNotToSay": "Prefer not to say"
+      },
+      "preferredLanguage": "Preferred language",
+      "languageOptions": {
+        "spanish": "Spanish",
+        "english": "English"
+      },
+      "bio": "Biography",
+      "bioPlaceholder": "Tell us something about yourself...",
+      "skills": "Skills",
+      "skillsPlaceholder": "Write your skills separated by commas",
+      "skillsHelper": "Separate skills with commas",
+      "saving": "Saving...",
+      "saveChanges": "Save Changes",
+      "overline": "Edit",
+      "title": "Configure your public profile",
+      "subtitle": "A complete profile builds more trust when publishing services, joining communities and closing exchanges.",
+      "basic": "Basic information",
+      "namePlaceholder": "Your full name",
+      "emailHelper": "The email comes from your sign-in account and cannot be edited here.",
+      "phone": "Phone",
+      "locationPlaceholder": "City, Country",
+      "personal": "Personal information",
+      "birthDate": "Date of birth",
+      "select": "Select...",
+      "male": "Male",
+      "female": "Female",
+      "other": "Other",
+      "preferNotSay": "Prefer not to say",
+      "publicProfile": "Public profile",
+      "bioHelper": "Write a few sentences about yourself.",
+      "skillPlaceholder": "Type a skill and press Enter",
+      "skillHelper": "Press Enter to add a skill to your profile.",
+      "timeCredits": "Available Time Credits",
+      "timeCreditsHelp": "Minutes available for exchanges",
+      "save": "Save Changes"
+    },
+    "image": {
+      "edit": "Edit"
+    },
+    "success": {
+      "message": "Profile updated successfully"
+    },
+    "error": {
+      "title": "Error loading profile",
+      "description": "There was a problem loading your profile. You can try logging out and logging back in, or reload the page.",
+      "logoutAndRetry": "Logout and Retry",
+      "reload": "Reload Page"
+    }
+  },
+  "communities": {
+    "title": "Communities",
+    "subtitle": "Discover and join communities that match your interests",
+    "create": "Create community",
+    "edit": "Edit community",
+    "delete": "Delete community",
+    "public": "Public",
+    "private": "Private",
+    "view_details": "View community",
+    "no_description": "No description yet",
+    "topics": "Topics",
+    "rules": "Rules",
+    "resources": "Resources",
+    "tabs": {
+      "all": "All",
+      "my_communities": "My communities",
+      "public": "Public"
+    },
+    "empty_states": {
+      "no_communities": "No communities found",
+      "no_my_communities": "You have not created any communities yet",
+      "create_first": "Create your first community"
+    },
+    "not_found": "No communities found",
+    "error": "Error loading communities",
+    "success": {
+      "created": "Community created successfully",
+      "updated": "Community updated successfully",
+      "deleted": "Community deleted successfully"
+    },
+    "form": {
+      "nameLabel": "Community name",
+      "descriptionLabel": "Description",
+      "imageLabel": "Community image",
+      "topicsLabel": "Topics / categories",
+      "topicsHelperText": "Separate topics with commas. E.g. technology, languages, volunteering",
+      "rulesLabel": "Community rules",
+      "rulesHelperText": "Write one rule per line.",
+      "rulesRequiredMessage": "Add at least one community rule.",
+      "publicLabel": "Public community",
+      "privateLabel": "Private community",
+      "publicDescription": "Any user will be able to join the community.",
+      "privateDescription": "Only approved members will be able to join.",
+      "createSubmit": "Create community",
+      "saveSubmit": "Save changes",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "nameRequired": "The name is required.",
+      "descriptionRequired": "The description is required.",
+      "nameLength": "The name must be between {{min}} and {{max}} characters.",
+      "descriptionLength": "The description must be between {{min}} and {{max}} characters."
+    },
+    "new": {
+      "description": "Create a community by defining its name, image, description and visibility.",
+      "loginRequired": "You must sign in to create a community.",
+      "loginError": "You need to sign in to create a community.",
+      "submitError": "The community could not be created. Check the information and try again."
+    },
+    "detail": {
+      "activeMembers": "{{count}} active members",
+      "eventsPublished": "{{count}} published events",
+      "sharedResources": "{{count}} shared resources",
+      "pendingRequests": "{{count}} pending requests",
+      "verifiedOrganization": "Verified organization",
+      "rejectedOrganization": "Rejected organization",
+      "pendingOrganization": "Pending organization",
+      "publishEvent": "Publish event",
+      "manageSpace": "Manage {{space}}",
+      "organization": "organization",
+      "community": "community",
+      "leave": "Leave community",
+      "cancelRequest": "Cancel request",
+      "join": "Join community",
+      "privateNotice": "This community is private. Your request must be approved by an owner or administrator.",
+      "pendingNotice": "Your request is pending review. You can cancel it while you wait.",
+      "pendingReview": "You have {{count}} pending requests to review.",
+      "loginToRegisterEvent": "Sign in to register for events.",
+      "eventRegistered": "You have registered for the event.",
+      "eventUnregistered": "You have cancelled your event registration.",
+      "joinPrivateSuccess": "Your request has been sent successfully.",
+      "joinSuccess": "You have joined the community.",
+      "joinError": "The join action could not be completed. Endpoint pending or access not allowed.",
+      "leavePendingSuccess": "You have cancelled your request.",
+      "leaveSuccess": "You have left the community.",
+      "leaveError": "The leave action could not be completed. Endpoint pending or access not allowed.",
+      "roleSuccess": "Role updated successfully.",
+      "roleError": "The member role could not be updated.",
+      "statusApproved": "Request approved successfully.",
+      "statusRejected": "Request rejected successfully.",
+      "statusError": "The request status could not be updated."
+    },
+    "editPage": {
+      "organizationPanel": "Organization management panel",
+      "subtitle": "Centralize settings, board content, events and pending requests here.",
+      "resources": "{{count}} resources",
+      "events": "{{count}} events",
+      "pendingRequests": "{{count}} pending requests",
+      "status": "Status: {{status}}",
+      "notFound": "Community not found.",
+      "noPermission": "Only an owner or administrator can manage this space.",
+      "currentOrganizationStatus": "Current organization status:",
+      "approveOrganization": "Approve organization",
+      "rejectOrganization": "Reject organization",
+      "pendingReview": "You have {{count}} pending requests to review in this space.",
+      "loadError": "The community could not be loaded for editing.",
+      "loginError": "You must sign in to edit this community.",
+      "saveError": "The community could not be saved. Check the information and try again.",
+      "organizationStatusError": "The organization status could not be updated.",
+      "createEventError": "The event could not be published.",
+      "updateEventError": "The event could not be updated.",
+      "deleteEventError": "The event could not be deleted."
+    },
+    "events": {
+      "publish": "Publish event",
+      "edit": "Edit event",
+      "save": "Save changes",
+      "description": "Create an activity visible on the community or organization detail page.",
+      "title": "Title",
+      "eventDescription": "Description",
+      "dateTime": "Date and time",
+      "location": "Location",
+      "capacity": "Capacity: {{capacity}}",
+      "titleError": "The title must be at least 5 characters.",
+      "descriptionError": "The description must be at least 10 characters.",
+      "dateError": "You must choose a date.",
+      "publishedTitle": "Published events",
+      "publishedDescription": "Review, edit or delete events in this space.",
+      "empty": "There are no published events yet.",
+      "noDescription": "No description",
+      "online": "Online"
+    },
+    "activity": {
+      "title": "Activity / Events",
+      "empty": "There is no activity available for this community yet.",
+      "noDescription": "No description",
+      "online": "Online",
+      "capacity": "Capacity {{capacity}}",
+      "registered": "You are registered",
+      "cancelRegistration": "Cancel registration",
+      "register": "Register",
+      "login": "Sign in"
+    },
+    "header": {
+      "verifiedOrganization": "Verified organization",
+      "pendingOrganization": "Pending organization",
+      "members": "{{count}} members",
+      "events": "{{count}} events",
+      "rules": "{{count}} rules",
+      "created": "Created {{date}}"
+    },
+    "resourcesSection": {
+      "link": "Link",
+      "note": "Note",
+      "image": "Image",
+      "title": "Resource board",
+      "description": "Links, notes and useful references for the community activity.",
+      "open": "Open resource",
+      "editor": {
+        "title": "Resources and announcements board",
+        "description": "Add notes, links or featured images for this space.",
+        "add": "Add resource",
+        "empty": "There are no published resources yet. You can start by adding a note, link or image.",
+        "item": "Resource #{{number}}",
+        "delete": "Delete resource {{number}}",
+        "titleLabel": "Title",
+        "typeLabel": "Type",
+        "descriptionLabel": "Description",
+        "urlLabel": "URL",
+        "imageUrlLabel": "Image URL"
+      }
+    },
+    "membersSection": {
+      "title": "Members",
+      "activeCount": "{{count}} active members in this space.",
+      "empty": "No members registered yet.",
+      "you": "You",
+      "joined": "Joined: {{date}}",
+      "pendingTitle": "Pending requests",
+      "approve": "Approve",
+      "reject": "Reject",
+      "requested": "Requested: {{date}}"
+    }
+  },
+  "organizations": {
+    "form": {
+      "nameLabel": "Organization name",
+      "descriptionLabel": "Institutional description",
+      "topicsLabel": "Areas / categories",
+      "topicsHelperText": "Separate areas with commas. E.g. social inclusion, health, education, volunteering",
+      "rulesLabel": "Participation rules or principles",
+      "rulesHelperText": "Write one rule or principle per line.",
+      "rulesRequiredMessage": "Add at least one participation rule or principle.",
+      "publicLabel": "Public organization",
+      "privateLabel": "Private organization",
+      "publicDescription": "The organization will be shown as an open entity once approved.",
+      "privateDescription": "The organization will also require approval for new members to access it.",
+      "submit": "Send request"
+    },
+    "new": {
+      "loginError": "You need to sign in to request an organization.",
+      "submitError": "The organization request could not be submitted."
+    }
+  },
+  "faq": {
+    "overline": "HELP CENTER",
+    "subtitle": "Find practical answers about platform usage, service discovery, exchanges, communities, and good practice.",
+    "searchPlaceholder": "Search by topic, workflow, or issue...",
+    "noResults": "No questions found for your search.",
+    "visibleCount": "{{questions}} visible questions across {{sections}} sections",
+    "activeFilter": "Active filter: {{term}}",
+    "chips": [
+      "Profile",
+      "Requests",
+      "Map",
+      "Communities",
+      "Privacy"
+    ],
+    "categories": [
+      {
+        "key": "account",
+        "title": "Account, profile and trust",
+        "items": [
+          {
+            "question": "How do I build a profile that feels trustworthy?",
+            "answer": "Add a recognizable photo, a short bio, your general location, relevant skills, and a clear explanation of how you usually collaborate. A complete profile helps other people understand what you offer and improves trust across the platform."
+          },
+          {
+            "question": "What parts of my profile are visible to other users?",
+            "answer": "People can usually see the information needed to assess whether collaborating with you makes sense, such as your name, image, general location, bio, skills, and public activity. Sensitive personal information should not be shared openly unless strictly necessary."
+          },
+          {
+            "question": "Can I change the platform language?",
+            "answer": "Yes. The interface supports switching between Spanish and English so navigation and help content match your preference."
+          },
+          {
+            "question": "How can I tell whether a profile or service looks reliable?",
+            "answer": "Review the profile completeness, service clarity, approximate location, ratings, and whether the description explains what is included. It is also a good idea to ask questions through chat before confirming an exchange."
+          }
+        ]
+      },
+      {
+        "key": "services",
+        "title": "Services, discovery and requests",
+        "items": [
+          {
+            "question": "How do I find services that are actually relevant to me?",
+            "answer": "Use text search, category and type filters, duration filters, and nearby discovery. If location is enabled, the platform can prioritize nearby services and display them on the map for a more practical overview."
+          },
+          {
+            "question": "What is the difference between in-person, virtual and hybrid services?",
+            "answer": "In-person services happen at a physical location, virtual services are fully online, and hybrid services combine both. Understanding this before requesting a service helps avoid operational misunderstandings."
+          },
+          {
+            "question": "How should I request a service properly?",
+            "answer": "Open the service detail page, review the description, location and duration, and then send a request. If there are logistical details or specific expectations, include a short message to provide context from the start."
+          },
+          {
+            "question": "What makes a service listing feel professional and credible?",
+            "answer": "The strongest listings clearly explain the value offered, target audience, format, duration, expected outcome, and any prerequisites. Adding an image, a clear description and a usable location also improves credibility."
+          },
+          {
+            "question": "Why do some services appear on the map and others do not?",
+            "answer": "Only services with a sufficiently defined location can be shown accurately on the map. Virtual services or listings without coordinates may still appear in the list view but not in the geographic view."
+          }
+        ]
+      },
+      {
+        "key": "exchanges",
+        "title": "Exchanges, messages and workflow",
+        "items": [
+          {
+            "question": "What happens after I send a request?",
+            "answer": "The request enters the exchange flow and the other user can review it, accept it, reject it, or continue the conversation before confirming. This gives both sides room to clarify expectations before committing."
+          },
+          {
+            "question": "How should messaging be used inside an exchange?",
+            "answer": "Messaging should be used to clarify availability, format, scope and practical details. Keeping important agreements in writing makes the collaboration easier to manage and reduces the risk of confusion."
+          },
+          {
+            "question": "What do exchange statuses usually mean?",
+            "answer": "The flow usually goes through pending, confirmed, in progress and completed. These statuses help both sides understand the current stage of the collaboration and keep the process visible."
+          },
+          {
+            "question": "What should I do if an exchange stops making sense or something goes wrong?",
+            "answer": "Communicate as early as possible inside the exchange, explain the situation clearly, and avoid leaving the other person without context. Early communication usually prevents most friction."
+          }
+        ]
+      },
+      {
+        "key": "communities",
+        "title": "Communities and participation",
+        "items": [
+          {
+            "question": "What are communities for inside the platform?",
+            "answer": "Communities bring together people with shared interests, goals or contexts. They help create continuity, stronger participation and more collaboration opportunities beyond one-off requests."
+          },
+          {
+            "question": "How do I create a useful community instead of an empty one?",
+            "answer": "A strong community has a clear purpose, a defined audience and a description that explains what members can expect. Communities work better when they are built around real interaction, not just visibility."
+          },
+          {
+            "question": "Who can edit a community?",
+            "answer": "Usually only the creator or someone with equivalent permissions can edit the community name, description, image and privacy settings."
+          },
+          {
+            "question": "What is the difference between a public and a private community?",
+            "answer": "A public community is easier to discover and grow, while a private community is better for curated or sensitive participation contexts. The right choice depends on the goal of the group."
+          }
+        ]
+      },
+      {
+        "key": "safety",
+        "title": "Safety, privacy and good practice",
+        "items": [
+          {
+            "question": "Should I share my exact address from the beginning?",
+            "answer": "Usually no. It is better to keep the location general during discovery and only share exact logistical details when the exchange is clear or confirmed. This improves privacy and reduces unnecessary exposure."
+          },
+          {
+            "question": "How can I reduce misunderstandings before collaborating?",
+            "answer": "Clarify the scope, duration, format and expected outcome before moving forward. The clearer the agreement is upfront, the smoother the collaboration tends to be."
+          },
+          {
+            "question": "Which signs suggest I should review a proposal more carefully before accepting?",
+            "answer": "Ambiguous descriptions, incomplete profiles, shifting conditions or unclear communication are all signs that you should ask more questions before confirming an exchange."
+          }
+        ]
+      }
+    ]
+  }
+}

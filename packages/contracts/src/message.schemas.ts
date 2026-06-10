@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ExchangeStatus } from './exchange.schemas';
 
 // ============================================================================
 // ESQUEMAS DE MESSAGE
@@ -6,35 +7,25 @@ import { z } from 'zod';
 
 export const MessageSchema = z.object({
   id: z.number(),
-  senderId: z.number(),
-  receiverId: z.number(),
+  exchangeId: z.number(),
+  senderId: z.string(), // Auth0 ID as string
   content: z.string(),
-  sentAt: z.date(),
-  status: z.enum(['sent', 'read', 'delivered']),
-  type: z.enum(['text', 'file', 'system']),
-  fileUrl: z.string().nullable(),
+  isRead: z.boolean(),
   createdAt: z.date(),
+  updatedAt: z.date(),
 });
 
 export const MessageCreateSchema = z.object({
-  receiverId: z.number(),
-  content: z.string().min(1, 'El mensaje no puede estar vacío'),
-  type: z.enum(['text', 'file', 'system']).default('text'),
-  fileUrl: z.string().optional(),
+  exchangeId: z.number().min(1, 'exchangeId es requerido'),
+  content: z.string().min(1, 'El mensaje no puede estar vacío').max(1000, 'El mensaje no puede exceder 1000 caracteres'),
 });
 
 export const MessageUpdateSchema = z.object({
-  content: z.string().min(1, 'El mensaje no puede estar vacío').optional(),
-  status: z.enum(['sent', 'read', 'delivered']).optional(),
-  type: z.enum(['text', 'file', 'system']).optional(),
-  fileUrl: z.string().optional(),
+  isRead: z.boolean().optional(),
 });
 
 export const MessageListQuerySchema = z.object({
-  senderId: z.number().optional(),
-  receiverId: z.number().optional(),
-  status: z.enum(['sent', 'read', 'delivered']).optional(),
-  type: z.enum(['text', 'file', 'system']).optional(),
+  exchangeId: z.number().min(1, 'exchangeId es requerido').optional(),
   page: z.number().min(1, 'La página debe ser mayor a 0').default(1),
   pageSize: z.number().min(1, 'El tamaño de página debe ser mayor a 0').max(100, 'El tamaño de página no puede exceder 100').default(20),
 });
@@ -47,6 +38,38 @@ export const MessageListResponseSchema = z.object({
   totalPages: z.number(),
 });
 
+export const ConversationUserSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  imageUrl: z.string().nullable().optional(),
+});
+
+export const ConversationServiceSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+});
+
+export const ConversationSummarySchema = z.object({
+  exchangeId: z.number(),
+  exchangeState: z.enum([
+    ExchangeStatus.PENDING,
+    ExchangeStatus.CONFIRMED,
+    ExchangeStatus.IN_PROGRESS,
+    ExchangeStatus.COMPLETED,
+    ExchangeStatus.CANCELLED,
+    ExchangeStatus.DISPUTED,
+  ]),
+  otherUser: ConversationUserSchema,
+  service: ConversationServiceSchema.nullable(),
+  lastMessage: MessageSchema.nullable(),
+  lastMessageAt: z.date(),
+  unreadCount: z.number(),
+});
+
+export const ConversationListResponseSchema = z.object({
+  conversations: z.array(ConversationSummarySchema),
+});
+
 // ============================================================================
 // TIPOS INFERIDOS
 // ============================================================================
@@ -56,19 +79,7 @@ export type MessageCreate = z.infer<typeof MessageCreateSchema>;
 export type MessageUpdate = z.infer<typeof MessageUpdateSchema>;
 export type MessageListQuery = z.infer<typeof MessageListQuerySchema>;
 export type MessageListResponse = z.infer<typeof MessageListResponseSchema>;
-
-// ============================================================================
-// ENUMS
-// ============================================================================
-
-export const MessageStatus = {
-  SENT: 'sent',
-  READ: 'read',
-  DELIVERED: 'delivered',
-} as const;
-
-export const MessageType = {
-  TEXT: 'text',
-  FILE: 'file',
-  SYSTEM: 'system',
-} as const;
+export type ConversationUser = z.infer<typeof ConversationUserSchema>;
+export type ConversationService = z.infer<typeof ConversationServiceSchema>;
+export type ConversationSummary = z.infer<typeof ConversationSummarySchema>;
+export type ConversationListResponse = z.infer<typeof ConversationListResponseSchema>;

@@ -10,40 +10,42 @@ interface ServiceFiltersProps {
 }
 
 export function ServiceFilters({ query, onQueryChange }: ServiceFiltersProps) {
+  type CategoryFilter = NonNullable<ServiceListQuery['category']>;
+  type TypeFilter = NonNullable<ServiceListQuery['type']>;
   const [searchTerm, setSearchTerm] = useState(query.q || '');
 
-  const categories = [
-    { value: 'educacion', label: 'Educación' },
-    { value: 'hogar', label: 'Hogar' },
-    { value: 'tecnologia', label: 'Tecnología' },
-    { value: 'salud', label: 'Salud' },
-    { value: 'deportes', label: 'Deportes' },
-    { value: 'arte', label: 'Arte' },
-    { value: 'otros', label: 'Otros' },
+  const categories: Array<{ value: CategoryFilter; label: string }> = [
+    { value: 'EDUCACION', label: 'Educación' },
+    { value: 'HOGAR', label: 'Hogar' },
+    { value: 'TECNOLOGIA', label: 'Tecnología' },
+    { value: 'SALUD', label: 'Salud' },
+    { value: 'DEPORTES', label: 'Deportes' },
+    { value: 'ARTE', label: 'Arte' },
+    { value: 'OTROS', label: 'Otros' },
   ];
 
-  const types = [
-    { value: 'presencial', label: 'Presencial' },
-    { value: 'virtual', label: 'Virtual' },
-    { value: 'hibrido', label: 'Híbrido' },
+  const types: Array<{ value: TypeFilter; label: string }> = [
+    { value: 'PRESENCIAL', label: 'Presencial' },
+    { value: 'VIRTUAL', label: 'Virtual' },
+    { value: 'HIBRIDO', label: 'Híbrido' },
   ];
 
   const handleSearch = () => {
     onQueryChange({ ...query, q: searchTerm, page: 1 });
   };
 
-  const handleCategoryFilter = (category: string | null) => {
+  const handleCategoryFilter = (category: CategoryFilter | null) => {
     onQueryChange({ 
       ...query, 
-      category: (category as any) || undefined, 
+      category: category || undefined, 
       page: 1 
     });
   };
 
-  const handleTypeFilter = (type: string | null) => {
+  const handleTypeFilter = (type: TypeFilter | null) => {
     onQueryChange({ 
       ...query, 
-      type: (type as any) || undefined, 
+      type: type || undefined, 
       page: 1 
     });
   };

@@ -6,22 +6,25 @@ import { z } from 'zod';
 
 export const EventSchema = z.object({
   id: z.number(),
-  groupId: z.number(),
+  communityId: z.number(),
   title: z.string(),
   description: z.string().nullable(),
   date: z.date(),
   location: z.string().nullable(),
   capacity: z.number().nullable(),
+  creatorId: z.string(),
   createdAt: z.date(),
+  updatedAt: z.date(),
 });
 
 export const EventCreateSchema = z.object({
-  groupId: z.number(),
+  communityId: z.number(),
   title: z.string().min(5, 'El título debe tener al menos 5 caracteres'),
   description: z.string().optional(),
   date: z.date(),
   location: z.string().optional(),
   capacity: z.number().positive('La capacidad debe ser positiva').optional(),
+  creatorId: z.string(),
 });
 
 export const EventUpdateSchema = z.object({
@@ -33,7 +36,7 @@ export const EventUpdateSchema = z.object({
 });
 
 export const EventListQuerySchema = z.object({
-  groupId: z.number().optional(),
+  communityId: z.number().optional(),
   q: z.string().optional(),
   dateFrom: z.date().optional(),
   dateTo: z.date().optional(),

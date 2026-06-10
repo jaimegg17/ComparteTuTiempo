@@ -6,70 +6,103 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id          Int      @id @default(autoincrement())
+  id          String   @id // Auth0 ID as primary key
   email       String   @unique
   password    String
   name        String
-  phoneNumber String?
-  location    String?
-  bio         String?
-  skills      String[] @default([])
-  imageUrl    String?
-  role        UserRole @default(USER)
+  phoneNumber       String?
+  location          String?
+  bio               String?
+  skills            String[] @default([])
+  imageUrl          String?
+  role              UserRole @default(USER)
+  timeCredits       Int      @default(300) // Minutes available
+  dateOfBirth       DateTime?
+  gender            String?
+  preferredLanguage String?  @default("es")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Relations
   services    Service[]
   sentMessages    Message[] @relation("SentMessages")
-  receivedMessages Message[] @relation("ReceivedMessages")
   ratings     Rating[]
   communities Community[]
+  communityMemberships CommunityMembership[]
+  communityEvents Event[] @relation("CommunityEventCreator")
   memberships Membership[]
   requestedExchanges Exchange[] @relation("RequestedExchanges")
   offeredExchanges   Exchange[] @relation("OfferedExchanges")
   createdGroups      Group[]
+  favoriteServices   UserFavoriteService[]
+  eventRegistrations EventRegistration[]
+  notifications      UserNotification[]
 
   @@map("users")
 }
 
 model Service {
-  id          Int           @id @default(autoincrement())
-  title       String
-  description String
-  duration    Int
-  location    String?
-  category    ServiceCategory
-  type        ServiceType
-  status      ServiceStatus @default(ACTIVO)
-  price       Float
-  userId      Int
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id                 Int           @id @default(autoincrement())
+  title              String
+  description        String        // Short description for listings
+  detailedDescription String?      @db.Text // Long description for detail page
+  duration           Int
+  location           String?
+  latitude           Float?
+  longitude          Float?
+  formattedAddress   String?
+  placeId            String?
+  availability       String?       // e.g., "morning", "afternoon", "evening", "flexible"
+  category           ServiceCategory
+  type               ServiceType
+  intent             ServiceIntent @default(OFFER)
+  status             ServiceStatus @default(ACTIVO)
+  price              Float
+  imageUrl           String?       // URL of the service image
+  userId             String
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
 
   // Relations
   user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   ratings     Rating[]
   exchanges   Exchange[]
+  favoritedBy UserFavoriteService[]
 
   @@map("services")
 }
 
-model Message {
-  id        Int      @id @default(autoincrement())
-  content   String
-  senderId  Int
-  receiverId Int
+model UserFavoriteService {
+  userId    String
+  serviceId Int
   createdAt DateTime @default(now())
 
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@id([userId, serviceId])
+  @@index([serviceId])
+  @@map("user_favorite_services")
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  exchangeId Int
+  senderId  String
+  content   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relations
+  exchange  Exchange @relation(fields: [exchangeId], references: [id], onDelete: Cascade)
   sender    User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
-  receiver  User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
 
   @@map("messages")
 }
@@ -78,7 +111,7 @@ model Rating {
   id        Int      @id @default(autoincrement())
   score     Int      @db.SmallInt
   comment   String?
-  userId    Int
+  userId    String
   serviceId Int
   createdAt DateTime @default(now())
 
@@ -94,20 +127,43 @@ model Community {
   id          Int      @id @default(autoincrement())
   name        String
   description String?
+  imageUrl    String?
+  topics      String[] @default([])
+  rules       String[] @default([])
+  resources   Json     @default("[]")
   isPrivate   Boolean  @default(false)
-  creatorId   Int
+  kind        CommunityKind @default(COMMUNITY)
+  verificationStatus VerificationStatus @default(NONE)
+  creatorId   String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Relations
   creator    User         @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  memberships CommunityMembership[]
+  events      Event[]
 
   @@map("communities")
 }
 
+model CommunityMembership {
+  id          Int      @id @default(autoincrement())
+  communityId Int
+  userId      String
+  role        CommunityMembershipRole @default(MEMBER)
+  status      CommunityMembershipStatus @default(ACTIVE)
+  joinedAt    DateTime @default(now())
+
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([communityId, userId])
+  @@map("community_memberships")
+}
+
 model Membership {
   id          Int           @id @default(autoincrement())
-  userId      Int
+  userId      String
   groupId     Int
   role        MembershipRole @default(MEMBER)
   status      MembershipStatus @default(ACTIVA)
@@ -123,12 +179,12 @@ model Membership {
 
 model Exchange {
   id            Int           @id @default(autoincrement())
-  requestedById Int
-  offeredById   Int
+  requestedById String
+  offeredById   String
   serviceId     Int
   date          DateTime
   state         ExchangeStatus @default(PENDING)
-  exchangedTime Decimal       @db.Decimal(5, 2)
+  exchangedTime Decimal?      @db.Decimal(5, 2)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
@@ -136,24 +192,60 @@ model Exchange {
   requestedBy  User          @relation("RequestedExchanges", fields: [requestedById], references: [id], onDelete: Cascade)
   offeredBy    User          @relation("OfferedExchanges", fields: [offeredById], references: [id], onDelete: Cascade)
   service      Service       @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  messages     Message[]
 
   @@map("exchanges")
 }
 
 model Event {
   id          Int      @id @default(autoincrement())
-  groupId     Int
+  communityId Int
   title       String   @db.VarChar(200)
   description String?  @db.Text
   date        DateTime
   location    String?  @db.VarChar(200)
   capacity    Int?
+  createdById String
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Relations
-  group       Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  createdBy   User      @relation("CommunityEventCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  registrations EventRegistration[]
 
   @@map("events")
+}
+
+model EventRegistration {
+  eventId       Int
+  userId        String
+  registeredAt  DateTime @default(now())
+
+  event         Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user          User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, userId])
+  @@index([userId])
+  @@map("event_registrations")
+}
+
+model UserNotification {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  type      String   @db.VarChar(50)
+  title     String   @db.VarChar(200)
+  body      String?  @db.Text
+  link      String?  @db.VarChar(255)
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  readAt    DateTime?
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([userId, isRead])
+  @@map("user_notifications")
 }
 
 model Group {
@@ -162,14 +254,13 @@ model Group {
   description String?  @db.Text
   type        GroupType @default(PUBLICO)
   isPrivate   Boolean  @default(false)
-  creatorId   Int
+  creatorId   String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Relations
   creator     User         @relation(fields: [creatorId], references: [id], onDelete: Cascade)
   members     Membership[]
-  events      Event[]
 
   @@map("groups")
 }
@@ -196,6 +287,11 @@ enum ServiceType {
   HIBRIDO
 }
 
+enum ServiceIntent {
+  OFFER
+  REQUEST
+}
+
 enum ServiceStatus {
   ACTIVO
   INACTIVO
@@ -206,6 +302,29 @@ enum MembershipRole {
   MEMBER
   MODERATOR
   ADMIN
+}
+
+enum CommunityKind {
+  COMMUNITY
+  ORGANIZATION
+}
+
+enum VerificationStatus {
+  NONE
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum CommunityMembershipRole {
+  OWNER
+  MEMBER
+}
+
+enum CommunityMembershipStatus {
+  ACTIVE
+  PENDING
+  SUSPENDED
 }
 
 enum MembershipStatus {

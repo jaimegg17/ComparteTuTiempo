@@ -1,6 +1,6 @@
-import { Service as PrismaService } from '@prisma/client';
+import { Service as PrismaService, ServiceCategory, ServiceStatus, ServiceType } from '@prisma/client';
 import { Service } from '../domain/service.entity';
-import { Service as ServiceContract } from '@comparte-tu-tiempo/contracts';
+import { ServiceWithImage } from '../domain/service.types';
 
 export class ServiceMapper {
   toDomain(prismaService: PrismaService): Service {
@@ -36,16 +36,24 @@ export class ServiceMapper {
       return mapping[status] || 'activo';
     };
 
-    const contract: ServiceContract = {
+    const contract: ServiceWithImage = {
       id: prismaService.id,
       title: prismaService.title,
       description: prismaService.description,
+      detailedDescription: prismaService.detailedDescription,
       duration: prismaService.duration,
       location: prismaService.location,
-      category: mapCategory(prismaService.category) as any,
-      type: mapType(prismaService.type) as any,
-      status: mapStatus(prismaService.status) as any,
+      latitude: prismaService.latitude,
+      longitude: prismaService.longitude,
+      formattedAddress: prismaService.formattedAddress,
+      placeId: prismaService.placeId,
+      availability: prismaService.availability,
+      category: mapCategory(prismaService.category) as unknown as ServiceWithImage['category'],
+      type: mapType(prismaService.type) as unknown as ServiceWithImage['type'],
+      intent: prismaService.intent as unknown as ServiceWithImage['intent'],
+      status: mapStatus(prismaService.status) as unknown as ServiceWithImage['status'],
       price: prismaService.price,
+      imageUrl: prismaService.imageUrl,
       userId: prismaService.userId,
       createdAt: prismaService.createdAt,
       updatedAt: prismaService.updatedAt,
@@ -90,12 +98,20 @@ export class ServiceMapper {
     return {
       title: service.title,
       description: service.description,
+      detailedDescription: service.detailedDescription || null,
       duration: service.duration,
       location: service.location,
-      category: mapCategoryToPrisma(service.category) as any,
-      type: mapTypeToPrisma(service.type) as any,
-      status: mapStatusToPrisma(service.status) as any,
+      latitude: service.latitude ?? null,
+      longitude: service.longitude ?? null,
+      formattedAddress: service.formattedAddress ?? null,
+      placeId: service.placeId ?? null,
+      availability: service.availability || null,
+      category: mapCategoryToPrisma(service.category) as ServiceCategory,
+      type: mapTypeToPrisma(service.type) as ServiceType,
+      intent: service.intent as unknown as PrismaService['intent'],
+      status: mapStatusToPrisma(service.status) as ServiceStatus,
       price: service.price,
+      imageUrl: service.imageUrl || null,
       userId: service.userId,
     };
   }

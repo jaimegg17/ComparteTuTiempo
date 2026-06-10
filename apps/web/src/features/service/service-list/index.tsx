@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useServices } from '@/shared/hooks/use-services';
 import { ServiceCard } from './service-card';
 import { ServiceFilters } from './service-filters';
-import type { ServiceListQuery } from '@comparte-tu-tiempo/contracts';
+import type { Service, ServiceListQuery } from '@comparte-tu-tiempo/contracts';
 
 export function ServiceList() {
   const [query, setQuery] = useState<ServiceListQuery>({
@@ -43,7 +43,7 @@ export function ServiceList() {
       <ServiceFilters query={query} onQueryChange={setQuery} />
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {data.services.map((service: any) => (
+        {data.services.map((service: Service) => (
           <ServiceCard key={service.id} service={service} />
         ))}
       </div>

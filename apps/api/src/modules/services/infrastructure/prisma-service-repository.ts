@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma, ServiceCategory, ServiceIntent, ServiceStatus, ServiceType } from '@prisma/client';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { ServiceRepositoryPort } from '../domain/service-repository.port';
 import { Service } from '../domain/service.entity';
-import { ServiceCreate, ServiceUpdate, ServiceListQuery, ServiceListResponse } from '@comparte-tu-tiempo/contracts';
+import { ServiceUpdate, ServiceListQuery, ServiceListResponse } from '@comparte-tu-tiempo/contracts';
 import { ServiceMapper } from './service.mapper';
+import { ServiceEnumMapper } from './service-enum.mapper';
+import { ServiceCreateWithImage } from '../domain/service.types';
 
 @Injectable()
 export class PrismaServiceRepository implements ServiceRepositoryPort {
@@ -12,13 +15,30 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
     private readonly mapper: ServiceMapper,
   ) {}
 
-  async create(data: ServiceCreate, userId: number): Promise<Service> {
+  async create(data: ServiceCreateWithImage, userId: string): Promise<Service> {
+    // Force include imageUrl in the data
+    const serviceData = {
+      title: data.title,
+      description: data.description,
+      duration: data.duration,
+      location: data.location,
+      latitude: data.latitude ?? null,
+      longitude: data.longitude ?? null,
+      formattedAddress: data.formattedAddress ?? null,
+      placeId: data.placeId ?? null,
+      category: ServiceEnumMapper.mapCategoryToPrisma(data.category) as ServiceCategory,
+      type: ServiceEnumMapper.mapTypeToPrisma(data.type) as ServiceType,
+      intent: data.intent as ServiceIntent,
+      price: data.price,
+      userId,
+      status: 'ACTIVO' as const,
+      detailedDescription: data.detailedDescription || null,
+      availability: data.availability || null,
+      imageUrl: data.imageUrl || null,
+    };
+    
     const prismaService = await this.prisma.service.create({
-      data: {
-        ...data,
-        userId,
-        status: 'ACTIVO',
-      },
+      data: serviceData,
     });
 
     return this.mapper.toDomain(prismaService);
@@ -29,10 +49,14 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
       where: { id },
     });
 
-    return prismaService ? this.mapper.toDomain(prismaService) : null;
+    if (!prismaService) {
+      return null;
+    }
+
+    return this.mapper.toDomain(prismaService);
   }
 
-  async findByUserId(userId: number): Promise<Service[]> {
+  async findByUserId(userId: string): Promise<Service[]> {
     const prismaServices = await this.prisma.service.findMany({
       where: { userId },
     });
@@ -41,11 +65,14 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
   }
 
   async list(query: ServiceListQuery): Promise<ServiceListResponse> {
-    const { q, category, city, type, status, page, pageSize } = query;
+    const { q, category, location, type, intent, status, page, pageSize, userId, nearLat, nearLng } = query;
+    const minPrice = query.minPrice;
+    const maxPrice = query.maxPrice;
+    const radiusKm = query.radiusKm ?? 10;
     const skip = (page - 1) * pageSize;
 
     // Construir filtros
-    const where: any = {};
+    const where: Prisma.ServiceWhereInput = {};
     
     if (q) {
       where.OR = [
@@ -54,27 +81,120 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
       ];
     }
     
-    if (category) where.category = category;
-    if (type) where.type = type;
-    if (status) where.status = status;
-    if (city) where.location = { contains: city, mode: 'insensitive' };
+    if (category) where.category = ServiceEnumMapper.mapCategoryToPrisma(category) as ServiceCategory;
+    if (type) where.type = ServiceEnumMapper.mapTypeToPrisma(type) as ServiceType;
+    if (intent) where.intent = intent as ServiceIntent;
+    if (status) where.status = ServiceEnumMapper.mapStatusToPrisma(status) as ServiceStatus;
+    if (location) where.location = { contains: location, mode: 'insensitive' };
+    if (userId) where.userId = userId; // Filtrar por usuario
+    if (nearLat !== undefined && nearLng !== undefined) {
+      where.latitude = { not: null };
+      where.longitude = { not: null };
+    }
+    
+    // Filtros de precio
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      where.price = {};
+      if (minPrice !== undefined) where.price.gte = minPrice;
+      if (maxPrice !== undefined) where.price.lte = maxPrice;
+    }
 
-    // Obtener total y servicios
-    const [total, prismaServices] = await Promise.all([
-      this.prisma.service.count({ where }),
-      this.prisma.service.findMany({
-        where,
-        skip,
-        take: pageSize,
-        orderBy: { createdAt: 'desc' },
-      }),
-    ]);
+    const prismaServices = await this.prisma.service.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            imageUrl: true,
+          }
+        },
+        ratings: {
+          select: {
+            score: true,
+          }
+        },
+        _count: {
+          select: {
+            ratings: true,
+            exchanges: true,
+          }
+        }
+      },
+    });
 
-    const services = prismaServices.map(service => this.mapper.toDomain(service));
+    // Calculate average rating for each service
+    let servicesWithRatings = prismaServices.map(service => {
+      const avgRating = service.ratings.length > 0
+        ? service.ratings.reduce((sum, r) => sum + r.score, 0) / service.ratings.length
+        : 0;
+
+      const hasCoordinates = service.latitude !== null && service.longitude !== null;
+      const distanceKm =
+        nearLat !== undefined && nearLng !== undefined && hasCoordinates
+          ? this.calculateDistanceKm(nearLat, nearLng, service.latitude as number, service.longitude as number)
+          : null;
+
+      return {
+        ...service,
+        averageRating: Number(avgRating.toFixed(1)),
+        totalRatings: service._count.ratings, // Use _count instead of ratings.length
+        totalExchanges: service._count.exchanges,
+        distanceKm,
+      };
+    });
+
+    if (nearLat !== undefined && nearLng !== undefined) {
+      servicesWithRatings = servicesWithRatings
+        .filter((service) => service.distanceKm !== null && (service.distanceKm as number) <= radiusKm)
+        .sort((a, b) => (a.distanceKm as number) - (b.distanceKm as number));
+    }
+
+    const total = servicesWithRatings.length;
+    const paginatedServices = servicesWithRatings.slice(skip, skip + pageSize);
+
     const totalPages = Math.ceil(total / pageSize);
 
     return {
-      services: services.map(service => service.toContract()),
+      services: paginatedServices.map(service => {
+        const serviceData = service as typeof service & {
+          detailedDescription?: string | null;
+          availability?: string | null;
+          imageUrl?: string | null;
+          formattedAddress?: string | null;
+          placeId?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+        };
+        return {
+          id: service.id,
+          title: service.title,
+          description: service.description,
+          detailedDescription: serviceData.detailedDescription || null,
+          duration: service.duration,
+          location: service.location,
+          latitude: serviceData.latitude ?? null,
+          longitude: serviceData.longitude ?? null,
+          formattedAddress: serviceData.formattedAddress ?? null,
+          placeId: serviceData.placeId ?? null,
+          availability: serviceData.availability || null,
+          category: service.category.toLowerCase() as unknown as ServiceListResponse['services'][number]['category'],
+          type: service.type.toLowerCase() as unknown as ServiceListResponse['services'][number]['type'],
+          intent: service.intent as ServiceListResponse['services'][number]['intent'],
+          status: service.status.toLowerCase() as unknown as ServiceListResponse['services'][number]['status'],
+          price: service.price,
+          imageUrl: serviceData.imageUrl || null,
+          userId: service.userId,
+          createdAt: service.createdAt,
+          updatedAt: service.updatedAt,
+          averageRating: service.averageRating,
+          totalRatings: service.totalRatings,
+          totalExchanges: service.totalExchanges,
+          distanceKm: service.distanceKm,
+          user: service.user,
+        };
+      }),
       total,
       page,
       pageSize,
@@ -82,31 +202,47 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
     };
   }
 
-  async update(id: number, data: ServiceUpdate, userId: number): Promise<Service> {
+  async update(id: number, data: ServiceUpdate, userId: string): Promise<Service> {
     // Verificar que el servicio existe y pertenece al usuario
     const existingService = await this.findById(id);
     if (!existingService) {
       throw new Error('Service not found');
     }
-    if (!existingService.isOwnedBy(userId)) {
+    if (existingService.userId !== userId) {
       throw new Error('Unauthorized to update this service');
     }
 
+    const updateData: Prisma.ServiceUncheckedUpdateInput = {};
+    if (data.title) updateData.title = data.title;
+    if (data.description) updateData.description = data.description;
+    if (data.duration) updateData.duration = data.duration;
+    if (data.location !== undefined) updateData.location = data.location;
+    if (data.latitude !== undefined) updateData.latitude = data.latitude;
+    if (data.longitude !== undefined) updateData.longitude = data.longitude;
+    if (data.formattedAddress !== undefined) updateData.formattedAddress = data.formattedAddress;
+    if (data.placeId !== undefined) updateData.placeId = data.placeId;
+    if (data.category) updateData.category = ServiceEnumMapper.mapCategoryToPrisma(data.category) as ServiceCategory;
+    if (data.type) updateData.type = ServiceEnumMapper.mapTypeToPrisma(data.type) as ServiceType;
+    if (data.intent) updateData.intent = data.intent as ServiceIntent;
+    if (data.status) updateData.status = ServiceEnumMapper.mapStatusToPrisma(data.status) as ServiceStatus;
+    if (data.price) updateData.price = data.price;
+    if (data.imageUrl !== undefined) updateData.imageUrl = data.imageUrl;
+
     const prismaService = await this.prisma.service.update({
       where: { id },
-      data,
+      data: updateData,
     });
 
     return this.mapper.toDomain(prismaService);
   }
 
-  async delete(id: number, userId: number): Promise<void> {
+  async delete(id: number, userId: string): Promise<void> {
     // Verificar que el servicio existe y pertenece al usuario
     const existingService = await this.findById(id);
     if (!existingService) {
       throw new Error('Service not found');
     }
-    if (!existingService.canBeDeletedBy(userId)) {
+    if (existingService.userId !== userId) {
       throw new Error('Unauthorized to delete this service');
     }
 
@@ -117,8 +253,20 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
 
   async exists(id: number): Promise<boolean> {
     const count = await this.prisma.service.count({
-      where: { id },
+      where: { id: { equals: id } },
     });
     return count > 0;
+  }
+
+  private calculateDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+    const toRad = (value: number) => (value * Math.PI) / 180;
+    const earthRadiusKm = 6371;
+    const dLat = toRad(lat2 - lat1);
+    const dLng = toRad(lng2 - lng1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Number((earthRadiusKm * c).toFixed(2));
   }
 }

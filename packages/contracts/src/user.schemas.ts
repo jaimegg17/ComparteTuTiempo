@@ -5,7 +5,7 @@ import { z } from 'zod';
 // ============================================================================
 
 export const UserSchema = z.object({
-  id: z.number(),
+  id: z.string(), // Auth0 ID as string
   email: z.string().email(),
   name: z.string(),
   phoneNumber: z.string().nullable(),
@@ -13,7 +13,7 @@ export const UserSchema = z.object({
   bio: z.string().nullable(),
   skills: z.array(z.string()).default([]),
   imageUrl: z.string().nullable(),
-  role: z.enum(['user', 'moderator', 'admin']),
+  role: z.enum(['USER', 'MODERATOR', 'ADMIN']), // Match Prisma enum
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -50,7 +50,7 @@ export type UserUpdate = z.infer<typeof UserUpdateSchema>;
 // ============================================================================
 
 export const UserRole = {
-  USER: 'user',
-  MODERATOR: 'moderator',
-  ADMIN: 'admin',
+  USER: 'USER',
+  MODERATOR: 'MODERATOR',
+  ADMIN: 'ADMIN',
 } as const;

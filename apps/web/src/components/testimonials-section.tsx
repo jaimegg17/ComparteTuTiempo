@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, Star } from "lucide-react"
+import Image from "next/image"
 
 const testimonials = [
   {
@@ -69,14 +70,16 @@ export function TestimonialsSection() {
 
                 {/* Testimonial content */}
                 <blockquote className="text-xl sm:text-2xl text-foreground mb-8 italic leading-relaxed">
-                  "{testimonials[currentIndex].content}"
+                  &ldquo;{testimonials[currentIndex].content}&rdquo;
                 </blockquote>
 
                 {/* Author */}
                 <div className="flex items-center justify-center space-x-4">
-                  <img
+                  <Image
                     src={testimonials[currentIndex].avatar || "/placeholder.svg"}
                     alt={testimonials[currentIndex].name}
+                    width={64}
+                    height={64}
                     className="w-16 h-16 rounded-full object-cover"
                   />
                   <div className="text-left">

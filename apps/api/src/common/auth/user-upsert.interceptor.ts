@@ -1,0 +1,38 @@
+import {
+  Injectable,
+  NestInterceptor,
+  ExecutionContext,
+  CallHandler,
+} from '@nestjs/common';
+import { Observable } from 'rxjs';
+import { PrismaService } from '../prisma/prisma.service';
+
+@Injectable()
+export class UserUpsertInterceptor implements NestInterceptor {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async intercept(
+    context: ExecutionContext,
+    next: CallHandler,
+  ): Promise<Observable<unknown>> {
+    const request = context.switchToHttp().getRequest();
+    const user = request.user;
+
+    if (user?.sub) {
+      // Upsert user if doesn't exist
+      await this.prisma.user.upsert({
+        where: { id: user.sub },
+        update: {}, // No update if user already exists
+        create: {
+          id: user.sub,
+          email: user.email || `${user.sub}@example.com`,
+          password: 'auth0-user', // Placeholder password for Auth0 users
+          name: user.name || 'Usuario',
+          timeCredits: 300, // 5 initial hours in minutes so new users can start exchanging
+        },
+      });
+    }
+
+    return next.handle();
+  }
+}

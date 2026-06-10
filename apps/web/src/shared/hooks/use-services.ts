@@ -13,7 +13,10 @@ export const useServices = (query: ServiceListQuery) => {
 export const useService = (id: number) => {
   return useQuery({
     queryKey: ['service', id],
-    queryFn: () => servicesApi.getService(id),
+    queryFn: async () => {
+      const response = await servicesApi.getService(id);
+      return response.service;
+    },
     enabled: !!id,
   });
 };
