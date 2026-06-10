@@ -91,11 +91,11 @@ export default function CommunityDetailPage() {
 
   const handleToggleEventRegistration = async (eventId: number) => {
     if (!user?.sub) {
-      setNotice('Inicia sesión para apuntarte a eventos.');
+      setNotice(t('communities.detail.loginToRegisterEvent'));
       return;
     }
     const added = await toggleRegistration(eventId);
-    setNotice(added ? 'Te has apuntado al evento.' : 'Has cancelado tu inscripción al evento.');
+    setNotice(added ? t('communities.detail.eventRegistered') : t('communities.detail.eventUnregistered'));
   };
 
   const handleJoin = async () => {
@@ -111,10 +111,10 @@ export default function CommunityDetailPage() {
 
       await communityMembershipsApi.joinCommunity(communityId);
 
-      setNotice(community?.isPrivate ? 'Tu solicitud se ha enviado correctamente.' : 'Te has unido a la comunidad.');
+      setNotice(community?.isPrivate ? t('communities.detail.joinPrivateSuccess') : t('communities.detail.joinSuccess'));
       await fetchCommunityData();
     } catch {
-      setNotice('No se pudo completar la acción de unirse. Endpoint pendiente o acceso no permitido.');
+      setNotice(t('communities.detail.joinError'));
     } finally {
       setActionLoading(false);
     }
@@ -133,10 +133,10 @@ export default function CommunityDetailPage() {
       }
 
       await communityMembershipsApi.leaveCommunity(communityId!);
-      setNotice(myPendingMembership ? 'Has cancelado tu solicitud.' : 'Has salido de la comunidad.');
+      setNotice(myPendingMembership ? t('communities.detail.leavePendingSuccess') : t('communities.detail.leaveSuccess'));
       await fetchCommunityData();
     } catch {
-      setNotice('No se pudo completar la acción de salir. Endpoint pendiente o acceso no permitido.');
+      setNotice(t('communities.detail.leaveError'));
     } finally {
       setActionLoading(false);
     }
@@ -148,10 +148,10 @@ export default function CommunityDetailPage() {
     try {
       setActionLoading(true);
       await communityMembershipsApi.updateMembership(communityId, membership.id, { role });
-      setNotice('Rol actualizado correctamente.');
+      setNotice(t('communities.detail.roleSuccess'));
       await fetchCommunityData();
     } catch {
-      setNotice('No se pudo actualizar el rol del miembro.');
+      setNotice(t('communities.detail.roleError'));
     } finally {
       setActionLoading(false);
     }
@@ -166,10 +166,10 @@ export default function CommunityDetailPage() {
     try {
       setActionLoading(true);
       await communityMembershipsApi.updateMembership(communityId, membership.id, { status });
-      setNotice(status === 'ACTIVE' ? 'Solicitud aprobada correctamente.' : 'Solicitud rechazada correctamente.');
+      setNotice(status === 'ACTIVE' ? t('communities.detail.statusApproved') : t('communities.detail.statusRejected'));
       await fetchCommunityData();
     } catch {
-      setNotice('No se pudo actualizar el estado de la solicitud.');
+      setNotice(t('communities.detail.statusError'));
     } finally {
       setActionLoading(false);
     }
@@ -230,13 +230,13 @@ export default function CommunityDetailPage() {
               >
                 <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" spacing={2} sx={{ alignItems: { xs: 'stretch', md: 'flex-start' } }}>
                   <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25} useFlexGap flexWrap="wrap">
-                    <Chip label={`${activeMemberships.length} miembros activos`} />
-                    <Chip label={`${events.length} eventos publicados`} />
-                    <Chip label={`${community.resources.length} recursos compartidos`} />
+                    <Chip label={t('communities.detail.activeMembers', { count: activeMemberships.length })} />
+                    <Chip label={t('communities.detail.eventsPublished', { count: events.length })} />
+                    <Chip label={t('communities.detail.sharedResources', { count: community.resources.length })} />
                     {canManage && (
                       <Chip
                         icon={<PendingActionsOutlined fontSize="small" />}
-                        label={`${pendingMemberships.length} solicitudes pendientes`}
+                        label={t('communities.detail.pendingRequests', { count: pendingMemberships.length })}
                         color={pendingMemberships.length > 0 ? 'warning' : 'default'}
                       />
                     )}
@@ -246,10 +246,10 @@ export default function CommunityDetailPage() {
                     <Chip
                       label={
                         community.verificationStatus === 'APPROVED'
-                          ? 'Organización verificada'
+                          ? t('communities.detail.verifiedOrganization')
                           : community.verificationStatus === 'REJECTED'
-                            ? 'Organización rechazada'
-                            : 'Organización pendiente'
+                            ? t('communities.detail.rejectedOrganization')
+                            : t('communities.detail.pendingOrganization')
                       }
                       color={
                         community.verificationStatus === 'APPROVED'
@@ -273,14 +273,14 @@ export default function CommunityDetailPage() {
                       onClick={() => router.push(`/communities/${community.id}/edit#events`)}
                       sx={{ textTransform: 'none', fontWeight: 700, alignSelf: 'flex-start' }}
                     >
-                      Publicar evento
+                      {t('communities.detail.publishEvent')}
                     </Button>
                     <Button
                       variant="outlined"
                       onClick={() => router.push(`/communities/${community.id}/edit`)}
                       sx={{ textTransform: 'none', fontWeight: 600, alignSelf: 'flex-start' }}
                     >
-                      Gestionar {community.kind === 'ORGANIZATION' ? 'organización' : 'comunidad'}
+                      {t('communities.detail.manageSpace', { space: community.kind === 'ORGANIZATION' ? t('communities.detail.organization') : t('communities.detail.community') })}
                     </Button>
                   </>
                 )}
@@ -293,28 +293,28 @@ export default function CommunityDetailPage() {
                   sx={{ textTransform: 'none', fontWeight: 600, alignSelf: 'flex-start' }}
                 >
                   {isMember
-                    ? 'Salir de comunidad'
+                    ? t('communities.detail.leave')
                     : myPendingMembership
-                      ? 'Cancelar solicitud'
-                      : 'Unirse a comunidad'}
+                      ? t('communities.detail.cancelRequest')
+                      : t('communities.detail.join')}
                 </Button>
               </Stack>
 
               {community.isPrivate && !isMember && !myPendingMembership && (
                 <Alert severity="info">
-                  Esta comunidad es privada. Tu solicitud deberá ser aprobada por un owner o administrador.
+                  {t('communities.detail.privateNotice')}
                 </Alert>
               )}
 
               {myPendingMembership && (
                 <Alert severity="warning">
-                  Tu solicitud está pendiente de revisión. Puedes cancelarla mientras esperas respuesta.
+                  {t('communities.detail.pendingNotice')}
                 </Alert>
               )}
 
               {canManage && pendingMemberships.length > 0 && (
                 <Alert severity="warning">
-                  Tienes {pendingMemberships.length} solicitud{pendingMemberships.length > 1 ? 'es' : ''} pendiente{pendingMemberships.length > 1 ? 's' : ''} de revisar.
+                  {t('communities.detail.pendingReview', { count: pendingMemberships.length })}
                 </Alert>
               )}
 

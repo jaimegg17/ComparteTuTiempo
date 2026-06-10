@@ -13,6 +13,7 @@ import {
   CommunityEventForm,
   type CommunityEventFormValues,
 } from '@/components/communities/forms/CommunityEventForm';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface CommunityEventsManagerProps {
   events: CommunityEvent[];
@@ -39,6 +40,7 @@ export function CommunityEventsManager({
   onUpdate,
   onDelete,
 }: CommunityEventsManagerProps) {
+  const { t, currentLanguage } = useTranslation();
   const [editingEventId, setEditingEventId] = useState<number | null>(null);
 
   const sortedEvents = useMemo(
@@ -64,14 +66,14 @@ export function CommunityEventsManager({
         }}
       >
         <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.5 }}>
-          Eventos publicados
+          {t('communities.events.publishedTitle')}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
-          Revisa, edita o elimina los eventos del espacio.
+          {t('communities.events.publishedDescription')}
         </Typography>
 
         {sortedEvents.length === 0 ? (
-          <Alert severity="info">Todavía no hay eventos publicados.</Alert>
+          <Alert severity="info">{t('communities.events.empty')}</Alert>
         ) : (
           <Stack spacing={2}>
             {sortedEvents.map((event) => (
@@ -88,7 +90,7 @@ export function CommunityEventsManager({
                     initialValues={toFormValues(event)}
                     submitting={submitting}
                     serverError={serverError}
-                    submitLabel="Guardar cambios"
+                    submitLabel={t('communities.events.save')}
                     onCancel={() => setEditingEventId(null)}
                     onSubmit={async (values) => {
                       await onUpdate(event.id, values);
@@ -102,7 +104,7 @@ export function CommunityEventsManager({
                         {event.title}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        {event.description || 'Sin descripción'}
+                        {event.description || t('communities.events.noDescription')}
                       </Typography>
                     </Box>
 
@@ -110,16 +112,16 @@ export function CommunityEventsManager({
                       <Chip
                         icon={<Schedule />}
                         size="small"
-                        label={new Date(event.date).toLocaleString('es-ES')}
+                        label={new Date(event.date).toLocaleString(currentLanguage === 'en' ? 'en-US' : 'es-ES')}
                       />
                       <Chip
                         icon={<Event />}
                         size="small"
-                        label={event.location || 'Online'}
+                        label={event.location || t('communities.events.online')}
                         variant="outlined"
                       />
                       {typeof event.capacity === 'number' && (
-                        <Chip size="small" label={`Capacidad: ${event.capacity}`} variant="outlined" />
+                        <Chip size="small" label={t('communities.events.capacity', { capacity: event.capacity })} variant="outlined" />
                       )}
                     </Stack>
 
@@ -130,7 +132,7 @@ export function CommunityEventsManager({
                         onClick={() => setEditingEventId(event.id)}
                         sx={{ textTransform: 'none', fontWeight: 700 }}
                       >
-                        Editar
+                        {t('common.edit')}
                       </Button>
                       <Button
                         startIcon={<DeleteOutline />}
@@ -139,7 +141,7 @@ export function CommunityEventsManager({
                         onClick={() => onDelete(event.id)}
                         sx={{ textTransform: 'none', fontWeight: 700 }}
                       >
-                        Eliminar
+                        {t('common.delete')}
                       </Button>
                     </Stack>
                   </Stack>

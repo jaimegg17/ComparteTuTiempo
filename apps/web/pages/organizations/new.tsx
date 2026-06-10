@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { Layout } from '@/components/Layout';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslation } from '@/hooks/useTranslation';
 import { communitiesApi } from '@/shared/api/communities';
 import { apiClient } from '@/shared/api/client';
 import {
@@ -15,6 +16,7 @@ import {
 
 export default function NewOrganizationPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { user } = useUser();
   const { accessToken } = useAuth();
   const [submitting, setSubmitting] = useState(false);
@@ -22,7 +24,7 @@ export default function NewOrganizationPage() {
 
   const handleSubmit = async (values: CommunityFormValues) => {
     if (!user?.sub) {
-      setError('Necesitas iniciar sesión para solicitar una organización.');
+      setError(t('organizations.new.loginError'));
       return;
     }
 
@@ -42,7 +44,7 @@ export default function NewOrganizationPage() {
       setError(
         submitError instanceof Error
           ? submitError.message
-          : 'No se pudo registrar la solicitud de organización.',
+          : t('organizations.new.submitError'),
       );
     } finally {
       setSubmitting(false);
@@ -175,20 +177,20 @@ export default function NewOrganizationPage() {
                 isPrivate: false,
               }}
               submitting={submitting}
-              submitLabel="Enviar solicitud"
+              submitLabel={t('organizations.form.submit')}
               serverError={error}
               labels={{
-                nameLabel: 'Nombre de la organización',
-                descriptionLabel: 'Descripción institucional',
-                topicsLabel: 'Ámbitos / categorías',
-                topicsHelperText: 'Separa los ámbitos con comas. Ej.: inclusión social, salud, educación, voluntariado',
-                rulesLabel: 'Normas o principios de participación',
-                rulesHelperText: 'Escribe una norma o principio por línea.',
-                rulesRequiredMessage: 'Añade al menos una norma o principio de participación.',
-                publicLabel: 'Organización pública',
-                privateLabel: 'Organización privada',
-                publicDescription: 'La organización se mostrará como entidad abierta una vez sea aprobada.',
-                privateDescription: 'La organización requerirá aprobación también para el acceso de nuevos miembros.',
+                nameLabel: t('organizations.form.nameLabel'),
+                descriptionLabel: t('organizations.form.descriptionLabel'),
+                topicsLabel: t('organizations.form.topicsLabel'),
+                topicsHelperText: t('organizations.form.topicsHelperText'),
+                rulesLabel: t('organizations.form.rulesLabel'),
+                rulesHelperText: t('organizations.form.rulesHelperText'),
+                rulesRequiredMessage: t('organizations.form.rulesRequiredMessage'),
+                publicLabel: t('organizations.form.publicLabel'),
+                privateLabel: t('organizations.form.privateLabel'),
+                publicDescription: t('organizations.form.publicDescription'),
+                privateDescription: t('organizations.form.privateDescription'),
               }}
               onCancel={() => router.push('/organizations')}
               onSubmit={handleSubmit}

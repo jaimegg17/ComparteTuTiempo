@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import type { CommunityCreate, CommunityKind } from '@comparte-tu-tiempo/contracts';
 import { ImageUpload } from '@/components/ui/ImageUpload';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export interface CommunityFormValues {
   name: string;
@@ -75,30 +76,31 @@ const toCreatePayload = (
 
 export const communityFormToPayload = toCreatePayload;
 
-const defaultLabels: Required<CommunityFormLabels> = {
-  nameLabel: 'Nombre de la comunidad',
-  descriptionLabel: 'Descripción',
-  topicsLabel: 'Temas / categorías',
-  topicsHelperText: 'Separa los temas con comas. Ej.: tecnología, idiomas, voluntariado',
-  rulesLabel: 'Reglas de la comunidad',
-  rulesHelperText: 'Escribe una regla por línea.',
-  rulesRequiredMessage: 'Añade al menos una regla de comunidad.',
-  publicLabel: 'Comunidad pública',
-  privateLabel: 'Comunidad privada',
-  publicDescription: 'Cualquier usuario podrá unirse a la comunidad.',
-  privateDescription: 'Solo miembros aprobados podrán unirse.',
-};
-
 export function CommunityForm({
   initialValues,
   submitting = false,
-  submitLabel = 'Crear comunidad',
+  submitLabel,
   serverError,
   labels,
   onCancel,
   onSubmit,
 }: CommunityFormProps) {
+  const { t } = useTranslation();
+  const defaultLabels: Required<CommunityFormLabels> = {
+    nameLabel: t('communities.form.nameLabel'),
+    descriptionLabel: t('communities.form.descriptionLabel'),
+    topicsLabel: t('communities.form.topicsLabel'),
+    topicsHelperText: t('communities.form.topicsHelperText'),
+    rulesLabel: t('communities.form.rulesLabel'),
+    rulesHelperText: t('communities.form.rulesHelperText'),
+    rulesRequiredMessage: t('communities.form.rulesRequiredMessage'),
+    publicLabel: t('communities.form.publicLabel'),
+    privateLabel: t('communities.form.privateLabel'),
+    publicDescription: t('communities.form.publicDescription'),
+    privateDescription: t('communities.form.privateDescription'),
+  };
   const mergedLabels = { ...defaultLabels, ...labels };
+  const effectiveSubmitLabel = submitLabel ?? t('communities.form.createSubmit');
 
   const [values, setValues] = useState<CommunityFormValues>(
     initialValues ?? {
@@ -123,18 +125,18 @@ export function CommunityForm({
     const normalizedDescription = values.description.trim();
 
     if (!normalizedName) {
-      next.name = 'El nombre es obligatorio.';
+      next.name = t('communities.form.nameRequired');
     } else if (normalizedName.length < NAME_MIN || normalizedName.length > NAME_MAX) {
-      next.name = `El nombre debe tener entre ${NAME_MIN} y ${NAME_MAX} caracteres.`;
+      next.name = t('communities.form.nameLength', { min: NAME_MIN, max: NAME_MAX });
     }
 
     if (!normalizedDescription) {
-      next.description = 'La descripción es obligatoria.';
+      next.description = t('communities.form.descriptionRequired');
     } else if (
       normalizedDescription.length < DESCRIPTION_MIN ||
       normalizedDescription.length > DESCRIPTION_MAX
     ) {
-      next.description = `La descripción debe tener entre ${DESCRIPTION_MIN} y ${DESCRIPTION_MAX} caracteres.`;
+      next.description = t('communities.form.descriptionLength', { min: DESCRIPTION_MIN, max: DESCRIPTION_MAX });
     }
 
     const parsedRules = values.rulesText
@@ -147,7 +149,7 @@ export function CommunityForm({
     }
 
     return next;
-  }, [values, mergedLabels.rulesRequiredMessage]);
+  }, [values, mergedLabels.rulesRequiredMessage, t]);
 
   const isValid = !errors.name && !errors.description && !errors.rulesText;
 
@@ -194,7 +196,7 @@ export function CommunityForm({
 
         <Box>
           <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
-            Imagen de la comunidad
+            {t('communities.form.imageLabel')}
           </Typography>
           <ImageUpload
             currentImage={values.imageUrl}
@@ -252,7 +254,7 @@ export function CommunityForm({
         <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
           {onCancel && (
             <Button onClick={onCancel} disabled={submitting} sx={{ textTransform: 'none' }}>
-              Cancelar
+              {t('communities.form.cancel')}
             </Button>
           )}
           <Button
@@ -261,7 +263,7 @@ export function CommunityForm({
             disabled={submitting || !isValid}
             sx={{ textTransform: 'none', fontWeight: 600 }}
           >
-            {submitting ? 'Guardando...' : submitLabel}
+            {submitting ? t('communities.form.saving') : effectiveSubmitLabel}
           </Button>
         </Stack>
       </Stack>

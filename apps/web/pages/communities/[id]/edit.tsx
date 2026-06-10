@@ -64,12 +64,12 @@ export default function EditCommunityPage() {
       setError(
         fetchError instanceof Error
           ? fetchError.message
-          : 'No se pudo cargar la comunidad para editar.',
+          : t('communities.editPage.loadError'),
       );
     } finally {
       setLoading(false);
     }
-  }, [communityId, accessToken]);
+  }, [communityId, accessToken, t]);
 
   useEffect(() => {
     fetchCommunity();
@@ -77,7 +77,7 @@ export default function EditCommunityPage() {
 
   const handleSubmit = async (values: CommunityFormValues) => {
     if (!communityId || !user?.sub) {
-      setError('Debes iniciar sesión para editar esta comunidad.');
+      setError(t('communities.editPage.loginError'));
       return;
     }
 
@@ -118,7 +118,7 @@ export default function EditCommunityPage() {
       setError(
         submitError instanceof Error
           ? submitError.message
-          : 'No se pudo guardar la comunidad. Revisa los datos e inténtalo de nuevo.',
+          : t('communities.editPage.saveError'),
       );
     } finally {
       setSubmitting(false);
@@ -152,7 +152,7 @@ export default function EditCommunityPage() {
       setError(
         submitError instanceof Error
           ? submitError.message
-          : 'No se pudo actualizar el estado de la organización.',
+          : t('communities.editPage.organizationStatusError'),
       );
     } finally {
       setSubmitting(false);
@@ -184,7 +184,7 @@ export default function EditCommunityPage() {
       setEventError(
         createEventError instanceof Error
           ? createEventError.message
-          : 'No se pudo publicar el evento.',
+          : t('communities.editPage.createEventError'),
       );
     } finally {
       setSubmitting(false);
@@ -215,7 +215,7 @@ export default function EditCommunityPage() {
       setEventError(
         updateEventError instanceof Error
           ? updateEventError.message
-          : 'No se pudo actualizar el evento.',
+          : t('communities.editPage.updateEventError'),
       );
     } finally {
         setSubmitting(false);
@@ -239,7 +239,7 @@ export default function EditCommunityPage() {
       setEventError(
         deleteEventError instanceof Error
           ? deleteEventError.message
-          : 'No se pudo eliminar el evento.',
+          : t('communities.editPage.deleteEventError'),
       );
     } finally {
       setSubmitting(false);
@@ -276,18 +276,18 @@ export default function EditCommunityPage() {
             }}
           >
             <Typography variant="h4" sx={{ fontWeight: 800, mb: 0.75 }}>
-              {community?.kind === 'ORGANIZATION' ? 'Panel de gestión de la organización' : t('communities.edit')}
+              {community?.kind === 'ORGANIZATION' ? t('communities.editPage.organizationPanel') : t('communities.edit')}
             </Typography>
             <Typography color="text.secondary" sx={{ mb: 2 }}>
-              Centraliza aquí la configuración, el tablón, los eventos y las solicitudes pendientes.
+              {t('communities.editPage.subtitle')}
             </Typography>
 
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.25} useFlexGap flexWrap="wrap">
-              <Chip label={`${resources.length} recursos`} />
-              <Chip label={`${events.length} eventos`} />
+              <Chip label={t('communities.editPage.resources', { count: resources.length })} />
+              <Chip label={t('communities.editPage.events', { count: events.length })} />
               <Chip
                 color={pendingMemberships.length > 0 ? 'warning' : 'default'}
-                label={`${pendingMemberships.length} solicitudes pendientes`}
+                label={t('communities.editPage.pendingRequests', { count: pendingMemberships.length })}
               />
               {community?.kind === 'ORGANIZATION' && (
                 <Chip
@@ -298,7 +298,7 @@ export default function EditCommunityPage() {
                         ? 'error'
                         : 'warning'
                   }
-                  label={`Estado: ${community.verificationStatus}`}
+                  label={t('communities.editPage.status', { status: community.verificationStatus })}
                 />
               )}
             </Stack>
@@ -311,12 +311,12 @@ export default function EditCommunityPage() {
           )}
 
           {!loading && !community && (
-            <Alert severity="error">No se encontró la comunidad.</Alert>
+            <Alert severity="error">{t('communities.editPage.notFound')}</Alert>
           )}
 
           {!loading && community && !canManage && (
             <Alert severity="warning">
-              Solo un owner o un administrador pueden gestionar este espacio.
+              {t('communities.editPage.noPermission')}
             </Alert>
           )}
 
@@ -324,7 +324,7 @@ export default function EditCommunityPage() {
             <Stack spacing={2.5}>
               {community.kind === 'ORGANIZATION' && isAdmin && (
                 <Alert severity={community.verificationStatus === 'APPROVED' ? 'success' : community.verificationStatus === 'REJECTED' ? 'error' : 'info'}>
-                  Estado actual de la organización: <strong>{community.verificationStatus}</strong>
+                  {t('communities.editPage.currentOrganizationStatus')} <strong>{community.verificationStatus}</strong>
                 </Alert>
               )}
 
@@ -337,7 +337,7 @@ export default function EditCommunityPage() {
                     onClick={() => handleOrganizationStatusChange('APPROVED')}
                     sx={{ textTransform: 'none', fontWeight: 700 }}
                   >
-                    Aprobar organización
+                    {t('communities.editPage.approveOrganization')}
                   </Button>
                   <Button
                     variant="outlined"
@@ -346,7 +346,7 @@ export default function EditCommunityPage() {
                     onClick={() => handleOrganizationStatusChange('REJECTED')}
                     sx={{ textTransform: 'none', fontWeight: 700 }}
                   >
-                    Rechazar organización
+                    {t('communities.editPage.rejectOrganization')}
                   </Button>
                 </Stack>
               )}
@@ -361,7 +361,7 @@ export default function EditCommunityPage() {
                   isPrivate: community.isPrivate,
                 }}
                 submitting={submitting}
-                submitLabel="Guardar cambios"
+                submitLabel={t('communities.form.saveSubmit')}
                 serverError={error}
                 onCancel={() => router.push(`/communities/${community.id}`)}
                 onSubmit={handleSubmit}
@@ -385,7 +385,7 @@ export default function EditCommunityPage() {
 
               {pendingMemberships.length > 0 && (
                 <Alert severity="warning">
-                  Tienes {pendingMemberships.length} solicitud{pendingMemberships.length > 1 ? 'es' : ''} pendiente{pendingMemberships.length > 1 ? 's' : ''} de revisar en este espacio.
+                  {t('communities.editPage.pendingReview', { count: pendingMemberships.length })}
                 </Alert>
               )}
             </Stack>

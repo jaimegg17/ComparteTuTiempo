@@ -7,7 +7,7 @@ interface CommunityHeaderProps {
   community: Community;
   membersCount: number;
   eventsCount: number;
-  t: (key: string) => string;
+  t: (key: string, options?: Record<string, unknown>) => string;
 }
 
 export function CommunityHeader({ community, membersCount, eventsCount, t }: CommunityHeaderProps) {
@@ -55,7 +55,7 @@ export function CommunityHeader({ community, membersCount, eventsCount, t }: Com
           <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mb: 3, rowGap: 1 }}>
             {community.kind === 'ORGANIZATION' && (
               <Chip
-                label={community.verificationStatus === 'APPROVED' ? 'Organización verificada' : 'Organización pendiente'}
+                label={community.verificationStatus === 'APPROVED' ? t('communities.header.verifiedOrganization') : t('communities.header.pendingOrganization')}
                 sx={{
                   bgcolor: community.verificationStatus === 'APPROVED' ? 'rgba(15, 118, 110, 0.12)' : 'rgba(245, 158, 11, 0.14)',
                   color: community.verificationStatus === 'APPROVED' ? '#0f766e' : '#b45309',
@@ -74,12 +74,12 @@ export function CommunityHeader({ community, membersCount, eventsCount, t }: Com
       )}
 
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} useFlexGap flexWrap="wrap" sx={{ rowGap: 1 }}>
-        <Chip label={`${membersCount} miembros`} variant="outlined" />
-        <Chip label={`${eventsCount} eventos`} variant="outlined" />
-        <Chip icon={<RuleFolder />} label={`${community.rules.length} reglas`} variant="outlined" />
+        <Chip label={t('communities.header.members', { count: membersCount })} variant="outlined" />
+        <Chip label={t('communities.header.events', { count: eventsCount })} variant="outlined" />
+        <Chip icon={<RuleFolder />} label={t('communities.header.rules', { count: community.rules.length })} variant="outlined" />
         <Chip
           icon={<CalendarMonth />}
-          label={`Creada ${new Date(community.createdAt).toLocaleDateString('es-ES')}`}
+          label={t('communities.header.created', { date: new Date(community.createdAt).toLocaleDateString() })}
           variant="outlined"
         />
       </Stack>

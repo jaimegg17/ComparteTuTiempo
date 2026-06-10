@@ -1,6 +1,7 @@
 import { Box, Chip, Stack, Typography, Button } from '@mui/material';
 import { Event, Schedule } from '@mui/icons-material';
 import type { Event as CommunityEvent } from '@comparte-tu-tiempo/contracts';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface CommunityActivitySectionProps {
   events: CommunityEvent[];
@@ -10,14 +11,15 @@ interface CommunityActivitySectionProps {
 }
 
 export function CommunityActivitySection({ events, isUserLoggedIn = false, isRegistered, onToggleRegistration }: CommunityActivitySectionProps) {
+  const { t, currentLanguage } = useTranslation();
   return (
     <Box sx={{ bgcolor: '#fff', p: { xs: 2.5, md: 3 }, borderRadius: 3, boxShadow: 1 }}>
       <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-        Actividad / Eventos
+        {t('communities.activity.title')}
       </Typography>
 
       {events.length === 0 ? (
-        <Typography color="text.secondary">Aún no hay actividad disponible para esta comunidad.</Typography>
+        <Typography color="text.secondary">{t('communities.activity.empty')}</Typography>
       ) : (
         <Stack spacing={1.5}>
           {events.slice(0, 6).map((event) => {
@@ -39,13 +41,13 @@ export function CommunityActivitySection({ events, isUserLoggedIn = false, isReg
                 <Box sx={{ minWidth: 0, flex: 1 }}>
                   <Typography sx={{ fontWeight: 600 }}>{event.title}</Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                    {event.description || 'Sin descripción'}
+                    {event.description || t('communities.activity.noDescription')}
                   </Typography>
                   <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-                    <Chip icon={<Schedule />} size="small" label={new Date(event.date).toLocaleString('es-ES')} />
-                    <Chip icon={<Event />} size="small" label={event.location || 'Online'} variant="outlined" />
-                    {typeof event.capacity === 'number' && <Chip size="small" label={`Aforo ${event.capacity}`} variant="outlined" />}
-                    {registered && <Chip size="small" label="Te has apuntado" color="success" />}
+                    <Chip icon={<Schedule />} size="small" label={new Date(event.date).toLocaleString(currentLanguage === 'en' ? 'en-US' : 'es-ES')} />
+                    <Chip icon={<Event />} size="small" label={event.location || t('communities.activity.online')} variant="outlined" />
+                    {typeof event.capacity === 'number' && <Chip size="small" label={t('communities.activity.capacity', { capacity: event.capacity })} variant="outlined" />}
+                    {registered && <Chip size="small" label={t('communities.activity.registered')} color="success" />}
                   </Stack>
                 </Box>
 
@@ -56,7 +58,7 @@ export function CommunityActivitySection({ events, isUserLoggedIn = false, isReg
                   disabled={!isUserLoggedIn}
                   sx={{ textTransform: 'none', fontWeight: 700 }}
                 >
-                  {registered ? 'Cancelar inscripción' : isUserLoggedIn ? 'Apuntarme' : 'Inicia sesión'}
+                  {registered ? t('communities.activity.cancelRegistration') : isUserLoggedIn ? t('communities.activity.register') : t('communities.activity.login')}
                 </Button>
               </Box>
             );

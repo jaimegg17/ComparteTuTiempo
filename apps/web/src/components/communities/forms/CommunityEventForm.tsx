@@ -7,6 +7,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export interface CommunityEventFormValues {
   title: string;
@@ -29,10 +30,12 @@ export function CommunityEventForm({
   initialValues,
   submitting = false,
   serverError,
-  submitLabel = 'Publicar evento',
+  submitLabel,
   onCancel,
   onSubmit,
 }: CommunityEventFormProps) {
+  const { t } = useTranslation();
+  const effectiveSubmitLabel = submitLabel ?? t('communities.events.publish');
   const [values, setValues] = useState<CommunityEventFormValues>({
     title: initialValues?.title ?? '',
     description: initialValues?.description ?? '',
@@ -43,14 +46,14 @@ export function CommunityEventForm({
 
   const errors = useMemo(() => {
     return {
-      title: values.title.trim().length < 5 ? 'El título debe tener al menos 5 caracteres.' : '',
+      title: values.title.trim().length < 5 ? t('communities.events.titleError') : '',
       description:
         values.description.trim().length < 10
-          ? 'La descripción debe tener al menos 10 caracteres.'
+          ? t('communities.events.descriptionError')
           : '',
-      date: !values.date ? 'Debes indicar una fecha.' : '',
+      date: !values.date ? t('communities.events.dateError') : '',
     };
-  }, [values]);
+  }, [values, t]);
 
   const isValid = !errors.title && !errors.description && !errors.date;
 
@@ -73,17 +76,17 @@ export function CommunityEventForm({
       }}
     >
       <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.5 }}>
-        {submitLabel === 'Guardar cambios' ? 'Editar evento' : 'Publicar evento'}
+        {effectiveSubmitLabel === t('communities.events.save') ? t('communities.events.edit') : t('communities.events.publish')}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
-        Crea una actividad visible en el detalle de la comunidad u organización.
+        {t('communities.events.description')}
       </Typography>
 
       <Stack spacing={2}>
         {serverError && <Alert severity="error">{serverError}</Alert>}
 
         <TextField
-          label="Título"
+          label={t('communities.events.title')}
           value={values.title}
           onChange={(event) => setValues((prev) => ({ ...prev, title: event.target.value }))}
           error={Boolean(errors.title)}
@@ -92,7 +95,7 @@ export function CommunityEventForm({
         />
 
         <TextField
-          label="Descripción"
+          label={t('communities.events.eventDescription')}
           value={values.description}
           onChange={(event) => setValues((prev) => ({ ...prev, description: event.target.value }))}
           error={Boolean(errors.description)}
@@ -103,7 +106,7 @@ export function CommunityEventForm({
         />
 
         <TextField
-          label="Fecha y hora"
+          label={t('communities.events.dateTime')}
           type="datetime-local"
           value={values.date}
           onChange={(event) => setValues((prev) => ({ ...prev, date: event.target.value }))}
@@ -114,14 +117,14 @@ export function CommunityEventForm({
         />
 
         <TextField
-          label="Ubicación"
+          label={t('communities.events.location')}
           value={values.location}
           onChange={(event) => setValues((prev) => ({ ...prev, location: event.target.value }))}
           fullWidth
         />
 
         <TextField
-          label="Capacidad"
+          label={t('communities.events.capacity')}
           type="number"
           value={values.capacity}
           onChange={(event) => setValues((prev) => ({ ...prev, capacity: event.target.value }))}
@@ -136,7 +139,7 @@ export function CommunityEventForm({
               onClick={onCancel}
               sx={{ textTransform: 'none', fontWeight: 700 }}
             >
-              Cancelar
+              {t('common.cancel')}
             </Button>
           )}
           <Button
@@ -145,7 +148,7 @@ export function CommunityEventForm({
             disabled={submitting || !isValid}
             sx={{ textTransform: 'none', fontWeight: 700 }}
           >
-            {submitting ? 'Guardando...' : submitLabel}
+            {submitting ? t('communities.form.saving') : effectiveSubmitLabel}
           </Button>
         </Box>
       </Stack>

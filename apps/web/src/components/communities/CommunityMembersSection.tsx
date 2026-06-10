@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import type { CommunityMembership, CommunityMembershipRole } from '@comparte-tu-tiempo/contracts';
 import type { CommunityMembershipStatus } from '@comparte-tu-tiempo/contracts';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface CommunityMembersSectionProps {
   memberships: CommunityMembership[];
@@ -30,6 +31,8 @@ export function CommunityMembersSection({
   onRoleChange,
   onStatusChange,
 }: CommunityMembersSectionProps) {
+  const { t, currentLanguage } = useTranslation();
+  const locale = currentLanguage === 'en' ? 'en-US' : 'es-ES';
   const activeMemberships = memberships.filter((membership) => membership.status === 'ACTIVE');
   const pendingMemberships = memberships.filter((membership) => membership.status === 'PENDING');
 
@@ -38,21 +41,21 @@ export function CommunityMembersSection({
       <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={1.5} sx={{ mb: 2 }}>
         <Box>
           <Typography variant="h6" sx={{ fontWeight: 800 }}>
-            Miembros
+            {t('communities.membersSection.title')}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {activeMemberships.length} integrantes activos en este espacio.
+            {t('communities.membersSection.activeCount', { count: activeMemberships.length })}
           </Typography>
         </Box>
       </Stack>
 
       {activeMemberships.length === 0 ? (
-        <Typography color="text.secondary">No hay miembros registrados todavía.</Typography>
+        <Typography color="text.secondary">{t('communities.membersSection.empty')}</Typography>
       ) : (
         <List sx={{ p: 0 }}>
           {activeMemberships.map((membership) => {
             const isCurrentUser = currentUserId === membership.userId;
-            const primary = isCurrentUser ? 'Tú' : membership.userName || membership.userId;
+            const primary = isCurrentUser ? t('communities.membersSection.you') : membership.userName || membership.userId;
 
             return (
               <ListItem
@@ -81,7 +84,7 @@ export function CommunityMembersSection({
                 </ListItemAvatar>
                 <ListItemText
                   primary={primary}
-                  secondary={`Alta: ${new Date(membership.joinedAt).toLocaleDateString('es-ES')}`}
+                  secondary={t('communities.membersSection.joined', { date: new Date(membership.joinedAt).toLocaleDateString(locale) })}
                 />
               </ListItem>
             );
@@ -92,7 +95,7 @@ export function CommunityMembersSection({
       {canManage && pendingMemberships.length > 0 && (
         <Box sx={{ mt: 3 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 1 }}>
-            Solicitudes pendientes
+            {t('communities.membersSection.pendingTitle')}
           </Typography>
           <List sx={{ p: 0 }}>
             {pendingMemberships.map((membership) => (
@@ -108,7 +111,7 @@ export function CommunityMembersSection({
                         onClick={() => onStatusChange(membership, 'ACTIVE')}
                         sx={{ textTransform: 'none', fontWeight: 700 }}
                       >
-                        Aprobar
+                        {t('communities.membersSection.approve')}
                       </Button>
                       <Button
                         size="small"
@@ -117,7 +120,7 @@ export function CommunityMembersSection({
                         onClick={() => onStatusChange(membership, 'SUSPENDED')}
                         sx={{ textTransform: 'none', fontWeight: 700 }}
                       >
-                        Rechazar
+                        {t('communities.membersSection.reject')}
                       </Button>
                     </Stack>
                   ) : (
@@ -132,7 +135,7 @@ export function CommunityMembersSection({
                 </ListItemAvatar>
                 <ListItemText
                   primary={membership.userName || membership.userId}
-                  secondary={`Solicitud: ${new Date(membership.joinedAt).toLocaleDateString('es-ES')}`}
+                  secondary={t('communities.membersSection.requested', { date: new Date(membership.joinedAt).toLocaleDateString(locale) })}
                 />
               </ListItem>
             ))}

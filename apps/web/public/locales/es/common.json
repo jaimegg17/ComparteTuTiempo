@@ -412,7 +412,159 @@
     },
     "topics": "Temas",
     "rules": "Reglas",
-    "resources": "Recursos"
+    "resources": "Recursos",
+    "form": {
+      "nameLabel": "Nombre de la comunidad",
+      "descriptionLabel": "Descripción",
+      "imageLabel": "Imagen de la comunidad",
+      "topicsLabel": "Temas / categorías",
+      "topicsHelperText": "Separa los temas con comas. Ej.: tecnología, idiomas, voluntariado",
+      "rulesLabel": "Reglas de la comunidad",
+      "rulesHelperText": "Escribe una regla por línea.",
+      "rulesRequiredMessage": "Añade al menos una regla de comunidad.",
+      "publicLabel": "Comunidad pública",
+      "privateLabel": "Comunidad privada",
+      "publicDescription": "Cualquier usuario podrá unirse a la comunidad.",
+      "privateDescription": "Solo miembros aprobados podrán unirse.",
+      "createSubmit": "Crear comunidad",
+      "saveSubmit": "Guardar cambios",
+      "saving": "Guardando...",
+      "cancel": "Cancelar",
+      "nameRequired": "El nombre es obligatorio.",
+      "descriptionRequired": "La descripción es obligatoria.",
+      "nameLength": "El nombre debe tener entre {{min}} y {{max}} caracteres.",
+      "descriptionLength": "La descripción debe tener entre {{min}} y {{max}} caracteres."
+    },
+    "new": {
+      "description": "Crea una comunidad definiendo nombre, imagen, descripción y visibilidad.",
+      "loginRequired": "Debes iniciar sesión para crear una comunidad.",
+      "loginError": "Necesitas iniciar sesión para crear una comunidad.",
+      "submitError": "No se pudo crear la comunidad. Revisa los datos e inténtalo de nuevo."
+    },
+    "detail": {
+      "activeMembers": "{{count}} miembros activos",
+      "eventsPublished": "{{count}} eventos publicados",
+      "sharedResources": "{{count}} recursos compartidos",
+      "pendingRequests": "{{count}} solicitudes pendientes",
+      "verifiedOrganization": "Organización verificada",
+      "rejectedOrganization": "Organización rechazada",
+      "pendingOrganization": "Organización pendiente",
+      "publishEvent": "Publicar evento",
+      "manageSpace": "Gestionar {{space}}",
+      "organization": "organización",
+      "community": "comunidad",
+      "leave": "Salir de comunidad",
+      "cancelRequest": "Cancelar solicitud",
+      "join": "Unirse a comunidad",
+      "privateNotice": "Esta comunidad es privada. Tu solicitud deberá ser aprobada por un owner o administrador.",
+      "pendingNotice": "Tu solicitud está pendiente de revisión. Puedes cancelarla mientras esperas respuesta.",
+      "pendingReview": "Tienes {{count}} solicitudes pendientes de revisar.",
+      "loginToRegisterEvent": "Inicia sesión para apuntarte a eventos.",
+      "eventRegistered": "Te has apuntado al evento.",
+      "eventUnregistered": "Has cancelado tu inscripción al evento.",
+      "joinPrivateSuccess": "Tu solicitud se ha enviado correctamente.",
+      "joinSuccess": "Te has unido a la comunidad.",
+      "joinError": "No se pudo completar la acción de unirse. Endpoint pendiente o acceso no permitido.",
+      "leavePendingSuccess": "Has cancelado tu solicitud.",
+      "leaveSuccess": "Has salido de la comunidad.",
+      "leaveError": "No se pudo completar la acción de salir. Endpoint pendiente o acceso no permitido.",
+      "roleSuccess": "Rol actualizado correctamente.",
+      "roleError": "No se pudo actualizar el rol del miembro.",
+      "statusApproved": "Solicitud aprobada correctamente.",
+      "statusRejected": "Solicitud rechazada correctamente.",
+      "statusError": "No se pudo actualizar el estado de la solicitud."
+    },
+    "editPage": {
+      "organizationPanel": "Panel de gestión de la organización",
+      "subtitle": "Centraliza aquí la configuración, el tablón, los eventos y las solicitudes pendientes.",
+      "resources": "{{count}} recursos",
+      "events": "{{count}} eventos",
+      "pendingRequests": "{{count}} solicitudes pendientes",
+      "status": "Estado: {{status}}",
+      "notFound": "No se encontró la comunidad.",
+      "noPermission": "Solo un owner o un administrador pueden gestionar este espacio.",
+      "currentOrganizationStatus": "Estado actual de la organización:",
+      "approveOrganization": "Aprobar organización",
+      "rejectOrganization": "Rechazar organización",
+      "pendingReview": "Tienes {{count}} solicitudes pendientes de revisar en este espacio.",
+      "loadError": "No se pudo cargar la comunidad para editar.",
+      "loginError": "Debes iniciar sesión para editar esta comunidad.",
+      "saveError": "No se pudo guardar la comunidad. Revisa los datos e inténtalo de nuevo.",
+      "organizationStatusError": "No se pudo actualizar el estado de la organización.",
+      "createEventError": "No se pudo publicar el evento.",
+      "updateEventError": "No se pudo actualizar el evento.",
+      "deleteEventError": "No se pudo eliminar el evento."
+    },
+    "events": {
+      "publish": "Publicar evento",
+      "edit": "Editar evento",
+      "save": "Guardar cambios",
+      "description": "Crea una actividad visible en el detalle de la comunidad u organización.",
+      "title": "Título",
+      "eventDescription": "Descripción",
+      "dateTime": "Fecha y hora",
+      "location": "Ubicación",
+      "capacity": "Capacidad: {{capacity}}",
+      "titleError": "El título debe tener al menos 5 caracteres.",
+      "descriptionError": "La descripción debe tener al menos 10 caracteres.",
+      "dateError": "Debes indicar una fecha.",
+      "publishedTitle": "Eventos publicados",
+      "publishedDescription": "Revisa, edita o elimina los eventos del espacio.",
+      "empty": "Todavía no hay eventos publicados.",
+      "noDescription": "Sin descripción",
+      "online": "Online"
+    },
+    "activity": {
+      "title": "Actividad / Eventos",
+      "empty": "Aún no hay actividad disponible para esta comunidad.",
+      "noDescription": "Sin descripción",
+      "online": "Online",
+      "capacity": "Aforo {{capacity}}",
+      "registered": "Te has apuntado",
+      "cancelRegistration": "Cancelar inscripción",
+      "register": "Apuntarme",
+      "login": "Inicia sesión"
+    },
+    "header": {
+      "verifiedOrganization": "Organización verificada",
+      "pendingOrganization": "Organización pendiente",
+      "members": "{{count}} miembros",
+      "events": "{{count}} eventos",
+      "rules": "{{count}} reglas",
+      "created": "Creada {{date}}"
+    },
+    "resourcesSection": {
+      "link": "Enlace",
+      "note": "Nota",
+      "image": "Imagen",
+      "title": "Tablón de recursos",
+      "description": "Enlaces, notas y referencias útiles para la actividad de la comunidad.",
+      "open": "Abrir recurso",
+      "editor": {
+        "title": "Tablón de recursos y anuncios",
+        "description": "Añade notas, enlaces o imágenes destacadas para el espacio.",
+        "add": "Añadir recurso",
+        "empty": "Aún no hay recursos publicados. Puedes empezar añadiendo una nota, un enlace o una imagen.",
+        "item": "Recurso #{{number}}",
+        "delete": "Eliminar recurso {{number}}",
+        "titleLabel": "Título",
+        "typeLabel": "Tipo",
+        "descriptionLabel": "Descripción",
+        "urlLabel": "URL",
+        "imageUrlLabel": "URL de imagen"
+      }
+    },
+    "membersSection": {
+      "title": "Miembros",
+      "activeCount": "{{count}} integrantes activos en este espacio.",
+      "empty": "No hay miembros registrados todavía.",
+      "you": "Tú",
+      "joined": "Alta: {{date}}",
+      "pendingTitle": "Solicitudes pendientes",
+      "approve": "Aprobar",
+      "reject": "Rechazar",
+      "requested": "Solicitud: {{date}}"
+    }
   },
   "auth": {
     "login": "Iniciar Sesión",
@@ -517,7 +669,7 @@
       "personalInfo": "Información Personal",
       "additionalInfo": "Información Adicional",
       "name": "Nombre",
-      "email": "Email",
+      "email": "Dirección de correo",
       "phoneNumber": "Teléfono",
       "location": "Ubicación",
       "dateOfBirth": "Fecha de Nacimiento",
@@ -528,7 +680,7 @@
         "other": "Otro",
         "preferNotToSay": "Prefiero no decir"
       },
-      "preferredLanguage": "Idioma Preferido",
+      "preferredLanguage": "Idioma preferido",
       "languageOptions": {
         "spanish": "Español",
         "english": "Inglés"
@@ -539,7 +691,29 @@
       "skillsPlaceholder": "Escribe tus habilidades separadas por comas",
       "skillsHelper": "Separa las habilidades con comas",
       "saving": "Guardando...",
-      "saveChanges": "Guardar Cambios"
+      "saveChanges": "Guardar Cambios",
+      "overline": "Edición",
+      "title": "Configura tu perfil público",
+      "subtitle": "Un perfil completo genera más confianza al publicar servicios, participar en comunidades y cerrar intercambios.",
+      "basic": "Información básica",
+      "namePlaceholder": "Tu nombre completo",
+      "emailHelper": "El email proviene de tu cuenta de inicio de sesión y no se puede editar aquí.",
+      "phone": "Teléfono",
+      "locationPlaceholder": "Ciudad, País",
+      "personal": "Información personal",
+      "birthDate": "Fecha de nacimiento",
+      "select": "Seleccionar...",
+      "male": "Masculino",
+      "female": "Femenino",
+      "other": "Otro",
+      "preferNotSay": "Prefiero no decir",
+      "publicProfile": "Perfil público",
+      "bioHelper": "Escribe algunas frases sobre ti mismo.",
+      "skillPlaceholder": "Escribe una habilidad y presiona Enter",
+      "skillHelper": "Pulsa Enter para añadir una habilidad al perfil.",
+      "timeCredits": "Créditos de Tiempo Disponibles",
+      "timeCreditsHelp": "Minutos disponibles para intercambios",
+      "save": "Guardar Cambios"
     },
     "image": {
       "edit": "Editar"
@@ -553,5 +727,152 @@
       "logoutAndRetry": "Cerrar Sesión y Volver a Iniciar",
       "reload": "Recargar Página"
     }
+  },
+  "organizations": {
+    "form": {
+      "nameLabel": "Nombre de la organización",
+      "descriptionLabel": "Descripción institucional",
+      "topicsLabel": "Ámbitos / categorías",
+      "topicsHelperText": "Separa los ámbitos con comas. Ej.: inclusión social, salud, educación, voluntariado",
+      "rulesLabel": "Normas o principios de participación",
+      "rulesHelperText": "Escribe una norma o principio por línea.",
+      "rulesRequiredMessage": "Añade al menos una norma o principio de participación.",
+      "publicLabel": "Organización pública",
+      "privateLabel": "Organización privada",
+      "publicDescription": "La organización se mostrará como entidad abierta una vez sea aprobada.",
+      "privateDescription": "La organización requerirá aprobación también para el acceso de nuevos miembros.",
+      "submit": "Enviar solicitud"
+    },
+    "new": {
+      "loginError": "Necesitas iniciar sesión para solicitar una organización.",
+      "submitError": "No se pudo registrar la solicitud de organización."
+    }
+  },
+  "faq": {
+    "overline": "CENTRO DE AYUDA",
+    "subtitle": "Resuelve dudas reales sobre uso de la plataforma, descubrimiento de servicios, intercambios, comunidades y buenas prácticas.",
+    "searchPlaceholder": "Buscar por tema, flujo o problema...",
+    "noResults": "No se encontraron preguntas para tu búsqueda.",
+    "visibleCount": "{{questions}} preguntas visibles en {{sections}} bloques",
+    "activeFilter": "Filtro activo: {{term}}",
+    "chips": [
+      "Perfil",
+      "Solicitudes",
+      "Mapa",
+      "Comunidades",
+      "Privacidad"
+    ],
+    "categories": [
+      {
+        "key": "cuenta",
+        "title": "Cuenta, perfil y confianza",
+        "items": [
+          {
+            "question": "¿Cómo completo un perfil que genere más confianza?",
+            "answer": "Añade una foto reconocible, una bio breve, tu ubicación aproximada, habilidades relevantes y una descripción clara de cómo sueles colaborar. Un perfil completo ayuda a que otras personas entiendan qué ofreces y mejora la confianza cuando publicas servicios o participas en comunidades."
+          },
+          {
+            "question": "¿Qué información de mi perfil ven otras personas?",
+            "answer": "Las demás personas pueden ver la información necesaria para valorar si una colaboración tiene sentido, como nombre, imagen, ubicación general, bio, habilidades y actividad pública. Los datos sensibles o privados no deberían compartirse en abierto salvo que sea realmente necesario."
+          },
+          {
+            "question": "¿Puedo cambiar el idioma de la plataforma?",
+            "answer": "Sí. La interfaz permite alternar entre español e inglés para adaptar la navegación, los textos principales y la ayuda a tu preferencia."
+          },
+          {
+            "question": "¿Cómo sé si un perfil o un servicio parece fiable?",
+            "answer": "Antes de aceptar o solicitar un intercambio, revisa si el perfil está completo, si la descripción del servicio es clara, si hay ubicación aproximada, imagen y valoraciones, y si la propuesta explica bien qué incluye y qué no. También es buena práctica resolver dudas por chat antes de confirmar."
+          }
+        ]
+      },
+      {
+        "key": "servicios",
+        "title": "Servicios, búsquedas y solicitudes",
+        "items": [
+          {
+            "question": "¿Cómo encuentro servicios realmente útiles para mí?",
+            "answer": "Puedes usar la búsqueda por texto, los filtros por categoría, tipo o duración y la vista por cercanía. Si activas tu ubicación, la plataforma puede priorizar servicios próximos y mostrarlos también en el mapa para facilitar una exploración más práctica."
+          },
+          {
+            "question": "¿Qué diferencia hay entre un servicio presencial, virtual e híbrido?",
+            "answer": "Un servicio presencial se realiza en una ubicación física, uno virtual se presta completamente online y uno híbrido combina ambos formatos. Revisar esta diferencia antes de solicitar un servicio ayuda a evitar malentendidos."
+          },
+          {
+            "question": "¿Cómo solicito un servicio correctamente?",
+            "answer": "Abre el detalle del servicio, revisa descripción, ubicación y duración, y después usa la acción de solicitar. Si hay contexto importante o disponibilidad concreta, conviene incluir un mensaje breve desde el primer momento."
+          },
+          {
+            "question": "¿Qué debería incluir una buena publicación de servicio?",
+            "answer": "Las mejores publicaciones explican con claridad qué se ofrece, a quién va dirigido, cuánto dura, si es presencial o virtual, qué resultados puede esperar la otra persona y si hay requisitos previos. Añadir imagen, ubicación y una descripción detallada mejora mucho la comprensión y la credibilidad."
+          },
+          {
+            "question": "¿Por qué algunos servicios aparecen en el mapa y otros no?",
+            "answer": "Solo los servicios con una ubicación suficientemente definida pueden representarse correctamente en el mapa. Los servicios virtuales o sin coordenadas pueden seguir apareciendo en la lista, pero no en la vista geográfica."
+          }
+        ]
+      },
+      {
+        "key": "intercambios",
+        "title": "Intercambios, mensajes y estados",
+        "items": [
+          {
+            "question": "¿Qué ocurre después de enviar una solicitud?",
+            "answer": "La solicitud entra en el flujo de intercambio y la otra persona puede revisarla, aceptarla, rechazarla o continuar la conversación antes de confirmar. Esto permite aclarar expectativas antes de pasar a una colaboración real."
+          },
+          {
+            "question": "¿Cómo se recomienda usar el chat dentro de un intercambio?",
+            "answer": "El chat debería utilizarse para concretar disponibilidad, formato, alcance del servicio y cualquier detalle práctico. Es útil dejar por escrito los acuerdos importantes para reducir fricciones posteriores."
+          },
+          {
+            "question": "¿Qué significan los estados de un intercambio?",
+            "answer": "Normalmente el flujo pasa por pendiente, confirmado, en progreso y completado. Estos estados ayudan a que ambas partes sepan en qué punto está la colaboración y aportan trazabilidad al proceso."
+          },
+          {
+            "question": "¿Qué hago si una solicitud deja de tener sentido o aparece un problema?",
+            "answer": "Lo recomendable es comunicarlo cuanto antes dentro del propio intercambio, explicando el motivo de forma clara y respetuosa. Cuanto antes se gestione una incidencia, más fácil será evitar frustraciones o trabajo perdido."
+          }
+        ]
+      },
+      {
+        "key": "comunidades",
+        "title": "Comunidades y participación",
+        "items": [
+          {
+            "question": "¿Para qué sirven las comunidades dentro de la plataforma?",
+            "answer": "Las comunidades agrupan personas con intereses, objetivos o contextos similares. Sirven para dar continuidad a las interacciones, generar pertenencia y descubrir colaboraciones más allá de una única solicitud puntual."
+          },
+          {
+            "question": "¿Cómo creo una comunidad útil y no solo decorativa?",
+            "answer": "Una buena comunidad define un propósito claro, una audiencia concreta y unas normas implícitas de participación. También ayuda incluir una descripción que explique qué tipo de personas deberían entrar y qué valor pueden encontrar."
+          },
+          {
+            "question": "¿Quién puede editar una comunidad?",
+            "answer": "Normalmente solo la persona creadora o quien tenga permisos equivalentes puede modificar el nombre, la descripción, la imagen y la configuración de privacidad."
+          },
+          {
+            "question": "¿Qué diferencia hay entre una comunidad pública y una privada?",
+            "answer": "Una comunidad pública facilita el descubrimiento y el crecimiento, mientras que una privada permite trabajar con grupos más controlados o con un contexto más específico. Elegir una u otra depende del objetivo de participación."
+          }
+        ]
+      },
+      {
+        "key": "seguridad",
+        "title": "Seguridad, privacidad y buenas prácticas",
+        "items": [
+          {
+            "question": "¿Es recomendable compartir la dirección exacta desde el principio?",
+            "answer": "No. Lo más prudente es mostrar una ubicación general durante la fase de descubrimiento y compartir detalles concretos solo cuando el intercambio esté claro o confirmado. Esto mejora la privacidad y reduce exposición innecesaria."
+          },
+          {
+            "question": "¿Cómo puedo evitar malentendidos al colaborar con otra persona?",
+            "answer": "Aclara siempre el alcance del servicio, la duración, el formato y el resultado esperado antes de avanzar. Cuanto más explícito sea el acuerdo previo, más fácil será que la experiencia sea satisfactoria para ambas partes."
+          },
+          {
+            "question": "¿Qué señales indican que debería revisar mejor una propuesta antes de aceptarla?",
+            "answer": "Descripciones ambiguas, perfiles muy incompletos, cambios constantes en las condiciones o poca claridad al comunicarse son señales de que conviene hacer más preguntas antes de confirmar."
+          }
+        ]
+      }
+    ]
   }
 }

@@ -24,7 +24,7 @@ export default function NewCommunityPage() {
 
   const handleSubmit = async (values: CommunityFormValues) => {
     if (!user?.sub) {
-      setError('Necesitas iniciar sesión para crear una comunidad.');
+      setError(t('communities.new.loginError'));
       return;
     }
 
@@ -42,7 +42,7 @@ export default function NewCommunityPage() {
       setError(
         submitError instanceof Error
           ? submitError.message
-          : 'No se pudo crear la comunidad. Revisa los datos e inténtalo de nuevo.',
+          : t('communities.new.submitError'),
       );
     } finally {
       setSubmitting(false);
@@ -75,12 +75,12 @@ export default function NewCommunityPage() {
             {t('communities.create')}
           </Typography>
           <Typography color="text.secondary" sx={{ mb: 3 }}>
-Crea una comunidad definiendo nombre, imagen, descripción y visibilidad.
+{t('communities.new.description')}
           </Typography>
 
           {!user?.sub && (
             <Alert severity="warning" sx={{ mb: 2 }}>
-              Debes iniciar sesión para crear una comunidad.
+              {t('communities.new.loginRequired')}
             </Alert>
           )}
 
@@ -94,7 +94,7 @@ Crea una comunidad definiendo nombre, imagen, descripción y visibilidad.
               isPrivate: false,
             }}
             submitting={submitting}
-            submitLabel="Crear comunidad"
+            submitLabel={t('communities.form.createSubmit')}
             serverError={error}
             onCancel={() => router.push('/communities')}
             onSubmit={handleSubmit}

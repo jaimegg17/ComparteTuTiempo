@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import { Add, DeleteOutline } from '@mui/icons-material';
 import type { CommunityResource } from '@comparte-tu-tiempo/contracts';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface CommunityResourcesEditorProps {
   resources: CommunityResource[];
@@ -30,6 +31,7 @@ export function CommunityResourcesEditor({
   resources,
   onChange,
 }: CommunityResourcesEditorProps) {
+  const { t } = useTranslation();
   const canAddMore = resources.length < 12;
 
   const normalizedResources = useMemo(
@@ -82,10 +84,10 @@ export function CommunityResourcesEditor({
       >
         <Box>
           <Typography variant="h6" sx={{ fontWeight: 800 }}>
-            Tablón de recursos y anuncios
+            {t('communities.resourcesSection.editor.title')}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Añade notas, enlaces o imágenes destacadas para el espacio.
+            {t('communities.resourcesSection.editor.description')}
           </Typography>
         </Box>
 
@@ -96,13 +98,13 @@ export function CommunityResourcesEditor({
           variant="outlined"
           sx={{ textTransform: 'none', fontWeight: 700, alignSelf: 'flex-start' }}
         >
-          Añadir recurso
+          {t('communities.resourcesSection.editor.add')}
         </Button>
       </Stack>
 
       {normalizedResources.length === 0 ? (
         <Typography color="text.secondary">
-          Aún no hay recursos publicados. Puedes empezar añadiendo una nota, un enlace o una imagen.
+          {t('communities.resourcesSection.editor.empty')}
         </Typography>
       ) : (
         <Stack spacing={2}>
@@ -116,18 +118,18 @@ export function CommunityResourcesEditor({
                 <Stack spacing={2}>
                   <Stack direction="row" justifyContent="space-between" alignItems="center">
                     <Typography sx={{ fontWeight: 700 }}>
-                      Recurso #{index + 1}
+                      {t('communities.resourcesSection.editor.item', { number: index + 1 })}
                     </Typography>
                     <IconButton
                       onClick={() => handleRemoveResource(index)}
-                      aria-label={`Eliminar recurso ${index + 1}`}
+                      aria-label={t('communities.resourcesSection.editor.delete', { number: index + 1 })}
                     >
                       <DeleteOutline />
                     </IconButton>
                   </Stack>
 
                   <TextField
-                    label="Título"
+                    label={t('communities.resourcesSection.editor.titleLabel')}
                     value={resource.title}
                     onChange={(event) => handleResourceChange(index, 'title', event.target.value)}
                     fullWidth
@@ -135,18 +137,18 @@ export function CommunityResourcesEditor({
 
                   <TextField
                     select
-                    label="Tipo"
+                    label={t('communities.resourcesSection.editor.typeLabel')}
                     value={resource.type}
                     onChange={(event) => handleResourceChange(index, 'type', event.target.value)}
                     fullWidth
                   >
-                    <MenuItem value="note">Nota</MenuItem>
-                    <MenuItem value="link">Enlace</MenuItem>
-                    <MenuItem value="image">Imagen</MenuItem>
+                    <MenuItem value="note">{t('communities.resourcesSection.note')}</MenuItem>
+                    <MenuItem value="link">{t('communities.resourcesSection.link')}</MenuItem>
+                    <MenuItem value="image">{t('communities.resourcesSection.image')}</MenuItem>
                   </TextField>
 
                   <TextField
-                    label="Descripción"
+                    label={t('communities.resourcesSection.editor.descriptionLabel')}
                     value={resource.description ?? ''}
                     onChange={(event) => handleResourceChange(index, 'description', event.target.value)}
                     multiline
@@ -156,7 +158,7 @@ export function CommunityResourcesEditor({
 
                   {(resource.type === 'link' || resource.type === 'image') && (
                     <TextField
-                      label="URL"
+                      label={t('communities.resourcesSection.editor.urlLabel')}
                       value={resource.url ?? ''}
                       onChange={(event) => handleResourceChange(index, 'url', event.target.value)}
                       fullWidth
@@ -165,7 +167,7 @@ export function CommunityResourcesEditor({
 
                   {resource.type === 'image' && (
                     <TextField
-                      label="URL de imagen"
+                      label={t('communities.resourcesSection.editor.imageUrlLabel')}
                       value={resource.imageUrl ?? ''}
                       onChange={(event) => handleResourceChange(index, 'imageUrl', event.target.value)}
                       fullWidth
