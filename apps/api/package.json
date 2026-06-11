@@ -9,7 +9,7 @@
     "dev": "ts-node -r tsconfig-paths/register src/main.ts",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/apps/api/src/main",
-    "start:prod:migrate": "prisma migrate deploy && node prisma/scripts/run-data-migrations.js && node dist/apps/api/src/main",
+    "start:prod:migrate": "prisma migrate deploy && (node prisma/scripts/run-data-migrations.js || echo '⚠️ Data migrations failed; continuing API startup') && node dist/apps/api/src/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
