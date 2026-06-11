@@ -88,7 +88,13 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
     if (status) where.status = ServiceEnumMapper.mapStatusToPrisma(status) as ServiceStatus;
     if (location) where.location = { contains: location, mode: 'insensitive' };
     if (userId) where.userId = userId; // Filtrar por usuario
-    if (communityId) where.communityId = communityId;
+    if (communityId) {
+      where.communityId = communityId;
+    } else if (!userId) {
+      // Los servicios publicados dentro de una comunidad no aparecen en el marketplace global.
+      // Se consultan desde /services?communityId=...
+      where.communityId = null;
+    }
     if (nearLat !== undefined && nearLng !== undefined) {
       where.latitude = { not: null };
       where.longitude = { not: null };

@@ -419,6 +419,7 @@ export class ServicesController {
       nearLng: query.nearLng,
       radiusKm: query.radiusKm || 10,
       userId: query.userId,
+      communityId: query.communityId,
     };
 
     const result = await this.listServicesUseCase.execute({ query: queryWithDefaults });
