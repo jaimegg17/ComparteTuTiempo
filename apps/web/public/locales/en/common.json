@@ -139,7 +139,15 @@
     "languages": "Languages",
     "music": "Music",
     "sports": "Sports",
-    "education": "Education"
+    "education": "Education",
+    "description": "Explore a few highlighted areas to start discovering services, people and exchange opportunities with more context.",
+    "viewServices": "View services",
+    "descriptions": {
+      "languages": "Classes, conversation and support to learn languages",
+      "music": "Instruments, singing, production and musical creativity",
+      "sports": "Training, wellbeing and shared physical activity",
+      "education": "Academic support, guided study and practical learning"
+    }
   },
   "testimonials": {
     "title": "Rate your experience",
@@ -157,7 +165,8 @@
       "text": "I love how customizable this app is. I can really make it work for me, no matter what project I'm working on.",
       "author": "Bob Johnson",
       "role": "Developer"
-    }
+    },
+    "description": "Feedback from people who have already used the platform to share knowledge, everyday support and quality time."
   },
   "services": {
     "title": "Services",
@@ -209,7 +218,9 @@
       "availability": "Availability",
       "language": "Language",
       "clear": "Clear Filters",
-      "apply": "Apply Filters"
+      "apply": "Apply Filters",
+      "active": "active",
+      "favoritesOnly": "Favorites only"
     },
     "categories": {
       "education": "Education",
@@ -304,7 +315,21 @@
         "rating": "Rating",
         "reviews": "Reviews",
         "exchanges": "Completed Exchanges"
-      }
+      },
+      "notFound": "Service not found.",
+      "backToServices": "Back to services",
+      "requestOverline": "REQUEST DETAIL",
+      "serviceOverline": "SERVICE DETAIL",
+      "requestIntro": "Review the published need, approximate location and reply only if you can really help.",
+      "serviceIntro": "Review the scope, approximate location and ratings before sending a request.",
+      "loginHintRequest": "You can review all information before deciding. When you want to reply to this request, we will take you to login.",
+      "loginHintService": "You can review all information before deciding. When you want to request this service, we will take you to login.",
+      "provider": "Provider",
+      "requester": "Requester",
+      "noLocation": "No location",
+      "viewProfile": "View profile",
+      "skills": "SKILLS",
+      "exchangesCompleted": "completed exchanges"
     },
     "not_found": "No services found",
     "error": "Error loading services",
@@ -312,6 +337,44 @@
       "created": "Service created successfully",
       "updated": "Service updated successfully",
       "deleted": "Service deleted successfully"
+    },
+    "viewModes": {
+      "list": "List",
+      "map": "Map"
+    },
+    "map": {
+      "unavailable": "Google Maps is not available right now. We show a basic OpenStreetMap map so browsing is not blocked.",
+      "openStreetMapTitle": "OpenStreetMap map"
+    },
+    "summary": {
+      "title": "Summary",
+      "services": "services",
+      "requests": "requests"
+    },
+    "intent": {
+      "offers": "Services",
+      "requests": "Requests"
+    },
+    "favorites": {
+      "save": "Save to favorites",
+      "remove": "Remove from favorites"
+    },
+    "actions": {
+      "createRequest": "Create request",
+      "newPublication": "New publication",
+      "editRequest": "Edit request",
+      "editService": "Edit service",
+      "ownRequest": "Your request",
+      "ownService": "Your service",
+      "loginToHelp": "Log in to help",
+      "loginToRequest": "Log in to request",
+      "canHelp": "I can help",
+      "requestExchange": "Request exchange",
+      "requestHelper": "If you can cover this need, send an initial message explaining how you could help and under what conditions.",
+      "serviceHelper": "Review the description before sending your request. You can add an initial message for context.",
+      "inactiveRequestHelper": "This request is no longer active. You can keep exploring other needs published on the platform.",
+      "inactiveServiceHelper": "This service is not available right now, but you can keep exploring other alternatives.",
+      "estimatedExchangeTime": "Estimated exchange time"
     }
   },
   "exchanges": {
@@ -973,5 +1036,14 @@
   },
   "languageSwitcher": {
     "current": "Current language"
+  },
+  "users": {
+    "profile": {
+      "loadError": "Error loading profile",
+      "notFound": "User not found",
+      "services": "services",
+      "ratings": "ratings",
+      "exchanges": "exchanges"
+    }
   }
 }

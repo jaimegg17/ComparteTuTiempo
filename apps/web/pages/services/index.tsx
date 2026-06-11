@@ -700,21 +700,21 @@ export default function ServicesPage() {
                       onClick={() => setFiltersOpen(true)}
                       sx={{ textTransform: 'none', fontWeight: 700, borderRadius: 999, px: 2.25 }}
                     >
-                      Filtros
+                      {t('services.filters.title')}
                     </Button>
                     {activeFiltersCount > 0 && (
-                      <Chip label={`${activeFiltersCount} activos`} size="small" color="primary" sx={{ fontWeight: 700 }} />
+                      <Chip label={`${activeFiltersCount} ${t('services.filters.active')}`} size="small" color="primary" sx={{ fontWeight: 700 }} />
                     )}
-                    {showFavoritesOnly && <Chip label="Solo favoritos" size="small" color="error" variant="outlined" sx={{ fontWeight: 700 }} />}
+                    {showFavoritesOnly && <Chip label={t('services.filters.favoritesOnly')} size="small" color="error" variant="outlined" sx={{ fontWeight: 700 }} />}
                   </Stack>
 
                   <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25} alignItems={{ xs: 'stretch', sm: 'center' }}>
                     <Box>
                       <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 800, letterSpacing: '0.08em', display: 'block', lineHeight: 1.2 }}>
-                        Resumen
+                        {t('services.summary.title')}
                       </Typography>
                       <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 700 }}>
-                      {loading ? t("common.loading") : `${visibleServices.length} ${selectedIntent === 'REQUEST' ? 'solicitudes' : 'servicios'} ${t("common.found")}`}
+                      {loading ? t("common.loading") : `${visibleServices.length} ${selectedIntent === 'REQUEST' ? t('services.summary.requests') : t('services.summary.services')} ${t("common.found")}`}
                       </Typography>
                     </Box>
                     <Button
@@ -731,7 +731,7 @@ export default function ServicesPage() {
                         '&:hover': { bgcolor: '#7028E0' },
                       }}
                     >
-                      + {selectedIntent === 'REQUEST' ? 'Crear solicitud' : 'Nueva publicación'}
+                      + {selectedIntent === 'REQUEST' ? t('services.actions.createRequest') : t('services.actions.newPublication')}
                     </Button>
                   </Stack>
                 </Stack>
@@ -744,14 +744,14 @@ export default function ServicesPage() {
                         onClick={() => setSelectedIntent('OFFER')}
                         sx={{ textTransform: 'none', borderRadius: 999, px: 2, fontWeight: 700, minHeight: 36 }}
                       >
-                        Servicios
+                        {t('services.intent.offers')}
                       </Button>
                       <Button
                         variant={selectedIntent === 'REQUEST' ? 'contained' : 'text'}
                         onClick={() => setSelectedIntent('REQUEST')}
                         sx={{ textTransform: 'none', borderRadius: 999, px: 2, fontWeight: 700, minHeight: 36 }}
                       >
-                        Solicitudes
+                        {t('services.intent.requests')}
                       </Button>
                     </Box>
 
@@ -762,7 +762,7 @@ export default function ServicesPage() {
                         onClick={() => setViewMode('list')}
                         sx={{ textTransform: 'none', borderRadius: 999, px: 2, fontWeight: 700, minHeight: 36 }}
                       >
-                        Lista
+                        {t('services.viewModes.list')}
                       </Button>
                       <Button
                         variant={viewMode === 'map' ? 'contained' : 'text'}
@@ -770,7 +770,7 @@ export default function ServicesPage() {
                         onClick={() => setViewMode('map')}
                         sx={{ textTransform: 'none', borderRadius: 999, px: 2, fontWeight: 700, minHeight: 36 }}
                       >
-                        Mapa
+                        {t('services.viewModes.map')}
                       </Button>
                     </Box>
 
@@ -858,11 +858,11 @@ export default function ServicesPage() {
                   {!googleMapsApiKey || mapsUnavailable ? (
                     <Box sx={{ display: 'grid', gap: 2 }}>
                       <Alert severity="info">
-                        Google Maps no está disponible ahora mismo. Mostramos un mapa básico de OpenStreetMap y enlaces externos para no bloquear la navegación.
+                        {t('services.map.unavailable')}
                       </Alert>
                       <Box
                         component="iframe"
-                        title="Mapa OpenStreetMap"
+                        title={t('services.map.openStreetMapTitle')}
                         src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapCenter.lng - 0.25}%2C${mapCenter.lat - 0.18}%2C${mapCenter.lng + 0.25}%2C${mapCenter.lat + 0.18}&layer=mapnik&marker=${mapCenter.lat}%2C${mapCenter.lng}`}
                         sx={{
                           width: '100%',

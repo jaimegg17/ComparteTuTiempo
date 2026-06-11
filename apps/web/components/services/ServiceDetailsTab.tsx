@@ -1,6 +1,7 @@
 import { Box, Typography, Chip, Avatar } from '@mui/material';
 import { CheckCircle } from 'iconoir-react';
 import { useRouter } from 'next/router';
+import { useTranslation } from '@/hooks/useTranslation';
 import type { Service } from '@/types/service.types';
 
 interface ServiceDetailsTabProps {
@@ -9,6 +10,7 @@ interface ServiceDetailsTabProps {
 
 export function ServiceDetailsTab({ service }: ServiceDetailsTabProps) {
   const router = useRouter();
+  const { t } = useTranslation();
 
   return (
     <Box>
@@ -62,7 +64,7 @@ export function ServiceDetailsTab({ service }: ServiceDetailsTabProps) {
           <CheckCircle width={20} height={20} color="#ed6c02" />
           <Box>
             <Typography variant="body2" sx={{ fontWeight: 700, color: 'warning.dark', lineHeight: 1.2, fontSize: '13px' }}>
-              {service.totalExchanges} intercambios realizados
+              {service.totalExchanges} {t('services.detail.exchangesCompleted')}
             </Typography>
           </Box>
         </Box>
@@ -72,7 +74,7 @@ export function ServiceDetailsTab({ service }: ServiceDetailsTabProps) {
       {service.user && (
         <Box>
           <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary', textTransform: 'uppercase', fontSize: '11px', mb: 1, display: 'block' }}>
-            Proveedor
+            {service.intent === 'REQUEST' ? t('services.detail.requester') : t('services.detail.provider')}
           </Typography>
           <Box 
             sx={{ 
@@ -100,18 +102,18 @@ export function ServiceDetailsTab({ service }: ServiceDetailsTabProps) {
                 {service.user.name}
               </Typography>
               <Typography variant="caption" color="text.secondary" sx={{ fontSize: '11px' }}>
-                {service.user.location || 'Sin ubicación'}
+                {service.user.location || t('services.detail.noLocation')}
               </Typography>
             </Box>
             <Typography variant="caption" color="primary" sx={{ fontWeight: 600, fontSize: '11px' }}>
-              Ver perfil →
+              {t('services.detail.viewProfile')} →
             </Typography>
           </Box>
 
           {service.user.skills && service.user.skills.length > 0 && (
             <Box sx={{ mt: 1.5 }}>
               <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 0.5, display: 'block', fontSize: '10px' }}>
-                HABILIDADES
+                {t('services.detail.skills')}
               </Typography>
               <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
                 {service.user.skills.slice(0, 5).map((skill, idx) => (

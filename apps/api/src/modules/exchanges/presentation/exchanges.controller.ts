@@ -14,9 +14,8 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { createZodDto } from '@anatine/zod-nestjs';
 import { Type } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsDateString, IsEnum, IsNumber, IsOptional, IsPositive, IsString, Max, Min } from 'class-validator';
 import { 
-  ExchangeCreateSchema, 
   ExchangeUpdateSchema,
   ExchangeStatus,
 } from '@comparte-tu-tiempo/contracts';
@@ -27,8 +26,30 @@ import { GetExchangeUseCase } from '../application/get-exchange.use-case';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
 import { PrismaService } from '@/common/prisma/prisma.service';
 
-// DTOs generados desde Zod
-export class CreateExchangeDto extends createZodDto(ExchangeCreateSchema) {}
+export class CreateExchangeDto {
+  @Type(() => Number)
+  @IsNumber()
+  serviceId: number;
+
+  @IsOptional()
+  @IsString()
+  offeredById?: string;
+
+  @IsOptional()
+  @IsString()
+  message?: string;
+
+  @IsOptional()
+  @IsDateString()
+  date?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @IsPositive()
+  exchangedTime?: number;
+}
+
 export class UpdateExchangeDto extends createZodDto(ExchangeUpdateSchema) {}
 
 type AuthenticatedRequest = { user?: { sub?: string; id?: string } };
@@ -102,7 +123,7 @@ export class ExchangesController {
     
     const service = await this.prisma.service.findUnique({
       where: { id: createExchangeDto.serviceId },
-      select: { id: true, userId: true, intent: true },
+      select: { id: true, userId: true, intent: true, duration: true },
     });
 
     if (!service) {
@@ -113,8 +134,13 @@ export class ExchangesController {
       throw new UnauthorizedException('No puedes iniciar un intercambio sobre tu propia publicación');
     }
 
+    const requestedDate = createExchangeDto.date ? new Date(createExchangeDto.date) : new Date(Date.now() + 60_000);
+    const safeDate = requestedDate <= new Date() ? new Date(Date.now() + 60_000) : requestedDate;
+
     const exchangeData = {
-      ...createExchangeDto,
+      serviceId: service.id,
+      date: safeDate,
+      exchangedTime: createExchangeDto.exchangedTime || service.duration,
       requestedById: service.intent === 'REQUEST' ? service.userId : userId,
       offeredById: service.intent === 'REQUEST' ? userId : service.userId,
     };

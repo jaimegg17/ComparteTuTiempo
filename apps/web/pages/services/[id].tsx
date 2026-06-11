@@ -22,12 +22,14 @@ import { ServiceInfoTabs } from '@/components/services/ServiceInfoTabs';
 import { ServiceRequestDialog } from '@/components/services/ServiceRequestDialog';
 import { useFavoriteServices } from '@/hooks/useFavoriteServices';
 import { buildApiUrl } from '@/shared/api/config';
+import { useTranslation } from '@/hooks/useTranslation';
 import type { Service } from '@/types/service.types';
 
 export default function ServiceDetailPage() {
   const router = useRouter();
   const { id } = router.query;
   const { user } = useUser();
+  const { t } = useTranslation();
   const { isFavorite, toggleFavorite } = useFavoriteServices(user?.sub);
 
   const [service, setService] = useState<Service | null>(null);
@@ -95,9 +97,8 @@ export default function ServiceDetailPage() {
         },
         body: JSON.stringify({
           serviceId: service.id,
-          offeredById: service.user?.id || service.userId,
           message: requestMessage || undefined,
-          date: new Date().toISOString(),
+          exchangedTime: service.duration,
         }),
       });
 
@@ -135,9 +136,9 @@ export default function ServiceDetailPage() {
       <Layout>
         <Box sx={{ bgcolor: '#f5f5f5', minHeight: '100vh', py: 6 }}>
           <Box sx={{ maxWidth: 980, mx: 'auto', px: { xs: 2, md: 3 } }}>
-            <Alert severity="error">{error || 'No se ha encontrado el servicio.'}</Alert>
+            <Alert severity="error">{error || t('services.detail.notFound')}</Alert>
             <Button onClick={() => router.push('/services')} sx={{ mt: 2, textTransform: 'none', fontWeight: 700 }}>
-              ← Volver a servicios
+              ← {t('services.detail.backToServices')}
             </Button>
           </Box>
         </Box>
@@ -157,19 +158,19 @@ export default function ServiceDetailPage() {
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25} alignItems={{ xs: 'stretch', sm: 'flex-start' }} justifyContent="space-between" sx={{ flex: 1, gap: 1.25 }}>
             <Box>
               <Button onClick={() => router.push('/services')} sx={{ mb: 1, textTransform: 'none', fontWeight: 700 }}>
-                ← Volver a servicios
+                ← {t('services.detail.backToServices')}
               </Button>
               <Typography variant="overline" sx={{ color: '#8A33FD', fontWeight: 800, letterSpacing: '0.08em', display: 'block' }}>
-                {isRequest ? 'DETALLE DE LA SOLICITUD' : 'DETALLE DEL SERVICIO'}
+                {isRequest ? t('services.detail.requestOverline') : t('services.detail.serviceOverline')}
               </Typography>
               <Typography color="text.secondary" sx={{ maxWidth: 680 }}>
-                {isRequest ? 'Comprueba la necesidad publicada, la ubicación aproximada y responde solo si realmente puedes ayudar.' : 'Revisa el alcance del servicio, la ubicación aproximada y las valoraciones antes de enviar una solicitud.'}
+                {isRequest ? t('services.detail.requestIntro') : t('services.detail.serviceIntro')}
               </Typography>
             </Box>
             {!isOwnService && (
-              <Tooltip title={favorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}>
+              <Tooltip title={favorite ? t('services.favorites.remove') : t('services.favorites.save')}>
                 <IconButton
-                  aria-label={favorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+                  aria-label={favorite ? t('services.favorites.remove') : t('services.favorites.save')}
                   onClick={() => toggleFavorite(service.id)}
                   sx={{ alignSelf: { xs: 'flex-start', sm: 'auto' }, bgcolor: '#fff', boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
                 >
@@ -185,7 +186,7 @@ export default function ServiceDetailPage() {
                 variant="outlined"
                 sx={{ alignSelf: { xs: 'flex-start', md: 'center' }, textTransform: 'none', fontWeight: 700 }}
               >
-                {isRequest ? 'Editar solicitud' : 'Editar servicio'}
+                {isRequest ? t('services.actions.editRequest') : t('services.actions.editService')}
               </Button>
             )}
           </Stack>
@@ -215,7 +216,7 @@ export default function ServiceDetailPage() {
 
                 {!user && !isOwnService && (
                   <Alert severity="info" sx={{ mb: 2.5 }}>
-                    {isRequest ? 'Puedes revisar toda la información antes de decidir. Cuando quieras responder a esta solicitud, te llevaremos al inicio de sesión.' : 'Puedes revisar toda la información antes de decidir. Cuando quieras solicitar este servicio, te llevaremos al inicio de sesión.'}
+                    {isRequest ? t('services.detail.loginHintRequest') : t('services.detail.loginHintService')}
                   </Alert>
                 )}
 

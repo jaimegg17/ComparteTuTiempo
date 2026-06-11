@@ -20,17 +20,70 @@ import { ListRatingsUseCase } from '../application/list-ratings.use-case';
 import { UpdateRatingUseCase } from '../application/update-rating.use-case';
 import { DeleteRatingUseCase } from '../application/delete-rating.use-case';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
-import { createZodDto } from '@anatine/zod-nestjs';
-import { 
-  RatingCreateSchema, 
-  RatingUpdateSchema, 
-  RatingListQuerySchema 
-} from '@comparte-tu-tiempo/contracts';
+import { Type } from 'class-transformer';
+import { IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+export class CreateRatingDto {
+  @IsOptional()
+  @IsString()
+  userId?: string;
 
-// DTOs generados desde Zod
-export class CreateRatingDto extends createZodDto(RatingCreateSchema) {}
-export class UpdateRatingDto extends createZodDto(RatingUpdateSchema) {}
-export class RatingListQueryDto extends createZodDto(RatingListQuerySchema) {}
+  @Type(() => Number)
+  @IsNumber()
+  serviceId: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(5)
+  score: number;
+
+  @IsOptional()
+  @IsString()
+  comment?: string;
+}
+
+export class UpdateRatingDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(5)
+  score?: number;
+
+  @IsOptional()
+  @IsString()
+  comment?: string;
+}
+export class RatingListQueryDto {
+  @IsOptional()
+  @IsString()
+  userId?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  serviceId?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(5)
+  score?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  page?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(100)
+  pageSize?: number;
+}
 
 @ApiTags('ratings')
 @Controller('ratings')

@@ -139,7 +139,15 @@
     "languages": "Idiomas",
     "music": "Música",
     "sports": "Deporte",
-    "education": "Estudios"
+    "education": "Estudios",
+    "description": "Explora algunas áreas destacadas para empezar a descubrir servicios, personas y oportunidades de intercambio con más contexto.",
+    "viewServices": "Ver servicios",
+    "descriptions": {
+      "languages": "Clases, conversación y apoyo para aprender idiomas",
+      "music": "Instrumentos, canto, producción y creatividad musical",
+      "sports": "Entrenamiento, bienestar y actividad física compartida",
+      "education": "Refuerzo académico, estudio guiado y formación práctica"
+    }
   },
   "testimonials": {
     "title": "Valora tu experiencia",
@@ -157,7 +165,8 @@
       "text": "Me encanta lo personalizable que es esta aplicación. Realmente puedo hacer que funcione para mí, sin importar en qué proyecto esté trabajando.",
       "author": "Carlos Rodríguez",
       "role": "Desarrollador"
-    }
+    },
+    "description": "Opiniones de personas que ya han usado la plataforma para compartir conocimientos, apoyo cotidiano y tiempo de calidad."
   },
   "services": {
     "title": "Servicios",
@@ -209,7 +218,9 @@
       "availability": "Disponibilidad",
       "language": "Idioma",
       "clear": "Limpiar Filtros",
-      "apply": "Aplicar Filtros"
+      "apply": "Aplicar Filtros",
+      "active": "activos",
+      "favoritesOnly": "Solo favoritos"
     },
     "categories": {
       "education": "Educación",
@@ -304,7 +315,21 @@
         "rating": "Valoración",
         "reviews": "Reseñas",
         "exchanges": "Intercambios Completados"
-      }
+      },
+      "notFound": "No se ha encontrado el servicio.",
+      "backToServices": "Volver a servicios",
+      "requestOverline": "DETALLE DE LA SOLICITUD",
+      "serviceOverline": "DETALLE DEL SERVICIO",
+      "requestIntro": "Comprueba la necesidad publicada, la ubicación aproximada y responde solo si realmente puedes ayudar.",
+      "serviceIntro": "Revisa el alcance del servicio, la ubicación aproximada y las valoraciones antes de enviar una solicitud.",
+      "loginHintRequest": "Puedes revisar toda la información antes de decidir. Cuando quieras responder a esta solicitud, te llevaremos al inicio de sesión.",
+      "loginHintService": "Puedes revisar toda la información antes de decidir. Cuando quieras solicitar este servicio, te llevaremos al inicio de sesión.",
+      "provider": "Proveedor",
+      "requester": "Solicitante",
+      "noLocation": "Sin ubicación",
+      "viewProfile": "Ver perfil",
+      "skills": "HABILIDADES",
+      "exchangesCompleted": "intercambios realizados"
     },
     "not_found": "No se encontraron servicios",
     "error": "Error al cargar servicios",
@@ -312,6 +337,44 @@
       "created": "Servicio creado exitosamente",
       "updated": "Servicio actualizado exitosamente",
       "deleted": "Servicio eliminado exitosamente"
+    },
+    "viewModes": {
+      "list": "Lista",
+      "map": "Mapa"
+    },
+    "map": {
+      "unavailable": "Google Maps no está disponible ahora mismo. Mostramos un mapa básico de OpenStreetMap para no bloquear la navegación.",
+      "openStreetMapTitle": "Mapa OpenStreetMap"
+    },
+    "summary": {
+      "title": "Resumen",
+      "services": "servicios",
+      "requests": "solicitudes"
+    },
+    "intent": {
+      "offers": "Servicios",
+      "requests": "Solicitudes"
+    },
+    "favorites": {
+      "save": "Guardar en favoritos",
+      "remove": "Quitar de favoritos"
+    },
+    "actions": {
+      "createRequest": "Crear solicitud",
+      "newPublication": "Nueva publicación",
+      "editRequest": "Editar solicitud",
+      "editService": "Editar servicio",
+      "ownRequest": "Tu solicitud",
+      "ownService": "Tu servicio",
+      "loginToHelp": "Iniciar sesión para ayudar",
+      "loginToRequest": "Iniciar sesión para solicitar",
+      "canHelp": "Puedo ayudarte",
+      "requestExchange": "Solicitar intercambio",
+      "requestHelper": "Si puedes cubrir esta necesidad, envía un mensaje inicial explicando cómo podrías ayudar y en qué condiciones.",
+      "serviceHelper": "Revisa bien la descripción antes de enviar tu solicitud. Podrás añadir un mensaje inicial para dar contexto.",
+      "inactiveRequestHelper": "Esta solicitud ya no está activa. Puedes seguir explorando otras necesidades publicadas en la plataforma.",
+      "inactiveServiceHelper": "Este servicio no está disponible en este momento, pero puedes seguir explorando otras alternativas.",
+      "estimatedExchangeTime": "Tiempo estimado de intercambio"
     }
   },
   "exchanges": {
@@ -973,5 +1036,14 @@
   },
   "languageSwitcher": {
     "current": "Idioma actual"
+  },
+  "users": {
+    "profile": {
+      "loadError": "Error al cargar el perfil",
+      "notFound": "No se ha encontrado el usuario",
+      "services": "servicios",
+      "ratings": "valoraciones",
+      "exchanges": "intercambios"
+    }
   }
 }
