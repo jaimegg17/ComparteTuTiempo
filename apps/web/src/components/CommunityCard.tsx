@@ -13,7 +13,8 @@ interface CommunityCardProps {
 
 export function CommunityCard({ community, onJoin, showJoinAction = false }: CommunityCardProps) {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, currentLanguage } = useTranslation();
+  const locale = currentLanguage === 'en' ? 'en-US' : 'es-ES';
   const [imageError, setImageError] = useState(false);
 
   const displayedTopics = community.topics.slice(0, 3);
@@ -132,7 +133,7 @@ export function CommunityCard({ community, onJoin, showJoinAction = false }: Com
           <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 1.5, gap: 1, flexWrap: 'wrap' }}>
             {community.kind === 'ORGANIZATION' && (
               <Chip
-                label={community.verificationStatus === 'APPROVED' ? 'verificada' : 'pendiente'}
+                label={community.verificationStatus === 'APPROVED' ? t('communities.verified') : t('communities.pending')}
                 size="small"
                 sx={{
                   fontSize: '11px',
@@ -174,11 +175,11 @@ export function CommunityCard({ community, onJoin, showJoinAction = false }: Com
           <Box sx={{ mt: 'auto', pt: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mb: 2 }}>
               <Typography variant="body2" sx={{ fontSize: '12px', color: 'text.secondary' }}>
-                {community.rules.length} reglas
+                {t('communities.rulesCount', { count: community.rules.length })}
               </Typography>
               {community.resources.length > 0 && (
                 <Typography variant="body2" sx={{ fontSize: '12px', color: 'text.secondary' }}>
-                  · {community.resources.length} recursos
+                  · {t('communities.resourcesCount', { count: community.resources.length })}
                 </Typography>
               )}
             </Box>
@@ -194,7 +195,7 @@ export function CommunityCard({ community, onJoin, showJoinAction = false }: Com
               }}
             >
               <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                {new Date(community.createdAt).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' })}
+                {new Date(community.createdAt).toLocaleDateString(locale, { month: 'short', year: 'numeric' })}
               </Typography>
 
               <Box
@@ -231,7 +232,7 @@ export function CommunityCard({ community, onJoin, showJoinAction = false }: Com
             }}
             sx={{ textTransform: 'none', borderRadius: 1.8, fontWeight: 700 }}
           >
-            Unirse
+            {t('communities.join')}
           </Button>
         </Box>
       )}

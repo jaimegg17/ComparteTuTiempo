@@ -733,7 +733,12 @@
       "title": "Community services",
       "description": "Offers and requests published in this space by its members.",
       "empty": "There are no services associated with this community yet."
-    }
+    },
+    "verified": "Verified",
+    "pending": "Pending",
+    "rulesCount": "{{count}} rules",
+    "resourcesCount": "{{count}} resources",
+    "join": "Join"
   },
   "organizations": {
     "form": {
@@ -965,5 +970,8 @@
       "start": "Start exchange",
       "complete": "Complete"
     }
+  },
+  "languageSwitcher": {
+    "current": "Current language"
   }
 }
