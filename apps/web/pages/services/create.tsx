@@ -100,18 +100,6 @@ export default function CreateServicePage() {
       .catch(() => setSelectedCommunity(null));
   }, [router.query?.communityId]);
 
-  type PlaceResult = {
-    name?: string;
-    formatted_address?: string;
-    place_id?: string;
-    geometry?: {
-      location?: {
-        lat: () => number;
-        lng: () => number;
-      };
-    };
-  };
-
   // Mapping functions for display
   const getCategoryDisplayName = (category: string) => {
     const categoryMap: Record<string, string> = {
