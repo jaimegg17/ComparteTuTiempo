@@ -13,7 +13,7 @@ import {
   Tooltip,
 } from '@mui/material';
 import { Layout } from '@/components/Layout';
-import { FavoriteBorderRounded, FavoriteRounded } from '@mui/icons-material';
+import { DeleteRounded, FavoriteBorderRounded, FavoriteRounded } from '@mui/icons-material';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { ServiceActionFooter } from '@/components/services/ServiceActionFooter';
 import { ServiceDetailHeader } from '@/components/services/ServiceDetailHeader';
@@ -40,6 +40,7 @@ export default function ServiceDetailPage() {
   const [requestLoading, setRequestLoading] = useState(false);
   const [requestSuccess, setRequestSuccess] = useState(false);
   const [requestError, setRequestError] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const getErrorMessage = (err: unknown, fallback: string) => (err instanceof Error ? err.message : fallback);
 
@@ -75,6 +76,34 @@ export default function ServiceDetailPage() {
       return;
     }
     setOpenRequestDialog(true);
+  };
+
+  const handleDeleteService = async () => {
+    if (!user || !service) return;
+    const confirmed = window.confirm(t('services.deleteConfirm'));
+    if (!confirmed) return;
+
+    try {
+      setDeleteLoading(true);
+      const token = await fetch('/api/auth/token').then((res) => res.json()).then((data) => data.accessToken);
+      const response = await fetch(buildApiUrl(`/services/${service.id}`), {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || t('services.deleteError'));
+      }
+
+      router.push('/services');
+    } catch (deleteError) {
+      setError(getErrorMessage(deleteError, t('services.deleteError')));
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   const handleRequestService = async () => {
@@ -181,13 +210,25 @@ export default function ServiceDetailPage() {
             </Stack>
 
             {isOwnService && (
-              <Button
-                onClick={() => router.push(`/services/edit/${service.id}`)}
-                variant="outlined"
-                sx={{ alignSelf: { xs: 'flex-start', md: 'center' }, textTransform: 'none', fontWeight: 700 }}
-              >
-                {isRequest ? t('services.actions.editRequest') : t('services.actions.editService')}
-              </Button>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ alignSelf: { xs: 'flex-start', md: 'center' } }}>
+                <Button
+                  onClick={() => router.push(`/services/edit/${service.id}`)}
+                  variant="outlined"
+                  sx={{ textTransform: 'none', fontWeight: 700 }}
+                >
+                  {isRequest ? t('services.actions.editRequest') : t('services.actions.editService')}
+                </Button>
+                <Button
+                  onClick={handleDeleteService}
+                  variant="outlined"
+                  color="error"
+                  startIcon={<DeleteRounded />}
+                  disabled={deleteLoading}
+                  sx={{ textTransform: 'none', fontWeight: 700 }}
+                >
+                  {deleteLoading ? t('common.loading') : t('services.actions.delete')}
+                </Button>
+              </Stack>
             )}
           </Stack>
 

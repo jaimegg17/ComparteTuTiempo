@@ -374,8 +374,12 @@
       "serviceHelper": "Revisa bien la descripción antes de enviar tu solicitud. Podrás añadir un mensaje inicial para dar contexto.",
       "inactiveRequestHelper": "Esta solicitud ya no está activa. Puedes seguir explorando otras necesidades publicadas en la plataforma.",
       "inactiveServiceHelper": "Este servicio no está disponible en este momento, pero puedes seguir explorando otras alternativas.",
-      "estimatedExchangeTime": "Tiempo estimado de intercambio"
-    }
+      "estimatedExchangeTime": "Tiempo estimado de intercambio",
+      "delete": "Eliminar"
+    },
+    "searchByName": "Buscar por nombre o descripción...",
+    "deleteConfirm": "¿Seguro que quieres eliminar esta publicación? Esta acción no se puede deshacer.",
+    "deleteError": "Error al eliminar la publicación"
   },
   "exchanges": {
     "title": "Mis Intercambios",

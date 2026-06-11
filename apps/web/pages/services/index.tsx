@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useRouter } from 'next/router';
-import { Typography, Box, CircularProgress, Button, Tabs, Tab, Drawer, IconButton, Chip, Paper, Stack, Alert } from '@mui/material';
+import { Typography, Box, CircularProgress, Button, Tabs, Tab, Drawer, IconButton, Chip, Paper, Stack, Alert, TextField, InputAdornment } from '@mui/material';
 import { Layout } from '@/components/Layout';
 import { ServiceCard } from '@/components/ServiceCard';
 import { FilterSidebar } from '@/components/filters/FilterSidebar';
@@ -13,7 +13,7 @@ import { useUser } from '@auth0/nextjs-auth0/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useFavoriteServices } from '@/hooks/useFavoriteServices';
 import Script from 'next/script';
-import { FilterListRounded, CloseRounded, MapRounded, ViewListRounded, PlaceRounded } from '@mui/icons-material';
+import { FilterListRounded, CloseRounded, MapRounded, ViewListRounded, PlaceRounded, SearchRounded } from '@mui/icons-material';
 import { buildApiUrl } from '@/shared/api/config';
 
 type MapCenter = { lat: number; lng: number };
@@ -693,7 +693,21 @@ export default function ServicesPage() {
             >
               <Stack spacing={1.5}>
                 <Stack direction={{ xs: 'column', lg: 'row' }} spacing={1.5} justifyContent="space-between" alignItems={{ xs: 'stretch', lg: 'center' }}>
-                  <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ rowGap: 1 }}>
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} useFlexGap flexWrap="wrap" sx={{ rowGap: 1, flex: 1 }}>
+                    <TextField
+                      value={searchTerm}
+                      onChange={(event) => setSearchTerm(event.target.value)}
+                      placeholder={t('services.searchByName')}
+                      size="small"
+                      sx={{ minWidth: { xs: '100%', sm: 280 }, maxWidth: { sm: 420 }, flex: { sm: 1 } }}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchRounded fontSize="small" />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
                     <Button
                       variant={filtersOpen ? 'contained' : 'outlined'}
                       startIcon={<FilterListRounded />}

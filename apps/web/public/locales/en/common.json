@@ -374,8 +374,12 @@
       "serviceHelper": "Review the description before sending your request. You can add an initial message for context.",
       "inactiveRequestHelper": "This request is no longer active. You can keep exploring other needs published on the platform.",
       "inactiveServiceHelper": "This service is not available right now, but you can keep exploring other alternatives.",
-      "estimatedExchangeTime": "Estimated exchange time"
-    }
+      "estimatedExchangeTime": "Estimated exchange time",
+      "delete": "Delete"
+    },
+    "searchByName": "Search by name or description...",
+    "deleteConfirm": "Are you sure you want to delete this publication? This action cannot be undone.",
+    "deleteError": "Error deleting publication"
   },
   "exchanges": {
     "title": "My Exchanges",
