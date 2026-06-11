@@ -61,11 +61,12 @@ export default function ExchangeDetailPage() {
       // Determine the other user
       const isRequester = user.sub === data.exchange.requestedById;
       const otherUserData = isRequester ? data.exchange.offeredBy : data.exchange.requestedBy;
-      
+      const fallbackUserId = isRequester ? data.exchange.offeredById : data.exchange.requestedById;
+
       setOtherUser({
-        id: otherUserData.id,
-        name: otherUserData.name,
-        imageUrl: otherUserData.imageUrl,
+        id: otherUserData?.id || fallbackUserId,
+        name: otherUserData?.name || otherUserData?.email || fallbackUserId,
+        imageUrl: otherUserData?.imageUrl,
       });
     }, ERROR_MESSAGES.NETWORK_ERROR);
   }, [id, user, handleAsyncOperation]);

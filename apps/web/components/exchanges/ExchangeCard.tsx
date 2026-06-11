@@ -33,6 +33,7 @@ export function ExchangeCard({ exchange, currentUserId, onAccept, onReject, onSt
   const isProvider = currentUserId === exchange.offeredById;
   const isRequester = currentUserId === exchange.requestedById;
   const otherUser = isProvider ? exchange.requestedBy : exchange.offeredBy;
+  const otherUserName = otherUser?.name || otherUser?.email || otherUser?.id || t('exchangesPage.card.unknownUser');
 
   const stateConfig = STATE_CONFIG[exchange.state];
   const canAccept = isProvider && exchange.state === 'PENDING';
@@ -137,12 +138,12 @@ export function ExchangeCard({ exchange, currentUserId, onAccept, onReject, onSt
 
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mb: 1.5 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Avatar src={otherUser?.imageUrl} alt={otherUser?.name} sx={{ width: 34, height: 34 }}>
-                  {otherUser?.name?.[0]?.toUpperCase()}
+                <Avatar src={otherUser?.imageUrl} alt={otherUserName} sx={{ width: 34, height: 34 }}>
+                  {otherUserName[0]?.toUpperCase()}
                 </Avatar>
                 <Box sx={{ minWidth: 0 }}>
                   <Typography variant="body2" sx={{ fontWeight: 700, wordBreak: 'break-word' }}>
-                    {isProvider ? t('exchangesPage.card.requestedBy') : t('exchangesPage.card.offeredBy')} {otherUser?.name}
+                    {isProvider ? t('exchangesPage.card.requestedBy') : t('exchangesPage.card.offeredBy')} {otherUserName}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
                     {t('exchangesPage.card.created', { date: new Date(exchange.createdAt).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' }) })}
@@ -177,7 +178,18 @@ export function ExchangeCard({ exchange, currentUserId, onAccept, onReject, onSt
               </Box>
             )}
 
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} useFlexGap flexWrap="wrap" sx={{ alignItems: { xs: 'stretch', sm: 'center' } }}>
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={1}
+              useFlexGap
+              flexWrap="wrap"
+              sx={{
+                alignItems: { xs: 'stretch', sm: 'center' },
+                justifyContent: { xs: 'stretch', sm: 'flex-end' },
+                ml: { sm: 'auto' },
+                mt: 1,
+              }}
+            >
               {(exchange.state === 'PENDING' || exchange.state === 'CONFIRMED' || exchange.state === 'IN_PROGRESS') && (
                 <Button
                   size="small"
@@ -194,7 +206,7 @@ export function ExchangeCard({ exchange, currentUserId, onAccept, onReject, onSt
                 size="small"
                 variant="text"
                 onClick={() => router.push(`/services/${exchange.serviceId}`)}
-                sx={{ textTransform: 'none', fontWeight: 700 }}
+                sx={{ textTransform: 'none', fontWeight: 700, width: { xs: '100%', sm: 'auto' } }}
               >
                 {t('exchangesPage.card.viewService')}
               </Button>

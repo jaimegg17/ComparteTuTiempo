@@ -1036,7 +1036,8 @@
       "accept": "Aceptar",
       "reject": "Rechazar",
       "start": "Iniciar intercambio",
-      "complete": "Completar"
+      "complete": "Completar",
+      "unknownUser": "Usuario"
     }
   },
   "languageSwitcher": {
