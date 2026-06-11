@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import Script from 'next/script';
 import {
   Container,
   Box,
@@ -11,6 +12,9 @@ import {
   Alert,
   CircularProgress,
   Stack,
+  List,
+  ListItemButton,
+  ListItemText,
 } from '@mui/material';
 import { Layout } from '@/components/Layout';
 import { useUser } from '@auth0/nextjs-auth0/client';
@@ -27,6 +31,47 @@ const CATEGORIES = ['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'AR
 const TYPES = ['PRESENCIAL', 'VIRTUAL', 'HIBRIDO'];
 const INTENTS = ['OFFER', 'REQUEST'] as const;
 const AVAILABILITY = ['mañana', 'tarde', 'noche', 'mañana-tarde', 'tarde-noche', 'flexible'];
+
+type PlacePrediction = {
+  description: string;
+  placeId: string;
+};
+
+type GooglePlacesStatus = 'OK' | 'ZERO_RESULTS' | string;
+
+type GooglePlacesAutocompleteService = {
+  getPlacePredictions: (
+    request: { input: string; types?: string[] },
+    callback: (predictions: Array<{ description: string; place_id: string }> | null, status: GooglePlacesStatus) => void,
+  ) => void;
+};
+
+type GooglePlacesService = {
+  getDetails: (
+    request: { placeId: string; fields: string[] },
+    callback: (
+      place: {
+        formatted_address?: string;
+        name?: string;
+        place_id?: string;
+        geometry?: { location?: { lat: () => number; lng: () => number } };
+      } | null,
+      status: GooglePlacesStatus,
+    ) => void,
+  ) => void;
+};
+
+type GoogleMapsWindow = Window & {
+  google?: {
+    maps?: {
+      places?: {
+        PlacesServiceStatus?: { OK: string };
+        AutocompleteService: new () => GooglePlacesAutocompleteService;
+        PlacesService: new (container: HTMLDivElement) => GooglePlacesService;
+      };
+    };
+  };
+};
 
 interface FormData {
   title: string;
@@ -81,6 +126,11 @@ export default function CreateServicePage() {
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
   const [locating, setLocating] = useState(false);
+  const [mapsLoaded, setMapsLoaded] = useState(false);
+  const [mapsFailed, setMapsFailed] = useState(false);
+  const [locationPredictions, setLocationPredictions] = useState<PlacePrediction[]>([]);
+  const [locationSearchLoading, setLocationSearchLoading] = useState(false);
+  const [locationPredictionsOpen, setLocationPredictionsOpen] = useState(false);
   const uploadImage = useUploadImage();
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   const { showToast } = useToast();
@@ -162,6 +212,84 @@ export default function CreateServicePage() {
         [field]: undefined,
       }));
     }
+  };
+
+  useEffect(() => {
+    const query = formData.location.trim();
+    const googlePlaces = typeof window !== 'undefined' ? (window as GoogleMapsWindow).google?.maps?.places : undefined;
+
+    if (!googleMapsApiKey || mapsFailed || !mapsLoaded || !googlePlaces || !locationPredictionsOpen || query.length < 3 || formData.placeId) {
+      setLocationPredictions([]);
+      setLocationSearchLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    const timeout = window.setTimeout(() => {
+      setLocationSearchLoading(true);
+      const autocompleteService = new googlePlaces.AutocompleteService();
+      autocompleteService.getPlacePredictions(
+        { input: query, types: ['geocode'] },
+        (predictions, status) => {
+          if (cancelled) return;
+          const okStatus = googlePlaces.PlacesServiceStatus?.OK || 'OK';
+          if (status === okStatus && predictions) {
+            setLocationPredictions(
+              predictions.map((prediction) => ({
+                description: prediction.description,
+                placeId: prediction.place_id,
+              })),
+            );
+          } else {
+            setLocationPredictions([]);
+          }
+          setLocationSearchLoading(false);
+        },
+      );
+    }, 250);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeout);
+    };
+  }, [formData.location, formData.placeId, googleMapsApiKey, locationPredictionsOpen, mapsFailed, mapsLoaded]);
+
+  const handleSelectLocationPrediction = (prediction: PlacePrediction) => {
+    const googlePlaces = typeof window !== 'undefined' ? (window as GoogleMapsWindow).google?.maps?.places : undefined;
+
+    setLocationPredictions([]);
+    setLocationPredictionsOpen(false);
+    setFormData((prev) => ({
+      ...prev,
+      location: prediction.description,
+      formattedAddress: prediction.description,
+      placeId: prediction.placeId,
+    }));
+
+    if (!googlePlaces) return;
+
+    const detailsContainer = document.createElement('div');
+    const placesService = new googlePlaces.PlacesService(detailsContainer);
+    placesService.getDetails(
+      { placeId: prediction.placeId, fields: ['formatted_address', 'name', 'geometry', 'place_id'] },
+      (place, status) => {
+        const okStatus = googlePlaces.PlacesServiceStatus?.OK || 'OK';
+        if (status !== okStatus || !place) return;
+
+        const lat = place.geometry?.location?.lat?.();
+        const lng = place.geometry?.location?.lng?.();
+        const bestAddress = place.formatted_address || place.name || prediction.description;
+
+        setFormData((prev) => ({
+          ...prev,
+          location: bestAddress,
+          formattedAddress: bestAddress,
+          placeId: place.place_id || prediction.placeId,
+          latitude: typeof lat === 'number' ? lat : undefined,
+          longitude: typeof lng === 'number' ? lng : undefined,
+        }));
+      },
+    );
   };
 
   const handleUseCurrentLocation = () => {
@@ -329,6 +457,17 @@ export default function CreateServicePage() {
 
   return (
     <Layout>
+      {googleMapsApiKey && (
+        <Script
+          src={`https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&libraries=places`}
+          strategy="afterInteractive"
+          onLoad={() => {
+            setMapsLoaded(true);
+            setMapsFailed(false);
+          }}
+          onError={() => setMapsFailed(true)}
+        />
+      )}
       <Box sx={{ bgcolor: '#f5f5f5', minHeight: '100%', py: 4 }}>
         <Container maxWidth="md">
           <Button 
@@ -346,9 +485,9 @@ export default function CreateServicePage() {
               {formData.intent === 'REQUEST' ? 'Publica una necesidad concreta para que otras personas puedan ofrecerte ayuda.' : t("services.subtitle")}
             </Typography>
 
-            {!googleMapsApiKey && (
+            {(!googleMapsApiKey || mapsFailed) && (
               <Alert severity="info" sx={{ mb: 3 }}>
-                Puedes escribir la ubicación manualmente. Google Places no es necesario para crear servicios.
+                Google Places no está disponible ahora mismo. Puedes escribir la ubicación manualmente o usar tu ubicación actual.
               </Alert>
             )}
 
@@ -495,22 +634,56 @@ export default function CreateServicePage() {
                     required
                   />
 
-                  <TextField
-                    fullWidth
-                    label={t("services.form.location")}
-                    placeholder={t("services.form.placeholders.location")}
-                    value={formData.location}
-                    onChange={handleChange('location')}
-                    autoComplete="off"
-                    name="service-location-manual"
-                    error={!!errors.location}
-                    helperText={
-                      errors.location ||
-                      'Escribe una dirección o zona. También puedes usar tu ubicación actual para guardar coordenadas.'
-                    }
-                    disabled={loading || success}
-                    required
-                  />
+                  <Box sx={{ width: '100%', position: 'relative' }}>
+                    <TextField
+                      fullWidth
+                      label={t("services.form.location")}
+                      placeholder={t("services.form.placeholders.location")}
+                      value={formData.location}
+                      onChange={handleChange('location')}
+                      onFocus={() => setLocationPredictionsOpen(true)}
+                      autoComplete="off"
+                      name="service-location-manual"
+                      error={!!errors.location}
+                      helperText={
+                        errors.location ||
+                        (locationSearchLoading
+                          ? 'Buscando ubicaciones en Google Maps…'
+                          : googleMapsApiKey && !mapsFailed
+                            ? 'Empieza a escribir y selecciona una ubicación de Google Maps para guardarla con coordenadas.'
+                            : 'Escribe una dirección o usa tu ubicación actual para guardar coordenadas.')
+                      }
+                      disabled={loading || success}
+                      required
+                    />
+                    {locationPredictionsOpen && locationPredictions.length > 0 && (
+                      <Paper
+                        variant="outlined"
+                        sx={{
+                          position: 'absolute',
+                          zIndex: 20,
+                          top: '56px',
+                          left: 0,
+                          right: 0,
+                          borderRadius: 2,
+                          overflow: 'hidden',
+                          boxShadow: '0 12px 30px rgba(15, 23, 42, 0.16)',
+                        }}
+                      >
+                        <List dense disablePadding>
+                          {locationPredictions.map((prediction) => (
+                            <ListItemButton
+                              key={prediction.placeId}
+                              onMouseDown={(event) => event.preventDefault()}
+                              onClick={() => handleSelectLocationPrediction(prediction)}
+                            >
+                              <ListItemText primary={prediction.description} />
+                            </ListItemButton>
+                          ))}
+                        </List>
+                      </Paper>
+                    )}
+                  </Box>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
                   <Button
