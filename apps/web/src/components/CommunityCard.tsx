@@ -9,9 +9,10 @@ interface CommunityCardProps {
   community: Community;
   onJoin?: (community: Community) => void;
   showJoinAction?: boolean;
+  detailBasePath?: '/communities' | '/organizations';
 }
 
-export function CommunityCard({ community, onJoin, showJoinAction = false }: CommunityCardProps) {
+export function CommunityCard({ community, onJoin, showJoinAction = false, detailBasePath = '/communities' }: CommunityCardProps) {
   const router = useRouter();
   const { t, currentLanguage } = useTranslation();
   const locale = currentLanguage === 'en' ? 'en-US' : 'es-ES';
@@ -55,7 +56,7 @@ export function CommunityCard({ community, onJoin, showJoinAction = false }: Com
       }}
     >
       <CardActionArea
-        onClick={() => router.push(`/communities/${community.id}`)}
+        onClick={() => router.push(`${detailBasePath}/${community.id}`)}
         sx={{
           height: '100%',
           display: 'flex',
@@ -219,7 +220,7 @@ export function CommunityCard({ community, onJoin, showJoinAction = false }: Com
         </CardContent>
       </CardActionArea>
 
-      {showJoinAction && onJoin && !community.isPrivate && (
+      {showJoinAction && onJoin && (
         <Box sx={{ px: 2.5, pb: 2.2, pt: 0 }}>
           <Button
             fullWidth
@@ -232,7 +233,7 @@ export function CommunityCard({ community, onJoin, showJoinAction = false }: Com
             }}
             sx={{ textTransform: 'none', borderRadius: 1.8, fontWeight: 700 }}
           >
-            {t('communities.join')}
+            {community.isPrivate ? t('communities.detail.requestJoin') : t('communities.join')}
           </Button>
         </Box>
       )}

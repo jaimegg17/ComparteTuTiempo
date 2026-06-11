@@ -303,6 +303,39 @@ export default function ServicesPage() {
     fetchServices(emptyFilters);
   };
 
+  const geocodeSearchLocation = async (): Promise<MapCenter | null> => {
+    const query = location.trim() || userProfile?.location?.trim();
+    if (!query) return null;
+
+    const googleObj = typeof window !== 'undefined' ? window.google : undefined;
+    if (googleObj?.maps?.Geocoder) {
+      const geocoder = new googleObj.maps.Geocoder();
+      const googleResult = await new Promise<MapCenter | null>((resolve) => {
+        geocoder.geocode({ address: query }, (results: GoogleGeocoderResult[], status: string) => {
+          if (status === 'OK' && results[0]?.geometry?.location) {
+            resolve({ lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng() });
+          } else {
+            resolve(null);
+          }
+        });
+      });
+      if (googleResult) return googleResult;
+    }
+
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`);
+      const data = await response.json() as Array<{ lat?: string; lon?: string }>;
+      const first = data[0];
+      if (first?.lat && first?.lon) {
+        return { lat: Number(first.lat), lng: Number(first.lon) };
+      }
+    } catch {
+      return null;
+    }
+
+    return null;
+  };
+
   const handleUseMyLocation = () => {
     if (!navigator.geolocation) {
       showToast({ message: 'Tu navegador no soporta geolocalización.', severity: 'warning' });
@@ -335,10 +368,21 @@ export default function ServicesPage() {
     fetchServices({ nearLat: null, nearLng: null, useNearby: false });
   };
 
-  const handleRadiusChange = (newRadius: number) => {
+  const handleRadiusChange = async (newRadius: number) => {
     setRadiusKm(newRadius);
     if (useNearby && nearLat !== null && nearLng !== null) {
       fetchServices({ radiusKm: newRadius, nearLat, nearLng, useNearby: true });
+      return;
+    }
+
+    const geocoded = await geocodeSearchLocation();
+    if (geocoded) {
+      setNearLat(geocoded.lat);
+      setNearLng(geocoded.lng);
+      setUseNearby(true);
+      fetchServices({ radiusKm: newRadius, nearLat: geocoded.lat, nearLng: geocoded.lng, useNearby: true });
+    } else {
+      showToast({ message: 'Escribe una ubicación o usa tu ubicación actual para aplicar el radio.', severity: 'info' });
     }
   };
 
@@ -436,6 +480,25 @@ export default function ServicesPage() {
     () => visibleServices.filter((service) => typeof service.latitude === 'number' && typeof service.longitude === 'number'),
     [visibleServices],
   );
+
+  const fallbackMapMarkers = useMemo(() => {
+    if (!servicesWithCoordinates.length) return [];
+    const lats = servicesWithCoordinates.map((service) => service.latitude as number);
+    const lngs = servicesWithCoordinates.map((service) => service.longitude as number);
+    const minLat = Math.min(...lats);
+    const maxLat = Math.max(...lats);
+    const minLng = Math.min(...lngs);
+    const maxLng = Math.max(...lngs);
+    const latSpan = Math.max(maxLat - minLat, 0.01);
+    const lngSpan = Math.max(maxLng - minLng, 0.01);
+
+    return servicesWithCoordinates.map((service, index) => ({
+      service,
+      index,
+      left: 8 + (((service.longitude as number) - minLng) / lngSpan) * 84,
+      top: 8 + ((maxLat - (service.latitude as number)) / latSpan) * 84,
+    }));
+  }, [servicesWithCoordinates]);
 
   useEffect(() => {
     if (useNearby && nearLat !== null && nearLng !== null) {
@@ -875,17 +938,58 @@ export default function ServicesPage() {
                         {t('services.map.unavailable')}
                       </Alert>
                       <Box
-                        component="iframe"
-                        title={t('services.map.openStreetMapTitle')}
-                        src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapCenter.lng - 0.25}%2C${mapCenter.lat - 0.18}%2C${mapCenter.lng + 0.25}%2C${mapCenter.lat + 0.18}&layer=mapnik&marker=${mapCenter.lat}%2C${mapCenter.lng}`}
+                        role="img"
+                        aria-label={t('services.map.openStreetMapTitle')}
                         sx={{
+                          position: 'relative',
                           width: '100%',
                           height: { xs: 420, md: 560 },
-                          border: 0,
                           borderRadius: 3,
                           overflow: 'hidden',
+                          border: '1px solid rgba(148,163,184,0.24)',
+                          background: `
+                            linear-gradient(90deg, rgba(148,163,184,0.18) 1px, transparent 1px),
+                            linear-gradient(0deg, rgba(148,163,184,0.18) 1px, transparent 1px),
+                            linear-gradient(135deg, #ecfeff 0%, #eef2ff 48%, #f8fafc 100%)
+                          `,
+                          backgroundSize: '56px 56px, 56px 56px, cover',
                         }}
-                      />
+                      >
+                        {fallbackMapMarkers.map(({ service, index, left, top }) => (
+                          <Button
+                            key={service.id}
+                            onClick={() => router.push(`/services/${service.id}`)}
+                            title={service.title}
+                            sx={{
+                              position: 'absolute',
+                              left: `${left}%`,
+                              top: `${top}%`,
+                              minWidth: 0,
+                              width: 36,
+                              height: 36,
+                              borderRadius: '50%',
+                              transform: 'translate(-50%, -50%)',
+                              bgcolor: service.intent === 'REQUEST' ? '#0f766e' : '#8A33FD',
+                              color: '#fff',
+                              fontWeight: 900,
+                              boxShadow: '0 10px 24px rgba(15,23,42,0.25)',
+                              '&:hover': { bgcolor: service.intent === 'REQUEST' ? '#115e59' : '#7028E0' },
+                            }}
+                          >
+                            {index + 1}
+                          </Button>
+                        ))}
+                        <Box sx={{ position: 'absolute', left: 16, bottom: 16, right: 16, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                          {fallbackMapMarkers.slice(0, 8).map(({ service, index }) => (
+                            <Chip
+                              key={service.id}
+                              label={`${index + 1}. ${service.title}`}
+                              onClick={() => router.push(`/services/${service.id}`)}
+                              sx={{ bgcolor: 'rgba(255,255,255,0.92)', fontWeight: 700 }}
+                            />
+                          ))}
+                        </Box>
+                      </Box>
                     </Box>
                   ) : (
                     <Box

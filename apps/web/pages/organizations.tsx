@@ -321,7 +321,7 @@ export default function OrganizationsPage() {
               }}
             >
               {filteredOrganizations.map((community) => (
-                <CommunityCard key={community.id} community={community} />
+                <CommunityCard key={community.id} community={community} detailBasePath="/organizations" />
               ))}
             </Box>
           )}
