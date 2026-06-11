@@ -86,7 +86,7 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
                 Notificaciones relevantes
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-                Este ajuste es ligero y está pensado para que puedas demostrar personalización de la experiencia sin introducir complejidad excesiva.
+                Elige qué avisos quieres destacar y revisa las actualizaciones importantes sobre tus intercambios, eventos y comunidades.
               </Typography>
             </Box>
           </Stack>

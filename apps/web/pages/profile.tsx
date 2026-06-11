@@ -443,14 +443,16 @@ const ProfilePage = () => {
               />
             </Box>
 
-            <NotificationsSection
-              preferences={preferences}
+            <Box id="notifications">
+              <NotificationsSection
+                preferences={preferences}
               onToggle={setPreference}
               notifications={notifications}
               unreadCount={unreadCount}
               onMarkAsRead={markAsRead}
-              onMarkAllAsRead={markAllAsRead}
-            />
+                onMarkAllAsRead={markAllAsRead}
+              />
+            </Box>
           </form>
         </Box>
       </Box>

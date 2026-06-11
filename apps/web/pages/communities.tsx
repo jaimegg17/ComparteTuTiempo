@@ -55,8 +55,7 @@ export default function CommunitiesPage() {
         pageSize,
         kind: 'COMMUNITY' as const,
         creatorId: activeTab === 1 && user?.sub ? user.sub : undefined,
-        isPrivate:
-          activeTab === 2 ? false : visibilityFilter === 'all' ? undefined : visibilityFilter === 'private',
+        isPrivate: visibilityFilter === 'all' ? undefined : visibilityFilter === 'private',
       };
 
       const response = await communitiesApi.getCommunities(query);
@@ -156,7 +155,6 @@ export default function CommunitiesPage() {
                   label={t("communities.tabs.my_communities")} 
                   disabled={!user?.sub}
                 />
-                <Tab label={t("communities.tabs.public")} />
               </Tabs>
               
               {/* Número de resultados y botón */}
@@ -216,7 +214,7 @@ export default function CommunitiesPage() {
                     setVisibilityFilter(event.target.value as VisibilityFilter);
                     setPage(1);
                   }}
-                  disabled={activeTab === 2}
+
                 >
                   <MenuItem value="all">{t('communities.tabs.all')}</MenuItem>
                   <MenuItem value="public">{t('communities.public')}</MenuItem>

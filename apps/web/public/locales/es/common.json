@@ -542,7 +542,9 @@
       "statusApproved": "Solicitud aprobada correctamente.",
       "statusRejected": "Solicitud rechazada correctamente.",
       "statusError": "No se pudo actualizar el estado de la solicitud.",
-      "publishService": "Publicar servicio"
+      "publishService": "Publicar servicio",
+      "requestJoin": "Solicitar unirme",
+      "mustBeMemberToRegisterEvent": "Debes pertenecer a la comunidad para apuntarte a sus eventos."
     },
     "editPage": {
       "organizationPanel": "Panel de gestión de la organización",
@@ -582,7 +584,8 @@
       "publishedDescription": "Revisa, edita o elimina los eventos del espacio.",
       "empty": "Todavía no hay eventos publicados.",
       "noDescription": "Sin descripción",
-      "online": "Online"
+      "online": "Online",
+      "capacityLabel": "Capacidad"
     },
     "activity": {
       "title": "Actividad / Eventos",

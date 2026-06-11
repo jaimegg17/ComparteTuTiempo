@@ -35,6 +35,7 @@ import {
   Logout,
   SwapHoriz,
   NotificationsActiveOutlined,
+  NotificationsNoneOutlined,
   Menu as MenuIcon,
   Close as CloseIcon,
 } from "@mui/icons-material";
@@ -258,6 +259,20 @@ export function Header() {
                 </Typography>
               ) : user ? (
                 <>
+                  <IconButton
+                    component={Link}
+                    href="/profile#notifications"
+                    aria-label={unreadCount > 0 ? `${unreadCount} notificaciones sin leer` : 'Notificaciones'}
+                    sx={{
+                      bgcolor: '#fff',
+                      border: '1px solid rgba(148, 163, 184, 0.22)',
+                      '&:hover': { bgcolor: 'rgba(15,23,42,0.03)' },
+                    }}
+                  >
+                    <Badge badgeContent={unreadCount} color="secondary" invisible={unreadCount === 0}>
+                      {unreadCount > 0 ? <NotificationsActiveOutlined fontSize="small" /> : <NotificationsNoneOutlined fontSize="small" />}
+                    </Badge>
+                  </IconButton>
                   <Button
                     onClick={handleClick}
                     aria-controls={open ? "account-menu" : undefined}

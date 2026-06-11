@@ -293,6 +293,15 @@ export class EventsController {
       throw new NotFoundException('Evento no encontrado');
     }
 
+    const membership = await this.prisma.communityMembership.findUnique({
+      where: { communityId_userId: { communityId: event.communityId, userId } },
+      select: { status: true },
+    });
+
+    if (!membership || membership.status !== 'ACTIVE') {
+      throw new ForbiddenException('Debes pertenecer a la comunidad para apuntarte a sus eventos');
+    }
+
     if (typeof event.capacity === 'number' && event._count.registrations >= event.capacity) {
       throw new ForbiddenException('El evento ha alcanzado su aforo máximo');
     }

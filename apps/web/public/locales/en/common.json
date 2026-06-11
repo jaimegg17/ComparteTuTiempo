@@ -704,7 +704,9 @@
       "statusApproved": "Request approved successfully.",
       "statusRejected": "Request rejected successfully.",
       "statusError": "The request status could not be updated.",
-      "publishService": "Publish service"
+      "publishService": "Publish service",
+      "requestJoin": "Request to join",
+      "mustBeMemberToRegisterEvent": "You must belong to the community to register for its events."
     },
     "editPage": {
       "organizationPanel": "Organization management panel",
@@ -744,7 +746,8 @@
       "publishedDescription": "Review, edit or delete events in this space.",
       "empty": "There are no published events yet.",
       "noDescription": "No description",
-      "online": "Online"
+      "online": "Online",
+      "capacityLabel": "Capacity"
     },
     "activity": {
       "title": "Activity / Events",

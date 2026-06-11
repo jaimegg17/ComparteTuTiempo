@@ -124,7 +124,7 @@ export function CommunityEventForm({
         />
 
         <TextField
-          label={t('communities.events.capacity')}
+          label={t('communities.events.capacityLabel')}
           type="number"
           value={values.capacity}
           onChange={(event) => setValues((prev) => ({ ...prev, capacity: event.target.value }))}

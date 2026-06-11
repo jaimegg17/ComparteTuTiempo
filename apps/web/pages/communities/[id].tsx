@@ -104,6 +104,10 @@ export default function CommunityDetailPage() {
       setNotice(t('communities.detail.loginToRegisterEvent'));
       return;
     }
+    if (!isMember && !canManage) {
+      setNotice(t('communities.detail.mustBeMemberToRegisterEvent'));
+      return;
+    }
     const added = await toggleRegistration(eventId);
     setNotice(added ? t('communities.detail.eventRegistered') : t('communities.detail.eventUnregistered'));
   };
@@ -294,16 +298,6 @@ export default function CommunityDetailPage() {
                     </Button>
                   </>
                 )}
-                {(isMember || canManage) && (
-                  <Button
-                    variant="outlined"
-                    startIcon={<HandymanOutlined />}
-                    onClick={() => router.push(`/services/create?communityId=${community.id}`)}
-                    sx={{ textTransform: 'none', fontWeight: 600, alignSelf: 'flex-start' }}
-                  >
-                    {t('communities.detail.publishService')}
-                  </Button>
-                )}
                 <Button
                   variant={isMember || myPendingMembership ? 'outlined' : 'contained'}
                   color={isMember || myPendingMembership ? 'inherit' : 'primary'}
@@ -316,7 +310,9 @@ export default function CommunityDetailPage() {
                     ? t('communities.detail.leave')
                     : myPendingMembership
                       ? t('communities.detail.cancelRequest')
-                      : t('communities.detail.join')}
+                      : community.isPrivate
+                        ? t('communities.detail.requestJoin')
+                        : t('communities.detail.join')}
                 </Button>
               </Stack>
 
