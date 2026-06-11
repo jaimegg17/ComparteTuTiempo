@@ -121,18 +121,22 @@ async function runDataMigrations() {
     const statements = splitSqlStatements(fileContent);
     console.log(`🧩 Aplicando ${fileName} (${statements.length} sentencia(s))...`);
 
-    await prisma.$transaction(async tx => {
-      for (const statement of statements) {
-        await tx.$executeRawUnsafe(statement);
-      }
-      await tx.$executeRawUnsafe(
-        'INSERT INTO data_migrations (name, checksum, applied_at) VALUES ($1, $2, NOW())',
-        fileName,
-        fileChecksum,
-      );
-    });
+    try {
+      await prisma.$transaction(async tx => {
+        for (const statement of statements) {
+          await tx.$executeRawUnsafe(statement);
+        }
+        await tx.$executeRawUnsafe(
+          'INSERT INTO data_migrations (name, checksum, applied_at) VALUES ($1, $2, NOW())',
+          fileName,
+          fileChecksum,
+        );
+      });
 
-    console.log(`✅ ${fileName} aplicada correctamente.`);
+      console.log(`✅ ${fileName} aplicada correctamente.`);
+    } catch (error) {
+      console.error(`❌ Error aplicando ${fileName}. Se continúa con las siguientes migraciones.`, error);
+    }
   }
 
   console.log('🎉 Data migrations completadas.');
