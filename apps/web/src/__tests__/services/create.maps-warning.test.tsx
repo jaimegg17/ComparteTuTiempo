@@ -58,7 +58,7 @@ describe('CreateServicePage maps warning', () => {
     render(<CreateServicePage />);
 
     expect(
-      await screen.findByText(/Google Places no está configurado en frontend/i),
+      await screen.findByText(/OpenStreetMap/i),
     ).toBeInTheDocument();
 
     if (previousValue) {

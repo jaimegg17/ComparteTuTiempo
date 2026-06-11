@@ -12,6 +12,9 @@ import {
   Alert,
   CircularProgress,
   Stack,
+  List,
+  ListItemButton,
+  ListItemText,
 } from '@mui/material';
 import { Layout } from '@/components/Layout';
 import { useUser } from '@auth0/nextjs-auth0/client';
@@ -83,9 +86,13 @@ export default function CreateServicePage() {
   const [mapsLoaded, setMapsLoaded] = useState(false);
   const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
   const [locating, setLocating] = useState(false);
+  const [locationSuggestions, setLocationSuggestions] = useState<Array<{ displayName: string; lat: number; lon: number }>>([]);
+  const [locationSearchLoading, setLocationSearchLoading] = useState(false);
+  const [locationSuggestionsOpen, setLocationSuggestionsOpen] = useState(false);
   const locationInputRef = useRef<HTMLInputElement | null>(null);
   const uploadImage = useUploadImage();
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const useGooglePlacesAutocomplete = false; // Manual input + OpenStreetMap suggestions are more stable on free deployments.
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -180,7 +187,7 @@ export default function CreateServicePage() {
   };
 
   useEffect(() => {
-    if (!mapsLoaded || !locationInputRef.current || typeof window === 'undefined') return;
+    if (!useGooglePlacesAutocomplete || !mapsLoaded || !locationInputRef.current || typeof window === 'undefined') return;
 
     const googleObj = (
       window as Window & {
@@ -229,7 +236,50 @@ export default function CreateServicePage() {
     return () => {
       if (listener && typeof listener.remove === 'function') listener.remove();
     };
-  }, [mapsLoaded]);
+  }, [mapsLoaded, useGooglePlacesAutocomplete]);
+
+  useEffect(() => {
+    const query = formData.location.trim();
+    if (!locationSuggestionsOpen || query.length < 3 || formData.latitude != null || formData.longitude != null) {
+      setLocationSuggestions([]);
+      setLocationSearchLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => {
+      setLocationSearchLoading(true);
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=5&addressdetails=1&q=${encodeURIComponent(query)}`, {
+        signal: controller.signal,
+        headers: {
+          Accept: 'application/json',
+        },
+      })
+        .then((response) => (response.ok ? response.json() : []))
+        .then((items: Array<{ display_name?: string; lat?: string; lon?: string }>) => {
+          setLocationSuggestions(
+            items
+              .map((item) => ({
+                displayName: item.display_name || '',
+                lat: Number(item.lat),
+                lon: Number(item.lon),
+              }))
+              .filter((item) => item.displayName && Number.isFinite(item.lat) && Number.isFinite(item.lon)),
+          );
+        })
+        .catch((suggestionError) => {
+          if (!(suggestionError instanceof DOMException && suggestionError.name === 'AbortError')) {
+            setLocationSuggestions([]);
+          }
+        })
+        .finally(() => setLocationSearchLoading(false));
+    }, 350);
+
+    return () => {
+      window.clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [formData.location, formData.latitude, formData.longitude, locationSuggestionsOpen]);
 
   const handleUseCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -396,7 +446,7 @@ export default function CreateServicePage() {
 
   return (
     <Layout>
-      {googleMapsApiKey && (
+      {googleMapsApiKey && useGooglePlacesAutocomplete && (
         <Script
           src={`https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&libraries=places`}
           strategy="afterInteractive"
@@ -421,9 +471,8 @@ export default function CreateServicePage() {
             </Typography>
 
             {!googleMapsApiKey && (
-              <Alert severity="warning" sx={{ mb: 3 }}>
-                Google Places no está configurado en frontend (`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`).
-                Puedes seguir creando servicios, pero sin autocompletado de ubicación.
+              <Alert severity="info" sx={{ mb: 3 }}>
+                Puedes escribir una ubicación manualmente o elegir una sugerencia de OpenStreetMap. Google Places no es necesario para crear servicios.
               </Alert>
             )}
 
@@ -580,13 +629,39 @@ export default function CreateServicePage() {
                     error={!!errors.location}
                     helperText={
                       errors.location ||
-                      (googleMapsApiKey
-                        ? 'Puedes escribir una dirección, seleccionar una sugerencia o usar tu ubicación actual.'
-                        : 'Añade una ubicación textual. Sin API key no hay sugerencias.')
+                      (locationSearchLoading
+                        ? 'Buscando sugerencias…'
+                        : 'Escribe una dirección, selecciona una sugerencia o usa tu ubicación actual.')
                     }
+                    onFocus={() => setLocationSuggestionsOpen(true)}
                     disabled={loading || success}
                     required
                   />
+                  {locationSuggestionsOpen && locationSuggestions.length > 0 && (
+                    <Paper variant="outlined" sx={{ mt: -1, borderRadius: 2, overflow: 'hidden' }}>
+                      <List dense disablePadding>
+                        {locationSuggestions.map((suggestion) => (
+                          <ListItemButton
+                            key={`${suggestion.lat}-${suggestion.lon}-${suggestion.displayName}`}
+                            onClick={() => {
+                              setFormData((prev) => ({
+                                ...prev,
+                                location: suggestion.displayName,
+                                formattedAddress: suggestion.displayName,
+                                latitude: suggestion.lat,
+                                longitude: suggestion.lon,
+                                placeId: undefined,
+                              }));
+                              setLocationSuggestions([]);
+                              setLocationSuggestionsOpen(false);
+                            }}
+                          >
+                            <ListItemText primary={suggestion.displayName} />
+                          </ListItemButton>
+                        ))}
+                      </List>
+                    </Paper>
+                  )}
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
                   <Button

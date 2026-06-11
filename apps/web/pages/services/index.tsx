@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useRouter } from 'next/router';
-import { Typography, Box, CircularProgress, Button, Tabs, Tab, Drawer, IconButton, Chip, Paper, Stack } from '@mui/material';
+import { Typography, Box, CircularProgress, Button, Tabs, Tab, Drawer, IconButton, Chip, Paper, Stack, Alert } from '@mui/material';
 import { Layout } from '@/components/Layout';
 import { ServiceCard } from '@/components/ServiceCard';
 import { FilterSidebar } from '@/components/filters/FilterSidebar';
@@ -122,6 +122,7 @@ export default function ServicesPage() {
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [mapsLoaded, setMapsLoaded] = useState(false);
+  const [mapsUnavailable, setMapsUnavailable] = useState(false);
   const [mapCenter, setMapCenter] = useState<MapCenter>({ lat: 40.4168, lng: -3.7038 });
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<GoogleMapInstance | null>(null);
@@ -464,7 +465,15 @@ export default function ServicesPage() {
   }, [mapsLoaded, userProfile?.location, useNearby, nearLat, nearLng]);
 
   useEffect(() => {
-    if (viewMode !== 'map' || !mapsLoaded || !mapContainerRef.current || typeof window === 'undefined') return;
+    if (viewMode === 'map' && googleMapsApiKey && !mapsLoaded) {
+      setMapsUnavailable(false);
+      const timeout = window.setTimeout(() => setMapsUnavailable(true), 5000);
+      return () => window.clearTimeout(timeout);
+    }
+  }, [viewMode, googleMapsApiKey, mapsLoaded]);
+
+  useEffect(() => {
+    if (viewMode !== 'map' || mapsUnavailable || !mapsLoaded || !mapContainerRef.current || typeof window === 'undefined') return;
 
     const googleObj = window.google;
     if (!googleObj?.maps) return;
@@ -541,7 +550,7 @@ export default function ServicesPage() {
       map.setCenter(mapCenter);
       map.setZoom(useNearby ? 12 : 6);
     }
-  }, [viewMode, mapsLoaded, servicesWithCoordinates, mapCenter, useNearby, nearLat, nearLng, getServiceMapPopupContent]);
+  }, [viewMode, mapsUnavailable, mapsLoaded, servicesWithCoordinates, mapCenter, useNearby, nearLat, nearLng, getServiceMapPopupContent]);
 
   return (
     <Layout>
@@ -549,7 +558,11 @@ export default function ServicesPage() {
         <Script
           src={`https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}`}
           strategy="afterInteractive"
-          onLoad={() => setMapsLoaded(true)}
+          onLoad={() => {
+            setMapsLoaded(true);
+            setMapsUnavailable(false);
+          }}
+          onError={() => setMapsUnavailable(true)}
         />
       )}
       <Box sx={{ bgcolor: '#f5f5f5', minHeight: '100%', py: 4 }}>
@@ -842,14 +855,23 @@ export default function ServicesPage() {
                     </Box>
                   </Box>
 
-                  {!googleMapsApiKey ? (
-                    <Box sx={{ py: 8, textAlign: 'center' }}>
-                      <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
-                        Google Maps no está configurado en frontend.
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Añade la API key para habilitar la vista de mapa.
-                      </Typography>
+                  {!googleMapsApiKey || mapsUnavailable ? (
+                    <Box sx={{ display: 'grid', gap: 2 }}>
+                      <Alert severity="info">
+                        Google Maps no está disponible ahora mismo. Mostramos un mapa básico de OpenStreetMap y enlaces externos para no bloquear la navegación.
+                      </Alert>
+                      <Box
+                        component="iframe"
+                        title="Mapa OpenStreetMap"
+                        src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapCenter.lng - 0.25}%2C${mapCenter.lat - 0.18}%2C${mapCenter.lng + 0.25}%2C${mapCenter.lat + 0.18}&layer=mapnik&marker=${mapCenter.lat}%2C${mapCenter.lng}`}
+                        sx={{
+                          width: '100%',
+                          height: { xs: 420, md: 560 },
+                          border: 0,
+                          borderRadius: 3,
+                          overflow: 'hidden',
+                        }}
+                      />
                     </Box>
                   ) : (
                     <Box
