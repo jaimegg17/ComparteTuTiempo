@@ -3,8 +3,7 @@ import { useRouter } from 'next/router';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useState } from 'react';
 import { ArrowOutwardRounded, FavoriteBorderRounded, FavoriteRounded } from '@mui/icons-material';
-import { useUser } from '@auth0/nextjs-auth0/client';
-import { useFavoriteServices } from '@/hooks/useFavoriteServices';
+
 
 interface ServiceCardProps {
   service: {
@@ -24,15 +23,14 @@ interface ServiceCardProps {
     formattedAddress?: string | null;
     distanceKm?: number | null;
   };
+  favorite?: boolean;
+  onToggleFavorite?: (serviceId: number) => void | Promise<void | boolean>;
 }
 
-export function ServiceCard({ service }: ServiceCardProps) {
+export function ServiceCard({ service, favorite = false, onToggleFavorite }: ServiceCardProps) {
   const router = useRouter();
   const { t } = useTranslation();
   const [imageError, setImageError] = useState(false);
-  const { user } = useUser();
-  const { isFavorite, toggleFavorite } = useFavoriteServices(user?.sub);
-  const favorite = isFavorite(service.id);
   const isRequest = service.intent === 'REQUEST';
 
   const getCategoryDisplayName = (category: string) => {
@@ -128,13 +126,13 @@ export function ServiceCard({ service }: ServiceCardProps) {
             </Box>
           </Box>
 
-          <Tooltip title={favorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}>
+          <Tooltip title={favorite ? t('services.favorites.remove') : t('services.favorites.save')}>
             <IconButton
-              aria-label={favorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+              aria-label={favorite ? t('services.favorites.remove') : t('services.favorites.save')}
               onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
-                toggleFavorite(service.id);
+                onToggleFavorite?.(service.id);
               }}
               sx={{
                 position: 'absolute',
@@ -152,7 +150,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
         <CardContent sx={{ flexGrow: 1, p: 2.5 }}>
           <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 1.5, gap: 1, flexWrap: 'wrap' }}>
             <Chip label={getCategoryDisplayName(service.category)} size="small" sx={{ fontSize: '11px', height: '22px', fontWeight: 500, bgcolor: '#F4BF61', color: '#000', '&:hover': { bgcolor: '#E5B050' } }} />
-            {favorite && <Chip label="Favorito" size="small" variant="outlined" color="error" sx={{ fontSize: '11px', height: '22px', fontWeight: 700 }} />}
+            {favorite && <Chip label={t('services.favorites.saved')} size="small" variant="outlined" color="error" sx={{ fontSize: '11px', height: '22px', fontWeight: 700 }} />}
           </Box>
 
           <Typography variant="h6" component="h3" sx={{ mb: 1, fontWeight: 600, lineHeight: 1.3, fontSize: '16px' }}>

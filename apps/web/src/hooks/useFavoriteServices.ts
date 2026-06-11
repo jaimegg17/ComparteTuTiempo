@@ -2,33 +2,72 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from './useAuth';
 import { buildApiUrl } from '@/shared/api/config';
 
+const FAVORITES_EVENT = 'ctt:favorites-updated';
 const storageKeyFor = (userId?: string | null) => `ctt:favorites:${userId || 'guest'}`;
+
+const readCachedFavorites = (userId?: string | null): number[] => {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = window.localStorage.getItem(storageKeyFor(userId));
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed.filter((id) => Number.isInteger(id)) : [];
+  } catch {
+    return [];
+  }
+};
+
+const writeCachedFavorites = (userId: string | null | undefined, ids: number[]) => {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(storageKeyFor(userId), JSON.stringify(ids));
+};
+
+const notifyFavoritesUpdated = (userId: string | null | undefined, ids: number[]) => {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent(FAVORITES_EVENT, { detail: { userId: userId || null, ids } }));
+};
 
 export function useFavoriteServices(userId?: string | null) {
   const { accessToken, getAccessToken } = useAuth();
   const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const persistLocal = useCallback((next: number[]) => {
+    setFavoriteIds(next);
+    writeCachedFavorites(userId, next);
+    notifyFavoritesUpdated(userId, next);
+  }, [userId]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const handleFavoritesUpdated = (event: Event) => {
+      const customEvent = event as CustomEvent<{ userId?: string | null; ids?: number[] }>;
+      const eventUserId = customEvent.detail?.userId || null;
+      const currentUserId = userId || null;
+      if (eventUserId !== currentUserId) return;
+      setFavoriteIds(customEvent.detail?.ids ?? []);
+    };
+
+    window.addEventListener(FAVORITES_EVENT, handleFavoritesUpdated);
+    return () => window.removeEventListener(FAVORITES_EVENT, handleFavoritesUpdated);
+  }, [userId]);
+
   useEffect(() => {
     const loadFavorites = async () => {
       if (typeof window === 'undefined') return;
 
+      // Paint cached values immediately so buttons/favorite chips do not flicker or stay disabled.
+      setFavoriteIds(readCachedFavorites(userId));
+
       if (!userId) {
-        try {
-          const raw = window.localStorage.getItem(storageKeyFor(userId));
-          setFavoriteIds(raw ? JSON.parse(raw) : []);
-        } catch {
-          setFavoriteIds([]);
-        }
         return;
       }
 
       setLoading(true);
 
       try {
-        const token = accessToken || await getAccessToken();
+        const token = accessToken || await getAccessToken(true);
         if (!token) {
-          setFavoriteIds([]);
           return;
         }
 
@@ -44,23 +83,16 @@ export function useFavoriteServices(userId?: string | null) {
         }
 
         const data = await response.json() as { favoriteServiceIds?: number[] };
-        setFavoriteIds(data.favoriteServiceIds ?? []);
+        persistLocal(data.favoriteServiceIds ?? []);
       } catch {
-        setFavoriteIds([]);
+        // Keep cached/optimistic favorites instead of blanking the UI.
       } finally {
         setLoading(false);
       }
     };
 
     void loadFavorites();
-  }, [userId, accessToken, getAccessToken]);
-
-  const persist = useCallback((next: number[]) => {
-    setFavoriteIds(next);
-    if (typeof window !== 'undefined' && !userId) {
-      window.localStorage.setItem(storageKeyFor(userId), JSON.stringify(next));
-    }
-  }, [userId]);
+  }, [userId, accessToken, getAccessToken, persistLocal]);
 
   const isFavorite = useCallback((serviceId: number) => favoriteIds.includes(serviceId), [favoriteIds]);
 
@@ -70,16 +102,16 @@ export function useFavoriteServices(userId?: string | null) {
       ? favoriteIds.filter((id) => id !== serviceId)
       : [...favoriteIds, serviceId];
 
-    persist(optimistic);
+    persistLocal(optimistic);
 
     if (!userId) {
       return !alreadyFavorite;
     }
 
     try {
-      const token = accessToken || await getAccessToken();
+      const token = accessToken || await getAccessToken(true);
       if (!token) {
-        persist(favoriteIds);
+        persistLocal(favoriteIds);
         return alreadyFavorite;
       }
 
@@ -95,14 +127,15 @@ export function useFavoriteServices(userId?: string | null) {
         throw new Error('No se pudo actualizar el favorito');
       }
 
+      writeCachedFavorites(userId, optimistic);
       return !alreadyFavorite;
     } catch {
-      persist(favoriteIds);
+      persistLocal(favoriteIds);
       return alreadyFavorite;
     }
-  }, [favoriteIds, persist, userId, accessToken, getAccessToken]);
+  }, [favoriteIds, persistLocal, userId, accessToken, getAccessToken]);
 
-  const clearFavorites = useCallback(() => persist([]), [persist]);
+  const clearFavorites = useCallback(() => persistLocal([]), [persistLocal]);
 
   return useMemo(() => ({ favoriteIds, favoritesCount: favoriteIds.length, isFavorite, toggleFavorite, clearFavorites, loading }), [favoriteIds, isFavorite, toggleFavorite, clearFavorites, loading]);
 }

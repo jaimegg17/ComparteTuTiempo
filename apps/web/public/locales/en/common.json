@@ -357,7 +357,8 @@
     },
     "favorites": {
       "save": "Save to favorites",
-      "remove": "Remove from favorites"
+      "remove": "Remove from favorites",
+      "saved": "Favorite"
     },
     "actions": {
       "createRequest": "Create request",

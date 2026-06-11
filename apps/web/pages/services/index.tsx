@@ -97,7 +97,7 @@ export default function ServicesPage() {
   const router = useRouter();
   const { t } = useTranslation();
   const { user } = useUser();
-  const { favoriteIds, favoritesCount } = useFavoriteServices(user?.sub);
+  const { favoriteIds, favoritesCount, isFavorite, toggleFavorite } = useFavoriteServices(user?.sub);
   const { userProfile } = useUserProfile();
   const { accessToken } = useAuth();
   const [services, setServices] = useState<Service[]>([]);
@@ -911,7 +911,12 @@ export default function ServicesPage() {
                 }}
               >
                 {visibleServices.map((service) => (
-                  <ServiceCard key={service.id} service={service} />
+                  <ServiceCard
+                    key={service.id}
+                    service={service}
+                    favorite={isFavorite(service.id)}
+                    onToggleFavorite={toggleFavorite}
+                  />
                 ))}
               </Box>
             )}
