@@ -107,30 +107,48 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
       if (maxPrice !== undefined) where.price.lte = maxPrice;
     }
 
-    const prismaServices = await this.prisma.service.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            imageUrl: true,
-          }
+    const serviceInclude = {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          imageUrl: true,
         },
-        ratings: {
-          select: {
-            score: true,
-          }
-        },
-        _count: {
-          select: {
-            ratings: true,
-            exchanges: true,
-          }
-        }
       },
-    });
+      ratings: {
+        select: {
+          score: true,
+        },
+      },
+      _count: {
+        select: {
+          ratings: true,
+          exchanges: true,
+        },
+      },
+    } as const;
+
+    const shouldSortByDistance = nearLat !== undefined && nearLng !== undefined;
+
+    const [totalBeforeDistanceFilter, prismaServices] = shouldSortByDistance
+      ? [
+          0,
+          await this.prisma.service.findMany({
+            where,
+            orderBy: { createdAt: 'desc' },
+            include: serviceInclude,
+          }),
+        ]
+      : await this.prisma.$transaction([
+          this.prisma.service.count({ where }),
+          this.prisma.service.findMany({
+            where,
+            orderBy: { createdAt: 'desc' },
+            skip,
+            take: pageSize,
+            include: serviceInclude,
+          }),
+        ]);
 
     // Calculate average rating for each service
     let servicesWithRatings = prismaServices.map(service => {
@@ -153,14 +171,16 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
       };
     });
 
-    if (nearLat !== undefined && nearLng !== undefined) {
+    let total = totalBeforeDistanceFilter;
+    let paginatedServices = servicesWithRatings;
+
+    if (shouldSortByDistance) {
       servicesWithRatings = servicesWithRatings
         .filter((service) => service.distanceKm !== null && (service.distanceKm as number) <= radiusKm)
         .sort((a, b) => (a.distanceKm as number) - (b.distanceKm as number));
+      total = servicesWithRatings.length;
+      paginatedServices = servicesWithRatings.slice(skip, skip + pageSize);
     }
-
-    const total = servicesWithRatings.length;
-    const paginatedServices = servicesWithRatings.slice(skip, skip + pageSize);
 
     const totalPages = Math.ceil(total / pageSize);
 
