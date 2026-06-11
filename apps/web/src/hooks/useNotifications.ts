@@ -33,7 +33,7 @@ export function useNotifications(userId?: string | null) {
 
     setLoading(true);
     try {
-      const token = accessToken || await getAccessToken();
+      const token = accessToken || await getAccessToken(true);
       if (!token) return;
 
       const response = await fetch(buildApiUrl('/users/me/notifications'), {
@@ -51,8 +51,7 @@ export function useNotifications(userId?: string | null) {
       setNotifications(data.notifications ?? []);
       setUnreadCount(data.unreadCount ?? 0);
     } catch {
-      setNotifications([]);
-      setUnreadCount(0);
+      // Keep the latest known notifications instead of hiding the badge on transient auth/network failures.
     } finally {
       setLoading(false);
     }
@@ -60,7 +59,14 @@ export function useNotifications(userId?: string | null) {
 
   useEffect(() => {
     void loadNotifications();
-  }, [loadNotifications]);
+    if (!userId) return undefined;
+
+    const interval = window.setInterval(() => {
+      void loadNotifications();
+    }, 30000);
+
+    return () => window.clearInterval(interval);
+  }, [loadNotifications, userId]);
 
   const markAsRead = useCallback(async (notificationId: number) => {
     if (!userId) return;

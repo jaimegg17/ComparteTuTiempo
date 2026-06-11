@@ -305,7 +305,7 @@ export default function ServicesPage() {
 
   const geocodeSearchLocation = async (): Promise<MapCenter | null> => {
     const query = location.trim() || userProfile?.location?.trim();
-    if (!query) return null;
+    if (!query) return mapCenter;
 
     const googleObj = typeof window !== 'undefined' ? window.google : undefined;
     if (googleObj?.maps?.Geocoder) {
@@ -381,8 +381,6 @@ export default function ServicesPage() {
       setNearLng(geocoded.lng);
       setUseNearby(true);
       fetchServices({ radiusKm: newRadius, nearLat: geocoded.lat, nearLng: geocoded.lng, useNearby: true });
-    } else {
-      showToast({ message: 'Escribe una ubicación o usa tu ubicación actual para aplicar el radio.', severity: 'info' });
     }
   };
 

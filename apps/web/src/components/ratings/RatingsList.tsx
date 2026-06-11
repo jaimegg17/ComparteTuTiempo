@@ -44,8 +44,7 @@ export function RatingsList({ serviceId, serviceTitle, onRatingUpdated }: Rating
         setPage((prev) => prev - 1);
       }
       onRatingUpdated?.();
-    } catch (err) {
-      console.error('Error al eliminar valoración:', err);
+    } catch {
       alert('Error al eliminar la valoración');
     } finally {
       setDeletingId(null);

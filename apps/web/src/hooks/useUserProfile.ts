@@ -37,7 +37,6 @@ export const useUserProfile = () => {
       }
       
       if (!token) {
-        console.log('No access token available for profile loading');
         return;
       }
 
@@ -51,11 +50,8 @@ export const useUserProfile = () => {
       if (response.ok) {
         const responseData = await response.json();
         setUserProfile(responseData.user);
-      } else {
-        console.error('Failed to load user profile:', response.status);
       }
-    } catch (error) {
-      console.error('Error loading user profile:', error);
+    } catch {
     } finally {
       setProfileLoading(false);
     }

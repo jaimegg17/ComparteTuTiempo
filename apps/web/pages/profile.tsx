@@ -136,8 +136,7 @@ const ProfilePage = () => {
         setFormData((prev) => ({ ...prev, imageUrl: result.url }));
         setProfileData((prev) => (prev ? { ...prev, imageUrl: result.url } : prev));
         updateUserProfile({ imageUrl: result.url });
-      } catch (uploadError) {
-        console.error('Upload error:', uploadError);
+      } catch {
         setError('Error uploading image');
       }
     },
@@ -203,8 +202,7 @@ const ProfilePage = () => {
       } else {
         setError('Error loading profile');
       }
-    } catch (loadError) {
-      console.error('Profile load error:', loadError);
+    } catch {
       setError('Error loading profile');
     }
   }, [accessToken, getAccessToken, setError, user]);
@@ -253,8 +251,8 @@ const ProfilePage = () => {
         completedExchanges,
         publishedServices: services.length,
       });
-    } catch (statsError) {
-      console.error('Stats load error:', statsError);
+    } catch {
+      // Optional stats should not block the profile page.
     }
   }, [accessToken, getAccessToken, user?.sub]);
 
@@ -317,12 +315,9 @@ const ProfilePage = () => {
         setSuccess(true);
         setError(null);
       } else {
-        const errorText = await response.text();
-        console.error('Profile update failed:', response.status, errorText);
         throw new Error(`Error updating profile: ${response.status}`);
       }
-    } catch (submitError) {
-      console.error('Profile update error:', submitError);
+    } catch {
       setError('Error updating profile');
     } finally {
       setIsSubmitting(false);

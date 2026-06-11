@@ -119,6 +119,26 @@ describe('ServicesPage nearby flow', () => {
     });
   });
 
+  it('aplica radio con centro por defecto si no hay ubicación escrita ni geolocalización activada', async () => {
+    render(<ServicesPage />);
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalled();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /25 km/i }));
+
+    await waitFor(() => {
+      const calls = (global.fetch as ReturnType<typeof vi.fn>).mock.calls;
+      expect(calls.some(([url]) =>
+        String(url).includes('/api/services/nearby/search') &&
+        String(url).includes('nearLat=40.4168') &&
+        String(url).includes('nearLng=-3.7038') &&
+        String(url).includes('radiusKm=25'),
+      )).toBe(true);
+    });
+  });
+
   it('permite quitar cercanía y volver al endpoint general de servicios', async () => {
     render(<ServicesPage />);
 

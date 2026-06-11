@@ -15,7 +15,6 @@ export const VideoPlaceholder: React.FC = () => {
 
   const handlePlayVideo = () => {
     // TODO: Implementar reproducción de video
-    console.log('Reproducir video explicativo');
   };
 
   return (

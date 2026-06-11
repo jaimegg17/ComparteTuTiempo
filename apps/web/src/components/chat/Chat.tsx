@@ -113,10 +113,8 @@ export function Chat({
           setLastMessageId(fetchedMessages[fetchedMessages.length - 1].id);
         }
       }
-    } catch (err) {
-      if (!silent) {
-        console.error('Error fetching messages:', err);
-      }
+    } catch {
+      // Keep the current chat state on transient polling failures.
     } finally {
       if (!silent) {
         setIsPolling(false);
