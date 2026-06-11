@@ -58,7 +58,7 @@ describe('CreateServicePage maps warning', () => {
     render(<CreateServicePage />);
 
     expect(
-      await screen.findByText(/OpenStreetMap/i),
+      await screen.findByText(/Google Places no es necesario/i),
     ).toBeInTheDocument();
 
     if (previousValue) {
