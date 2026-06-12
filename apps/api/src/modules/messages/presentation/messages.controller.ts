@@ -12,14 +12,9 @@ import {
   Param,
   ParseIntPipe 
 } from '@nestjs/common';
-import { Transform } from 'class-transformer';
-import { IsInt, IsOptional, Min } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { IsInt, IsNumber, IsOptional, IsString, MaxLength, Min, MinLength } from 'class-validator';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam } from '@nestjs/swagger';
-import { createZodDto } from '@anatine/zod-nestjs';
-import { 
-  MessageCreateSchema, 
-  MessageListQuerySchema 
-} from '@comparte-tu-tiempo/contracts';
 import { CreateMessageUseCase } from '../application/create-message.use-case';
 import { ListConversationsUseCase } from '../application/list-conversations.use-case';
 import { ListMessagesUseCase } from '../application/list-messages.use-case';
@@ -27,11 +22,37 @@ import { GetMessagesByExchangeUseCase } from '../application/get-messages-by-exc
 import { MarkMessageReadUseCase } from '../application/mark-message-read.use-case';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
 
-// DTOs generados desde Zod
-export class CreateMessageDto extends createZodDto(MessageCreateSchema) {}
+export class CreateMessageDto {
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  exchangeId!: number;
 
-// Query DTO for listing messages
-export class MessageListQueryDto extends createZodDto(MessageListQuerySchema) {}
+  @IsString()
+  @MinLength(1)
+  @MaxLength(1000)
+  content!: string;
+}
+
+export class MessageListQueryDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  exchangeId?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  page?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  pageSize?: number;
+}
 
 class MessagePaginationQueryDto {
   @IsOptional()
