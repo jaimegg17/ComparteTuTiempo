@@ -82,8 +82,18 @@ export function ServiceCard({ service, favorite = false, onToggleFavorite }: Ser
       }}
     >
       <CardActionArea
+        component="div"
+        role="button"
+        tabIndex={0}
         onClick={() => router.push(`/services/${service.id}`)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            router.push(`/services/${service.id}`);
+          }
+        }}
         sx={{
+          cursor: 'pointer',
           height: '100%',
           display: 'flex',
           flexDirection: 'column',

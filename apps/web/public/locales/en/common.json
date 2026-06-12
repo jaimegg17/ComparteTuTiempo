@@ -421,16 +421,13 @@
     }
   },
   "chat": {
-    "title": "Chat",
+    "exchangeChat": "Exchange chat",
+    "newMessages": "{{count}} new message",
+    "newMessages_plural": "{{count}} new messages",
+    "empty": "No messages yet. Write to clarify availability, details and next steps.",
     "placeholder": "Type your message...",
-    "send": "Send",
-    "typing": "{{name}} is typing...",
-    "online": "Online",
-    "offline": "Offline",
-    "last_seen": "Last seen {{time}}",
-    "no_messages": "No messages yet",
-    "error": "Error loading messages",
-    "success": "Message sent successfully"
+    "refresh": "Refresh messages",
+    "realtimeEnabled": "Automatic updates enabled"
   },
   "ratings": {
     "title": "Ratings",
@@ -1041,6 +1038,27 @@
       "start": "Start exchange",
       "complete": "Complete",
       "unknownUser": "User"
+    },
+    "detail": {
+      "overline": "EXCHANGE DETAIL",
+      "back": "Back to exchanges",
+      "subtitle": "Your role: {{role}} · Conversation with {{name}}",
+      "roleRequester": "requester",
+      "roleProvider": "provider",
+      "summary": "Summary",
+      "service": "Service",
+      "createdAt": "Created on",
+      "duration": "Duration",
+      "durationValue": "{{hours}} hours",
+      "initialMessage": "Initial message",
+      "participants": "Participants",
+      "requester": "Requester",
+      "provider": "Provider",
+      "you": "You",
+      "chatTitle": "Conversation",
+      "chatSubtitle": "Coordinate the details with {{name}} before confirming or completing the exchange.",
+      "loadError": "Error loading the exchange",
+      "notFound": "The exchange detail could not be loaded"
     }
   },
   "languageSwitcher": {

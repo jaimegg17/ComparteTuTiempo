@@ -421,16 +421,13 @@
     }
   },
   "chat": {
-    "title": "Chat",
+    "exchangeChat": "Chat del intercambio",
+    "newMessages": "{{count}} mensaje nuevo",
+    "newMessages_plural": "{{count}} mensajes nuevos",
+    "empty": "Todavía no hay mensajes. Escribe para aclarar disponibilidad, detalles y próximos pasos.",
     "placeholder": "Escribe tu mensaje...",
-    "send": "Enviar",
-    "typing": "{{name}} está escribiendo...",
-    "online": "En línea",
-    "offline": "Desconectado",
-    "last_seen": "Visto por última vez {{time}}",
-    "no_messages": "Aún no hay mensajes",
-    "error": "Error al cargar mensajes",
-    "success": "Mensaje enviado exitosamente"
+    "refresh": "Actualizar mensajes",
+    "realtimeEnabled": "Actualización automática activada"
   },
   "ratings": {
     "title": "Valoraciones",
@@ -1041,6 +1038,27 @@
       "start": "Iniciar intercambio",
       "complete": "Completar",
       "unknownUser": "Usuario"
+    },
+    "detail": {
+      "overline": "DETALLE DEL INTERCAMBIO",
+      "back": "Volver a intercambios",
+      "subtitle": "Tu rol: {{role}} · Conversación con {{name}}",
+      "roleRequester": "solicitante",
+      "roleProvider": "proveedor/a",
+      "summary": "Resumen",
+      "service": "Servicio",
+      "createdAt": "Creado el",
+      "duration": "Duración",
+      "durationValue": "{{hours}} horas",
+      "initialMessage": "Mensaje inicial",
+      "participants": "Participantes",
+      "requester": "Solicitante",
+      "provider": "Proveedor/a",
+      "you": "Tú",
+      "chatTitle": "Conversación",
+      "chatSubtitle": "Coordina los detalles con {{name}} antes de confirmar o completar el intercambio.",
+      "loadError": "Error al cargar el intercambio",
+      "notFound": "No se pudo cargar el detalle del intercambio"
     }
   },
   "languageSwitcher": {

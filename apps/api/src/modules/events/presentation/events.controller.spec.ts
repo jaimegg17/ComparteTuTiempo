@@ -24,6 +24,15 @@ describe('EventsController', () => {
       update: jest.fn(),
       delete: jest.fn(),
     },
+    eventRegistration: {
+      findMany: jest.fn(),
+      upsert: jest.fn(),
+      count: jest.fn(),
+      deleteMany: jest.fn(),
+    },
+    userNotification: {
+      create: jest.fn(),
+    },
   };
 
   const controller = new EventsController(
@@ -126,6 +135,22 @@ describe('EventsController', () => {
         { user: { sub: 'auth0|user' } },
       ),
     ).rejects.toThrow('No autorizado para actualizar este evento');
+  });
+
+  it('bloquea la inscripción a eventos si el usuario no es miembro activo', async () => {
+    prisma.event.findUnique.mockResolvedValue({
+      id: 15,
+      communityId: 4,
+      capacity: 20,
+      _count: { registrations: 0 },
+    });
+    prisma.communityMembership.findUnique.mockResolvedValue(null);
+
+    await expect(
+      controller.registerForEvent(15, { user: { sub: 'auth0|outsider' } }),
+    ).rejects.toThrow('Debes pertenecer a la comunidad para apuntarte a sus eventos');
+
+    expect(prisma.eventRegistration.upsert).not.toHaveBeenCalled();
   });
 
   it('permite eliminar un evento si el usuario es admin', async () => {

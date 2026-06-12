@@ -34,6 +34,34 @@ describe('RatingsController - delete rating', () => {
     expect(createRatingUseCase.execute).not.toHaveBeenCalled();
   });
 
+  it('acepta payload válido de valoración y fuerza userId autenticado', async () => {
+    const createdAt = new Date();
+    createRatingUseCase.execute.mockResolvedValue({
+      rating: {
+        toContract: () => ({
+          id: 7,
+          userId: 'auth0|u1',
+          serviceId: 1,
+          score: 5,
+          comment: 'Muy buena experiencia',
+          createdAt,
+          updatedAt: createdAt,
+        }),
+      },
+    });
+
+    const result = await controller.createRating(
+      { serviceId: 1, score: 5, comment: 'Muy buena experiencia' },
+      { user: { sub: 'auth0|u1' } },
+    );
+
+    expect(createRatingUseCase.execute).toHaveBeenCalledWith({
+      data: { serviceId: 1, score: 5, comment: 'Muy buena experiencia', userId: 'auth0|u1' },
+      userId: 'auth0|u1',
+    });
+    expect(result.rating).toEqual(expect.objectContaining({ serviceId: 1, score: 5 }));
+  });
+
   it('ejecuta DeleteRatingUseCase con id y userId', async () => {
     deleteRatingUseCase.execute.mockResolvedValue(undefined);
 

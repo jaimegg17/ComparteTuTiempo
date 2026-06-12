@@ -31,6 +31,34 @@ describe('MessagesController', () => {
     ).rejects.toThrow(UnauthorizedException);
   });
 
+  it('acepta payload válido del chat sin rechazar exchangeId/content', async () => {
+    const createdAt = new Date();
+    createMessageUseCase.execute.mockResolvedValue({
+      message: {
+        toContract: () => ({
+          id: 99,
+          exchangeId: 10,
+          senderId: 'auth0|u1',
+          content: 'Hola, ¿seguimos con el intercambio?',
+          isRead: false,
+          createdAt,
+          updatedAt: createdAt,
+        }),
+      },
+    });
+
+    const result = await controller.createMessage(
+      { exchangeId: 10, content: 'Hola, ¿seguimos con el intercambio?' },
+      { user: { sub: 'auth0|u1' } },
+    );
+
+    expect(createMessageUseCase.execute).toHaveBeenCalledWith({
+      data: { exchangeId: 10, content: 'Hola, ¿seguimos con el intercambio?' },
+      userId: 'auth0|u1',
+    });
+    expect(result.data).toEqual(expect.objectContaining({ exchangeId: 10, content: 'Hola, ¿seguimos con el intercambio?' }));
+  });
+
   it('lanza BadRequestException en listMessages si falta exchangeId', async () => {
     await expect(
       controller.listMessages({ page: 1, pageSize: 20 }, { user: { sub: 'auth0|u1' } }),
