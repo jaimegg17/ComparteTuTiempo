@@ -367,7 +367,7 @@ export default function EditServicePage() {
     <Layout>
       {googleMapsApiKey && (
         <Script
-          src={`https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&libraries=places`}
+          src={`https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&libraries=places&loading=async`}
           strategy="afterInteractive"
           onLoad={() => setMapsLoaded(true)}
         />

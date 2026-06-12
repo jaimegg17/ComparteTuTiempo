@@ -212,6 +212,7 @@ export default function ServicesPage() {
       // El backend filtra minPrice/maxPrice por créditos, no por duración.
       // La duración se filtra abajo en cliente para evitar excluir resultados por precio.
       if (typ) params.append('type', typ);
+      params.append('pageSize', '12');
       if (intent !== 'ALL') params.append('intent', intent);
       if (nearbyEnabled && lat !== null && lng !== null) {
         params.append('nearLat', lat.toString());
@@ -617,7 +618,7 @@ export default function ServicesPage() {
     <Layout>
       {googleMapsApiKey && (
         <Script
-          src={`https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}`}
+          src={`https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&loading=async`}
           strategy="afterInteractive"
           onLoad={() => {
             setMapsLoaded(true);
@@ -882,13 +883,13 @@ export default function ServicesPage() {
                       <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 700, px: 0.5 }}>
                         Radio:
                       </Typography>
-                      <Button size="small" variant={radiusKm === 5 ? 'contained' : 'text'} onClick={() => handleRadiusChange(5)} sx={{ minWidth: 52, borderRadius: 999, fontWeight: 700 }}>
+                      <Button size="small" variant={radiusKm === 5 ? 'contained' : 'text'} onClick={() => { void handleRadiusChange(5); }} sx={{ minWidth: 52, borderRadius: 999, fontWeight: 700 }}>
                         5 km
                       </Button>
-                      <Button size="small" variant={radiusKm === 10 ? 'contained' : 'text'} onClick={() => handleRadiusChange(10)} sx={{ minWidth: 56, borderRadius: 999, fontWeight: 700 }}>
+                      <Button size="small" variant={radiusKm === 10 ? 'contained' : 'text'} onClick={() => { void handleRadiusChange(10); }} sx={{ minWidth: 56, borderRadius: 999, fontWeight: 700 }}>
                         10 km
                       </Button>
-                      <Button size="small" variant={radiusKm === 25 ? 'contained' : 'text'} onClick={() => handleRadiusChange(25)} sx={{ minWidth: 56, borderRadius: 999, fontWeight: 700 }}>
+                      <Button size="small" variant={radiusKm === 25 ? 'contained' : 'text'} onClick={() => { void handleRadiusChange(25); }} sx={{ minWidth: 56, borderRadius: 999, fontWeight: 700 }}>
                         25 km
                       </Button>
                     </Box>

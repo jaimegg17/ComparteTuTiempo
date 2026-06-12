@@ -104,6 +104,8 @@ export function ServiceCard({ service, favorite = false, onToggleFavorite }: Ser
               image={service.imageUrl}
               alt={service.title}
               className="service-card-media"
+              loading="lazy"
+              decoding="async"
               sx={{ objectFit: 'cover', transition: 'transform 0.35s ease' }}
               onError={() => setImageError(true)}
             />

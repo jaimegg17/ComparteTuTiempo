@@ -204,7 +204,7 @@ export class UsersController {
     const notifications = await this.prisma.userNotification.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
-      take: 20,
+      take: 100,
       select: {
         id: true,
         type: true,
