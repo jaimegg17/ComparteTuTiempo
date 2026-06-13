@@ -159,9 +159,7 @@ export class CommunitiesController {
     private readonly createCommunityUseCase: CreateCommunityUseCase,
     private readonly listCommunitiesUseCase: ListCommunitiesUseCase,
     private readonly prisma: PrismaService,
-  ) {
-    this.logger.log('CommunitiesController initialized');
-  }
+  ) {}
 
   private getAuthenticatedUserId(req: AuthenticatedRequest): string {
     const userId = req.user?.sub || req.user?.id;
@@ -324,8 +322,6 @@ export class CommunitiesController {
   @ApiOperation({ summary: 'Listar comunidades con filtros' })
   @ApiResponse({ status: 200, description: 'Lista de comunidades obtenida' })
   async listCommunities(@Query() query: CommunityListQueryDto) {
-    this.logger.log('listCommunities called with query:', query);
-    
     try {
       // Asegurar que page y pageSize estén presentes y sean números
       const queryWithDefaults = {
@@ -336,8 +332,6 @@ export class CommunitiesController {
         kind: query.kind,
         verificationStatus: query.verificationStatus,
       };
-
-      this.logger.log('Query with defaults:', queryWithDefaults);
 
       // Build where clause for direct Prisma query
       const where: Prisma.CommunityWhereInput = {};
@@ -352,8 +346,6 @@ export class CommunitiesController {
 
       const skip = (queryWithDefaults.page - 1) * queryWithDefaults.pageSize;
 
-      this.logger.log('Executing Prisma query with where:', where);
-
       // Direct Prisma query to test if it works
       const [prismaCommunities, total] = await Promise.all([
         this.prisma.community.findMany({
@@ -364,8 +356,6 @@ export class CommunitiesController {
         }),
         this.prisma.community.count({ where }),
       ]);
-
-      this.logger.log(`Found ${prismaCommunities.length} communities, total: ${total}`);
 
       // Map to contract format
       const communities = prismaCommunities.map((c) => this.serializeCommunity(c));
@@ -381,7 +371,6 @@ export class CommunitiesController {
         totalPages,
       };
 
-      this.logger.log('Returning response:', response);
       return response;
     } catch (error) {
       this.logger.error('Error listing communities:', error);

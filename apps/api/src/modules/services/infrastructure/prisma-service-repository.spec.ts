@@ -6,7 +6,9 @@ describe('PrismaServiceRepository - nearby list', () => {
   const prisma = {
     service: {
       findMany: jest.fn(),
+      count: jest.fn(),
     },
+    $transaction: jest.fn(),
   };
 
   const mapper = {} as ServiceMapper;
@@ -42,6 +44,36 @@ describe('PrismaServiceRepository - nearby list', () => {
     ratings: [],
     _count: { ratings: 0, exchanges: 0 },
     ...overrides,
+  });
+
+  it('excluye servicios de comunidad en el marketplace global', async () => {
+    prisma.service.count.mockReturnValue(Promise.resolve(1));
+    prisma.service.findMany.mockReturnValue(Promise.resolve([makeService({ id: 20, communityId: null })]));
+    prisma.$transaction.mockImplementation(async (operations: Promise<unknown>[]) => Promise.all(operations));
+
+    await repository.list({ page: 1, pageSize: 12 });
+
+    expect(prisma.service.count).toHaveBeenCalledWith({
+      where: expect.objectContaining({ communityId: null }),
+    });
+    expect(prisma.service.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ communityId: null }),
+      skip: 0,
+      take: 12,
+    }));
+  });
+
+  it('permite listar servicios scoped cuando se filtra por communityId', async () => {
+    prisma.service.count.mockReturnValue(Promise.resolve(1));
+    prisma.service.findMany.mockReturnValue(Promise.resolve([makeService({ id: 21, communityId: 4 })]));
+    prisma.$transaction.mockImplementation(async (operations: Promise<unknown>[]) => Promise.all(operations));
+
+    const result = await repository.list({ page: 1, pageSize: 12, communityId: 4 });
+
+    expect(prisma.service.count).toHaveBeenCalledWith({
+      where: expect.objectContaining({ communityId: 4 }),
+    });
+    expect(result.services[0].communityId).toBe(4);
   });
 
   it('filtra por radio y ordena por distancia ascendente', async () => {

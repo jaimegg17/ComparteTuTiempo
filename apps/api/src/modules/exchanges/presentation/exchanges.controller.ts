@@ -12,13 +12,9 @@ import {
   ParseIntPipe 
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam } from '@nestjs/swagger';
-import { createZodDto } from '@anatine/zod-nestjs';
 import { Type } from 'class-transformer';
-import { IsDateString, IsEnum, IsNumber, IsOptional, IsPositive, IsString, Max, Min } from 'class-validator';
-import { 
-  ExchangeUpdateSchema,
-  ExchangeStatus,
-} from '@comparte-tu-tiempo/contracts';
+import { IsDate, IsDateString, IsEnum, IsNumber, IsOptional, IsPositive, IsString, Max, Min } from 'class-validator';
+import { ExchangeStatus } from '@comparte-tu-tiempo/contracts';
 import { CreateExchangeUseCase } from '../application/create-exchange.use-case';
 import { ListExchangesUseCase } from '../application/list-exchanges.use-case';
 import { UpdateExchangeUseCase } from '../application/update-exchange.use-case';
@@ -50,7 +46,22 @@ export class CreateExchangeDto {
   exchangedTime?: number;
 }
 
-export class UpdateExchangeDto extends createZodDto(ExchangeUpdateSchema) {}
+export class UpdateExchangeDto {
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  date?: Date;
+
+  @IsOptional()
+  @IsEnum(ExchangeStatus)
+  state?: (typeof ExchangeStatus)[keyof typeof ExchangeStatus];
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @IsPositive()
+  exchangedTime?: number;
+}
 
 type AuthenticatedRequest = { user?: { sub?: string; id?: string } };
 

@@ -153,6 +153,59 @@ describe('EventsController', () => {
     expect(prisma.eventRegistration.upsert).not.toHaveBeenCalled();
   });
 
+  it('permite inscripción si el usuario es miembro activo y usa upsert para evitar duplicados', async () => {
+    prisma.event.findUnique.mockResolvedValue({
+      id: 16,
+      title: 'Taller vecinal',
+      communityId: 4,
+      capacity: 20,
+      _count: { registrations: 3 },
+    });
+    prisma.communityMembership.findUnique.mockResolvedValue({ status: 'ACTIVE' });
+    prisma.eventRegistration.upsert.mockResolvedValue({ eventId: 16, userId: 'auth0|member' });
+    prisma.userNotification.create.mockResolvedValue({ id: 1 });
+    prisma.eventRegistration.count.mockResolvedValue(4);
+
+    const result = await controller.registerForEvent(16, { user: { sub: 'auth0|member' } });
+
+    expect(prisma.eventRegistration.upsert).toHaveBeenCalledWith({
+      where: { eventId_userId: { eventId: 16, userId: 'auth0|member' } },
+      update: {},
+      create: { eventId: 16, userId: 'auth0|member' },
+    });
+    expect(result.registrationsCount).toBe(4);
+  });
+
+  it('bloquea inscripción si el evento está lleno', async () => {
+    prisma.event.findUnique.mockResolvedValue({
+      id: 17,
+      title: 'Evento lleno',
+      communityId: 4,
+      capacity: 3,
+      _count: { registrations: 3 },
+    });
+    prisma.communityMembership.findUnique.mockResolvedValue({ status: 'ACTIVE' });
+
+    await expect(
+      controller.registerForEvent(17, { user: { sub: 'auth0|member' } }),
+    ).rejects.toThrow('El evento ha alcanzado su aforo máximo');
+
+    expect(prisma.eventRegistration.upsert).not.toHaveBeenCalled();
+  });
+
+  it('al cancelar inscripción borra solo el registro del usuario autenticado', async () => {
+    prisma.event.findUnique.mockResolvedValue({ title: 'Taller vecinal', communityId: 4 });
+    prisma.userNotification.create.mockResolvedValue({ id: 2 });
+    prisma.eventRegistration.count.mockResolvedValue(2);
+
+    const result = await controller.unregisterFromEvent(16, { user: { sub: 'auth0|member' } });
+
+    expect(prisma.eventRegistration.deleteMany).toHaveBeenCalledWith({
+      where: { eventId: 16, userId: 'auth0|member' },
+    });
+    expect(result.registrationsCount).toBe(2);
+  });
+
   it('permite eliminar un evento si el usuario es admin', async () => {
     prisma.event.findUnique.mockResolvedValue({
       id: 11,

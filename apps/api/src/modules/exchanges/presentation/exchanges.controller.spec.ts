@@ -75,6 +75,66 @@ describe('ExchangesController', () => {
     });
   });
 
+  it('en servicios tipo REQUEST invierte roles y notifica al dueño de la solicitud', async () => {
+    const future = new Date(Date.now() + 60_000);
+    const entity = new ExchangeEntity(77, 'auth0|request-owner', 'auth0|helper', 11, future, 'PENDING', 3, future, future);
+
+    prisma.service.findUnique.mockResolvedValue({
+      id: 11,
+      userId: 'auth0|request-owner',
+      intent: 'REQUEST',
+      duration: 3,
+      title: 'Necesito revisar mi CV',
+    });
+    createExchangeUseCase.execute.mockResolvedValue({ exchange: entity });
+    prisma.userNotification.create.mockResolvedValue({ id: 2 });
+    prisma.exchange.findMany.mockResolvedValue([
+      {
+        id: 77,
+        service: { id: 11, title: 'Necesito revisar mi CV', duration: 3, category: 'EDUCACION', imageUrl: null },
+        requestedBy: { id: 'auth0|request-owner', name: 'Owner', email: 'owner@test.com', imageUrl: null },
+        offeredBy: { id: 'auth0|helper', name: 'Helper', email: 'helper@test.com', imageUrl: null },
+      },
+    ]);
+
+    await controller.createExchange(
+      { serviceId: 11, message: 'Puedo ayudarte', exchangedTime: 3 },
+      { user: { sub: 'auth0|helper' } },
+    );
+
+    expect(createExchangeUseCase.execute).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        serviceId: 11,
+        requestedById: 'auth0|request-owner',
+        offeredById: 'auth0|helper',
+        exchangedTime: 3,
+      }),
+      userId: 'auth0|helper',
+    });
+    expect(prisma.userNotification.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        userId: 'auth0|request-owner',
+        type: 'EXCHANGE_REQUEST',
+        title: 'Nueva respuesta a tu solicitud',
+        link: '/exchanges/77',
+      }),
+    });
+  });
+
+  it('acepta actualización de estado desde las acciones del frontend', async () => {
+    const now = new Date();
+    const entity = new ExchangeEntity(55, 'auth0|requester', 'auth0|provider', 10, now, 'CONFIRMED', 2, now, now);
+    updateExchangeUseCase.execute.mockResolvedValue({ exchange: entity });
+
+    await controller.updateExchange(55, { state: 'CONFIRMED' }, { user: { sub: 'auth0|provider' } });
+
+    expect(updateExchangeUseCase.execute).toHaveBeenCalledWith({
+      id: 55,
+      data: { state: 'CONFIRMED' },
+      userId: 'auth0|provider',
+    });
+  });
+
   it('rechaza crear intercambio sin usuario autenticado', async () => {
     await expect(controller.createExchange({ serviceId: 10 }, {})).rejects.toThrow(UnauthorizedException);
     expect(createExchangeUseCase.execute).not.toHaveBeenCalled();
