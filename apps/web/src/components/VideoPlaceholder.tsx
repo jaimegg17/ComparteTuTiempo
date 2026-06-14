@@ -14,7 +14,7 @@ export const VideoPlaceholder: React.FC = () => {
   const { t } = useTranslation();
 
   const handlePlayVideo = () => {
-    // TODO: Implementar reproducción de video
+    window.location.href = '/faq';
   };
 
   return (
