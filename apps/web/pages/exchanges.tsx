@@ -15,11 +15,13 @@ import { ExchangeCard, ExchangeFilters } from '@/components/exchanges';
 import type { Exchange, ExchangeState } from '@/types/exchange.types';
 import { buildApiUrl } from '@/shared/api/config';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function ExchangesPage() {
   const router = useRouter();
   const { t } = useTranslation();
   const { user, isLoading: userLoading } = useUser();
+  const { getAccessToken } = useAuth();
 
   const [allExchanges, setAllExchanges] = useState<Exchange[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,12 +42,7 @@ export default function ExchangesPage() {
       setLoading(true);
       setError(null);
 
-      const tokenResponse = await fetch('/api/auth/token');
-      if (!tokenResponse.ok) {
-        throw new Error(t('exchangesPage.loadTokenError'));
-      }
-      const tokenData = await tokenResponse.json();
-      const token = tokenData.accessToken;
+      const token = await getAccessToken();
 
       if (!token) {
         throw new Error(t('exchangesPage.missingTokenError'));
@@ -75,7 +72,7 @@ export default function ExchangesPage() {
     } finally {
       setLoading(false);
     }
-  }, [user, activeTab, t]);
+  }, [user, activeTab, t, getAccessToken]);
 
   useEffect(() => {
     if (!userLoading && user) {
@@ -111,7 +108,8 @@ export default function ExchangesPage() {
     try {
       setActionLoading(true);
       setNotice(null);
-      const token = await fetch('/api/auth/token').then((res) => res.json()).then((data) => data.accessToken);
+      const token = await getAccessToken();
+      if (!token) throw new Error(t('exchangesPage.missingTokenError'));
 
       const response = await fetch(buildApiUrl(`/exchanges/${id}`), {
         method: 'PUT',

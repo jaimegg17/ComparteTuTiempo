@@ -66,19 +66,52 @@ Archivo:
 
 - `apps/api/src/prisma/data-migrations.spec.ts`
 
+## Hallazgos corregidos en segunda pasada
+
+### 8. Eliminación de llamadas directas a `/api/auth/token`
+
+Se migraron las llamadas directas restantes en páginas principales a `useAuth().getAccessToken()` para reutilizar caché y evitar bucles o peticiones redundantes en Network.
+
+Archivos:
+
+- `apps/web/pages/services/create.tsx`
+- `apps/web/pages/services/edit/[id].tsx`
+- `apps/web/pages/services/[id].tsx`
+- `apps/web/pages/exchanges.tsx`
+- `apps/web/pages/exchanges/[id].tsx`
+- `apps/web/src/widgets/header/index.tsx`
+
+### 9. Eliminación de `createZodDto` restante
+
+Se reemplazaron los DTOs Zod restantes en grupos y membresías por DTOs explícitos `class-validator`, eliminando el patrón que había provocado errores `property schema should not exist`.
+
+Archivos:
+
+- `apps/api/src/modules/groups/presentation/groups.controller.ts`
+- `apps/api/src/modules/memberships/presentation/memberships.controller.ts`
+
+### 10. Desactivación del auth legacy local
+
+Se deshabilitaron `signup/signin` locales para evitar tokens mock o rutas ambiguas frente a Auth0, que es el sistema real de autenticación.
+
+Archivos:
+
+- `apps/api/src/modules/auth/presentation/auth.controller.ts`
+- `apps/api/src/modules/auth/application/sign-up.use-case.ts`
+- `apps/api/src/modules/auth/application/sign-in.use-case.ts`
+
+### 11. Eliminación de endpoints con éxito falso
+
+Se sustituyeron respuestas placeholder/fake en grupos, membresías, eventos y borrado de comunidades por implementación real o `NotImplementedException` explícito.
+
+Archivos:
+
+- `apps/api/src/modules/groups/presentation/groups.controller.ts`
+- `apps/api/src/modules/memberships/presentation/memberships.controller.ts`
+- `apps/api/src/modules/events/presentation/events.controller.ts`
+- `apps/api/src/modules/communities/presentation/communities.controller.ts`
+
 ## Riesgos detectados pendientes / recomendaciones
-
-### Direct fetch a `/api/auth/token` en varias páginas
-
-Persisten llamadas directas en varias páginas (`services/create`, `services/[id]`, `exchanges`, `exchanges/[id]`, header admin). No son necesariamente un fallo funcional, pero conviene migrarlas gradualmente a `useAuth().getAccessToken()` para reutilizar caché y reducir exposición/repetición en Network.
-
-### `createZodDto` restante en módulos secundarios
-
-Quedan usos en grupos y memberships. Si esos flujos se usan intensivamente en demo, conviene reemplazarlos por DTOs explícitos como se hizo en exchanges/messages/ratings.
-
-### Auth legacy/mock
-
-Existen módulos auth legacy con `mock-jwt-token` y TODOs. Si no se usan en producción porque Auth0 es la fuente real, no bloquea la demo, pero conviene documentarlo o retirarlo para evitar dudas en auditoría.
 
 ### Tests de navegador real
 
@@ -99,5 +132,5 @@ pnpm --filter @comparte-tu-tiempo/web build
 
 Resultados:
 
-- API: 27 suites, 158 tests.
+- API: 28 suites, 168 tests.
 - Web: 9 suites, 16 tests.

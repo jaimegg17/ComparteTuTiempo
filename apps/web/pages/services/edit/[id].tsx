@@ -16,6 +16,7 @@ import {
 import { Layout } from '@/components/Layout';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/components/ui/ToastProvider';
 import { getFriendlyErrorMessage } from '@/shared/utils/error-messages';
 import type { Service } from '@/types/service.types';
@@ -68,6 +69,7 @@ export default function EditServicePage() {
   const router = useRouter();
   const { id } = router.query;
   const { user, isLoading: userLoading } = useUser();
+  const { getAccessToken } = useAuth();
   const { t } = useTranslation();
 
   const [formData, setFormData] = useState<FormData>({
@@ -304,10 +306,8 @@ export default function EditServicePage() {
     setError(null);
 
     try {
-      const tokenResponse = await fetch('/api/auth/token');
-      if (!tokenResponse.ok) throw new Error('No se pudo obtener el token de autenticación');
-      const tokenData = await tokenResponse.json();
-      const token = tokenData.accessToken;
+      const token = await getAccessToken();
+      if (!token) throw new Error('No se pudo obtener el token de autenticación');
 
       const response = await fetch(buildApiUrl(`/services/${id}`), {
         method: 'PUT',

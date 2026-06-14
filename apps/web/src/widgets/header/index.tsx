@@ -8,6 +8,7 @@ import { useUser } from "@auth0/nextjs-auth0/client";
 import { useUserProfileContext } from "@/contexts/UserProfileContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useNotifications } from "@/hooks/useNotifications";
+import { useAuth } from "@/hooks/useAuth";
 import { communitiesApi } from "@/shared/api/communities";
 import { apiClient } from "@/shared/api/client";
 import {
@@ -48,6 +49,7 @@ export function Header() {
   const { displayName, displayEmail, displayImage } = useUserProfileContext();
   const { userProfile } = useUserProfile();
   const { unreadCount } = useNotifications(user?.sub);
+  const { getAccessToken } = useAuth();
   const { t } = useTranslation();
   const [pendingOrganizationsCount, setPendingOrganizationsCount] = useState(0);
 
@@ -101,12 +103,7 @@ export function Header() {
       }
 
       try {
-        const token = await fetch("/api/auth/token", {
-          cache: "no-store",
-          headers: { "Cache-Control": "no-cache" },
-        })
-          .then((res) => (res.ok ? res.json() : null))
-          .then((data) => data?.accessToken as string | undefined);
+        const token = await getAccessToken();
 
         if (!token) return;
 
@@ -119,7 +116,7 @@ export function Header() {
     };
 
     void loadPendingOrganizations();
-  }, [userProfile?.role]);
+  }, [userProfile?.role, getAccessToken]);
 
   return (
     <AppBar

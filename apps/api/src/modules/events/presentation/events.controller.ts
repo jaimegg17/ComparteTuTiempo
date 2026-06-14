@@ -23,6 +23,7 @@ import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { IsDateString, IsNumber, IsOptional, IsString, Min, MinLength } from 'class-validator';
 import { Type } from 'class-transformer';
 import type { EventListQuery } from '@comparte-tu-tiempo/contracts';
+import { EventMapper } from '../infrastructure/event.mapper';
 
 export class CreateEventDto {
   @IsString()
@@ -206,10 +207,14 @@ export class EventsController {
   @ApiOperation({ summary: 'Listar eventos próximos' })
   @ApiResponse({ status: 200, description: 'Lista de eventos próximos obtenida' })
   async listUpcomingEvents() {
-    // This would need a specific use case for upcoming events
+    const result = await this.listEventsUseCase.execute({
+      query: normalizeEventListQuery({ dateFrom: new Date().toISOString(), page: 1, pageSize: 20 }),
+    });
+
     return {
       message: 'Eventos próximos obtenidos exitosamente',
-      events: [],
+      ...result.events,
+      events: result.events.events.map(event => event.toContract()),
     };
   }
 
@@ -217,10 +222,14 @@ export class EventsController {
   @ApiOperation({ summary: 'Listar eventos pasados' })
   @ApiResponse({ status: 200, description: 'Lista de eventos pasados obtenida' })
   async listPastEvents() {
-    // This would need a specific use case for past events
+    const result = await this.listEventsUseCase.execute({
+      query: normalizeEventListQuery({ dateTo: new Date().toISOString(), page: 1, pageSize: 20 }),
+    });
+
     return {
       message: 'Eventos pasados obtenidos exitosamente',
-      events: [],
+      ...result.events,
+      events: result.events.events.map(event => event.toContract()),
     };
   }
 
@@ -397,10 +406,15 @@ export class EventsController {
   @ApiResponse({ status: 200, description: 'Evento obtenido' })
   @ApiResponse({ status: 404, description: 'Evento no encontrado' })
   async getEvent(@Param('id', ParseIntPipe) id: number) {
-    // This would need a get event use case
+    const event = await this.prisma.event.findUnique({ where: { id } });
+
+    if (!event) {
+      throw new NotFoundException('Evento no encontrado');
+    }
+
     return {
       message: 'Evento obtenido exitosamente',
-      event: { id },
+      event: EventMapper.toDomain(event).toContract(),
     };
   }
 

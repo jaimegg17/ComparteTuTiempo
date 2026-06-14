@@ -24,6 +24,7 @@ import { Chat } from '@/components/chat/Chat';
 import { ErrorAlert } from '@/components/ui/BeautifulAlert';
 import { useErrorHandling, ERROR_MESSAGES } from '@/hooks/useErrorHandling';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useAuth } from '@/hooks/useAuth';
 import type { Exchange, ExchangeUser } from '@/types/exchange.types';
 import type { ChatUser } from '@/types/message.types';
 import { buildApiUrl } from '@/shared/api/config';
@@ -38,6 +39,7 @@ export default function ExchangeDetailPage() {
   const router = useRouter();
   const { id } = router.query;
   const { user } = useUser();
+  const { getAccessToken } = useAuth();
   const { t, currentLanguage } = useTranslation();
   
   const [exchange, setExchange] = useState<Exchange | null>(null);
@@ -48,12 +50,7 @@ export default function ExchangeDetailPage() {
     if (!id || !user) return;
 
     await handleAsyncOperation(async () => {
-      const tokenResponse = await fetch('/api/auth/token');
-      if (!tokenResponse.ok) {
-        throw new Error(t('exchangesPage.loadTokenError'));
-      }
-      const tokenData = await tokenResponse.json();
-      const token = tokenData.accessToken;
+      const token = await getAccessToken();
 
       if (!token) {
         throw new Error(t('exchangesPage.missingTokenError'));
@@ -84,7 +81,7 @@ export default function ExchangeDetailPage() {
         imageUrl: otherUserData?.imageUrl,
       });
     }, ERROR_MESSAGES.NETWORK_ERROR);
-  }, [id, user, handleAsyncOperation, t]);
+  }, [id, user, handleAsyncOperation, t, getAccessToken]);
 
   useEffect(() => {
     void fetchExchange();

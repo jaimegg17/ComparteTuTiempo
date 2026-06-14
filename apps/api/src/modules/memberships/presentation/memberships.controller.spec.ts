@@ -1,4 +1,4 @@
-import { UnauthorizedException } from '@nestjs/common';
+import { NotImplementedException, UnauthorizedException } from '@nestjs/common';
 import {
   MembershipsController,
   normalizeMembershipListQuery,
@@ -61,6 +61,10 @@ describe('MembershipsController', () => {
       query: expect.objectContaining({ groupId: 4, page: 1, pageSize: 20 }),
     });
     expect(result.memberships).toEqual([{ id: 1, groupId: 4, userId: 'auth0|u1' }]);
+  });
+
+  it('no devuelve éxito falso al borrar membresía porque no hay delete use case', async () => {
+    await expect(controller.deleteMembership(1, { user: { sub: 'auth0|u1' } })).rejects.toThrow(NotImplementedException);
   });
 
   it('lanza UnauthorizedException al crear membresía sin usuario autenticado', async () => {

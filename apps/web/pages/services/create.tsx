@@ -19,6 +19,7 @@ import {
 import { Layout } from '@/components/Layout';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useAuth } from '@/hooks/useAuth';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 import { useUploadImage } from '@/shared/hooks/use-upload';
 import { getFriendlyErrorMessage } from '@/shared/utils/error-messages';
@@ -103,6 +104,7 @@ interface FormErrors {
 export default function CreateServicePage() {
   const router = useRouter();
   const { user, isLoading: userLoading } = useUser();
+  const { getAccessToken } = useAuth();
   const { t } = useTranslation();
   
   const [formData, setFormData] = useState<FormData>({
@@ -384,13 +386,10 @@ export default function CreateServicePage() {
       // Use uploaded image URL if available
       const imageUrl = uploadedImageUrl || formData.imageUrl;
 
-      // Get token
-      const tokenResponse = await fetch('/api/auth/token');
-      if (!tokenResponse.ok) {
+      const token = await getAccessToken();
+      if (!token) {
         throw new Error('No se pudo obtener el token de autenticación');
       }
-      const tokenData = await tokenResponse.json();
-      const token = tokenData.accessToken;
 
       const response = await fetch(buildApiUrl('/services'), {
         method: 'POST',

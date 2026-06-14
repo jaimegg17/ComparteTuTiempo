@@ -81,6 +81,42 @@ describe('EventsController', () => {
     expect(result.events).toEqual([{ id: 1, title: 'Evento' }]);
   });
 
+  it('resuelve eventos próximos y pasados usando filtros de fecha reales', async () => {
+    listEventsUseCase.execute.mockResolvedValue({
+      events: { events: [], total: 0, page: 1, pageSize: 20, totalPages: 0 },
+    });
+
+    await controller.listUpcomingEvents();
+    await controller.listPastEvents();
+
+    expect(listEventsUseCase.execute).toHaveBeenNthCalledWith(1, {
+      query: expect.objectContaining({ dateFrom: expect.any(Date), page: 1, pageSize: 20 }),
+    });
+    expect(listEventsUseCase.execute).toHaveBeenNthCalledWith(2, {
+      query: expect.objectContaining({ dateTo: expect.any(Date), page: 1, pageSize: 20 }),
+    });
+  });
+
+  it('obtiene evento por id desde datos reales y no devuelve un placeholder', async () => {
+    prisma.event.findUnique.mockResolvedValue({
+      id: 33,
+      communityId: 4,
+      title: 'Evento real',
+      description: 'Descripción real',
+      date: new Date('2026-06-20T10:00:00.000Z'),
+      location: 'Madrid',
+      capacity: 10,
+      createdById: 'auth0|owner',
+      createdAt: new Date('2026-06-01T10:00:00.000Z'),
+      updatedAt: new Date('2026-06-01T10:00:00.000Z'),
+    });
+
+    const result = await controller.getEvent(33);
+
+    expect(prisma.event.findUnique).toHaveBeenCalledWith({ where: { id: 33 } });
+    expect(result.event).toEqual(expect.objectContaining({ id: 33, title: 'Evento real', communityId: 4 }));
+  });
+
   it('resuelve /events/community/:id usando el mismo flujo real', async () => {
     const toContract = jest.fn().mockReturnValue({ id: 2, title: 'Evento comunidad' });
     listEventsUseCase.execute.mockResolvedValue({

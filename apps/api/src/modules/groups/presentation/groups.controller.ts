@@ -12,20 +12,59 @@ import {
   UseGuards, 
   Request,
   HttpCode,
-  HttpStatus
+  HttpStatus,
+  NotImplementedException
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam } from '@nestjs/swagger';
-import { createZodDto } from '@anatine/zod-nestjs';
-import { GroupCreateSchema, GroupUpdateSchema } from '@comparte-tu-tiempo/contracts';
 import { Type } from 'class-transformer';
-import { IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsBoolean, IsEnum, IsNumber, IsOptional, IsString, Max, Min, MinLength } from 'class-validator';
 import { CreateGroupUseCase } from '../application/create-group.use-case';
 import { ListGroupsUseCase } from '../application/list-groups.use-case';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
 
-// DTOs generados desde Zod
-export class CreateGroupDto extends createZodDto(GroupCreateSchema) {}
-export class UpdateGroupDto extends createZodDto(GroupUpdateSchema) {}
+enum GroupTypeDto {
+  PUBLICO = 'PUBLICO',
+  PRIVADO = 'PRIVADO',
+  TRABAJO = 'TRABAJO',
+  HOBBY = 'HOBBY',
+}
+
+export class CreateGroupDto {
+  @IsString()
+  @MinLength(3)
+  name!: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsEnum(GroupTypeDto)
+  type?: 'PUBLICO' | 'PRIVADO' | 'TRABAJO' | 'HOBBY';
+
+  @IsOptional()
+  @IsBoolean()
+  isPrivate?: boolean;
+}
+
+export class UpdateGroupDto {
+  @IsOptional()
+  @IsString()
+  @MinLength(3)
+  name?: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsEnum(GroupTypeDto)
+  type?: 'PUBLICO' | 'PRIVADO' | 'TRABAJO' | 'HOBBY';
+
+  @IsOptional()
+  @IsBoolean()
+  isPrivate?: boolean;
+}
 
 type AuthenticatedRequest = { user?: { sub?: string; id?: string } };
 
@@ -83,7 +122,11 @@ export class GroupsController {
     const userId = this.getAuthenticatedUserId(req);
     
     const result = await this.createGroupUseCase.execute({
-      data: createGroupDto,
+      data: {
+        ...createGroupDto,
+        type: createGroupDto.type ?? 'PUBLICO',
+        isPrivate: createGroupDto.isPrivate ?? false,
+      },
       userId,
     });
 
@@ -120,13 +163,8 @@ export class GroupsController {
   @ApiOperation({ summary: 'Listar grupos de una comunidad específica' })
   @ApiParam({ name: 'communityId', description: 'ID de la comunidad' })
   @ApiResponse({ status: 200, description: 'Lista de grupos de la comunidad obtenida' })
-  async listGroupsByCommunity(@Param('communityId', ParseIntPipe) communityId: number) {
-    // This would need a specific use case for community groups
-    return {
-      message: 'Grupos de la comunidad obtenidos exitosamente',
-      groups: [],
-      communityId,
-    };
+  async listGroupsByCommunity(@Param('communityId', ParseIntPipe) _communityId: number) {
+    throw new NotImplementedException('Los grupos por comunidad no están habilitados en esta versión.');
   }
 
   @Get(':id')
@@ -134,12 +172,8 @@ export class GroupsController {
   @ApiParam({ name: 'id', description: 'ID del grupo' })
   @ApiResponse({ status: 200, description: 'Grupo obtenido' })
   @ApiResponse({ status: 404, description: 'Grupo no encontrado' })
-  async getGroup(@Param('id', ParseIntPipe) id: number) {
-    // This would need a get group use case
-    return {
-      message: 'Grupo obtenido exitosamente',
-      group: { id },
-    };
+  async getGroup(@Param('id', ParseIntPipe) _id: number) {
+    throw new NotImplementedException('El detalle de grupos no está habilitado en esta versión.');
   }
 
   @Put(':id')
@@ -156,12 +190,8 @@ export class GroupsController {
     @Request() req: AuthenticatedRequest,
   ) {
     this.getAuthenticatedUserId(req);
-    
-    // This would need an update group use case
-    return {
-      message: 'Grupo actualizado exitosamente',
-      group: { id },
-    };
+    void id;
+    throw new NotImplementedException('La edición de grupos no está habilitada en esta versión.');
   }
 
   @Delete(':id')
@@ -178,10 +208,7 @@ export class GroupsController {
     @Request() req: AuthenticatedRequest,
   ) {
     this.getAuthenticatedUserId(req);
-    
-    // This would need a delete group use case
-    return {
-      message: 'Grupo eliminado exitosamente',
-    };
+    void id;
+    throw new NotImplementedException('El borrado de grupos no está habilitado en esta versión.');
   }
 }

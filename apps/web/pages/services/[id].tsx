@@ -23,12 +23,14 @@ import { ServiceRequestDialog } from '@/components/services/ServiceRequestDialog
 import { useFavoriteServices } from '@/hooks/useFavoriteServices';
 import { buildApiUrl } from '@/shared/api/config';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useAuth } from '@/hooks/useAuth';
 import type { Service } from '@/types/service.types';
 
 export default function ServiceDetailPage() {
   const router = useRouter();
   const { id } = router.query;
   const { user } = useUser();
+  const { getAccessToken } = useAuth();
   const { t } = useTranslation();
   const { isFavorite, toggleFavorite } = useFavoriteServices(user?.sub);
 
@@ -85,7 +87,8 @@ export default function ServiceDetailPage() {
 
     try {
       setDeleteLoading(true);
-      const token = await fetch('/api/auth/token').then((res) => res.json()).then((data) => data.accessToken);
+      const token = await getAccessToken();
+      if (!token) throw new Error('No se pudo obtener el token de autenticación');
       const response = await fetch(buildApiUrl(`/services/${service.id}`), {
         method: 'DELETE',
         headers: {
@@ -116,7 +119,8 @@ export default function ServiceDetailPage() {
       setRequestLoading(true);
       setRequestError(null);
 
-      const token = await fetch('/api/auth/token').then((res) => res.json()).then((data) => data.accessToken);
+      const token = await getAccessToken();
+      if (!token) throw new Error('No se pudo obtener el token de autenticación');
 
       const response = await fetch(buildApiUrl('/exchanges'), {
         method: 'POST',

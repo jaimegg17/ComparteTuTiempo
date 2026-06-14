@@ -13,15 +13,13 @@ import {
   UnauthorizedException,
   HttpCode,
   HttpStatus,
+  NotImplementedException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
-import { createZodDto } from '@anatine/zod-nestjs';
 import {
-  MembershipCreateSchema,
   MembershipRole,
   MembershipStatus,
-  MembershipUpdateSchema,
 } from '@comparte-tu-tiempo/contracts';
 import { IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
@@ -29,8 +27,32 @@ import { CreateMembershipUseCase } from '../application/create-membership.use-ca
 import { ListMembershipsUseCase } from '../application/list-memberships.use-case';
 import { UpdateMembershipUseCase } from '../application/update-membership.use-case';
 
-export class CreateMembershipDto extends createZodDto(MembershipCreateSchema) {}
-export class UpdateMembershipDto extends createZodDto(MembershipUpdateSchema) {}
+export class CreateMembershipDto {
+  @IsString()
+  userId!: string;
+
+  @IsNumber()
+  @Type(() => Number)
+  groupId!: number;
+
+  @IsOptional()
+  @IsEnum(MembershipRole)
+  role?: 'MEMBER' | 'MODERATOR' | 'ADMIN';
+
+  @IsOptional()
+  @IsEnum(MembershipStatus)
+  status?: 'ACTIVA' | 'PENDIENTE' | 'SUSPENDIDA';
+}
+
+export class UpdateMembershipDto {
+  @IsOptional()
+  @IsEnum(MembershipRole)
+  role?: 'MEMBER' | 'MODERATOR' | 'ADMIN';
+
+  @IsOptional()
+  @IsEnum(MembershipStatus)
+  status?: 'ACTIVA' | 'PENDIENTE' | 'SUSPENDIDA';
+}
 
 // Simple list DTO for now
 export class MembershipListQueryDto {
@@ -106,7 +128,14 @@ export class MembershipsController {
     @Request() req: { user?: { sub?: string; id?: string } },
   ) {
     const userId = this.getAuthenticatedUserId(req);
-    const result = await this.createMembershipUseCase.execute({ data: dto, userId });
+    const result = await this.createMembershipUseCase.execute({
+      data: {
+        ...dto,
+        role: dto.role ?? 'MEMBER',
+        status: dto.status ?? 'ACTIVA',
+      },
+      userId,
+    });
     return { message: 'Membresía creada exitosamente', membership: result.membership.toContract() };
   }
 
@@ -145,8 +174,12 @@ export class MembershipsController {
   @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Eliminar una membresía' })
-  async deleteMembership(@Param('id', ParseIntPipe) id: number) {
-    // Pendiente: delete use case si lo necesitamos
-    return { message: 'Membresía eliminada exitosamente', membership: { id } };
+  async deleteMembership(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: { user?: { sub?: string; id?: string } },
+  ) {
+    this.getAuthenticatedUserId(req);
+    void id;
+    throw new NotImplementedException('El borrado de membresías no está habilitado en esta versión.');
   }
 }

@@ -714,11 +714,22 @@ export class CommunitiesController {
   @ApiResponse({ status: 403, description: 'No autorizado para eliminar esta comunidad' })
   async deleteCommunity(
     @Param('id', ParseIntPipe) id: number,
+    @Request() req: AuthenticatedRequest,
   ) {
-    // This would need a delete community use case
-    return {
-      message: 'Comunidad eliminada exitosamente',
-      community: { id },
-    };
+    const userId = this.getAuthenticatedUserId(req);
+    const existing = await this.prisma.community.findUnique({
+      where: { id },
+      select: { id: true, creatorId: true },
+    });
+
+    if (!existing) {
+      throw new NotFoundException('Comunidad no encontrada');
+    }
+
+    if (!(await this.canManageCommunity(id, userId)) && existing.creatorId !== userId) {
+      throw new ForbiddenException('No autorizado para eliminar esta comunidad');
+    }
+
+    await this.prisma.community.delete({ where: { id } });
   }
 }
