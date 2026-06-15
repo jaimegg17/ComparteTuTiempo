@@ -15,7 +15,7 @@ const CATEGORIES = ['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'AR
 const TYPES = ['PRESENCIAL', 'VIRTUAL', 'HIBRIDO'] as const;
 const INTENTS = ['OFFER', 'REQUEST'] as const;
 
-// DTOs con class-validator para compatibilidad con ValidationPipe global
+// DTOs using class-validator for compatibility with the global ValidationPipe
 export class CreateServiceDto {
   @IsString()
   @MinLength(5, { message: 'El título debe tener al menos 5 caracteres' })
@@ -331,7 +331,7 @@ export class ServicesController {
     if (userId) {
       await this.prisma.user.upsert({
         where: { id: userId },
-        update: {},  // No actualizar nada si ya existe
+        update: {},  // Do not update anything when it already exists
         create: {
           id: userId,
           email: authUser.email || `${userId}@example.com`,
@@ -359,7 +359,7 @@ export class ServicesController {
     @Query() query: ServiceListQueryDto,
     @Request() req: { user?: { sub?: string } },
   ) {
-    // Asegurar que page y pageSize estén presentes
+    // Ensure page and pageSize are present
     const queryWithDefaults = {
       page: query.page || 1,
       pageSize: query.pageSize || 20,
@@ -374,11 +374,11 @@ export class ServicesController {
       nearLat: query.nearLat,
       nearLng: query.nearLng,
       radiusKm: query.radiusKm,
-      userId: query.userId, // Filtrar por usuario si se proporciona
+      userId: query.userId, // Filter by user when provided
       communityId: query.communityId,
     };
 
-    // Si se proporciona userId, verificar que el usuario solo pueda ver sus propios servicios
+    // If userId is provided, ensure users can only view their own services
     if (queryWithDefaults.userId && req.user && req.user.sub !== queryWithDefaults.userId) {
       throw new ForbiddenException('No tienes permisos para ver estos servicios');
     }

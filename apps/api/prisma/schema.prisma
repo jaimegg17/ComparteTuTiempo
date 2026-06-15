@@ -36,10 +36,8 @@ model User {
   communities Community[]
   communityMemberships CommunityMembership[]
   communityEvents Event[] @relation("CommunityEventCreator")
-  memberships Membership[]
   requestedExchanges Exchange[] @relation("RequestedExchanges")
   offeredExchanges   Exchange[] @relation("OfferedExchanges")
-  createdGroups      Group[]
   favoriteServices   UserFavoriteService[]
   eventRegistrations EventRegistration[]
   notifications      UserNotification[]
@@ -165,22 +163,6 @@ model CommunityMembership {
   @@map("community_memberships")
 }
 
-model Membership {
-  id          Int           @id @default(autoincrement())
-  userId      String
-  groupId     Int
-  role        MembershipRole @default(MEMBER)
-  status      MembershipStatus @default(ACTIVA)
-  joinedAt    DateTime      @default(now())
-
-  // Relations
-  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  group      Group         @relation(fields: [groupId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, groupId])
-  @@map("memberships")
-}
-
 model Exchange {
   id            Int           @id @default(autoincrement())
   requestedById String
@@ -252,23 +234,6 @@ model UserNotification {
   @@map("user_notifications")
 }
 
-model Group {
-  id          Int      @id @default(autoincrement())
-  name        String   @db.VarChar(200)
-  description String?  @db.Text
-  type        GroupType @default(PUBLICO)
-  isPrivate   Boolean  @default(false)
-  creatorId   String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  creator     User         @relation(fields: [creatorId], references: [id], onDelete: Cascade)
-  members     Membership[]
-
-  @@map("groups")
-}
-
 enum UserRole {
   USER
   MODERATOR
@@ -302,12 +267,6 @@ enum ServiceStatus {
   COMPLETADO
 }
 
-enum MembershipRole {
-  MEMBER
-  MODERATOR
-  ADMIN
-}
-
 enum CommunityKind {
   COMMUNITY
   ORGANIZATION
@@ -331,12 +290,6 @@ enum CommunityMembershipStatus {
   SUSPENDED
 }
 
-enum MembershipStatus {
-  ACTIVA
-  PENDIENTE
-  SUSPENDIDA
-}
-
 enum ExchangeStatus {
   PENDING
   CONFIRMED
@@ -346,9 +299,3 @@ enum ExchangeStatus {
   DISPUTED
 }
 
-enum GroupType {
-  PUBLICO
-  PRIVADO
-  TRABAJO
-  HOBBY
-}

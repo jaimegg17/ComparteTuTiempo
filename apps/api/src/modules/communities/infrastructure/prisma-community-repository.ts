@@ -89,50 +89,32 @@ export class PrismaCommunityRepository implements CommunityRepositoryPort {
     pageSize: number;
     totalPages: number;
   }> {
-    try {
-      const { page, pageSize, creatorId, isPrivate, kind, verificationStatus } = query;
-      const skip = (page - 1) * pageSize;
+    const { page, pageSize, creatorId, isPrivate, kind, verificationStatus } = query;
+    const skip = (page - 1) * pageSize;
 
-      // Build where clause
-      const where: Prisma.CommunityWhereInput = {};
-      if (creatorId) where.creatorId = creatorId;
-      if (isPrivate !== undefined) where.isPrivate = isPrivate;
-      if (kind) where.kind = kind;
-      if (verificationStatus) where.verificationStatus = verificationStatus;
+    const where: Prisma.CommunityWhereInput = {};
+    if (creatorId) where.creatorId = creatorId;
+    if (isPrivate !== undefined) where.isPrivate = isPrivate;
+    if (kind) where.kind = kind;
+    if (verificationStatus) where.verificationStatus = verificationStatus;
 
-      // Get total count
-      const total = await this.prisma.community.count({ where });
+    const total = await this.prisma.community.count({ where });
+    const prismaCommunities = await this.prisma.community.findMany({
+      where,
+      skip,
+      take: pageSize,
+      orderBy: { createdAt: 'desc' },
+    });
 
-      // Get paginated results
-      const prismaCommunities = await this.prisma.community.findMany({
-        where,
-        skip,
-        take: pageSize,
-        orderBy: { createdAt: 'desc' },
-      });
+    const communities = prismaCommunities.map((prismaCommunity) => CommunityMapper.toDomain(prismaCommunity));
+    const totalPages = Math.ceil(total / pageSize);
 
-      // Map to domain entities safely
-      const communities = prismaCommunities.map((prismaCommunity) => {
-        try {
-          return CommunityMapper.toDomain(prismaCommunity);
-        } catch (error) {
-          console.error('Error mapping community:', error, prismaCommunity);
-          throw error;
-        }
-      });
-
-      const totalPages = Math.ceil(total / pageSize);
-
-      return {
-        communities,
-        total,
-        page,
-        pageSize,
-        totalPages,
-      };
-    } catch (error) {
-      console.error('Error in PrismaCommunityRepository.list:', error);
-      throw error;
-    }
+    return {
+      communities,
+      total,
+      page,
+      pageSize,
+      totalPages,
+    };
   }
 }

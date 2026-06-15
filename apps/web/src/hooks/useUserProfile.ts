@@ -30,7 +30,7 @@ export const useUserProfile = () => {
 
     setProfileLoading(true);
     try {
-      // Obtener token si no lo tenemos
+      // Get a token if we do not have one yet
       let token = accessToken;
       if (!token) {
         token = await getAccessToken();
@@ -76,7 +76,7 @@ export const useUserProfile = () => {
     profileLoading,
     loadUserProfile,
     updateUserProfile,
-    // Fallback a datos de Auth0 si no tenemos perfil del backend
+    // Fall back to Auth0 data when the backend profile is not available
     displayName,
     displayEmail,
     displayImage,

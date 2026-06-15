@@ -246,7 +246,7 @@ export class EventsController {
       message: 'Eventos de la comunidad obtenidos exitosamente',
       ...result.events,
       events: result.events.events.map(event => event.toContract()),
-      communityId, // Compatibilidad para clientes legados
+      communityId, // Backwards compatibility for legacy clients
     };
   }
 
@@ -337,7 +337,7 @@ export class EventsController {
         body: `Te has apuntado al evento "${event.title}".`,
         link: `/communities/${event.communityId}`,
       },
-    });
+    }).catch(() => undefined);
 
     const registrationsCount = await this.prisma.eventRegistration.count({
       where: { eventId: id },
@@ -386,7 +386,7 @@ export class EventsController {
           body: `Has cancelado tu inscripción al evento "${event.title}".`,
           link: `/communities/${event.communityId}`,
         },
-      });
+      }).catch(() => undefined);
     }
 
     const registrationsCount = await this.prisma.eventRegistration.count({

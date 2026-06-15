@@ -72,7 +72,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
     const radiusKm = query.radiusKm ?? 10;
     const skip = (page - 1) * pageSize;
 
-    // Construir filtros
+    // Build filters
     const where: Prisma.ServiceWhereInput = {};
     
     if (q) {
@@ -87,12 +87,12 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
     if (intent) where.intent = intent as ServiceIntent;
     if (status) where.status = ServiceEnumMapper.mapStatusToPrisma(status) as ServiceStatus;
     if (location) where.location = { contains: location, mode: 'insensitive' };
-    if (userId) where.userId = userId; // Filtrar por usuario
+    if (userId) where.userId = userId; // Filter by user
     if (communityId) {
       where.communityId = communityId;
     } else if (!userId) {
-      // Los servicios publicados dentro de una comunidad no aparecen en el marketplace global.
-      // Se consultan desde /services?communityId=...
+      // Services published inside a community do not appear in the global marketplace.
+      // They are queried through /services?communityId=...
       where.communityId = null;
     }
     if (nearLat !== undefined && nearLng !== undefined) {
@@ -100,7 +100,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
       where.longitude = { not: null };
     }
     
-    // Filtros de precio
+    // Price filters
     if (minPrice !== undefined || maxPrice !== undefined) {
       where.price = {};
       if (minPrice !== undefined) where.price.gte = minPrice;
@@ -232,7 +232,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
   }
 
   async update(id: number, data: ServiceUpdate, userId: string): Promise<Service> {
-    // Verificar que el servicio existe y pertenece al usuario
+    // Verify that the service exists and belongs to the user
     const existingService = await this.findById(id);
     if (!existingService) {
       throw new Error('Service not found');
@@ -267,7 +267,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
   }
 
   async delete(id: number, userId: string): Promise<void> {
-    // Verificar que el servicio existe y pertenece al usuario
+    // Verify that the service exists and belongs to the user
     const existingService = await this.findById(id);
     if (!existingService) {
       throw new Error('Service not found');

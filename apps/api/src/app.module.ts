@@ -8,9 +8,7 @@ import { ExchangesModule } from './modules/exchanges/exchanges.module';
 import { MessagesModule } from './modules/messages/messages.module';
 import { RatingsModule } from './modules/ratings/ratings.module';
 import { CommunitiesModule } from './modules/communities/communities.module';
-import { GroupsModule } from './modules/groups/groups.module';
 import { EventsModule } from './modules/events/events.module';
-import { MembershipsModule } from './modules/memberships/memberships.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { Auth0Module } from './common/auth/auth0.module';
 import { HealthModule } from './modules/health/health.module';
@@ -29,9 +27,7 @@ import { HealthModule } from './modules/health/health.module';
     MessagesModule,
     RatingsModule,
     CommunitiesModule,
-    GroupsModule,
     EventsModule,
-    MembershipsModule,
     UploadModule,
     HealthModule,
   ],

@@ -491,7 +491,8 @@
   "video": {
     "title": "How does our platform work?",
     "subtitle": "Discover in this video how you can exchange your time for services and unique experiences.",
-    "playButton": "Watch explanatory video"
+    "playButton": "Watch explanatory video",
+    "comingSoon": "Video coming soon"
   },
   "hero": {
     "title": "Share your time",

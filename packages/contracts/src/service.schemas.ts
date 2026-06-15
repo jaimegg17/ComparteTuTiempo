@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // ============================================================================
-// ESQUEMAS DE SERVICIO
+// SERVICE SCHEMAS
 // ============================================================================
 
 export const ServiceSchema = z.object({
@@ -9,7 +9,7 @@ export const ServiceSchema = z.object({
   title: z.string(),
   description: z.string(),
   detailedDescription: z.string().nullable().optional(),
-  duration: z.number().positive('La duración debe ser positiva'),
+  duration: z.number().positive('Duration must be positive'),
   location: z.string().nullable(),
   latitude: z.number().nullable().optional(),
   longitude: z.number().nullable().optional(),
@@ -20,7 +20,7 @@ export const ServiceSchema = z.object({
   type: z.enum(['PRESENCIAL', 'VIRTUAL', 'HIBRIDO']),
   intent: z.enum(['OFFER', 'REQUEST']).default('OFFER'),
   status: z.enum(['ACTIVO', 'INACTIVO', 'COMPLETADO']),
-  price: z.number().positive('El precio debe ser positivo'),
+  price: z.number().positive('Price must be positive'),
   distanceKm: z.number().nullable().optional(),
   userId: z.string(),
   communityId: z.number().nullable().optional(),
@@ -29,10 +29,10 @@ export const ServiceSchema = z.object({
 });
 
 export const ServiceCreateSchema = z.object({
-  title: z.string().min(5, 'El título debe tener al menos 5 caracteres'),
-  description: z.string().min(20, 'La descripción debe tener al menos 20 caracteres'),
+  title: z.string().min(5, 'Title must be at least 5 characters'),
+  description: z.string().min(20, 'Description must be at least 20 characters'),
   detailedDescription: z.string().optional(),
-  duration: z.number().positive('La duración debe ser positiva'),
+  duration: z.number().positive('Duration must be positive'),
   location: z.string().optional(),
   latitude: z.number().optional().nullable(),
   longitude: z.number().optional().nullable(),
@@ -42,16 +42,16 @@ export const ServiceCreateSchema = z.object({
   category: z.enum(['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'ARTE', 'OTROS']),
   type: z.enum(['PRESENCIAL', 'VIRTUAL', 'HIBRIDO']),
   intent: z.enum(['OFFER', 'REQUEST']).default('OFFER'),
-  price: z.number().positive('El precio debe ser positivo'),
-  imageUrl: z.string().url('La URL de la imagen debe ser válida').optional().nullable(),
+  price: z.number().positive('Price must be positive'),
+  imageUrl: z.string().url('Image URL must be valid').optional().nullable(),
   communityId: z.number().positive().optional().nullable(),
 });
 
 export const ServiceUpdateSchema = z.object({
-  title: z.string().min(5, 'El título debe tener al menos 5 caracteres').optional(),
-  description: z.string().min(20, 'La descripción debe tener al menos 20 caracteres').optional(),
+  title: z.string().min(5, 'Title must be at least 5 characters').optional(),
+  description: z.string().min(20, 'Description must be at least 20 characters').optional(),
   detailedDescription: z.string().optional(),
-  duration: z.number().positive('La duración debe ser positiva').optional(),
+  duration: z.number().positive('Duration must be positive').optional(),
   location: z.string().optional(),
   latitude: z.number().optional().nullable(),
   longitude: z.number().optional().nullable(),
@@ -62,8 +62,8 @@ export const ServiceUpdateSchema = z.object({
   type: z.enum(['PRESENCIAL', 'VIRTUAL', 'HIBRIDO']).optional(),
   intent: z.enum(['OFFER', 'REQUEST']).optional(),
   status: z.enum(['ACTIVO', 'INACTIVO', 'COMPLETADO']).optional(),
-  price: z.number().positive('El precio debe ser positivo').optional(),
-  imageUrl: z.string().url('La URL de la imagen debe ser válida').optional().nullable(),
+  price: z.number().positive('Price must be positive').optional(),
+  imageUrl: z.string().url('Image URL must be valid').optional().nullable(),
   communityId: z.number().positive().optional().nullable(),
 });
 
@@ -81,8 +81,8 @@ export const ServiceListQuerySchema = z.object({
   radiusKm: z.number().positive().optional(),
   userId: z.string().optional(), // Filter by user ID
   communityId: z.number().positive().optional(),
-  page: z.number().min(1, 'La página debe ser mayor a 0').default(1),
-  pageSize: z.number().min(1, 'El tamaño de página debe ser mayor a 0').max(100, 'El tamaño de página no puede exceder 100').default(20),
+  page: z.number().min(1, 'Page must be greater than 0').default(1),
+  pageSize: z.number().min(1, 'Page size must be greater than 0').max(100, 'Page size cannot exceed 100').default(20),
 });
 
 export const ServiceListResponseSchema = z.object({
@@ -94,7 +94,7 @@ export const ServiceListResponseSchema = z.object({
 });
 
 // ============================================================================
-// TIPOS INFERIDOS
+// INFERRED TYPES
 // ============================================================================
 
 export type Service = z.infer<typeof ServiceSchema>;

@@ -7,7 +7,7 @@ import type {
 } from '@comparte-tu-tiempo/contracts';
 
 export const servicesApi = {
-  // Obtener lista de servicios
+  // Get service list
   async getServices(query: ServiceListQuery): Promise<ServiceListResponse> {
     const searchParams = new URLSearchParams();
     
@@ -46,22 +46,22 @@ export const servicesApi = {
     return apiClient.get<ServiceListResponse>(`/services/nearby/search?${searchParams.toString()}`);
   },
 
-  // Obtener servicio por ID
+  // Get service by ID
   async getService(id: number): Promise<{ service: Service & { averageRating?: number; totalRatings?: number; totalExchanges?: number } }> {
     return apiClient.get<{ service: Service & { averageRating?: number; totalRatings?: number; totalExchanges?: number } }>(`/services/${id}`);
   },
 
-  // Crear nuevo servicio
+  // Create a new service
   async createService(data: ServiceCreate): Promise<{ service: Service }> {
     return apiClient.post<{ service: Service }>('/services', data);
   },
 
-  // Actualizar servicio
+  // Update service
   async updateService(id: number, data: Partial<ServiceCreate>): Promise<Service> {
     return apiClient.put<Service>(`/services/${id}`, data);
   },
 
-  // Eliminar servicio
+  // Delete service
   async deleteService(id: number): Promise<void> {
     return apiClient.delete<void>(`/services/${id}`);
   },

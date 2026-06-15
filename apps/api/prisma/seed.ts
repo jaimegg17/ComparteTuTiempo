@@ -4,9 +4,9 @@ import { runDataMigrations } from './scripts/run-data-migrations';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Iniciando seed local basado en data migrations...');
+  console.log('Starting local seed based on data migrations...');
   await runDataMigrations();
-  console.log('✅ Seed local completado.');
+  console.log('Local seed completed.');
 }
 
 main()

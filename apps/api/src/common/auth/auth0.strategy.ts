@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
@@ -21,12 +21,6 @@ export class Auth0Strategy extends PassportStrategy(Strategy) {
     const domain = configService.get<string>('AUTH0_DOMAIN');
     const audience = configService.get<string>('AUTH0_AUDIENCE');
     
-    console.log('🔧 Auth0Strategy configuration:', {
-      domain,
-      audience,
-      issuer: `https://${domain}/`,
-    });
-    
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -45,7 +39,6 @@ export class Auth0Strategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: Auth0JwtPayload) {
-    // Log payload for debugging
     const expectedAudience = this.configService.get<string>('AUTH0_AUDIENCE');
     const expectedAudienceValue = expectedAudience ?? '';
     const tokenAudience = payload.aud;
@@ -53,25 +46,9 @@ export class Auth0Strategy extends PassportStrategy(Strategy) {
       ? tokenAudience.includes(expectedAudienceValue)
       : tokenAudience === expectedAudienceValue;
 
-    console.log('🔍 JWT Payload validated:', {
-      sub: payload.sub,
-      email: payload.email,
-      aud: tokenAudience,
-      expectedAud: expectedAudience,
-      isAudienceValid,
-      iss: payload.iss,
-      exp: payload.exp,
-      iat: payload.iat,
-      isExpired: payload.exp ? Date.now() > payload.exp * 1000 : false,
-    });
-
-    // Verify audience - Auth0 can return audience as array or string
+    // Verify audience. Auth0 can return it as an array or a string.
     if (!isAudienceValid) {
-      console.error('❌ Audience validation failed:', {
-        tokenAudience,
-        expectedAudience: expectedAudienceValue,
-      });
-      throw new Error('Invalid audience');
+      throw new UnauthorizedException('Invalid audience');
     }
 
     // Auth0 payload contains user information
@@ -81,7 +58,6 @@ export class Auth0Strategy extends PassportStrategy(Strategy) {
       email: payload.email,
       name: payload.name,
       picture: payload.picture,
-      // Add any other claims you need
     };
   }
 }

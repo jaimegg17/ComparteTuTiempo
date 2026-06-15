@@ -1,15 +1,15 @@
 import { z } from 'zod';
 
 // ============================================================================
-// ESQUEMAS DE COMMUNITY
+// COMMUNITY SCHEMAS
 // ============================================================================
 
 export const CommunityResourceSchema = z.object({
   title: z.string().min(1),
   description: z.string().nullable().optional(),
   type: z.enum(['link', 'note', 'image']).default('note'),
-  url: z.string().url('La URL del recurso debe ser válida').nullable().optional(),
-  imageUrl: z.string().url('La URL de la imagen debe ser válida').nullable().optional(),
+  url: z.string().url('Resource URL must be valid').nullable().optional(),
+  imageUrl: z.string().url('Image URL must be valid').nullable().optional(),
 });
 
 export const CommunityKindSchema = z.enum(['COMMUNITY', 'ORGANIZATION']);
@@ -32,7 +32,7 @@ export const CommunitySchema = z.object({
   id: z.number(),
   name: z.string(),
   description: z.string().nullable().transform(v => v ?? null),
-  imageUrl: z.string().url('La URL de la imagen debe ser válida').nullable().optional(),
+  imageUrl: z.string().url('Image URL must be valid').nullable().optional(),
   topics: z.array(z.string()).default([]),
   rules: z.array(z.string()).default([]),
   resources: z.array(CommunityResourceSchema).default([]),
@@ -47,7 +47,7 @@ export const CommunitySchema = z.object({
 export const CommunityCreateSchema = z.object({
   name: z.string().min(3).max(100),
   description: z.string().min(10).max(500),
-  imageUrl: z.string().url('La URL de la imagen debe ser válida').optional().nullable(),
+  imageUrl: z.string().url('Image URL must be valid').optional().nullable(),
   topics: z.array(z.string().min(1).max(40)).max(8).optional(),
   rules: z.array(z.string().min(3).max(180)).max(10).optional(),
   resources: z.array(CommunityResourceSchema).max(12).optional(),
@@ -59,7 +59,7 @@ export const CommunityCreateSchema = z.object({
 export const CommunityUpdateSchema = z.object({
   name: z.string().min(3).max(100).optional(),
   description: z.string().min(10).max(500).optional(),
-  imageUrl: z.string().url('La URL de la imagen debe ser válida').optional().nullable(),
+  imageUrl: z.string().url('Image URL must be valid').optional().nullable(),
   topics: z.array(z.string().min(1).max(40)).max(8).optional(),
   rules: z.array(z.string().min(3).max(180)).max(10).optional(),
   resources: z.array(CommunityResourceSchema).max(12).optional(),
@@ -85,7 +85,7 @@ export const CommunityListResponseSchema = z.object({
 });
 
 // ============================================================================
-// TIPOS INFERIDOS
+// INFERRED TYPES
 // ============================================================================
 
 export type CommunityResource = z.infer<typeof CommunityResourceSchema>;

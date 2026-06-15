@@ -64,7 +64,7 @@ export function ServiceFilters({ query, onQueryChange }: ServiceFiltersProps) {
         Filtros de Búsqueda
       </h2>
       
-      {/* Barra de búsqueda */}
+      {/* Search bar */}
       <div className="mb-6">
         <div className="flex space-x-2">
           <input
@@ -81,7 +81,7 @@ export function ServiceFilters({ query, onQueryChange }: ServiceFiltersProps) {
         </div>
       </div>
 
-      {/* Filtros por categoría */}
+      {/* Category filters */}
       <div className="mb-6">
         <h3 className="text-sm font-medium text-gray-700 mb-3">Categoría</h3>
         <div className="flex flex-wrap gap-2">
@@ -105,7 +105,7 @@ export function ServiceFilters({ query, onQueryChange }: ServiceFiltersProps) {
         </div>
       </div>
 
-      {/* Filtros por tipo */}
+      {/* Type filters */}
       <div className="mb-6">
         <h3 className="text-sm font-medium text-gray-700 mb-3">Tipo de Servicio</h3>
         <div className="flex flex-wrap gap-2">
@@ -129,7 +129,7 @@ export function ServiceFilters({ query, onQueryChange }: ServiceFiltersProps) {
         </div>
       </div>
 
-      {/* Botón limpiar filtros */}
+      {/* Clear filters button */}
       <div className="flex justify-end">
         <Button
           variant="ghost"

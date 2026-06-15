@@ -8,7 +8,7 @@ import type {
 } from '@comparte-tu-tiempo/contracts';
 
 export const ratingsApi = {
-  // Obtener lista de valoraciones
+  // Get rating list
   async getRatings(query: RatingListQuery): Promise<RatingListResponse> {
     const searchParams = new URLSearchParams();
     
@@ -21,22 +21,22 @@ export const ratingsApi = {
     return apiClient.get<RatingListResponse>(`/ratings?${searchParams.toString()}`);
   },
 
-  // Obtener valoración por ID
+  // Get rating by ID
   async getRating(id: number): Promise<Rating> {
     return apiClient.get<Rating>(`/ratings/${id}`);
   },
 
-  // Crear nueva valoración
+  // Create a new rating
   async createRating(data: RatingCreate): Promise<{ rating: Rating }> {
     return apiClient.post<{ rating: Rating }>('/ratings', data);
   },
 
-  // Actualizar valoración
+  // Update rating
   async updateRating(id: number, data: RatingUpdate): Promise<{ rating: Rating }> {
     return apiClient.put<{ rating: Rating }>(`/ratings/${id}`, data);
   },
 
-  // Eliminar valoración
+  // Delete rating
   async deleteRating(id: number): Promise<void> {
     return apiClient.delete<void>(`/ratings/${id}`);
   },

@@ -71,7 +71,7 @@ export class Service {
   get createdAt(): Date { return this._createdAt; }
   get updatedAt(): Date { return this._updatedAt; }
 
-  // Métodos de dominio
+  // Domain methods
   isActive(): boolean {
     return this._status === 'ACTIVO';
   }
@@ -88,7 +88,7 @@ export class Service {
     return this.isOwnedBy(userId);
   }
 
-  // Métodos de utilidad
+  // Utility methods
   get durationFormatted(): string {
     return `${this._duration} hora${this._duration !== 1 ? 's' : ''}`;
   }
@@ -101,7 +101,7 @@ export class Service {
     return this._type === 'PRESENCIAL';
   }
 
-  // Método para convertir a contrato
+  // Convert to contract format
   toContract(): ServiceWithImage {
     return {
       id: this._id,

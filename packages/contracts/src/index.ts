@@ -2,9 +2,7 @@ export * from './auth.schemas';
 export * from './user.schemas';
 export * from './service.schemas';
 export * from './exchange.schemas';
-export * from './group.schemas';
 export * from './event.schemas';
-export * from './membership.schemas';
 export * from './community.schemas';
 export * from './rating.schemas';
 export * from './message.schemas';
@@ -34,13 +32,6 @@ export type {
   ExchangeListResponse,
 } from './exchange.schemas';
 export type {
-  Group,
-  GroupCreate,
-  GroupUpdate,
-  GroupListQuery,
-  GroupListResponse,
-} from './group.schemas';
-export type {
   Event,
   EventCreate,
   EventUpdate,
@@ -68,13 +59,6 @@ export type {
   RatingListResponse,
 } from './rating.schemas';
 export type {
-  Membership,
-  MembershipCreate,
-  MembershipUpdate,
-  MembershipListQuery,
-  MembershipListResponse,
-} from './membership.schemas';
-export type {
   Message,
   MessageCreate,
   MessageUpdate,
@@ -89,8 +73,6 @@ export type {
 export { UserRole } from './user.schemas';
 export { ServiceCategory, ServiceType, ServiceStatus, ServiceIntent } from './service.schemas';
 export { ExchangeStatus } from './exchange.schemas';
-export { GroupType } from './group.schemas';
-export { MembershipRole, MembershipStatus } from './membership.schemas';
 export {
   CommunityKind as CommunityKindValues,
   CommunityVerificationStatus as CommunityVerificationStatusValues,

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // ============================================================================
-// ESQUEMAS DE RATING
+// RATING SCHEMAS
 // ============================================================================
 
 export const RatingSchema = z.object({
@@ -42,7 +42,7 @@ export const RatingListResponseSchema = z.object({
 });
 
 // ============================================================================
-// TIPOS INFERIDOS
+// INFERRED TYPES
 // ============================================================================
 
 export type Rating = z.infer<typeof RatingSchema>;

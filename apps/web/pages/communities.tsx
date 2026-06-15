@@ -157,7 +157,7 @@ export default function CommunitiesPage() {
                 />
               </Tabs>
               
-              {/* Número de resultados y botón */}
+              {/* Result count and action button */}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
                 <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '18px' }}>
                   {loading

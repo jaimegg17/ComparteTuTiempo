@@ -122,11 +122,11 @@ export async function runDataMigrations() {
   const sqlFiles = entries.filter(file => file.endsWith('.sql')).sort();
 
   if (sqlFiles.length === 0) {
-    console.log('ℹ️ No hay archivos SQL en prisma/data-migrations.');
+    console.log('No SQL files found in prisma/data-migrations.');
     return;
   }
 
-  console.log(`🚀 Ejecutando ${sqlFiles.length} data migration(s)...`);
+  console.log(`Running ${sqlFiles.length} data migration(s)...`);
 
   for (const fileName of sqlFiles) {
     const filePath = path.join(migrationsDir, fileName);
@@ -138,24 +138,24 @@ export async function runDataMigrations() {
     if (applied) {
       if (applied.checksum !== fileChecksum) {
         throw new Error(
-          `La migración ${fileName} ya fue aplicada con otro checksum. ` +
-          'Crea un archivo nuevo en lugar de modificar uno existente.',
+          `Migration ${fileName} was already applied with a different checksum. ` +
+          'Create a new migration file instead of modifying an existing one.',
         );
       }
 
-      console.log(`⏭️  ${fileName} ya aplicada. Se omite.`);
+      console.log(`${fileName} already applied. Skipping.`);
       continue;
     }
 
     const statements = splitSqlStatements(fileContent);
 
     if (statements.length === 0) {
-      console.log(`⚠️  ${fileName} está vacío. Se marca como aplicada.`);
+      console.log(`${fileName} is empty. Marking it as applied.`);
       await markApplied(fileName, fileChecksum);
       continue;
     }
 
-    console.log(`🧩 Aplicando ${fileName} (${statements.length} sentencia(s))...`);
+    console.log(`Applying ${fileName} (${statements.length} statement(s))...`);
 
     await prisma.$transaction(async tx => {
       for (const statement of statements) {
@@ -169,16 +169,16 @@ export async function runDataMigrations() {
       );
     });
 
-    console.log(`✅ ${fileName} aplicada correctamente.`);
+    console.log(`${fileName} applied successfully.`);
   }
 
-  console.log('🎉 Data migrations completadas.');
+  console.log('Data migrations completed.');
 }
 
 if (require.main === module) {
   runDataMigrations()
     .catch(error => {
-      console.error('❌ Error ejecutando data migrations:', error);
+      console.error('Error running data migrations:', error);
       process.exitCode = 1;
     })
     .finally(async () => {

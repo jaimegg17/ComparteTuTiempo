@@ -106,7 +106,7 @@ export default function ServicesPage() {
   const { showToast } = useToast();
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   
-  // Filtros
+  // Filters
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [location, setLocation] = useState('');
@@ -129,7 +129,7 @@ export default function ServicesPage() {
   const markersRef = useRef<GoogleMarkerInstance[]>([]);
   const infoWindowRef = useRef<GoogleInfoWindowInstance | null>(null);
 
-  // Estados de colapso para cada filtro
+  // Collapse state for each filter
   const [openCategories, setOpenCategories] = useState(false);
   const [openLocation, setOpenLocation] = useState(false);
   const [openType, setOpenType] = useState(false);
@@ -156,7 +156,7 @@ export default function ServicesPage() {
     }
   }, [router.isReady, router.query.category, router.query.intent, selectedCategory, selectedIntent, categories]);
   
-  // Mapping functions for display
+  // Display mapping functions
   const getCategoryDisplayName = useCallback((category: string) => {
     const categoryMap: Record<string, string> = {
       'EDUCACION': t('services.categories.education'),
@@ -209,8 +209,8 @@ export default function ServicesPage() {
       if (q) params.append('q', q);
       if (cat) params.append('category', cat);
       if (loc) params.append('location', loc);
-      // El backend filtra minPrice/maxPrice por créditos, no por duración.
-      // La duración se filtra abajo en cliente para evitar excluir resultados por precio.
+      // The backend filters minPrice/maxPrice by credits, not by duration.
+      // Duration is filtered below on the client to avoid excluding results by price.
       if (typ) params.append('type', typ);
       params.append('pageSize', '12');
       if (intent !== 'ALL') params.append('intent', intent);
@@ -404,12 +404,12 @@ export default function ServicesPage() {
   };
 
   const toggleCategory = (cat: string) => {
-    // Si ya está seleccionada, la deseleccionamos; si no, la seleccionamos
+    // Toggle selected state
     setSelectedCategory(prev => prev === cat ? '' : cat);
   };
 
   const toggleType = (type: string) => {
-    // Si ya está seleccionado, lo deseleccionamos; si no, lo seleccionamos
+    // Toggle selected state
     setSelectedType(prev => prev === type ? '' : type);
   };
 

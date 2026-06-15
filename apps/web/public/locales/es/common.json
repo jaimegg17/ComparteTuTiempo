@@ -688,7 +688,8 @@
   "video": {
     "title": "¿Cómo funciona nuestra plataforma?",
     "subtitle": "Descubre en este video cómo puedes intercambiar tu tiempo por servicios y experiencias únicas.",
-    "playButton": "Ver video explicativo"
+    "playButton": "Ver video explicativo",
+    "comingSoon": "Video próximamente"
   },
   "hero": {
     "title": "Comparte tu tiempo",

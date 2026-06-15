@@ -133,7 +133,7 @@ export class RatingsController {
   @ApiOperation({ summary: 'Listar valoraciones con filtros' })
   @ApiResponse({ status: 200, description: 'Lista de valoraciones obtenida' })
   async listRatings(@Query() query: RatingListQueryDto) {
-    // Asegurar que page y pageSize estén presentes
+    // Ensure page and pageSize are present
     const queryWithDefaults = {
       page: query.page || 1,
       pageSize: query.pageSize || 20,

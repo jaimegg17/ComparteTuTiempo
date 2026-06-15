@@ -45,7 +45,7 @@ export class ApiClient {
     };
 
     try {
-      // Asegurar que fetch esté disponible
+      // Ensure fetch is available
       if (typeof fetch === 'undefined') {
         throw new Error('Fetch API no está disponible en este entorno');
       }

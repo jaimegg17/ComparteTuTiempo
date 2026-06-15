@@ -27,7 +27,7 @@ export const useCreateService = () => {
   return useMutation({
     mutationFn: (data: ServiceCreate) => servicesApi.createService(data),
     onSuccess: () => {
-      // Invalidar y refetch la lista de servicios
+      // Invalidate and refetch the service list
       queryClient.invalidateQueries({ queryKey: ['services'] });
     },
   });
@@ -40,9 +40,9 @@ export const useUpdateService = () => {
     mutationFn: ({ id, data }: { id: number; data: Partial<ServiceCreate> }) =>
       servicesApi.updateService(id, data),
     onSuccess: (updatedService) => {
-      // Actualizar el cache del servicio específico
+      // Update the specific service cache
       queryClient.setQueryData(['service', updatedService.id], updatedService);
-      // Invalidar la lista de servicios
+      // Invalidate the service list
       queryClient.invalidateQueries({ queryKey: ['services'] });
     },
   });
@@ -54,7 +54,7 @@ export const useDeleteService = () => {
   return useMutation({
     mutationFn: (id: number) => servicesApi.deleteService(id),
     onSuccess: () => {
-      // Invalidar y refetch la lista de servicios
+      // Invalidate and refetch the service list
       queryClient.invalidateQueries({ queryKey: ['services'] });
     },
   });

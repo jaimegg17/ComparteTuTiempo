@@ -45,7 +45,7 @@ export function ServiceDetailsTab({ service }: ServiceDetailsTabProps) {
         )}
       </Box>
 
-      {/* Descripción detallada */}
+      {/* Detailed description */}
       <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8, mb: 3 }}>
         {service.detailedDescription || service.description}
       </Typography>
@@ -70,7 +70,7 @@ export function ServiceDetailsTab({ service }: ServiceDetailsTabProps) {
         </Box>
       )}
 
-      {/* Información del proveedor */}
+      {/* Provider information */}
       {service.user && (
         <Box>
           <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary', textTransform: 'uppercase', fontSize: '11px', mb: 1, display: 'block' }}>

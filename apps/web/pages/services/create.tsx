@@ -152,7 +152,7 @@ export default function CreateServicePage() {
       .catch(() => setSelectedCommunity(null));
   }, [router.query?.communityId]);
 
-  // Mapping functions for display
+  // Display mapping functions
   const getCategoryDisplayName = (category: string) => {
     const categoryMap: Record<string, string> = {
       'EDUCACION': t('services.categories.education'),
@@ -207,7 +207,7 @@ export default function CreateServicePage() {
         : {}),
     }));
     
-    // Clear error for this field
+    // Clear the error for this field
     if (errors[field as keyof FormErrors]) {
       setErrors(prev => ({
         ...prev,
@@ -383,7 +383,7 @@ export default function CreateServicePage() {
     setError(null);
     
     try {
-      // Use uploaded image URL if available
+      // Use the uploaded image URL when available
       const imageUrl = uploadedImageUrl || formData.imageUrl;
 
       const token = await getAccessToken();
@@ -504,7 +504,7 @@ export default function CreateServicePage() {
 
             <form onSubmit={handleSubmit}>
               <Stack spacing={3}>
-                {/* Título */}
+                {/* Title */}
                 <TextField
                   fullWidth
                   label={t("services.form.title")}
@@ -517,7 +517,7 @@ export default function CreateServicePage() {
                   required
                 />
 
-                {/* Descripción Corta */}
+                {/* Short description */}
                 <TextField
                   fullWidth
                   multiline
@@ -533,7 +533,7 @@ export default function CreateServicePage() {
                   required
                 />
 
-                {/* Descripción Detallada */}
+                {/* Detailed description */}
                 <TextField
                   fullWidth
                   multiline
@@ -562,7 +562,7 @@ export default function CreateServicePage() {
                   </Alert>
                 )}
 
-                {/* Tipo de publicación, categoría y formato */}
+                {/* Post type, category, and format */}
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                   <TextField
                     select
@@ -617,7 +617,7 @@ export default function CreateServicePage() {
                   </TextField>
                 </Box>
 
-                {/* Duración y Ubicación */}
+                {/* Duration and location */}
                 <Box sx={{ display: 'flex', gap: 2 }}>
                   <TextField
                     fullWidth
@@ -718,7 +718,7 @@ export default function CreateServicePage() {
                   <strong>{t("services.form.info_note")}</strong>
                 </Alert>
 
-                {/* Botones */}
+                {/* Buttons */}
                 <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', pt: 2 }}>
                   <Button
                     variant="outlined"

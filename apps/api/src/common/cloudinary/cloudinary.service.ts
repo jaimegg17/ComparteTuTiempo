@@ -98,13 +98,13 @@ export class CloudinaryService {
       cloudinary.uploader.destroy(publicId, { invalidate: true }, (error, result) => {
         if (error) {
           this.logger.error(`Error deleting from Cloudinary: ${error.message}`, error.stack);
-          reject(new Error(`Error al eliminar la imagen: ${error.message}`));
+          reject(new Error(`Error deleting image: ${error.message}`));
         } else if (result && result.result === 'ok') {
           this.logger.log(`Image deleted successfully: ${publicId}`);
           resolve();
         } else {
           this.logger.warn(`Image deletion returned: ${result?.result}`);
-          reject(new Error('No se pudo eliminar la imagen'));
+          reject(new Error('Could not delete image'));
         }
       });
     });

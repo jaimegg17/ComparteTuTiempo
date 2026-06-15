@@ -40,7 +40,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
 
   return (
     <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
-      {/* Header con categoría y precio */}
+      {/* Header with category and price */}
       <div className="p-6 pb-4">
         <div className="flex items-center justify-between mb-4">
           <span className={`px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(service.category)}`}>
@@ -54,22 +54,22 @@ export function ServiceCard({ service }: ServiceCardProps) {
           </div>
         </div>
         
-        {/* Título del servicio */}
+        {/* Service title */}
         <h3 className="text-xl font-semibold text-gray-900 mb-3 line-clamp-2 leading-tight">
           {service.title}
         </h3>
         
-        {/* Descripción */}
+        {/* Description */}
         <p className="text-gray-600 text-sm mb-4 line-clamp-3 leading-relaxed">
           {service.description}
         </p>
       </div>
 
-      {/* Footer con información y botón */}
+      {/* Footer with info and button */}
       <div className="px-6 pb-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-4 text-sm text-gray-500">
-            {/* Duración */}
+            {/* Duration */}
             <div className="flex items-center space-x-1">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -77,7 +77,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
               <span>{service.duration}h</span>
             </div>
             
-            {/* Tipo de servicio */}
+            {/* Service type */}
             <div className="flex items-center space-x-1">
               {getTypeIcon(service.type)}
               <span className="capitalize">{service.type}</span>
@@ -85,7 +85,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
           </div>
         </div>
         
-        {/* Botón de acción */}
+        {/* Action button */}
         <Link href={`/services/${service.id}`} className="block">
           <Button 
             variant="primary" 

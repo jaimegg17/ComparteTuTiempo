@@ -133,7 +133,7 @@ export class MessagesController {
       throw new BadRequestException('exchangeId is required in query params');
     }
     
-    // Asegurar que page y pageSize estén presentes
+    // Ensure page and pageSize are present
     const queryWithDefaults = {
       page: query.page || 1,
       pageSize: query.pageSize || 20,

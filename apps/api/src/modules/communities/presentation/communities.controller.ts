@@ -35,7 +35,7 @@ import { ListCommunitiesUseCase } from '../application/list-communities.use-case
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
 import { PrismaService } from '@/common/prisma/prisma.service';
 
-// DTOs con class-validator para compatibilidad con ValidationPipe global
+// DTOs using class-validator for compatibility with the global ValidationPipe
 export class CreateCommunityDto {
   @IsString()
   name!: string;
@@ -323,7 +323,7 @@ export class CommunitiesController {
   @ApiResponse({ status: 200, description: 'Lista de comunidades obtenida' })
   async listCommunities(@Query() query: CommunityListQueryDto) {
     try {
-      // Asegurar que page y pageSize estén presentes y sean números
+      // Ensure page and pageSize are present and numeric
       const queryWithDefaults = {
         page: query.page || 1,
         pageSize: query.pageSize || 20,

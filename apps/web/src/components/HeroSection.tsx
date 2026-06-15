@@ -108,7 +108,7 @@ export const HeroSection: React.FC = () => {
             </Typography>
           </Box>
 
-          {/* Botón */}
+          {/* Button */}
           <Box
             sx={{
               display: 'flex',

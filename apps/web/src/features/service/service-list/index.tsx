@@ -48,7 +48,7 @@ export function ServiceList() {
         ))}
       </div>
 
-      {/* Paginación básica */}
+      {/* Basic pagination */}
       {data.totalPages > 1 && (
         <div className="flex justify-center space-x-2 mt-8">
           <button

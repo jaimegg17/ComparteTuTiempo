@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { ExchangeStatus } from './exchange.schemas';
 
 // ============================================================================
-// ESQUEMAS DE MESSAGE
+// MESSAGE SCHEMAS
 // ============================================================================
 
 export const MessageSchema = z.object({
@@ -16,8 +16,8 @@ export const MessageSchema = z.object({
 });
 
 export const MessageCreateSchema = z.object({
-  exchangeId: z.number().min(1, 'exchangeId es requerido'),
-  content: z.string().min(1, 'El mensaje no puede estar vacío').max(1000, 'El mensaje no puede exceder 1000 caracteres'),
+  exchangeId: z.number().min(1, 'exchangeId is required'),
+  content: z.string().min(1, 'Message cannot be empty').max(1000, 'Message cannot exceed 1000 characters'),
 });
 
 export const MessageUpdateSchema = z.object({
@@ -25,9 +25,9 @@ export const MessageUpdateSchema = z.object({
 });
 
 export const MessageListQuerySchema = z.object({
-  exchangeId: z.number().min(1, 'exchangeId es requerido').optional(),
-  page: z.number().min(1, 'La página debe ser mayor a 0').default(1),
-  pageSize: z.number().min(1, 'El tamaño de página debe ser mayor a 0').max(100, 'El tamaño de página no puede exceder 100').default(20),
+  exchangeId: z.number().min(1, 'exchangeId is required').optional(),
+  page: z.number().min(1, 'Page must be greater than 0').default(1),
+  pageSize: z.number().min(1, 'Page size must be greater than 0').max(100, 'Page size cannot exceed 100').default(20),
 });
 
 export const MessageListResponseSchema = z.object({
@@ -71,7 +71,7 @@ export const ConversationListResponseSchema = z.object({
 });
 
 // ============================================================================
-// TIPOS INFERIDOS
+// INFERRED TYPES
 // ============================================================================
 
 export type Message = z.infer<typeof MessageSchema>;
