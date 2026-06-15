@@ -55,7 +55,6 @@ export default function CommunitiesPage() {
         pageSize,
         kind: 'COMMUNITY' as const,
         creatorId: activeTab === 1 && user?.sub ? user.sub : undefined,
-        isPrivate: visibilityFilter === 'all' ? undefined : visibilityFilter === 'private',
       };
 
       const response = await communitiesApi.getCommunities(query);
