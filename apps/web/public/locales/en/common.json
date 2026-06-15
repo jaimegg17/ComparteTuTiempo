@@ -685,7 +685,12 @@
       "leave": "Leave community",
       "cancelRequest": "Cancel request",
       "join": "Join community",
-      "privateNotice": "This community is private. Your request must be approved by an owner or administrator.",
+      "joinOrganization": "Join organization",
+      "privateCommunityLoginTitle": "Private community",
+      "privateCommunityLoginDescription": "To access this private community content, sign in and request access.",
+      "privateOrganizationLoginTitle": "Private organization",
+      "privateOrganizationLoginDescription": "To access this private organization content, sign in and request access.",
+      "privateNotice": "This space is private. Your request must be approved by an owner or administrator.",
       "pendingNotice": "Your request is pending review. You can cancel it while you wait.",
       "pendingReview": "You have {{count}} pending requests to review.",
       "loginToRegisterEvent": "Sign in to register for events.",
@@ -703,7 +708,9 @@
       "statusRejected": "Request rejected successfully.",
       "statusError": "The request status could not be updated.",
       "publishService": "Publish service",
+      "publishOrganizationService": "Publish initiative",
       "requestJoin": "Request to join",
+      "requestJoinOrganization": "Request access",
       "mustBeMemberToRegisterEvent": "You must belong to the community to register for its events."
     },
     "editPage": {
@@ -762,9 +769,18 @@
       "verifiedOrganization": "Verified organization",
       "pendingOrganization": "Pending organization",
       "members": "{{count}} members",
+      "organizationMembers": "{{count}} participants",
       "events": "{{count}} events",
       "rules": "{{count}} rules",
+      "principles": "{{count}} principles",
+      "resources": "{{count}} resources",
       "created": "Created {{date}}"
+    },
+    "rulesSection": {
+      "title": "Community rules",
+      "description": "Basic guidelines to keep the space useful, kind and safe.",
+      "organizationTitle": "Participation principles",
+      "organizationDescription": "Internal criteria and rules that help the organization operate transparently and safely."
     },
     "resourcesSection": {
       "link": "Link",
@@ -772,6 +788,8 @@
       "image": "Image",
       "title": "Resource board",
       "description": "Links, notes and useful references for the community activity.",
+      "organizationTitle": "Institutional resources",
+      "organizationDescription": "Links, notes and useful materials to better understand the organization's activity.",
       "open": "Open resource",
       "editor": {
         "title": "Resources and announcements board",
@@ -801,7 +819,10 @@
     "services": {
       "title": "Community services",
       "description": "Offers and requests published in this space by its members.",
-      "empty": "There are no services associated with this community yet."
+      "empty": "There are no services associated with this community yet.",
+      "organizationTitle": "Organization initiatives",
+      "organizationDescription": "Offers, requests or activities published in this institutional space.",
+      "organizationEmpty": "There are no initiatives associated with this organization yet."
     },
     "verified": "Verified",
     "pending": "Pending",
@@ -904,6 +925,14 @@
           {
             "question": "How should I request a service properly?",
             "answer": "Open the service detail page, review the description, location and duration, and then send a request. If there are logistical details or specific expectations, include a short message to provide context from the start."
+          },
+          {
+            "question": "What is the difference between an offer and a request?",
+            "answer": "An offer is something a person can provide to others, such as classes, technical help or occasional support. A request is a need published by someone looking for help. Both can start an exchange and continue through chat."
+          },
+          {
+            "question": "Why might no requests appear after filtering?",
+            "answer": "The request filter only shows publications marked as needs or help requests. If you combine it with category, location, duration or nearby filters, there may be no matching results. Clear the filters to see all available requests."
           },
           {
             "question": "What makes a service listing feel professional and credible?",

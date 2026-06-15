@@ -1,5 +1,5 @@
 import { Box, Chip, Stack, Typography } from '@mui/material';
-import { CalendarMonth, Lock, Public, RuleFolder } from '@mui/icons-material';
+import { CalendarMonth, Lock, Public, RuleFolder, FolderSharedOutlined } from '@mui/icons-material';
 import type { Community } from '@comparte-tu-tiempo/contracts';
 import { useState } from 'react';
 
@@ -7,10 +7,11 @@ interface CommunityHeaderProps {
   community: Community;
   membersCount: number;
   eventsCount: number;
+  resourcesCount?: number;
   t: (key: string, options?: Record<string, unknown>) => string;
 }
 
-export function CommunityHeader({ community, membersCount, eventsCount, t }: CommunityHeaderProps) {
+export function CommunityHeader({ community, membersCount, eventsCount, resourcesCount = 0, t }: CommunityHeaderProps) {
   const [imageError, setImageError] = useState(false);
 
   return (
@@ -74,9 +75,10 @@ export function CommunityHeader({ community, membersCount, eventsCount, t }: Com
       )}
 
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} useFlexGap flexWrap="wrap" sx={{ rowGap: 1 }}>
-        <Chip label={t('communities.header.members', { count: membersCount })} variant="outlined" />
+        <Chip label={t(community.kind === 'ORGANIZATION' ? 'communities.header.organizationMembers' : 'communities.header.members', { count: membersCount })} variant="outlined" />
         <Chip label={t('communities.header.events', { count: eventsCount })} variant="outlined" />
-        <Chip icon={<RuleFolder />} label={t('communities.header.rules', { count: community.rules.length })} variant="outlined" />
+        <Chip icon={<RuleFolder />} label={t(community.kind === 'ORGANIZATION' ? 'communities.header.principles' : 'communities.header.rules', { count: community.rules.length })} variant="outlined" />
+        <Chip icon={<FolderSharedOutlined />} label={t('communities.header.resources', { count: resourcesCount })} variant="outlined" />
         <Chip
           icon={<CalendarMonth />}
           label={t('communities.header.created', { date: new Date(community.createdAt).toLocaleDateString() })}

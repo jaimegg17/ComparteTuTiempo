@@ -390,7 +390,7 @@ export function Header() {
                 </>
               ) : (
                 <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <Link href="/api/auth/login" style={{ textDecoration: "none" }}>
+                  <Link href="/login" style={{ textDecoration: "none" }}>
                     <Button
                       variant="contained"
                       size="small"
@@ -477,7 +477,7 @@ export function Header() {
         ) : (
           <Button
             component={Link}
-            href="/api/auth/login"
+            href="/login"
             variant="contained"
             fullWidth
             startIcon={<LoginIcon />}

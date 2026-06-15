@@ -25,7 +25,7 @@ import type { Community } from '@comparte-tu-tiempo/contracts';
 
 export default function AdminInboxPage() {
   const router = useRouter();
-  const { accessToken } = useAuth();
+  const { user, accessToken, isLoading: authLoading } = useAuth();
   const { userProfile, profileLoading } = useUserProfile();
   const [organizations, setOrganizations] = useState<Community[]>([]);
   const [metrics, setMetrics] = useState<AdminMetrics | null>(null);
@@ -106,6 +106,26 @@ export default function AdminInboxPage() {
             Volver
           </Button>
 
+          {(authLoading || profileLoading) ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+              <CircularProgress />
+            </Box>
+          ) : !user ? (
+            <Alert
+              severity="warning"
+              action={
+                <Button color="inherit" size="small" onClick={() => router.push('/api/auth/login?returnTo=/admin/inbox')}>
+                  Iniciar sesión
+                </Button>
+              }
+              sx={{ mb: 2 }}
+            >
+              Necesitas iniciar sesión con una cuenta administradora para acceder a este inbox.
+            </Alert>
+          ) : userProfile?.role !== 'ADMIN' ? (
+            <Alert severity="warning" sx={{ mb: 2 }}>Solo un administrador puede acceder a este inbox.</Alert>
+          ) : (
+            <>
           <Box
             sx={{
               mb: 3,
@@ -138,15 +158,11 @@ export default function AdminInboxPage() {
 
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-          {userProfile && userProfile.role !== 'ADMIN' && (
-            <Alert severity="warning">Solo un administrador puede acceder a este inbox.</Alert>
-          )}
-
           {loading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
               <CircularProgress />
             </Box>
-          ) : userProfile?.role === 'ADMIN' && (
+          ) : (
             <Stack spacing={2}>
               {organizations.length === 0 ? (
                 <Alert severity="success">No hay elementos pendientes en el inbox administrativo.</Alert>
@@ -209,6 +225,8 @@ export default function AdminInboxPage() {
                 ))
               )}
             </Stack>
+          )}
+            </>
           )}
         </Box>
       </Box>

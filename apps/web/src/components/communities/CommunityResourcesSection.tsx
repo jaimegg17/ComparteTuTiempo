@@ -5,6 +5,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 
 interface CommunityResourcesSectionProps {
   resources: CommunityResource[];
+  organization?: boolean;
 }
 
 const typeIcons = {
@@ -13,17 +14,17 @@ const typeIcons = {
   image: <ImageIcon sx={{ fontSize: 18 }} />,
 };
 
-export function CommunityResourcesSection({ resources }: CommunityResourcesSectionProps) {
+export function CommunityResourcesSection({ resources, organization = false }: CommunityResourcesSectionProps) {
   const { t } = useTranslation();
   if (!resources.length) return null;
 
   return (
     <Box sx={{ bgcolor: '#fff', borderRadius: 3, p: { xs: 2.5, md: 3 }, boxShadow: '0 12px 28px rgba(15,23,42,0.06)', border: '1px solid rgba(148,163,184,0.16)' }}>
       <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.5 }}>
-        {t('communities.resourcesSection.title')}
+        {t(organization ? 'communities.resourcesSection.organizationTitle' : 'communities.resourcesSection.title')}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
-        {t('communities.resourcesSection.description')}
+        {t(organization ? 'communities.resourcesSection.organizationDescription' : 'communities.resourcesSection.description')}
       </Typography>
 
       <Stack spacing={1.5}>

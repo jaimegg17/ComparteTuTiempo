@@ -60,8 +60,14 @@ export default function CommunitiesPage() {
 
       const response = await communitiesApi.getCommunities(query);
 
-      setCommunities(response.communities);
-      setTotal(response.total);
+      const visibilityFilteredCommunities = response.communities.filter((community) => {
+        if (visibilityFilter === 'public') return !community.isPrivate;
+        if (visibilityFilter === 'private') return community.isPrivate;
+        return true;
+      });
+
+      setCommunities(visibilityFilteredCommunities);
+      setTotal(visibilityFilteredCommunities.length);
     }, ERROR_MESSAGES.NETWORK_ERROR);
   }, [handleAsyncOperation, accessToken, page, pageSize, activeTab, user?.sub, visibilityFilter]);
 
@@ -91,6 +97,11 @@ export default function CommunitiesPage() {
   }, [communities, searchTerm]);
 
   const handleJoinCommunity = (community: Community) => {
+    if (!user?.sub) {
+      router.push(`/api/auth/login?returnTo=/communities/${community.id}`);
+      return;
+    }
+
     router.push(`/communities/${community.id}?action=join`);
   };
 
@@ -241,7 +252,7 @@ export default function CommunitiesPage() {
                     key={community.id}
                     community={community}
                     onJoin={handleJoinCommunity}
-                    showJoinAction={Boolean(user?.sub && community.creatorId !== user.sub)}
+                    showJoinAction={community.creatorId !== user?.sub}
                   />
                 ))}
               </Box>

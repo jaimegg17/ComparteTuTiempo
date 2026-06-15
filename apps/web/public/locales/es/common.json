@@ -522,7 +522,12 @@
       "leave": "Salir de comunidad",
       "cancelRequest": "Cancelar solicitud",
       "join": "Unirse a comunidad",
-      "privateNotice": "Esta comunidad es privada. Tu solicitud deberá ser aprobada por un owner o administrador.",
+      "joinOrganization": "Unirme a organización",
+      "privateCommunityLoginTitle": "Comunidad privada",
+      "privateCommunityLoginDescription": "Para acceder al contenido de esta comunidad privada debes iniciar sesión y solicitar acceso.",
+      "privateOrganizationLoginTitle": "Organización privada",
+      "privateOrganizationLoginDescription": "Para acceder al contenido de esta organización privada debes iniciar sesión y solicitar acceso.",
+      "privateNotice": "Este espacio es privado. Tu solicitud deberá ser aprobada por un owner o administrador.",
       "pendingNotice": "Tu solicitud está pendiente de revisión. Puedes cancelarla mientras esperas respuesta.",
       "pendingReview": "Tienes {{count}} solicitudes pendientes de revisar.",
       "loginToRegisterEvent": "Inicia sesión para apuntarte a eventos.",
@@ -540,7 +545,9 @@
       "statusRejected": "Solicitud rechazada correctamente.",
       "statusError": "No se pudo actualizar el estado de la solicitud.",
       "publishService": "Publicar servicio",
+      "publishOrganizationService": "Publicar iniciativa",
       "requestJoin": "Solicitar unirme",
+      "requestJoinOrganization": "Solicitar acceso",
       "mustBeMemberToRegisterEvent": "Debes pertenecer a la comunidad para apuntarte a sus eventos."
     },
     "editPage": {
@@ -599,9 +606,18 @@
       "verifiedOrganization": "Organización verificada",
       "pendingOrganization": "Organización pendiente",
       "members": "{{count}} miembros",
+      "organizationMembers": "{{count}} integrantes",
       "events": "{{count}} eventos",
       "rules": "{{count}} reglas",
+      "principles": "{{count}} principios",
+      "resources": "{{count}} recursos",
       "created": "Creada {{date}}"
+    },
+    "rulesSection": {
+      "title": "Reglas de la comunidad",
+      "description": "Pautas básicas para mantener un espacio útil, amable y seguro.",
+      "organizationTitle": "Principios de participación",
+      "organizationDescription": "Criterios y normas internas que ayudan a operar con transparencia y seguridad."
     },
     "resourcesSection": {
       "link": "Enlace",
@@ -609,6 +625,8 @@
       "image": "Imagen",
       "title": "Tablón de recursos",
       "description": "Enlaces, notas y referencias útiles para la actividad de la comunidad.",
+      "organizationTitle": "Recursos institucionales",
+      "organizationDescription": "Enlaces, notas y materiales útiles para conocer mejor la actividad de la organización.",
       "open": "Abrir recurso",
       "editor": {
         "title": "Tablón de recursos y anuncios",
@@ -638,7 +656,10 @@
     "services": {
       "title": "Servicios de la comunidad",
       "description": "Ofertas y solicitudes publicadas dentro de este espacio por sus miembros.",
-      "empty": "Todavía no hay servicios asociados a esta comunidad."
+      "empty": "Todavía no hay servicios asociados a esta comunidad.",
+      "organizationTitle": "Iniciativas de la organización",
+      "organizationDescription": "Ofertas, solicitudes o actividades publicadas dentro de este espacio institucional.",
+      "organizationEmpty": "Todavía no hay iniciativas asociadas a esta organización."
     },
     "verified": "Verificada",
     "pending": "Pendiente",
@@ -904,6 +925,14 @@
           {
             "question": "¿Cómo solicito un servicio correctamente?",
             "answer": "Abre el detalle del servicio, revisa descripción, ubicación y duración, y después usa la acción de solicitar. Si hay contexto importante o disponibilidad concreta, conviene incluir un mensaje breve desde el primer momento."
+          },
+          {
+            "question": "¿Qué diferencia hay entre una oferta y una solicitud?",
+            "answer": "Una oferta es algo que una persona puede aportar a otras, como clases, ayuda técnica o apoyo puntual. Una solicitud es una necesidad publicada por alguien que busca ayuda. En ambos casos se puede iniciar un intercambio y concretar los detalles por chat."
+          },
+          {
+            "question": "¿Por qué puede no aparecer una solicitud al filtrar?",
+            "answer": "El filtro de solicitudes solo muestra publicaciones marcadas como necesidad o petición de ayuda. Si combinas ese filtro con categoría, ubicación, duración o cercanía, puede que no haya resultados. Prueba a limpiar filtros para ver todas las solicitudes disponibles."
           },
           {
             "question": "¿Qué debería incluir una buena publicación de servicio?",
