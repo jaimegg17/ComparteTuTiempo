@@ -32,17 +32,12 @@ export const useUploadImage = () => {
   const performUpload = useCallback(async (file: File) => {
       // Ensure user is authenticated
       if (!user) {
-        console.error('❌ User not authenticated');
         throw new Error('Debes iniciar sesión para subir imágenes. Por favor, inicia sesión e intenta nuevamente.');
       }
 
       if (isLoading) {
-        console.log('⏳ Waiting for auth to load...');
-        // Wait a bit for auth to finish loading
         await new Promise(resolve => setTimeout(resolve, 500));
       }
-
-      console.log('🔑 Attempting to get access token for user:', user.sub);
       
       // Always get a fresh token before making the request
       // Don't rely on cached token as it might be expired
@@ -50,28 +45,16 @@ export const useUploadImage = () => {
       const token = await getAccessToken(true); // forceRefresh = true
       
       if (!token) {
-        console.error('❌ Failed to get access token');
-        console.error('User:', user);
-        console.error('User sub:', user.sub);
         throw new Error('No se pudo obtener el token de autenticación. Por favor, recarga la página e inicia sesión nuevamente.');
       }
       
-      console.log('✅ Token obtained, length:', token.length);
-      console.log('✅ Token preview:', token.substring(0, 20) + '...');
-      
-      // Always set a fresh token before making the request
-      // Clear any old token first to avoid issues
       apiClient.setToken(token);
-      console.log('✅ Token set in apiClient');
       
       // Small delay to ensure token is set
       await new Promise(resolve => setTimeout(resolve, 100));
       
       try {
-        console.log('📤 Starting image upload...');
-        const result = await uploadApi.uploadImage(file);
-        console.log('✅ Image upload successful');
-        return result;
+        return await uploadApi.uploadImage(file);
       } catch (error: unknown) {
         const uploadError = (error ?? {}) as UploadError;
         // If we get a 401, the token might be expired
@@ -81,7 +64,6 @@ export const useUploadImage = () => {
           uploadError.message?.includes('Unauthorized') ||
           uploadError.message?.includes('Token inválido')
         ) {
-          console.log('🔄 Token expired or invalid, trying to get a fresh one...');
           // Force a fresh token fetch (don't use cache)
           const freshToken = await getAccessToken(true); // forceRefresh = true
           if (freshToken && freshToken !== token) {

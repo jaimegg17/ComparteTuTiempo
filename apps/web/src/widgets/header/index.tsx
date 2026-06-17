@@ -8,6 +8,7 @@ import { useUser } from "@auth0/nextjs-auth0/client";
 import { useUserProfileContext } from "@/contexts/UserProfileContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useNotifications } from "@/hooks/useNotifications";
+import { useAuth } from "@/hooks/useAuth";
 import { communitiesApi } from "@/shared/api/communities";
 import { apiClient } from "@/shared/api/client";
 import {
@@ -35,6 +36,7 @@ import {
   Logout,
   SwapHoriz,
   NotificationsActiveOutlined,
+  NotificationsNoneOutlined,
   Menu as MenuIcon,
   Close as CloseIcon,
 } from "@mui/icons-material";
@@ -47,6 +49,7 @@ export function Header() {
   const { displayName, displayEmail, displayImage } = useUserProfileContext();
   const { userProfile } = useUserProfile();
   const { unreadCount } = useNotifications(user?.sub);
+  const { getAccessToken } = useAuth();
   const { t } = useTranslation();
   const [pendingOrganizationsCount, setPendingOrganizationsCount] = useState(0);
 
@@ -100,12 +103,7 @@ export function Header() {
       }
 
       try {
-        const token = await fetch("/api/auth/token", {
-          cache: "no-store",
-          headers: { "Cache-Control": "no-cache" },
-        })
-          .then((res) => (res.ok ? res.json() : null))
-          .then((data) => data?.accessToken as string | undefined);
+        const token = await getAccessToken();
 
         if (!token) return;
 
@@ -118,7 +116,7 @@ export function Header() {
     };
 
     void loadPendingOrganizations();
-  }, [userProfile?.role]);
+  }, [userProfile?.role, getAccessToken]);
 
   return (
     <AppBar
@@ -258,6 +256,20 @@ export function Header() {
                 </Typography>
               ) : user ? (
                 <>
+                  <IconButton
+                    component={Link}
+                    href="/profile#notifications"
+                    aria-label={unreadCount > 0 ? `${unreadCount} notificaciones sin leer` : 'Notificaciones'}
+                    sx={{
+                      bgcolor: '#fff',
+                      border: '1px solid rgba(148, 163, 184, 0.22)',
+                      '&:hover': { bgcolor: 'rgba(15,23,42,0.03)' },
+                    }}
+                  >
+                    <Badge badgeContent={unreadCount} color="secondary" invisible={unreadCount === 0}>
+                      {unreadCount > 0 ? <NotificationsActiveOutlined fontSize="small" /> : <NotificationsNoneOutlined fontSize="small" />}
+                    </Badge>
+                  </IconButton>
                   <Button
                     onClick={handleClick}
                     aria-controls={open ? "account-menu" : undefined}
@@ -378,7 +390,7 @@ export function Header() {
                 </>
               ) : (
                 <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <Link href="/api/auth/login" style={{ textDecoration: "none" }}>
+                  <Link href="/login" style={{ textDecoration: "none" }}>
                     <Button
                       variant="contained"
                       size="small"
@@ -465,7 +477,7 @@ export function Header() {
         ) : (
           <Button
             component={Link}
-            href="/api/auth/login"
+            href="/login"
             variant="contained"
             fullWidth
             startIcon={<LoginIcon />}

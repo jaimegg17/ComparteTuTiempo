@@ -16,6 +16,7 @@ describe('CommunitiesController', () => {
       count: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
+      delete: jest.fn(),
     },
     communityMembership: {
       findUnique: jest.fn(),
@@ -227,6 +228,26 @@ describe('CommunitiesController', () => {
       }),
     );
     expect(result.membership.status).toBe('PENDING');
+  });
+
+  it('elimina una comunidad real solo si el usuario puede gestionarla', async () => {
+    prisma.community.findUnique.mockResolvedValue({ id: 42, creatorId: 'auth0|owner' });
+    prisma.user.findUnique.mockResolvedValue({ role: 'USER' });
+    prisma.communityMembership.findUnique.mockResolvedValue({ role: 'OWNER', status: 'ACTIVE' });
+    prisma.community.delete.mockResolvedValue({ id: 42 });
+
+    await controller.deleteCommunity(42, { user: { sub: 'auth0|owner' } });
+
+    expect(prisma.community.delete).toHaveBeenCalledWith({ where: { id: 42 } });
+  });
+
+  it('no devuelve éxito falso al eliminar una comunidad sin permisos', async () => {
+    prisma.community.findUnique.mockResolvedValue({ id: 42, creatorId: 'auth0|owner' });
+    prisma.user.findUnique.mockResolvedValue({ role: 'USER' });
+    prisma.communityMembership.findUnique.mockResolvedValue(null);
+
+    await expect(controller.deleteCommunity(42, { user: { sub: 'auth0|other' } })).rejects.toThrow(ForbiddenException);
+    expect(prisma.community.delete).not.toHaveBeenCalled();
   });
 
   it('permite a un owner aprobar una solicitud pendiente', async () => {

@@ -15,7 +15,7 @@ const CATEGORIES = ['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'AR
 const TYPES = ['PRESENCIAL', 'VIRTUAL', 'HIBRIDO'] as const;
 const INTENTS = ['OFFER', 'REQUEST'] as const;
 
-// DTOs con class-validator para compatibilidad con ValidationPipe global
+// DTOs using class-validator for compatibility with the global ValidationPipe
 export class CreateServiceDto {
   @IsString()
   @MinLength(5, { message: 'El título debe tener al menos 5 caracteres' })
@@ -79,6 +79,12 @@ export class CreateServiceDto {
   @IsUrl()
   @IsString()
   imageUrl?: string | null;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Type(() => Number)
+  communityId?: number | null;
 }
 
 export class UpdateServiceDto {
@@ -154,6 +160,12 @@ export class UpdateServiceDto {
   @IsUrl()
   @IsString()
   imageUrl?: string | null;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Type(() => Number)
+  communityId?: number | null;
 }
 
 // Query DTO for searching and filtering services
@@ -225,6 +237,12 @@ export class ServiceListQueryDto {
   @IsOptional()
   @IsString()
   userId?: string; // Filter by user ID
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  communityId?: number;
 }
 
 @ApiTags('services')
@@ -238,6 +256,27 @@ export class ServicesController {
     private readonly deleteServiceUseCase: DeleteServiceUseCase,
     private readonly prisma: PrismaService,
   ) {}
+
+  private async canAttachServiceToCommunity(communityId: number, userId: string): Promise<boolean> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { role: true } });
+    if (user?.role === 'ADMIN') return true;
+
+    const community = await this.prisma.community.findUnique({
+      where: { id: communityId },
+      select: { creatorId: true },
+    });
+    if (!community) {
+      throw new NotFoundException('Comunidad no encontrada');
+    }
+    if (community.creatorId === userId) return true;
+
+    const membership = await this.prisma.communityMembership.findUnique({
+      where: { communityId_userId: { communityId, userId } },
+      select: { status: true },
+    });
+
+    return membership?.status === 'ACTIVE';
+  }
 
   private getAuthenticatedUser(req: { user?: { sub?: string; id?: string; email?: string; name?: string } }) {
     const userId = req.user?.sub || req.user?.id;
@@ -279,15 +318,20 @@ export class ServicesController {
       intent: body.intent || 'OFFER',
       price: body.price,
       imageUrl: body.imageUrl,
+      communityId: body.communityId ?? null,
     };
     const authUser = this.getAuthenticatedUser(req);
     const { userId } = authUser;
+
+    if (serviceData.communityId && !(await this.canAttachServiceToCommunity(serviceData.communityId, userId))) {
+      throw new ForbiddenException('Debes pertenecer a la comunidad para publicar servicios en ella');
+    }
     
     // Upsert user if doesn't exist
     if (userId) {
       await this.prisma.user.upsert({
         where: { id: userId },
-        update: {},  // No actualizar nada si ya existe
+        update: {},  // Do not update anything when it already exists
         create: {
           id: userId,
           email: authUser.email || `${userId}@example.com`,
@@ -315,7 +359,7 @@ export class ServicesController {
     @Query() query: ServiceListQueryDto,
     @Request() req: { user?: { sub?: string } },
   ) {
-    // Asegurar que page y pageSize estén presentes
+    // Ensure page and pageSize are present
     const queryWithDefaults = {
       page: query.page || 1,
       pageSize: query.pageSize || 20,
@@ -330,10 +374,11 @@ export class ServicesController {
       nearLat: query.nearLat,
       nearLng: query.nearLng,
       radiusKm: query.radiusKm,
-      userId: query.userId, // Filtrar por usuario si se proporciona
+      userId: query.userId, // Filter by user when provided
+      communityId: query.communityId,
     };
 
-    // Si se proporciona userId, verificar que el usuario solo pueda ver sus propios servicios
+    // If userId is provided, ensure users can only view their own services
     if (queryWithDefaults.userId && req.user && req.user.sub !== queryWithDefaults.userId) {
       throw new ForbiddenException('No tienes permisos para ver estos servicios');
     }
@@ -374,6 +419,7 @@ export class ServicesController {
       nearLng: query.nearLng,
       radiusKm: query.radiusKm || 10,
       userId: query.userId,
+      communityId: query.communityId,
     };
 
     const result = await this.listServicesUseCase.execute({ query: queryWithDefaults });
@@ -493,6 +539,10 @@ export class ServicesController {
     @Request() req: { user?: { sub?: string; id?: string } },
   ) {
     const { userId } = this.getAuthenticatedUser(req);
+
+    if (updateServiceDto.communityId && !(await this.canAttachServiceToCommunity(updateServiceDto.communityId, userId))) {
+      throw new ForbiddenException('Debes pertenecer a la comunidad para publicar servicios en ella');
+    }
     
     const result = await this.updateServiceUseCase.execute({ id, data: updateServiceDto, userId });
     return { message: 'Servicio actualizado exitosamente', service: result.service.toContract() };

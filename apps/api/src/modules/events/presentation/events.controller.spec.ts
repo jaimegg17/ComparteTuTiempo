@@ -24,6 +24,15 @@ describe('EventsController', () => {
       update: jest.fn(),
       delete: jest.fn(),
     },
+    eventRegistration: {
+      findMany: jest.fn(),
+      upsert: jest.fn(),
+      count: jest.fn(),
+      deleteMany: jest.fn(),
+    },
+    userNotification: {
+      create: jest.fn(),
+    },
   };
 
   const controller = new EventsController(
@@ -70,6 +79,42 @@ describe('EventsController', () => {
       query: expect.objectContaining({ communityId: 3, page: 1, pageSize: 20 }),
     });
     expect(result.events).toEqual([{ id: 1, title: 'Evento' }]);
+  });
+
+  it('resuelve eventos próximos y pasados usando filtros de fecha reales', async () => {
+    listEventsUseCase.execute.mockResolvedValue({
+      events: { events: [], total: 0, page: 1, pageSize: 20, totalPages: 0 },
+    });
+
+    await controller.listUpcomingEvents();
+    await controller.listPastEvents();
+
+    expect(listEventsUseCase.execute).toHaveBeenNthCalledWith(1, {
+      query: expect.objectContaining({ dateFrom: expect.any(Date), page: 1, pageSize: 20 }),
+    });
+    expect(listEventsUseCase.execute).toHaveBeenNthCalledWith(2, {
+      query: expect.objectContaining({ dateTo: expect.any(Date), page: 1, pageSize: 20 }),
+    });
+  });
+
+  it('obtiene evento por id desde datos reales y no devuelve un placeholder', async () => {
+    prisma.event.findUnique.mockResolvedValue({
+      id: 33,
+      communityId: 4,
+      title: 'Evento real',
+      description: 'Descripción real',
+      date: new Date('2026-06-20T10:00:00.000Z'),
+      location: 'Madrid',
+      capacity: 10,
+      createdById: 'auth0|owner',
+      createdAt: new Date('2026-06-01T10:00:00.000Z'),
+      updatedAt: new Date('2026-06-01T10:00:00.000Z'),
+    });
+
+    const result = await controller.getEvent(33);
+
+    expect(prisma.event.findUnique).toHaveBeenCalledWith({ where: { id: 33 } });
+    expect(result.event).toEqual(expect.objectContaining({ id: 33, title: 'Evento real', communityId: 4 }));
   });
 
   it('resuelve /events/community/:id usando el mismo flujo real', async () => {
@@ -126,6 +171,75 @@ describe('EventsController', () => {
         { user: { sub: 'auth0|user' } },
       ),
     ).rejects.toThrow('No autorizado para actualizar este evento');
+  });
+
+  it('bloquea la inscripción a eventos si el usuario no es miembro activo', async () => {
+    prisma.event.findUnique.mockResolvedValue({
+      id: 15,
+      communityId: 4,
+      capacity: 20,
+      _count: { registrations: 0 },
+    });
+    prisma.communityMembership.findUnique.mockResolvedValue(null);
+
+    await expect(
+      controller.registerForEvent(15, { user: { sub: 'auth0|outsider' } }),
+    ).rejects.toThrow('Debes pertenecer a la comunidad para apuntarte a sus eventos');
+
+    expect(prisma.eventRegistration.upsert).not.toHaveBeenCalled();
+  });
+
+  it('permite inscripción si el usuario es miembro activo y usa upsert para evitar duplicados', async () => {
+    prisma.event.findUnique.mockResolvedValue({
+      id: 16,
+      title: 'Taller vecinal',
+      communityId: 4,
+      capacity: 20,
+      _count: { registrations: 3 },
+    });
+    prisma.communityMembership.findUnique.mockResolvedValue({ status: 'ACTIVE' });
+    prisma.eventRegistration.upsert.mockResolvedValue({ eventId: 16, userId: 'auth0|member' });
+    prisma.userNotification.create.mockResolvedValue({ id: 1 });
+    prisma.eventRegistration.count.mockResolvedValue(4);
+
+    const result = await controller.registerForEvent(16, { user: { sub: 'auth0|member' } });
+
+    expect(prisma.eventRegistration.upsert).toHaveBeenCalledWith({
+      where: { eventId_userId: { eventId: 16, userId: 'auth0|member' } },
+      update: {},
+      create: { eventId: 16, userId: 'auth0|member' },
+    });
+    expect(result.registrationsCount).toBe(4);
+  });
+
+  it('bloquea inscripción si el evento está lleno', async () => {
+    prisma.event.findUnique.mockResolvedValue({
+      id: 17,
+      title: 'Evento lleno',
+      communityId: 4,
+      capacity: 3,
+      _count: { registrations: 3 },
+    });
+    prisma.communityMembership.findUnique.mockResolvedValue({ status: 'ACTIVE' });
+
+    await expect(
+      controller.registerForEvent(17, { user: { sub: 'auth0|member' } }),
+    ).rejects.toThrow('El evento ha alcanzado su aforo máximo');
+
+    expect(prisma.eventRegistration.upsert).not.toHaveBeenCalled();
+  });
+
+  it('al cancelar inscripción borra solo el registro del usuario autenticado', async () => {
+    prisma.event.findUnique.mockResolvedValue({ title: 'Taller vecinal', communityId: 4 });
+    prisma.userNotification.create.mockResolvedValue({ id: 2 });
+    prisma.eventRegistration.count.mockResolvedValue(2);
+
+    const result = await controller.unregisterFromEvent(16, { user: { sub: 'auth0|member' } });
+
+    expect(prisma.eventRegistration.deleteMany).toHaveBeenCalledWith({
+      where: { eventId: 16, userId: 'auth0|member' },
+    });
+    expect(result.registrationsCount).toBe(2);
   });
 
   it('permite eliminar un evento si el usuario es admin', async () => {

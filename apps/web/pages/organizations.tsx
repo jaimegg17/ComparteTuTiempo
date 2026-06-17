@@ -24,11 +24,13 @@ import { CommunityCard } from '@/components/CommunityCard';
 import { communitiesApi } from '@/shared/api/communities';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslation } from '@/hooks/useTranslation';
 import { apiClient } from '@/shared/api/client';
 import type { Community } from '@comparte-tu-tiempo/contracts';
 
 export default function OrganizationsPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { userProfile } = useUserProfile();
   const { accessToken } = useAuth();
   const [organizations, setOrganizations] = useState<Community[]>([]);
@@ -57,11 +59,11 @@ export default function OrganizationsPage() {
         setPendingOrganizationsCount(0);
       }
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : 'No se pudieron cargar las organizaciones.');
+      setError(loadError instanceof Error ? loadError.message : t('organizations.list.loadError'));
     } finally {
       setLoading(false);
     }
-  }, [userProfile?.role, accessToken]);
+  }, [userProfile?.role, accessToken, t]);
 
   useEffect(() => {
     void loadOrganizations();
@@ -103,21 +105,21 @@ export default function OrganizationsPage() {
   const summaryItems = useMemo(
     () => [
       {
-        label: 'Organizaciones visibles',
+        label: t('organizations.list.summaryVisible'),
         value: sortedOrganizations.length,
         icon: <VerifiedUserOutlined fontSize="small" />,
         tone: 'rgba(15,118,110,0.10)',
         color: '#0f766e',
       },
       {
-        label: 'Ámbitos representados',
+        label: t('organizations.list.summaryTopics'),
         value: visibleTopics.length,
         icon: <Groups2Outlined fontSize="small" />,
         tone: 'rgba(138,51,253,0.10)',
         color: '#7A2EF6',
       },
       {
-        label: 'Resultados actuales',
+        label: t('organizations.list.summaryResults'),
         value: filteredOrganizations.length,
         icon: <VisibilityOutlined fontSize="small" />,
         tone: 'rgba(59,130,246,0.10)',
@@ -126,7 +128,7 @@ export default function OrganizationsPage() {
       ...(userProfile?.role === 'ADMIN'
         ? [
             {
-              label: 'Solicitudes pendientes',
+              label: t('organizations.list.summaryPending'),
               value: pendingOrganizationsCount,
               icon: <PendingActionsOutlined fontSize="small" />,
               tone: pendingOrganizationsCount > 0 ? 'rgba(245,158,11,0.15)' : 'rgba(148,163,184,0.12)',
@@ -135,7 +137,7 @@ export default function OrganizationsPage() {
           ]
         : []),
     ],
-    [sortedOrganizations.length, visibleTopics.length, filteredOrganizations.length, userProfile?.role, pendingOrganizationsCount],
+    [sortedOrganizations.length, visibleTopics.length, filteredOrganizations.length, userProfile?.role, pendingOrganizationsCount, t],
   );
 
   return (
@@ -156,7 +158,7 @@ export default function OrganizationsPage() {
             <Stack direction={{ xs: 'column', lg: 'row' }} spacing={0}>
               <Box sx={{ flex: 1, p: { xs: 2.5, md: 4 } }}>
                 <Chip
-                  label="Entidades verificadas y en revisión"
+                  label={t('organizations.list.badge')}
                   size="small"
                   sx={{
                     mb: 1.5,
@@ -168,11 +170,10 @@ export default function OrganizationsPage() {
                   }}
                 />
                 <Typography variant="h3" sx={{ fontWeight: 900, mb: 1.25, fontSize: { xs: '1.75rem', sm: '2rem', md: '2.6rem' } }}>
-                  Organizaciones con un perfil más institucional y fiable
+                  {t('organizations.list.title')}
                 </Typography>
                 <Typography color="text.secondary" sx={{ lineHeight: 1.8, maxWidth: 760, mb: 2.5, fontSize: { xs: '0.95rem', md: '1rem' } }}>
-                  Aquí reunimos asociaciones, ONG y colectivos oficiales con mayor contexto, gobernanza y señal de confianza.
-                  Las organizaciones aprobadas se muestran públicamente y las nuevas solicitudes pasan por revisión administrativa.
+                  {t('organizations.list.subtitle')}
                 </Typography>
 
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems={{ xs: 'stretch', sm: 'center' }} sx={{ '& .MuiButton-root': { width: { xs: '100%', sm: 'auto' } } }}>
@@ -182,7 +183,7 @@ export default function OrganizationsPage() {
                     endIcon={<ArrowOutwardRounded />}
                     sx={{ textTransform: 'none', fontWeight: 800, borderRadius: 2.5, px: 2.25 }}
                   >
-                    Solicitar organización
+                    {t('organizations.list.request')}
                   </Button>
                   {userProfile?.role === 'ADMIN' && (
                     <Button
@@ -190,7 +191,7 @@ export default function OrganizationsPage() {
                       onClick={() => router.push('/admin/organizations')}
                       sx={{ textTransform: 'none', fontWeight: 800, borderRadius: 2.5, px: 2.25 }}
                     >
-                      Revisar solicitudes
+                      {t('organizations.list.review')}
                     </Button>
                   )}
                 </Stack>
@@ -206,14 +207,10 @@ export default function OrganizationsPage() {
                 }}
               >
                 <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 800, letterSpacing: '0.08em' }}>
-                  Qué esperar aquí
+                  {t('organizations.list.whatToExpect')}
                 </Typography>
                 <Stack spacing={1.5} sx={{ mt: 1.5 }}>
-                  {[
-                    'Organizaciones visibles con badge de verificación cuando han sido aprobadas.',
-                    'Temas y áreas de actividad para identificar rápido la misión de cada entidad.',
-                    'Proceso de solicitud diferenciado para mantener un nivel de confianza más alto.',
-                  ].map((item) => (
+                  {(t('organizations.list.expectations', { returnObjects: true }) as string[]).map((item) => (
                     <Box
                       key={item}
                       sx={{
@@ -238,7 +235,7 @@ export default function OrganizationsPage() {
 
           {userProfile?.role === 'ADMIN' && pendingOrganizationsCount > 0 && (
             <Alert severity="warning" sx={{ mb: 2 }}>
-              Tienes {pendingOrganizationsCount} solicitud{pendingOrganizationsCount > 1 ? 'es' : ''} de organización pendiente{pendingOrganizationsCount > 1 ? 's' : ''} de revisar.
+              {t('organizations.list.pendingAlert', { count: pendingOrganizationsCount })}
             </Alert>
           )}
 
@@ -256,7 +253,7 @@ export default function OrganizationsPage() {
               <TextField
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder="Buscar organizaciones por nombre, descripción o temas..."
+                placeholder={t('organizations.list.searchPlaceholder')}
                 fullWidth
                 size="small"
                 InputProps={{
@@ -272,7 +269,7 @@ export default function OrganizationsPage() {
                 onClick={() => setSearchTerm('')}
                 sx={{ textTransform: 'none', fontWeight: 700, whiteSpace: 'nowrap' }}
               >
-                Limpiar búsqueda
+                {t('organizations.list.clearSearch')}
               </Button>
             </Stack>
 
@@ -324,7 +321,7 @@ export default function OrganizationsPage() {
               }}
             >
               {filteredOrganizations.map((community) => (
-                <CommunityCard key={community.id} community={community} />
+                <CommunityCard key={community.id} community={community} detailBasePath="/organizations" />
               ))}
             </Box>
           )}
@@ -342,10 +339,10 @@ export default function OrganizationsPage() {
               }}
             >
               <Typography variant="h6" sx={{ fontWeight: 800, mb: 1 }}>
-                No hay organizaciones que coincidan con la búsqueda
+                {t('organizations.list.emptyTitle')}
               </Typography>
               <Typography color="text.secondary" sx={{ mb: 2 }}>
-                Prueba con otro término o solicita una nueva organización si todavía no existe en la plataforma.
+                {t('organizations.list.emptyDescription')}
               </Typography>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="center" sx={{ '& .MuiButton-root': { width: { xs: '100%', sm: 'auto' } } }}>
                 <Button
@@ -353,14 +350,14 @@ export default function OrganizationsPage() {
                   onClick={() => setSearchTerm('')}
                   sx={{ textTransform: 'none', fontWeight: 700 }}
                 >
-                  Limpiar búsqueda
+                  {t('organizations.list.clearSearch')}
                 </Button>
                 <Button
                   variant="contained"
                   onClick={() => router.push('/organizations/new')}
                   sx={{ textTransform: 'none', fontWeight: 700 }}
                 >
-                  Solicitar organización
+                  {t('organizations.list.request')}
                 </Button>
               </Stack>
             </Box>

@@ -177,7 +177,6 @@ export default function EditCommunityPage() {
         date: new Date(values.date),
         location: values.location.trim() || undefined,
         capacity: values.capacity ? Number(values.capacity) : undefined,
-        creatorId: user.sub,
       });
       setEvents(await eventsApi.getEventsByCommunity(communityId));
     } catch (createEventError) {

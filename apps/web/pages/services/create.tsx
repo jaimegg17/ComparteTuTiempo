@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Script from 'next/script';
 import {
@@ -12,20 +12,67 @@ import {
   Alert,
   CircularProgress,
   Stack,
+  List,
+  ListItemButton,
+  ListItemText,
 } from '@mui/material';
 import { Layout } from '@/components/Layout';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useAuth } from '@/hooks/useAuth';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 import { useUploadImage } from '@/shared/hooks/use-upload';
 import { getFriendlyErrorMessage } from '@/shared/utils/error-messages';
 import { useToast } from '@/components/ui/ToastProvider';
 import { buildApiUrl } from '@/shared/api/config';
+import { communitiesApi } from '@/shared/api/communities';
+import type { Community } from '@comparte-tu-tiempo/contracts';
 
 const CATEGORIES = ['EDUCACION', 'HOGAR', 'TECNOLOGIA', 'SALUD', 'DEPORTES', 'ARTE', 'OTROS'];
 const TYPES = ['PRESENCIAL', 'VIRTUAL', 'HIBRIDO'];
 const INTENTS = ['OFFER', 'REQUEST'] as const;
 const AVAILABILITY = ['mañana', 'tarde', 'noche', 'mañana-tarde', 'tarde-noche', 'flexible'];
+
+type PlacePrediction = {
+  description: string;
+  placeId: string;
+};
+
+type GooglePlacesStatus = 'OK' | 'ZERO_RESULTS' | string;
+
+type GooglePlacesAutocompleteService = {
+  getPlacePredictions: (
+    request: { input: string; types?: string[] },
+    callback: (predictions: Array<{ description: string; place_id: string }> | null, status: GooglePlacesStatus) => void,
+  ) => void;
+};
+
+type GooglePlacesService = {
+  getDetails: (
+    request: { placeId: string; fields: string[] },
+    callback: (
+      place: {
+        formatted_address?: string;
+        name?: string;
+        place_id?: string;
+        geometry?: { location?: { lat: () => number; lng: () => number } };
+      } | null,
+      status: GooglePlacesStatus,
+    ) => void,
+  ) => void;
+};
+
+type GoogleMapsWindow = Window & {
+  google?: {
+    maps?: {
+      places?: {
+        PlacesServiceStatus?: { OK: string };
+        AutocompleteService: new () => GooglePlacesAutocompleteService;
+        PlacesService: new (container: HTMLDivElement) => GooglePlacesService;
+      };
+    };
+  };
+};
 
 interface FormData {
   title: string;
@@ -42,6 +89,7 @@ interface FormData {
   longitude?: number | null;
   formattedAddress?: string;
   placeId?: string;
+  communityId?: string;
 }
 
 interface FormErrors {
@@ -56,6 +104,7 @@ interface FormErrors {
 export default function CreateServicePage() {
   const router = useRouter();
   const { user, isLoading: userLoading } = useUser();
+  const { getAccessToken } = useAuth();
   const { t } = useTranslation();
   
   const [formData, setFormData] = useState<FormData>({
@@ -69,6 +118,7 @@ export default function CreateServicePage() {
     location: '',
     availability: '',
     imageUrl: '',
+    communityId: '',
   });
   
   const [errors, setErrors] = useState<FormErrors>({});
@@ -76,26 +126,33 @@ export default function CreateServicePage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
-  const [mapsLoaded, setMapsLoaded] = useState(false);
+  const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
   const [locating, setLocating] = useState(false);
-  const locationInputRef = useRef<HTMLInputElement | null>(null);
+  const [mapsLoaded, setMapsLoaded] = useState(false);
+  const [mapsFailed, setMapsFailed] = useState(false);
+  const [locationPredictions, setLocationPredictions] = useState<PlacePrediction[]>([]);
+  const [locationSearchLoading, setLocationSearchLoading] = useState(false);
+  const [locationPredictionsOpen, setLocationPredictionsOpen] = useState(false);
   const uploadImage = useUploadImage();
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   const { showToast } = useToast();
 
-  type PlaceResult = {
-    name?: string;
-    formatted_address?: string;
-    place_id?: string;
-    geometry?: {
-      location?: {
-        lat: () => number;
-        lng: () => number;
-      };
-    };
-  };
+  useEffect(() => {
+    const rawCommunityId = router.query?.communityId;
+    const communityId = Array.isArray(rawCommunityId) ? rawCommunityId[0] : rawCommunityId;
+    if (!communityId) return;
 
-  // Mapping functions for display
+    const parsedCommunityId = Number(communityId);
+    if (!Number.isInteger(parsedCommunityId) || parsedCommunityId <= 0) return;
+
+    setFormData((prev) => ({ ...prev, communityId: String(parsedCommunityId) }));
+    void communitiesApi
+      .getCommunity(parsedCommunityId)
+      .then((response) => setSelectedCommunity(response.community))
+      .catch(() => setSelectedCommunity(null));
+  }, [router.query?.communityId]);
+
+  // Display mapping functions
   const getCategoryDisplayName = (category: string) => {
     const categoryMap: Record<string, string> = {
       'EDUCACION': t('services.categories.education'),
@@ -133,6 +190,13 @@ export default function CreateServicePage() {
   };
 
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as GoogleMapsWindow).google?.maps?.places) {
+      setMapsLoaded(true);
+      setMapsFailed(false);
+    }
+  }, []);
+
   const handleChange = (field: keyof FormData) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -150,7 +214,7 @@ export default function CreateServicePage() {
         : {}),
     }));
     
-    // Clear error for this field
+    // Clear the error for this field
     if (errors[field as keyof FormErrors]) {
       setErrors(prev => ({
         ...prev,
@@ -160,56 +224,82 @@ export default function CreateServicePage() {
   };
 
   useEffect(() => {
-    if (!mapsLoaded || !locationInputRef.current || typeof window === 'undefined') return;
+    const query = formData.location.trim();
+    const googlePlaces = typeof window !== 'undefined' ? (window as GoogleMapsWindow).google?.maps?.places : undefined;
 
-    const googleObj = (
-      window as Window & {
-        google?: {
-          maps?: {
-            places?: {
-              Autocomplete: new (
-                input: HTMLInputElement,
-                options?: Record<string, unknown>,
-              ) => {
-                addListener: (
-                  eventName: string,
-                  callback: () => void,
-                ) => { remove: () => void } | void;
-                getPlace: () => PlaceResult;
-              };
-            };
-          };
-        };
-      }
-    ).google;
+    if (!googleMapsApiKey || mapsFailed || !mapsLoaded || !googlePlaces || !locationPredictionsOpen || query.length < 3 || formData.placeId) {
+      setLocationPredictions([]);
+      setLocationSearchLoading(false);
+      return;
+    }
 
-    const AutocompleteCtor = googleObj?.maps?.places?.Autocomplete;
-    if (!AutocompleteCtor) return;
-
-    const autocomplete = new AutocompleteCtor(locationInputRef.current, {
-      fields: ['formatted_address', 'name', 'geometry', 'place_id'],
-    });
-
-    const listener = autocomplete.addListener('place_changed', () => {
-      const place = autocomplete.getPlace();
-      const lat = place.geometry?.location?.lat?.();
-      const lng = place.geometry?.location?.lng?.();
-      const bestAddress = place.formatted_address || place.name || '';
-
-      setFormData(prev => ({
-        ...prev,
-        location: bestAddress,
-        latitude: typeof lat === 'number' ? lat : undefined,
-        longitude: typeof lng === 'number' ? lng : undefined,
-        formattedAddress: place.formatted_address || bestAddress || undefined,
-        placeId: place.place_id || undefined,
-      }));
-    });
+    let cancelled = false;
+    const timeout = window.setTimeout(() => {
+      setLocationSearchLoading(true);
+      const autocompleteService = new googlePlaces.AutocompleteService();
+      autocompleteService.getPlacePredictions(
+        { input: query, types: ['geocode'] },
+        (predictions, status) => {
+          if (cancelled) return;
+          const okStatus = googlePlaces.PlacesServiceStatus?.OK || 'OK';
+          if (status === okStatus && predictions) {
+            setLocationPredictions(
+              predictions.map((prediction) => ({
+                description: prediction.description,
+                placeId: prediction.place_id,
+              })),
+            );
+          } else {
+            setLocationPredictions([]);
+          }
+          setLocationSearchLoading(false);
+        },
+      );
+    }, 250);
 
     return () => {
-      if (listener && typeof listener.remove === 'function') listener.remove();
+      cancelled = true;
+      window.clearTimeout(timeout);
     };
-  }, [mapsLoaded]);
+  }, [formData.location, formData.placeId, googleMapsApiKey, locationPredictionsOpen, mapsFailed, mapsLoaded]);
+
+  const handleSelectLocationPrediction = (prediction: PlacePrediction) => {
+    const googlePlaces = typeof window !== 'undefined' ? (window as GoogleMapsWindow).google?.maps?.places : undefined;
+
+    setLocationPredictions([]);
+    setLocationPredictionsOpen(false);
+    setFormData((prev) => ({
+      ...prev,
+      location: prediction.description,
+      formattedAddress: prediction.description,
+      placeId: prediction.placeId,
+    }));
+
+    if (!googlePlaces) return;
+
+    const detailsContainer = document.createElement('div');
+    const placesService = new googlePlaces.PlacesService(detailsContainer);
+    placesService.getDetails(
+      { placeId: prediction.placeId, fields: ['formatted_address', 'name', 'geometry', 'place_id'] },
+      (place, status) => {
+        const okStatus = googlePlaces.PlacesServiceStatus?.OK || 'OK';
+        if (status !== okStatus || !place) return;
+
+        const lat = place.geometry?.location?.lat?.();
+        const lng = place.geometry?.location?.lng?.();
+        const bestAddress = place.formatted_address || place.name || prediction.description;
+
+        setFormData((prev) => ({
+          ...prev,
+          location: bestAddress,
+          formattedAddress: bestAddress,
+          placeId: place.place_id || prediction.placeId,
+          latitude: typeof lat === 'number' ? lat : undefined,
+          longitude: typeof lng === 'number' ? lng : undefined,
+        }));
+      },
+    );
+  };
 
   const handleUseCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -300,16 +390,13 @@ export default function CreateServicePage() {
     setError(null);
     
     try {
-      // Use uploaded image URL if available
+      // Use the uploaded image URL when available
       const imageUrl = uploadedImageUrl || formData.imageUrl;
 
-      // Get token
-      const tokenResponse = await fetch('/api/auth/token');
-      if (!tokenResponse.ok) {
+      const token = await getAccessToken();
+      if (!token) {
         throw new Error('No se pudo obtener el token de autenticación');
       }
-      const tokenData = await tokenResponse.json();
-      const token = tokenData.accessToken;
 
       const response = await fetch(buildApiUrl('/services'), {
         method: 'POST',
@@ -332,6 +419,7 @@ export default function CreateServicePage() {
           placeId: formData.placeId,
           availability: formData.availability || undefined,
           imageUrl: imageUrl || undefined,
+          communityId: formData.communityId ? Number(formData.communityId) : undefined,
           price: parseFloat(formData.duration) * 60, // Duration in minutes
         }),
       });
@@ -377,9 +465,14 @@ export default function CreateServicePage() {
     <Layout>
       {googleMapsApiKey && (
         <Script
-          src={`https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&libraries=places`}
+          id="google-maps-js"
+          src={`https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&libraries=places&loading=async`}
           strategy="afterInteractive"
-          onLoad={() => setMapsLoaded(true)}
+          onLoad={() => {
+            setMapsLoaded(true);
+            setMapsFailed(false);
+          }}
+          onError={() => setMapsFailed(true)}
         />
       )}
       <Box sx={{ bgcolor: '#f5f5f5', minHeight: '100%', py: 4 }}>
@@ -399,10 +492,9 @@ export default function CreateServicePage() {
               {formData.intent === 'REQUEST' ? 'Publica una necesidad concreta para que otras personas puedan ofrecerte ayuda.' : t("services.subtitle")}
             </Typography>
 
-            {!googleMapsApiKey && (
-              <Alert severity="warning" sx={{ mb: 3 }}>
-                Google Places no está configurado en frontend (`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`).
-                Puedes seguir creando servicios, pero sin autocompletado de ubicación.
+            {(!googleMapsApiKey || mapsFailed) && (
+              <Alert severity="info" sx={{ mb: 3 }}>
+                Google Places no está disponible ahora mismo. Puedes escribir la ubicación manualmente o usar tu ubicación actual.
               </Alert>
             )}
 
@@ -420,7 +512,7 @@ export default function CreateServicePage() {
 
             <form onSubmit={handleSubmit}>
               <Stack spacing={3}>
-                {/* Título */}
+                {/* Title */}
                 <TextField
                   fullWidth
                   label={t("services.form.title")}
@@ -433,7 +525,7 @@ export default function CreateServicePage() {
                   required
                 />
 
-                {/* Descripción Corta */}
+                {/* Short description */}
                 <TextField
                   fullWidth
                   multiline
@@ -449,7 +541,7 @@ export default function CreateServicePage() {
                   required
                 />
 
-                {/* Descripción Detallada */}
+                {/* Detailed description */}
                 <TextField
                   fullWidth
                   multiline
@@ -472,7 +564,13 @@ export default function CreateServicePage() {
                   disabled={loading || success}
                 />
 
-                {/* Tipo de publicación, categoría y formato */}
+                {selectedCommunity && (
+                  <Alert severity="info">
+                    {t('services.form.communityNotice', { name: selectedCommunity.name })}
+                  </Alert>
+                )}
+
+                {/* Post type, category, and format */}
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                   <TextField
                     select
@@ -527,7 +625,7 @@ export default function CreateServicePage() {
                   </TextField>
                 </Box>
 
-                {/* Duración y Ubicación */}
+                {/* Duration and location */}
                 <Box sx={{ display: 'flex', gap: 2 }}>
                   <TextField
                     fullWidth
@@ -543,23 +641,56 @@ export default function CreateServicePage() {
                     required
                   />
 
-                  <TextField
-                    fullWidth
-                    label={t("services.form.location")}
-                    placeholder={t("services.form.placeholders.location")}
-                    value={formData.location}
-                    onChange={handleChange('location')}
-                    inputRef={locationInputRef}
-                    error={!!errors.location}
-                    helperText={
-                      errors.location ||
-                      (googleMapsApiKey
-                        ? 'Puedes escribir una dirección, seleccionar una sugerencia o usar tu ubicación actual.'
-                        : 'Añade una ubicación textual. Sin API key no hay sugerencias.')
-                    }
-                    disabled={loading || success}
-                    required
-                  />
+                  <Box sx={{ width: '100%', position: 'relative' }}>
+                    <TextField
+                      fullWidth
+                      label={t("services.form.location")}
+                      placeholder={t("services.form.placeholders.location")}
+                      value={formData.location}
+                      onChange={handleChange('location')}
+                      onFocus={() => setLocationPredictionsOpen(true)}
+                      autoComplete="off"
+                      name="service-location-manual"
+                      error={!!errors.location}
+                      helperText={
+                        errors.location ||
+                        (locationSearchLoading
+                          ? 'Buscando ubicaciones en Google Maps…'
+                          : googleMapsApiKey && !mapsFailed
+                            ? 'Empieza a escribir y selecciona una ubicación de Google Maps para guardarla con coordenadas.'
+                            : 'Escribe una dirección o usa tu ubicación actual para guardar coordenadas.')
+                      }
+                      disabled={loading || success}
+                      required
+                    />
+                    {locationPredictionsOpen && locationPredictions.length > 0 && (
+                      <Paper
+                        variant="outlined"
+                        sx={{
+                          position: 'absolute',
+                          zIndex: 20,
+                          top: '56px',
+                          left: 0,
+                          right: 0,
+                          borderRadius: 2,
+                          overflow: 'hidden',
+                          boxShadow: '0 12px 30px rgba(15, 23, 42, 0.16)',
+                        }}
+                      >
+                        <List dense disablePadding>
+                          {locationPredictions.map((prediction) => (
+                            <ListItemButton
+                              key={prediction.placeId}
+                              onMouseDown={(event) => event.preventDefault()}
+                              onClick={() => handleSelectLocationPrediction(prediction)}
+                            >
+                              <ListItemText primary={prediction.description} />
+                            </ListItemButton>
+                          ))}
+                        </List>
+                      </Paper>
+                    )}
+                  </Box>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
                   <Button
@@ -595,7 +726,7 @@ export default function CreateServicePage() {
                   <strong>{t("services.form.info_note")}</strong>
                 </Alert>
 
-                {/* Botones */}
+                {/* Buttons */}
                 <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', pt: 2 }}>
                   <Button
                     variant="outlined"

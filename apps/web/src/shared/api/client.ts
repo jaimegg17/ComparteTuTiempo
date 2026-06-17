@@ -37,9 +37,6 @@ export class ApiClient {
     // This must be set even for FormData requests
     if (this.token) {
       headers.Authorization = `Bearer ${this.token}`;
-      console.log('🔑 Setting Authorization header, token length:', this.token.length);
-    } else {
-      console.warn('⚠️ No token available in apiClient for request to:', endpoint);
     }
 
     const config: RequestInit = {
@@ -47,17 +44,8 @@ export class ApiClient {
       headers,
     };
 
-    // Log request details for debugging
-    console.log('📤 Making request:', {
-      method: config.method || 'GET',
-      url,
-      hasToken: !!this.token,
-      isFormData: options.body instanceof FormData,
-      headers: Object.keys(headers),
-    });
-
     try {
-      // Asegurar que fetch esté disponible
+      // Ensure fetch is available
       if (typeof fetch === 'undefined') {
         throw new Error('Fetch API no está disponible en este entorno');
       }
@@ -84,7 +72,6 @@ export class ApiClient {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('API request failed:', error);
       throw error;
     }
   }

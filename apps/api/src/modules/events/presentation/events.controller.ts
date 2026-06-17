@@ -20,25 +20,62 @@ import { ListEventsUseCase } from '../application/list-events.use-case';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
-import { IsDateString, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { IsDateString, IsNumber, IsOptional, IsString, Min, MinLength } from 'class-validator';
 import { Type } from 'class-transformer';
 import type { EventListQuery } from '@comparte-tu-tiempo/contracts';
+import { EventMapper } from '../infrastructure/event.mapper';
 
-// Simple DTOs without Zod for now
 export class CreateEventDto {
+  @IsString()
+  @MinLength(3)
   title!: string;
+
+  @IsString()
+  @MinLength(10)
   description!: string;
-  date!: Date;
+
+  @IsDateString()
+  date!: string | Date;
+
+  @IsOptional()
+  @IsString()
   location?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Type(() => Number)
   capacity?: number;
+
+  @IsNumber()
+  @Type(() => Number)
   communityId!: number;
 }
 
 export class UpdateEventDto {
+  @IsOptional()
+  @IsString()
+  @MinLength(3)
   title?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(10)
   description?: string;
-  date?: Date;
+
+  @IsOptional()
+  @IsDateString()
+  date?: string | Date;
+
+  @IsOptional()
+  @IsString()
   location?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Type(() => Number)
+  capacity?: number;
 }
 
 export class EventListQueryDto {
@@ -139,7 +176,7 @@ export class EventsController {
       throw new ForbiddenException('No autorizado para crear eventos en esta comunidad');
     }
     const result = await this.createEventUseCase.execute({
-      data: { ...createEventDto, creatorId: userId },
+      data: { ...createEventDto, date: new Date(createEventDto.date), creatorId: userId },
       userId,
     });
 
@@ -170,10 +207,14 @@ export class EventsController {
   @ApiOperation({ summary: 'Listar eventos próximos' })
   @ApiResponse({ status: 200, description: 'Lista de eventos próximos obtenida' })
   async listUpcomingEvents() {
-    // This would need a specific use case for upcoming events
+    const result = await this.listEventsUseCase.execute({
+      query: normalizeEventListQuery({ dateFrom: new Date().toISOString(), page: 1, pageSize: 20 }),
+    });
+
     return {
       message: 'Eventos próximos obtenidos exitosamente',
-      events: [],
+      ...result.events,
+      events: result.events.events.map(event => event.toContract()),
     };
   }
 
@@ -181,10 +222,14 @@ export class EventsController {
   @ApiOperation({ summary: 'Listar eventos pasados' })
   @ApiResponse({ status: 200, description: 'Lista de eventos pasados obtenida' })
   async listPastEvents() {
-    // This would need a specific use case for past events
+    const result = await this.listEventsUseCase.execute({
+      query: normalizeEventListQuery({ dateTo: new Date().toISOString(), page: 1, pageSize: 20 }),
+    });
+
     return {
       message: 'Eventos pasados obtenidos exitosamente',
-      events: [],
+      ...result.events,
+      events: result.events.events.map(event => event.toContract()),
     };
   }
 
@@ -201,7 +246,7 @@ export class EventsController {
       message: 'Eventos de la comunidad obtenidos exitosamente',
       ...result.events,
       events: result.events.events.map(event => event.toContract()),
-      communityId, // Compatibilidad para clientes legados
+      communityId, // Backwards compatibility for legacy clients
     };
   }
 
@@ -257,6 +302,15 @@ export class EventsController {
       throw new NotFoundException('Evento no encontrado');
     }
 
+    const membership = await this.prisma.communityMembership.findUnique({
+      where: { communityId_userId: { communityId: event.communityId, userId } },
+      select: { status: true },
+    });
+
+    if (!membership || membership.status !== 'ACTIVE') {
+      throw new ForbiddenException('Debes pertenecer a la comunidad para apuntarte a sus eventos');
+    }
+
     if (typeof event.capacity === 'number' && event._count.registrations >= event.capacity) {
       throw new ForbiddenException('El evento ha alcanzado su aforo máximo');
     }
@@ -283,7 +337,7 @@ export class EventsController {
         body: `Te has apuntado al evento "${event.title}".`,
         link: `/communities/${event.communityId}`,
       },
-    });
+    }).catch(() => undefined);
 
     const registrationsCount = await this.prisma.eventRegistration.count({
       where: { eventId: id },
@@ -332,7 +386,7 @@ export class EventsController {
           body: `Has cancelado tu inscripción al evento "${event.title}".`,
           link: `/communities/${event.communityId}`,
         },
-      });
+      }).catch(() => undefined);
     }
 
     const registrationsCount = await this.prisma.eventRegistration.count({
@@ -352,10 +406,15 @@ export class EventsController {
   @ApiResponse({ status: 200, description: 'Evento obtenido' })
   @ApiResponse({ status: 404, description: 'Evento no encontrado' })
   async getEvent(@Param('id', ParseIntPipe) id: number) {
-    // This would need a get event use case
+    const event = await this.prisma.event.findUnique({ where: { id } });
+
+    if (!event) {
+      throw new NotFoundException('Evento no encontrado');
+    }
+
     return {
       message: 'Evento obtenido exitosamente',
-      event: { id },
+      event: EventMapper.toDomain(event).toContract(),
     };
   }
 
@@ -388,8 +447,9 @@ export class EventsController {
       data: {
         ...(updateEventDto.title !== undefined ? { title: updateEventDto.title } : {}),
         ...(updateEventDto.description !== undefined ? { description: updateEventDto.description } : {}),
-        ...(updateEventDto.date !== undefined ? { date: updateEventDto.date } : {}),
+        ...(updateEventDto.date !== undefined ? { date: new Date(updateEventDto.date) } : {}),
         ...(updateEventDto.location !== undefined ? { location: updateEventDto.location } : {}),
+        ...(updateEventDto.capacity !== undefined ? { capacity: updateEventDto.capacity } : {}),
       },
     });
 

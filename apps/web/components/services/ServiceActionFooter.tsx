@@ -1,4 +1,5 @@
 import { Box, Button, Chip, Typography } from '@mui/material';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface ServiceActionFooterProps {
   isOwnService: boolean;
@@ -17,23 +18,24 @@ export function ServiceActionFooter({
   intent = 'OFFER',
   onRequestService,
 }: ServiceActionFooterProps) {
+  const { t } = useTranslation();
   const isAvailable = status === 'ACTIVO';
   const isRequest = intent === 'REQUEST';
-  const ownLabel = isRequest ? 'Tu solicitud' : 'Tu servicio';
+  const ownLabel = isRequest ? t('services.actions.ownRequest') : t('services.actions.ownService');
   const ctaLabel = !isUserLoggedIn
     ? isRequest
-      ? 'Iniciar sesión para ayudar'
-      : 'Iniciar sesión para solicitar'
+      ? t('services.actions.loginToHelp')
+      : t('services.actions.loginToRequest')
     : isRequest
-      ? 'Puedo ayudarte'
-      : 'Solicitar intercambio';
+      ? t('services.actions.canHelp')
+      : t('services.actions.requestExchange');
   const helperText = isAvailable
     ? isRequest
-      ? 'Si puedes cubrir esta necesidad, envía un mensaje inicial explicando cómo podrías ayudar y en qué condiciones.'
-      : 'Revisa bien la descripción antes de enviar tu solicitud. Podrás añadir un mensaje inicial para dar contexto.'
+      ? t('services.actions.requestHelper')
+      : t('services.actions.serviceHelper')
     : isRequest
-      ? 'Esta solicitud ya no está activa. Puedes seguir explorando otras necesidades publicadas en la plataforma.'
-      : 'Este servicio no está disponible en este momento, pero puedes seguir explorando otras alternativas.';
+      ? t('services.actions.inactiveRequestHelper')
+      : t('services.actions.inactiveServiceHelper');
 
   return (
     <Box sx={{ display: 'flex', alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
@@ -70,7 +72,7 @@ export function ServiceActionFooter({
           {duration}h
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-          Tiempo estimado de intercambio
+          {t('services.actions.estimatedExchangeTime')}
         </Typography>
       </Box>
     </Box>

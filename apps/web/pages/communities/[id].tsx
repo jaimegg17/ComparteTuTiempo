@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
-import { Alert, Box, Button, CircularProgress, Stack, Chip } from '@mui/material';
-import { ArrowBack, EventAvailable, ExitToApp, GroupAdd, PendingActionsOutlined } from '@mui/icons-material';
+import { Alert, Box, Button, CircularProgress, Stack, Typography } from '@mui/material';
+import { ArrowBack, EventAvailable, ExitToApp, GroupAdd, HandymanOutlined } from '@mui/icons-material';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { Layout } from '@/components/Layout';
 import { ErrorAlert } from '@/components/ui/BeautifulAlert';
 import { communitiesApi } from '@/shared/api/communities';
 import { eventsApi } from '@/shared/api/events';
 import { communityMembershipsApi } from '@/shared/api/community-memberships';
+import { servicesApi } from '@/shared/api/services';
 import { useErrorHandling, ERROR_MESSAGES } from '@/hooks/useErrorHandling';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useAuth } from '@/hooks/useAuth';
@@ -18,8 +19,9 @@ import { CommunityMembersSection } from '@/components/communities/CommunityMembe
 import { CommunityActivitySection } from '@/components/communities/CommunityActivitySection';
 import { CommunityRulesSection } from '@/components/communities/CommunityRulesSection';
 import { CommunityResourcesSection } from '@/components/communities/CommunityResourcesSection';
-import type { Community, CommunityMembership, CommunityMembershipRole, Event } from '@comparte-tu-tiempo/contracts';
+import type { Community, CommunityMembership, CommunityMembershipRole, Event, Service } from '@comparte-tu-tiempo/contracts';
 import { apiClient } from '@/shared/api/client';
+import { ServiceCard } from '@/components/ServiceCard';
 
 export default function CommunityDetailPage() {
   const router = useRouter();
@@ -32,6 +34,7 @@ export default function CommunityDetailPage() {
   const [community, setCommunity] = useState<Community | null>(null);
   const [memberships, setMemberships] = useState<CommunityMembership[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
+  const [communityServices, setCommunityServices] = useState<Service[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const { error, loading, handleAsyncOperation, clearError } = useErrorHandling();
@@ -53,9 +56,17 @@ export default function CommunityDetailPage() {
       const detailResponse = await communitiesApi.getCommunity(communityId);
       setCommunity(detailResponse.community);
 
-      const [membershipsResult, eventsResult] = await Promise.allSettled([
+      if (detailResponse.community.isPrivate && !user?.sub) {
+        setMemberships([]);
+        setEvents([]);
+        setCommunityServices([]);
+        return;
+      }
+
+      const [membershipsResult, eventsResult, servicesResult] = await Promise.allSettled([
         communityMembershipsApi.getMemberships(communityId),
         eventsApi.getEventsByCommunity(communityId),
+        servicesApi.getServices({ communityId, page: 1, pageSize: 6 }),
       ]);
 
       if (membershipsResult.status === 'fulfilled') {
@@ -69,8 +80,14 @@ export default function CommunityDetailPage() {
       } else {
         setEvents([]);
       }
+
+      if (servicesResult.status === 'fulfilled') {
+        setCommunityServices(servicesResult.value.services);
+      } else {
+        setCommunityServices([]);
+      }
     }, ERROR_MESSAGES.NETWORK_ERROR);
-  }, [communityId, accessToken, handleAsyncOperation]);
+  }, [communityId, accessToken, user?.sub, handleAsyncOperation]);
 
   useEffect(() => {
     fetchCommunityData();
@@ -88,10 +105,15 @@ export default function CommunityDetailPage() {
   const isOwner = myMembership?.role === 'OWNER' || Boolean(community && user?.sub && community.creatorId === user.sub);
   const isAdmin = userProfile?.role === 'ADMIN';
   const canManage = isOwner || isAdmin;
+  const isOrganizationView = router.pathname.startsWith('/organizations') || community?.kind === 'ORGANIZATION';
 
   const handleToggleEventRegistration = async (eventId: number) => {
     if (!user?.sub) {
       setNotice(t('communities.detail.loginToRegisterEvent'));
+      return;
+    }
+    if (!isMember && !canManage) {
+      setNotice(t('communities.detail.mustBeMemberToRegisterEvent'));
       return;
     }
     const added = await toggleRegistration(eventId);
@@ -99,7 +121,12 @@ export default function CommunityDetailPage() {
   };
 
   const handleJoin = async () => {
-    if (!communityId || !user?.sub || actionLoading) return;
+    if (!communityId || actionLoading) return;
+
+    if (!user?.sub) {
+      router.push(`/api/auth/login?returnTo=${isOrganizationView ? '/organizations' : '/communities'}/${communityId}`);
+      return;
+    }
 
     setActionLoading(true);
     setNotice(null);
@@ -181,7 +208,7 @@ export default function CommunityDetailPage() {
         <Box sx={{ maxWidth: 1040, mx: 'auto', px: { xs: 2, sm: 2.5, md: 3 } }}>
           <Button
             startIcon={<ArrowBack />}
-            onClick={() => router.push('/communities')}
+            onClick={() => router.push(isOrganizationView ? '/organizations' : '/communities')}
             sx={{ mb: 2, textTransform: 'none' }}
           >
             {t('common.back')}
@@ -212,58 +239,42 @@ export default function CommunityDetailPage() {
 
           {!loading && community && (
             <Stack spacing={2.5}>
-              <CommunityHeader
-                community={community}
-                membersCount={activeMemberships.length}
-                eventsCount={events.length}
-                t={t}
-              />
+              {!(community.isPrivate && !user?.sub) && (
+                <CommunityHeader
+                  community={community}
+                  membersCount={activeMemberships.length}
+                  eventsCount={events.length}
+                  resourcesCount={community.resources.length}
+                  t={t}
+                />
+              )}
 
-              <Box
-                sx={{
-                  bgcolor: '#fff',
-                  borderRadius: 3,
-                  border: '1px solid rgba(148,163,184,0.16)',
-                  boxShadow: '0 12px 28px rgba(15,23,42,0.06)',
-                  p: { xs: 2.25, md: 2.75 },
-                }}
-              >
-                <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" spacing={2} sx={{ alignItems: { xs: 'stretch', md: 'flex-start' } }}>
-                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25} useFlexGap flexWrap="wrap">
-                    <Chip label={t('communities.detail.activeMembers', { count: activeMemberships.length })} />
-                    <Chip label={t('communities.detail.eventsPublished', { count: events.length })} />
-                    <Chip label={t('communities.detail.sharedResources', { count: community.resources.length })} />
-                    {canManage && (
-                      <Chip
-                        icon={<PendingActionsOutlined fontSize="small" />}
-                        label={t('communities.detail.pendingRequests', { count: pendingMemberships.length })}
-                        color={pendingMemberships.length > 0 ? 'warning' : 'default'}
-                      />
-                    )}
-                  </Stack>
-
-                  {community.kind === 'ORGANIZATION' && (
-                    <Chip
-                      label={
-                        community.verificationStatus === 'APPROVED'
-                          ? t('communities.detail.verifiedOrganization')
-                          : community.verificationStatus === 'REJECTED'
-                            ? t('communities.detail.rejectedOrganization')
-                            : t('communities.detail.pendingOrganization')
-                      }
-                      color={
-                        community.verificationStatus === 'APPROVED'
-                          ? 'success'
-                          : community.verificationStatus === 'REJECTED'
-                            ? 'error'
-                            : 'warning'
-                      }
-                      sx={{ fontWeight: 800, alignSelf: 'flex-start' }}
-                    />
-                  )}
-                </Stack>
-              </Box>
-
+              {community.isPrivate && !user?.sub ? (
+                <Box
+                  sx={{
+                    bgcolor: '#fff',
+                    borderRadius: 3,
+                    border: '1px solid rgba(148,163,184,0.16)',
+                    boxShadow: '0 12px 28px rgba(15,23,42,0.06)',
+                    p: { xs: 2.5, md: 3 },
+                  }}
+                >
+                  <Typography variant="h6" sx={{ fontWeight: 800, mb: 1 }}>
+                    {t(isOrganizationView ? 'communities.detail.privateOrganizationLoginTitle' : 'communities.detail.privateCommunityLoginTitle')}
+                  </Typography>
+                  <Typography color="text.secondary" sx={{ mb: 2, lineHeight: 1.7 }}>
+                    {t(isOrganizationView ? 'communities.detail.privateOrganizationLoginDescription' : 'communities.detail.privateCommunityLoginDescription')}
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    onClick={() => router.push(`/api/auth/login?returnTo=${isOrganizationView ? '/organizations' : '/communities'}/${community.id}`)}
+                    sx={{ textTransform: 'none', fontWeight: 800, bgcolor: '#8A33FD', '&:hover': { bgcolor: '#7028E0' } }}
+                  >
+                    {t('auth.login')}
+                  </Button>
+                </Box>
+              ) : (
+                <>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ '& .MuiButton-root': { width: { xs: '100%', sm: 'auto' } } }}>
                 {canManage && (
                   <>
@@ -280,7 +291,7 @@ export default function CommunityDetailPage() {
                       onClick={() => router.push(`/communities/${community.id}/edit`)}
                       sx={{ textTransform: 'none', fontWeight: 600, alignSelf: 'flex-start' }}
                     >
-                      {t('communities.detail.manageSpace', { space: community.kind === 'ORGANIZATION' ? t('communities.detail.organization') : t('communities.detail.community') })}
+                      {t('communities.detail.manageSpace', { space: isOrganizationView ? t('communities.detail.organization') : t('communities.detail.community') })}
                     </Button>
                   </>
                 )}
@@ -289,14 +300,16 @@ export default function CommunityDetailPage() {
                   color={isMember || myPendingMembership ? 'inherit' : 'primary'}
                   onClick={isMember || myPendingMembership ? handleLeave : handleJoin}
                   startIcon={isMember || myPendingMembership ? <ExitToApp /> : <GroupAdd />}
-                  disabled={!user?.sub || actionLoading}
+                  disabled={actionLoading}
                   sx={{ textTransform: 'none', fontWeight: 600, alignSelf: 'flex-start' }}
                 >
                   {isMember
                     ? t('communities.detail.leave')
                     : myPendingMembership
                       ? t('communities.detail.cancelRequest')
-                      : t('communities.detail.join')}
+                      : community.isPrivate
+                        ? t(isOrganizationView ? 'communities.detail.requestJoinOrganization' : 'communities.detail.requestJoin')
+                        : t(isOrganizationView ? 'communities.detail.joinOrganization' : 'communities.detail.join')}
                 </Button>
               </Stack>
 
@@ -320,6 +333,54 @@ export default function CommunityDetailPage() {
 
               <Box
                 sx={{
+                  bgcolor: '#fff',
+                  borderRadius: 3,
+                  border: '1px solid rgba(148,163,184,0.16)',
+                  boxShadow: '0 12px 28px rgba(15,23,42,0.06)',
+                  p: { xs: 2.25, md: 2.75 },
+                }}
+              >
+                <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={1.5} sx={{ mb: 2 }}>
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 800 }}>
+                      {t(isOrganizationView ? 'communities.services.organizationTitle' : 'communities.services.title')}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {t(isOrganizationView ? 'communities.services.organizationDescription' : 'communities.services.description')}
+                    </Typography>
+                  </Box>
+                  {(isMember || canManage) && (
+                    <Button
+                      variant="outlined"
+                      startIcon={<HandymanOutlined />}
+                      onClick={() => router.push(`/services/create?communityId=${community.id}`)}
+                      sx={{ textTransform: 'none', fontWeight: 700, alignSelf: { xs: 'stretch', sm: 'flex-start' } }}
+                    >
+                      {t(isOrganizationView ? 'communities.detail.publishOrganizationService' : 'communities.detail.publishService')}
+                    </Button>
+                  )}
+                </Stack>
+
+                {communityServices.length === 0 ? (
+                  <Alert severity="info">{t(isOrganizationView ? 'communities.services.organizationEmpty' : 'communities.services.empty')}</Alert>
+                ) : (
+                  <Box
+                    sx={{
+                      display: 'grid',
+                      gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))', xl: 'repeat(3, minmax(0, 1fr))' },
+                      gap: 2,
+                      '& > *': { maxWidth: 'none' },
+                    }}
+                  >
+                    {communityServices.map((service) => (
+                      <ServiceCard key={service.id} service={{ ...service, location: service.location ?? '' }} />
+                    ))}
+                  </Box>
+                )}
+              </Box>
+
+              <Box
+                sx={{
                   display: 'grid',
                   gridTemplateColumns: { xs: '1fr', lg: '1.35fr 1fr' },
                   gap: 2.5,
@@ -327,8 +388,8 @@ export default function CommunityDetailPage() {
               >
                 <Box>
                   <Stack spacing={2.5}>
-                    <CommunityRulesSection rules={community.rules} />
-                    <CommunityResourcesSection resources={community.resources} />
+                    <CommunityRulesSection rules={community.rules} organization={isOrganizationView} />
+                    <CommunityResourcesSection resources={community.resources} organization={isOrganizationView} />
                   </Stack>
                 </Box>
                 <Box>
@@ -349,6 +410,8 @@ export default function CommunityDetailPage() {
                   </Stack>
                 </Box>
               </Box>
+                </>
+              )}
             </Stack>
           )}
         </Box>

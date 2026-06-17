@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Post, Delete, Param, Body, UseGuards, Request, ParseIntPipe, NotFoundException, BadRequestException, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Put, Post, Delete, Param, Body, UseGuards, Request, ParseIntPipe, NotFoundException, BadRequestException, UnauthorizedException, ForbiddenException, Logger } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
 import { PrismaService } from '@/common/prisma/prisma.service';
@@ -55,6 +55,8 @@ export class UpdateUserDto {
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
+  private readonly logger = new Logger(UsersController.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly cloudinaryService: CloudinaryService,
@@ -204,7 +206,7 @@ export class UsersController {
     const notifications = await this.prisma.userNotification.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
-      take: 20,
+      take: 100,
       select: {
         id: true,
         type: true,
@@ -378,12 +380,12 @@ export class UsersController {
   ) {
     const userId = this.getAuthenticatedUserId(req);
 
-    // Verificar que el usuario solo puede actualizar su propio perfil
+    // Verify users can only update their own profile
     if (userId !== id) {
       throw new BadRequestException('You can only update your own profile');
     }
 
-    // Verificar que el usuario existe
+    // Verify that the user exists
     const existingUser = await this.prisma.user.findUnique({
       where: { id },
     });
@@ -396,7 +398,7 @@ export class UsersController {
     const hasImageUrlUpdate = Object.prototype.hasOwnProperty.call(updateUserDto, 'imageUrl');
     const nextImageUrl = hasImageUrlUpdate ? updateUserDto.imageUrl ?? null : previousImageUrl;
 
-    // Actualizar el usuario
+    // Update the user
     const updatedUser = await this.prisma.user.update({
       where: { id },
       data: {
@@ -442,8 +444,8 @@ export class UsersController {
         const publicId = this.cloudinaryService.extractPublicId(previousImageUrl);
         await this.cloudinaryService.deleteImage(publicId);
       } catch (error) {
-        console.warn(
-          `No se pudo limpiar imagen anterior del usuario ${id}: ${
+        this.logger.warn(
+          `Could not clean up previous image for user ${id}: ${
             error instanceof Error ? error.message : String(error)
           }`,
         );

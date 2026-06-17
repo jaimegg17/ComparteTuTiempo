@@ -69,7 +69,7 @@ export class UpdateServiceUseCase {
           await this.cloudinaryService.deleteImage(publicId);
         } catch (error) {
           this.logger.warn(
-            `No se pudo limpiar imagen antigua del servicio ${input.id}: ${
+            `Could not clean up previous image for service ${input.id}: ${
               error instanceof Error ? error.message : String(error)
             }`,
           );

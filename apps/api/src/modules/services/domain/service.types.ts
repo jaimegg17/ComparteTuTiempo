@@ -3,6 +3,7 @@ import { Service as ServiceContract } from '@comparte-tu-tiempo/contracts';
 // Extended Service interface that includes imageUrl
 export interface ServiceWithImage extends ServiceContract {
   imageUrl?: string | null;
+  communityId?: number | null;
 }
 
 // Extended Service entity that includes imageUrl
@@ -22,4 +23,5 @@ export interface ServiceCreateWithImage {
   intent: ServiceContract['intent'];
   price: number;
   imageUrl?: string | null;
+  communityId?: number | null;
 }

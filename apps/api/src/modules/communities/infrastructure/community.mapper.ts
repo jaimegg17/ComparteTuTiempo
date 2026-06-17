@@ -34,26 +34,21 @@ const normalizeResources = (value: unknown): CommunityResource[] => {
 
 export class CommunityMapper {
   static toDomain(prismaCommunity: CommunityPersistence): CommunityEntity {
-    try {
-      return new CommunityEntity(
-        prismaCommunity.id,
-        prismaCommunity.name,
-        prismaCommunity.description ?? null, // Handle nullable description
-        prismaCommunity.imageUrl ?? null,
-        prismaCommunity.topics ?? [],
-        prismaCommunity.rules ?? [],
-        normalizeResources(prismaCommunity.resources),
-        prismaCommunity.kind ?? 'COMMUNITY',
-        prismaCommunity.verificationStatus ?? 'NONE',
-        prismaCommunity.isPrivate,
-        prismaCommunity.creatorId,
-        prismaCommunity.createdAt instanceof Date ? prismaCommunity.createdAt : new Date(prismaCommunity.createdAt),
-        prismaCommunity.updatedAt instanceof Date ? prismaCommunity.updatedAt : new Date(prismaCommunity.updatedAt),
-      );
-    } catch (error) {
-      console.error('Error in CommunityMapper.toDomain:', error, prismaCommunity);
-      throw error;
-    }
+    return new CommunityEntity(
+      prismaCommunity.id,
+      prismaCommunity.name,
+      prismaCommunity.description ?? null,
+      prismaCommunity.imageUrl ?? null,
+      prismaCommunity.topics ?? [],
+      prismaCommunity.rules ?? [],
+      normalizeResources(prismaCommunity.resources),
+      prismaCommunity.kind ?? 'COMMUNITY',
+      prismaCommunity.verificationStatus ?? 'NONE',
+      prismaCommunity.isPrivate,
+      prismaCommunity.creatorId,
+      prismaCommunity.createdAt instanceof Date ? prismaCommunity.createdAt : new Date(prismaCommunity.createdAt),
+      prismaCommunity.updatedAt instanceof Date ? prismaCommunity.updatedAt : new Date(prismaCommunity.updatedAt),
+    );
   }
 
   static toPrisma(community: CommunityEntity): CommunityPersistence {

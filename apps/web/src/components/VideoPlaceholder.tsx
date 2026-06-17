@@ -13,11 +13,6 @@ import { useTranslation } from 'react-i18next';
 export const VideoPlaceholder: React.FC = () => {
   const { t } = useTranslation();
 
-  const handlePlayVideo = () => {
-    // TODO: Implementar reproducción de video
-    console.log('Reproducir video explicativo');
-  };
-
   return (
     <Box sx={{ pt: { xs: 3.5, md: 4.5 }, pb: { xs: 6, md: 8 } }}>
       <Container maxWidth="lg" sx={{ px: { xs: 2, md: 3 } }}>
@@ -80,7 +75,8 @@ export const VideoPlaceholder: React.FC = () => {
             <Button
               variant="contained"
               size="large"
-              onClick={handlePlayVideo}
+              disabled
+              aria-label={t('video.comingSoon', 'Video próximamente')}
               sx={{
                 backgroundColor: 'rgba(255, 255, 255, 0.9)',
                 color: 'primary.main',
@@ -94,9 +90,7 @@ export const VideoPlaceholder: React.FC = () => {
                 minWidth: { xs: '84px', md: '112px' },
                 boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
                 '&:hover': {
-                  backgroundColor: 'white',
-                  transform: 'scale(1.05)',
-                  boxShadow: '0 12px 40px rgba(0,0,0,0.4)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
                 },
                 transition: 'all 0.3s ease',
               }}
@@ -113,7 +107,7 @@ export const VideoPlaceholder: React.FC = () => {
                 textShadow: '0 2px 4px rgba(0,0,0,0.5)',
               }}
             >
-              {t('video.playButton', 'Ver video explicativo')}
+              {t('video.comingSoon', 'Video próximamente')}
             </Typography>
           </CardContent>
         </Card>

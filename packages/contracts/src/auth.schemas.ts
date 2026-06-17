@@ -1,20 +1,20 @@
 import { z } from 'zod';
 
 // ============================================================================
-// ESQUEMAS DE AUTENTICACIÓN
+// AUTHENTICATION SCHEMAS
 // ============================================================================
 
 export const SignUpSchema = z.object({
-  email: z.string().email('Email inválido'),
-  password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
-  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+  email: z.string().email('Invalid email'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  name: z.string().min(2, 'Name must be at least 2 characters'),
   phoneNumber: z.string().optional(),
   location: z.string().optional(),
 });
 
 export const SignInSchema = z.object({
-  email: z.string().email('Email inválido'),
-  password: z.string().min(1, 'La contraseña es requerida'),
+  email: z.string().email('Invalid email'),
+  password: z.string().min(1, 'Password is required'),
 });
 
 export const MeSchema = z.object({
@@ -29,7 +29,7 @@ export const MeSchema = z.object({
 });
 
 // ============================================================================
-// TIPOS INFERIDOS
+// INFERRED TYPES
 // ============================================================================
 
 export type SignUp = z.infer<typeof SignUpSchema>;

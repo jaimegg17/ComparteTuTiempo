@@ -35,6 +35,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
       detailedDescription: data.detailedDescription || null,
       availability: data.availability || null,
       imageUrl: data.imageUrl || null,
+      communityId: data.communityId ?? null,
     };
     
     const prismaService = await this.prisma.service.create({
@@ -65,13 +66,13 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
   }
 
   async list(query: ServiceListQuery): Promise<ServiceListResponse> {
-    const { q, category, location, type, intent, status, page, pageSize, userId, nearLat, nearLng } = query;
+    const { q, category, location, type, intent, status, page, pageSize, userId, communityId, nearLat, nearLng } = query;
     const minPrice = query.minPrice;
     const maxPrice = query.maxPrice;
     const radiusKm = query.radiusKm ?? 10;
     const skip = (page - 1) * pageSize;
 
-    // Construir filtros
+    // Build filters
     const where: Prisma.ServiceWhereInput = {};
     
     if (q) {
@@ -86,43 +87,68 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
     if (intent) where.intent = intent as ServiceIntent;
     if (status) where.status = ServiceEnumMapper.mapStatusToPrisma(status) as ServiceStatus;
     if (location) where.location = { contains: location, mode: 'insensitive' };
-    if (userId) where.userId = userId; // Filtrar por usuario
+    if (userId) where.userId = userId; // Filter by user
+    if (communityId) {
+      where.communityId = communityId;
+    } else if (!userId) {
+      // Services published inside a community do not appear in the global marketplace.
+      // They are queried through /services?communityId=...
+      where.communityId = null;
+    }
     if (nearLat !== undefined && nearLng !== undefined) {
       where.latitude = { not: null };
       where.longitude = { not: null };
     }
     
-    // Filtros de precio
+    // Price filters
     if (minPrice !== undefined || maxPrice !== undefined) {
       where.price = {};
       if (minPrice !== undefined) where.price.gte = minPrice;
       if (maxPrice !== undefined) where.price.lte = maxPrice;
     }
 
-    const prismaServices = await this.prisma.service.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            imageUrl: true,
-          }
+    const serviceInclude = {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          imageUrl: true,
         },
-        ratings: {
-          select: {
-            score: true,
-          }
-        },
-        _count: {
-          select: {
-            ratings: true,
-            exchanges: true,
-          }
-        }
       },
-    });
+      ratings: {
+        select: {
+          score: true,
+        },
+      },
+      _count: {
+        select: {
+          ratings: true,
+          exchanges: true,
+        },
+      },
+    } as const;
+
+    const shouldSortByDistance = nearLat !== undefined && nearLng !== undefined;
+
+    const [totalBeforeDistanceFilter, prismaServices] = shouldSortByDistance
+      ? [
+          0,
+          await this.prisma.service.findMany({
+            where,
+            orderBy: { createdAt: 'desc' },
+            include: serviceInclude,
+          }),
+        ]
+      : await this.prisma.$transaction([
+          this.prisma.service.count({ where }),
+          this.prisma.service.findMany({
+            where,
+            orderBy: { createdAt: 'desc' },
+            skip,
+            take: pageSize,
+            include: serviceInclude,
+          }),
+        ]);
 
     // Calculate average rating for each service
     let servicesWithRatings = prismaServices.map(service => {
@@ -145,14 +171,16 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
       };
     });
 
-    if (nearLat !== undefined && nearLng !== undefined) {
+    let total = totalBeforeDistanceFilter;
+    let paginatedServices = servicesWithRatings;
+
+    if (shouldSortByDistance) {
       servicesWithRatings = servicesWithRatings
         .filter((service) => service.distanceKm !== null && (service.distanceKm as number) <= radiusKm)
         .sort((a, b) => (a.distanceKm as number) - (b.distanceKm as number));
+      total = servicesWithRatings.length;
+      paginatedServices = servicesWithRatings.slice(skip, skip + pageSize);
     }
-
-    const total = servicesWithRatings.length;
-    const paginatedServices = servicesWithRatings.slice(skip, skip + pageSize);
 
     const totalPages = Math.ceil(total / pageSize);
 
@@ -185,6 +213,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
           status: service.status.toLowerCase() as unknown as ServiceListResponse['services'][number]['status'],
           price: service.price,
           imageUrl: serviceData.imageUrl || null,
+          communityId: service.communityId ?? null,
           userId: service.userId,
           createdAt: service.createdAt,
           updatedAt: service.updatedAt,
@@ -203,7 +232,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
   }
 
   async update(id: number, data: ServiceUpdate, userId: string): Promise<Service> {
-    // Verificar que el servicio existe y pertenece al usuario
+    // Verify that the service exists and belongs to the user
     const existingService = await this.findById(id);
     if (!existingService) {
       throw new Error('Service not found');
@@ -227,6 +256,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
     if (data.status) updateData.status = ServiceEnumMapper.mapStatusToPrisma(data.status) as ServiceStatus;
     if (data.price) updateData.price = data.price;
     if (data.imageUrl !== undefined) updateData.imageUrl = data.imageUrl;
+    if (data.communityId !== undefined) updateData.communityId = data.communityId;
 
     const prismaService = await this.prisma.service.update({
       where: { id },
@@ -237,7 +267,7 @@ export class PrismaServiceRepository implements ServiceRepositoryPort {
   }
 
   async delete(id: number, userId: string): Promise<void> {
-    // Verificar que el servicio existe y pertenece al usuario
+    // Verify that the service exists and belongs to the user
     const existingService = await this.findById(id);
     if (!existingService) {
       throw new Error('Service not found');

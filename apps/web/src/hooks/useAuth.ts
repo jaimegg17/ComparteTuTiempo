@@ -1,80 +1,142 @@
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { useState, useEffect, useCallback, useRef } from 'react';
 
+let sharedAccessToken: string | null = null;
+let sharedAccessTokenExpiresAt: number | null = null;
+let sharedAccessTokenUserId: string | null = null;
+let sharedTokenRequest: Promise<string | null> | null = null;
+let sharedFetchReference: typeof fetch | null = null;
+
+const getJwtExpiry = (token: string): number | null => {
+  try {
+    const payload = token.split('.')[1];
+    if (!payload) return null;
+
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const decoded = JSON.parse(atob(normalized)) as { exp?: number };
+    return typeof decoded.exp === 'number' ? decoded.exp * 1000 : null;
+  } catch {
+    return null;
+  }
+};
+
 export const useAuth = () => {
   const { user, isLoading, error } = useUser();
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const userId = typeof user?.sub === 'string' ? user.sub : typeof user?.id === 'string' ? user.id : null;
+  const [accessToken, setAccessToken] = useState<string | null>(() => {
+    const currentFetchReference = typeof fetch === 'function' ? fetch : null;
+    return userId && sharedAccessTokenUserId === userId && (!sharedFetchReference || sharedFetchReference === currentFetchReference)
+      ? sharedAccessToken
+      : null;
+  });
   const [tokenLoading, setTokenLoading] = useState(false);
-  const accessTokenRef = useRef<string | null>(null);
+  const accessTokenRef = useRef<string | null>(accessToken);
+  const accessTokenExpiresAtRef = useRef<number | null>(accessToken ? getJwtExpiry(accessToken) : null);
 
   useEffect(() => {
+    const currentFetchReference = typeof fetch === 'function' ? fetch : null;
+    if (sharedFetchReference && currentFetchReference && sharedFetchReference !== currentFetchReference) {
+      sharedAccessToken = null;
+      sharedAccessTokenExpiresAt = null;
+      sharedAccessTokenUserId = null;
+      sharedTokenRequest = null;
+      setAccessToken(null);
+    }
+
+    if (!userId) {
+      sharedAccessToken = null;
+      sharedAccessTokenExpiresAt = null;
+      sharedAccessTokenUserId = null;
+      sharedTokenRequest = null;
+      accessTokenRef.current = null;
+      accessTokenExpiresAtRef.current = null;
+      setAccessToken(null);
+      return;
+    }
+
+    if (sharedAccessTokenUserId && sharedAccessTokenUserId !== userId) {
+      sharedAccessToken = null;
+      sharedAccessTokenExpiresAt = null;
+      sharedAccessTokenUserId = null;
+      sharedTokenRequest = null;
+      setAccessToken(null);
+      return;
+    }
+
+    if (sharedAccessToken && sharedAccessTokenUserId === userId && sharedAccessToken !== accessToken) {
+      setAccessToken(sharedAccessToken);
+      return;
+    }
+
     accessTokenRef.current = accessToken;
-  }, [accessToken]);
+    accessTokenExpiresAtRef.current = accessToken ? getJwtExpiry(accessToken) : null;
+  }, [accessToken, userId]);
 
   const getAccessToken = useCallback(async (forceRefresh = false) => {
     if (!user) return null;
-    
-    // If we have a cached token and not forcing refresh, return it
-    // But we'll still fetch a fresh one to ensure it's valid
-    if (!forceRefresh && accessTokenRef.current) {
-      // Still fetch fresh token but return cached one immediately
-      // The fresh fetch will update the cache in the background
-      fetch('/api/auth/token')
-        .then(res => res.ok ? res.json() : null)
-        .then(data => {
-          if (data?.accessToken) {
-            setAccessToken(data.accessToken);
-          }
-        })
-        .catch(err => console.error('🔑 Background token refresh failed:', err));
-      
-      return accessTokenRef.current;
+
+    const currentFetchReference = typeof fetch === 'function' ? fetch : null;
+    if (sharedFetchReference && currentFetchReference && sharedFetchReference !== currentFetchReference) {
+      sharedAccessToken = null;
+      sharedAccessTokenExpiresAt = null;
+      sharedAccessTokenUserId = null;
+      sharedTokenRequest = null;
+      setAccessToken(null);
     }
-    
-    setTokenLoading(true);
-    try {
-      console.log('🔑 Getting access token for user:', user.sub);
-      // Add cache busting to ensure fresh token
-      const response = await fetch('/api/auth/token', {
-        cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache',
-        },
-      });
-      console.log('🔑 Token response status:', response.status);
-      
-      if (response.ok) {
-        const data = await response.json();
-        if (data.accessToken) {
-          console.log('✅ Token obtained successfully, length:', data.accessToken.length);
-          setAccessToken(data.accessToken);
-          return data.accessToken;
-        } else {
-          console.error('❌ No access token in response. Response data:', data);
-          setAccessToken(null);
-          return null;
+
+    const cachedToken = sharedAccessTokenUserId === userId ? sharedAccessToken || accessTokenRef.current : accessTokenRef.current;
+    const expiresAt = sharedAccessTokenUserId === userId ? sharedAccessTokenExpiresAt || accessTokenExpiresAtRef.current : accessTokenExpiresAtRef.current;
+    const isUsable = cachedToken && (!expiresAt || expiresAt > Date.now() + 60_000);
+
+    if (!forceRefresh && isUsable) {
+      return cachedToken;
+    }
+
+    if (sharedTokenRequest) {
+      return sharedTokenRequest;
+    }
+
+    sharedTokenRequest = (async () => {
+      setTokenLoading(true);
+      try {
+        sharedFetchReference = currentFetchReference;
+        const response = await fetch('/api/auth/token', {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.accessToken) {
+            sharedAccessToken = data.accessToken;
+            sharedAccessTokenExpiresAt = getJwtExpiry(data.accessToken);
+            sharedAccessTokenUserId = userId;
+            setAccessToken(data.accessToken);
+            return data.accessToken;
+          }
         }
-      } else {
-        let errorText = '';
-        try {
-          errorText = await response.text();
-        } catch {
-          errorText = 'Could not read error response';
-        }
-        console.error('❌ Failed to get access token. Status:', response.status);
-        console.error('❌ Error response:', errorText);
-        // Clear cached token if request failed
+
+        sharedAccessToken = null;
+        sharedAccessTokenExpiresAt = null;
+        sharedAccessTokenUserId = null;
         setAccessToken(null);
         return null;
+      } catch {
+        sharedAccessToken = null;
+        sharedAccessTokenExpiresAt = null;
+        sharedAccessTokenUserId = null;
+        setAccessToken(null);
+        return null;
+      } finally {
+        setTokenLoading(false);
+        sharedTokenRequest = null;
       }
-    } catch (error) {
-      console.error('🔑 Error getting access token:', error);
-      setAccessToken(null);
-      return null;
-    } finally {
-      setTokenLoading(false);
-    }
-  }, [user]);
+    })();
+
+    return sharedTokenRequest;
+  }, [user, userId]);
 
   useEffect(() => {
     if (user && !accessToken) {

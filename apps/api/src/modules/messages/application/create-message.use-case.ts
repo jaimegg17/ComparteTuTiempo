@@ -52,6 +52,21 @@ export class CreateMessageUseCase {
 
     const message = await this.messageRepository.create(data, userId);
 
+    const recipientId = userId === exchange.requestedById ? exchange.offeredById : exchange.requestedById;
+    if (recipientId && recipientId !== userId) {
+      await this.prisma.userNotification.create({
+        data: {
+          userId: recipientId,
+          type: 'MESSAGE',
+          title: 'Nuevo mensaje',
+          body: exchange.service?.title
+            ? `Has recibido un mensaje sobre "${exchange.service.title}".`
+            : 'Has recibido un nuevo mensaje en un intercambio.',
+          link: `/exchanges/${exchange.id}`,
+        },
+      }).catch(() => undefined);
+    }
+
     return { message };
   }
 }

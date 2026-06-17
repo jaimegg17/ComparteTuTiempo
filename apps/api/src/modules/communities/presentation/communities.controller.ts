@@ -35,7 +35,7 @@ import { ListCommunitiesUseCase } from '../application/list-communities.use-case
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
 import { PrismaService } from '@/common/prisma/prisma.service';
 
-// DTOs con class-validator para compatibilidad con ValidationPipe global
+// DTOs using class-validator for compatibility with the global ValidationPipe
 export class CreateCommunityDto {
   @IsString()
   name!: string;
@@ -159,9 +159,7 @@ export class CommunitiesController {
     private readonly createCommunityUseCase: CreateCommunityUseCase,
     private readonly listCommunitiesUseCase: ListCommunitiesUseCase,
     private readonly prisma: PrismaService,
-  ) {
-    this.logger.log('CommunitiesController initialized');
-  }
+  ) {}
 
   private getAuthenticatedUserId(req: AuthenticatedRequest): string {
     const userId = req.user?.sub || req.user?.id;
@@ -324,10 +322,8 @@ export class CommunitiesController {
   @ApiOperation({ summary: 'Listar comunidades con filtros' })
   @ApiResponse({ status: 200, description: 'Lista de comunidades obtenida' })
   async listCommunities(@Query() query: CommunityListQueryDto) {
-    this.logger.log('listCommunities called with query:', query);
-    
     try {
-      // Asegurar que page y pageSize estén presentes y sean números
+      // Ensure page and pageSize are present and numeric
       const queryWithDefaults = {
         page: query.page || 1,
         pageSize: query.pageSize || 20,
@@ -336,8 +332,6 @@ export class CommunitiesController {
         kind: query.kind,
         verificationStatus: query.verificationStatus,
       };
-
-      this.logger.log('Query with defaults:', queryWithDefaults);
 
       // Build where clause for direct Prisma query
       const where: Prisma.CommunityWhereInput = {};
@@ -352,8 +346,6 @@ export class CommunitiesController {
 
       const skip = (queryWithDefaults.page - 1) * queryWithDefaults.pageSize;
 
-      this.logger.log('Executing Prisma query with where:', where);
-
       // Direct Prisma query to test if it works
       const [prismaCommunities, total] = await Promise.all([
         this.prisma.community.findMany({
@@ -364,8 +356,6 @@ export class CommunitiesController {
         }),
         this.prisma.community.count({ where }),
       ]);
-
-      this.logger.log(`Found ${prismaCommunities.length} communities, total: ${total}`);
 
       // Map to contract format
       const communities = prismaCommunities.map((c) => this.serializeCommunity(c));
@@ -381,7 +371,6 @@ export class CommunitiesController {
         totalPages,
       };
 
-      this.logger.log('Returning response:', response);
       return response;
     } catch (error) {
       this.logger.error('Error listing communities:', error);
@@ -725,11 +714,22 @@ export class CommunitiesController {
   @ApiResponse({ status: 403, description: 'No autorizado para eliminar esta comunidad' })
   async deleteCommunity(
     @Param('id', ParseIntPipe) id: number,
+    @Request() req: AuthenticatedRequest,
   ) {
-    // This would need a delete community use case
-    return {
-      message: 'Comunidad eliminada exitosamente',
-      community: { id },
-    };
+    const userId = this.getAuthenticatedUserId(req);
+    const existing = await this.prisma.community.findUnique({
+      where: { id },
+      select: { id: true, creatorId: true },
+    });
+
+    if (!existing) {
+      throw new NotFoundException('Comunidad no encontrada');
+    }
+
+    if (!(await this.canManageCommunity(id, userId)) && existing.creatorId !== userId) {
+      throw new ForbiddenException('No autorizado para eliminar esta comunidad');
+    }
+
+    await this.prisma.community.delete({ where: { id } });
   }
 }

@@ -14,6 +14,7 @@ import { Message, MessageCreate, ChatUser } from '@/types/message.types';
 import { useErrorHandling, ERROR_MESSAGES } from '@/hooks/useErrorHandling';
 import { ErrorAlert } from '@/components/ui/BeautifulAlert';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslation } from '@/hooks/useTranslation';
 import { apiClient } from '@/shared/api/client';
 import { messagesApi } from '@/shared/api/messages';
 
@@ -24,6 +25,7 @@ interface ChatProps {
   onMessageSent?: (message: Message) => void;
   enableRealTime?: boolean; // Enable polling for real-time updates
   pollingInterval?: number; // Polling interval in milliseconds (default: 3000ms)
+  embedded?: boolean;
 }
 
 export function Chat({ 
@@ -33,6 +35,7 @@ export function Chat({
   onMessageSent,
   enableRealTime = true,
   pollingInterval = 3000,
+  embedded = false,
 }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
@@ -45,6 +48,7 @@ export function Chat({
   const isUserTypingRef = useRef(false);
   const { error, handleAsyncOperation, clearError } = useErrorHandling();
   const { getAccessToken } = useAuth();
+  const { t } = useTranslation();
 
   // Auto-scroll to bottom when new messages arrive
   const scrollToBottom = () => {
@@ -113,10 +117,8 @@ export function Chat({
           setLastMessageId(fetchedMessages[fetchedMessages.length - 1].id);
         }
       }
-    } catch (err) {
-      if (!silent) {
-        console.error('Error fetching messages:', err);
-      }
+    } catch {
+      // Keep the current chat state on transient polling failures.
     } finally {
       if (!silent) {
         setIsPolling(false);
@@ -254,23 +256,25 @@ export function Chat({
   }
 
   return (
-    <Paper sx={{ height: 500, display: 'flex', flexDirection: 'column' }}>
+    <Paper elevation={embedded ? 0 : 1} sx={{ height: embedded ? 560 : 500, display: 'flex', flexDirection: 'column', borderRadius: embedded ? 0 : 2 }}>
       {/* Chat Header */}
-      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Avatar src={otherUser.imageUrl} alt={otherUser.name}>
-            {otherUser.name[0]}
-          </Avatar>
-          <Box>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              {otherUser.name}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Exchange Chat
-            </Typography>
+      {!embedded && (
+        <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Avatar src={otherUser.imageUrl} alt={otherUser.name}>
+              {otherUser.name[0]}
+            </Avatar>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                {otherUser.name}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {t('chat.exchangeChat')}
+              </Typography>
+            </Box>
           </Box>
         </Box>
-      </Box>
+      )}
 
       {/* Error Display */}
       {error && (
@@ -279,7 +283,7 @@ export function Chat({
             message={error}
             onRetry={fetchMessages}
             onClose={clearError}
-            retryText="Retry"
+            retryText={t('common.retry')}
           />
         </Box>
       )}
@@ -299,7 +303,7 @@ export function Chat({
             }}
           >
             <Chip
-              label={`${newMessagesCount} nuevo${newMessagesCount > 1 ? 's' : ''} mensaje${newMessagesCount > 1 ? 's' : ''}`}
+              label={t('chat.newMessages', { count: newMessagesCount })}
               onClick={loadNewMessages}
               color="primary"
               sx={{
@@ -315,7 +319,7 @@ export function Chat({
         {messages.length === 0 ? (
           <Box sx={{ textAlign: 'center', py: 4 }}>
             <Typography variant="body2" color="text.secondary">
-              No messages yet. Start the conversation!
+              {t('chat.empty')}
             </Typography>
           </Box>
         ) : (
@@ -401,7 +405,7 @@ export function Chat({
             fullWidth
             multiline
             maxRows={3}
-            placeholder="Type your message..."
+            placeholder={t('chat.placeholder')}
             value={newMessage}
             onChange={handleInputChange}
             onFocus={handleInputFocus}
@@ -439,7 +443,7 @@ export function Chat({
               onClick={() => fetchMessages(false)}
               color="default"
               size="small"
-              title="Refresh messages"
+              title={t('chat.refresh')}
               sx={{
                 borderRadius: 2,
               }}
@@ -450,7 +454,7 @@ export function Chat({
         </Box>
         {enableRealTime && (
           <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block', fontSize: '0.7rem' }}>
-            Real-time updates enabled
+            {t('chat.realtimeEnabled')}
           </Typography>
         )}
       </Box>

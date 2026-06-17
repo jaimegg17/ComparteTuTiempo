@@ -30,14 +30,13 @@ export const useUserProfile = () => {
 
     setProfileLoading(true);
     try {
-      // Obtener token si no lo tenemos
+      // Get a token if we do not have one yet
       let token = accessToken;
       if (!token) {
         token = await getAccessToken();
       }
       
       if (!token) {
-        console.log('No access token available for profile loading');
         return;
       }
 
@@ -51,11 +50,8 @@ export const useUserProfile = () => {
       if (response.ok) {
         const responseData = await response.json();
         setUserProfile(responseData.user);
-      } else {
-        console.error('Failed to load user profile:', response.status);
       }
-    } catch (error) {
-      console.error('Error loading user profile:', error);
+    } catch {
     } finally {
       setProfileLoading(false);
     }
@@ -80,7 +76,7 @@ export const useUserProfile = () => {
     profileLoading,
     loadUserProfile,
     updateUserProfile,
-    // Fallback a datos de Auth0 si no tenemos perfil del backend
+    // Fall back to Auth0 data when the backend profile is not available
     displayName,
     displayEmail,
     displayImage,

@@ -18,7 +18,7 @@ import type { Community } from '@comparte-tu-tiempo/contracts';
 
 export default function AdminOrganizationsPage() {
   const router = useRouter();
-  const { accessToken } = useAuth();
+  const { user, accessToken, isLoading: authLoading } = useAuth();
   const { userProfile, profileLoading } = useUserProfile();
   const [organizations, setOrganizations] = useState<Community[]>([]);
   const [metrics, setMetrics] = useState<AdminMetrics | null>(null);
@@ -90,6 +90,26 @@ export default function AdminOrganizationsPage() {
             Volver a organizaciones
           </Button>
 
+          {(authLoading || profileLoading) ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+              <CircularProgress />
+            </Box>
+          ) : !user ? (
+            <Alert
+              severity="warning"
+              action={
+                <Button color="inherit" size="small" onClick={() => router.push('/api/auth/login?returnTo=/admin/organizations')}>
+                  Iniciar sesión
+                </Button>
+              }
+              sx={{ mb: 2 }}
+            >
+              Necesitas iniciar sesión con una cuenta administradora para acceder a esta pantalla.
+            </Alert>
+          ) : userProfile?.role !== 'ADMIN' ? (
+            <Alert severity="warning" sx={{ mb: 2 }}>Solo un administrador puede acceder a esta pantalla.</Alert>
+          ) : (
+            <>
           <Box
             sx={{
               mb: 3,
@@ -165,15 +185,11 @@ export default function AdminOrganizationsPage() {
 
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-          {userProfile && userProfile.role !== 'ADMIN' && (
-            <Alert severity="warning">Solo un administrador puede acceder a esta pantalla.</Alert>
-          )}
-
           {loading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
               <CircularProgress />
             </Box>
-          ) : userProfile?.role === 'ADMIN' && (
+          ) : (
             <Stack spacing={2.25}>
               {organizations.length === 0 ? (
                 <Box
@@ -266,6 +282,8 @@ export default function AdminOrganizationsPage() {
                 ))
               )}
             </Stack>
+          )}
+            </>
           )}
         </Box>
       </Box>

@@ -86,7 +86,7 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
                 Notificaciones relevantes
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-                Este ajuste es ligero y está pensado para que puedas demostrar personalización de la experiencia sin introducir complejidad excesiva.
+                Elige qué avisos quieres destacar y revisa las actualizaciones importantes sobre tus intercambios, eventos y comunidades.
               </Typography>
             </Box>
           </Stack>
@@ -136,7 +136,7 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
           <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} spacing={1.5} sx={{ mb: 1.5 }}>
             <Box>
               <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
-                Historial reciente
+                Historial de notificaciones
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {unreadCount > 0 ? `${unreadCount} notificaciones sin leer` : 'No tienes notificaciones sin leer'}
@@ -150,7 +150,7 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
           {notifications.length === 0 ? (
             <Box sx={{ p: 2, borderRadius: 2.5, bgcolor: 'rgba(248,250,252,0.88)', border: '1px solid rgba(148,163,184,0.14)' }}>
               <Typography variant="body2" color="text.secondary">
-                Todavía no hay notificaciones persistentes para esta cuenta.
+                Todavía no hay notificaciones para esta cuenta. Las nuevas solicitudes, eventos e intercambios aparecerán aquí.
               </Typography>
             </Box>
           ) : (

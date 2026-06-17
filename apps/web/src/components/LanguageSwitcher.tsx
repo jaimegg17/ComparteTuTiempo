@@ -11,7 +11,7 @@ const languageOptions = [
 ];
 
 export function LanguageSwitcher() {
-  const { changeLanguage, currentLanguage } = useTranslation();
+  const { t, changeLanguage, currentLanguage } = useTranslation();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -100,7 +100,7 @@ export function LanguageSwitcher() {
             <ListItemIcon sx={{ minWidth: 30 }}>{option.flag}</ListItemIcon>
             <ListItemText
               primary={option.label}
-              secondary={option.code === current.code ? "Idioma actual" : undefined}
+              secondary={option.code === current.code ? t('languageSwitcher.current') : undefined}
               primaryTypographyProps={{ fontSize: 14, fontWeight: 600 }}
               secondaryTypographyProps={{ fontSize: 12 }}
             />

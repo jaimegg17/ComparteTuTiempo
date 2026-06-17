@@ -139,7 +139,15 @@
     "languages": "Languages",
     "music": "Music",
     "sports": "Sports",
-    "education": "Education"
+    "education": "Education",
+    "description": "Explore a few highlighted areas to start discovering services, people and exchange opportunities with more context.",
+    "viewServices": "View services",
+    "descriptions": {
+      "languages": "Classes, conversation and support to learn languages",
+      "music": "Instruments, singing, production and musical creativity",
+      "sports": "Training, wellbeing and shared physical activity",
+      "education": "Academic support, guided study and practical learning"
+    }
   },
   "testimonials": {
     "title": "Rate your experience",
@@ -157,7 +165,8 @@
       "text": "I love how customizable this app is. I can really make it work for me, no matter what project I'm working on.",
       "author": "Bob Johnson",
       "role": "Developer"
-    }
+    },
+    "description": "Feedback from people who have already used the platform to share knowledge, everyday support and quality time."
   },
   "services": {
     "title": "Services",
@@ -209,7 +218,9 @@
       "availability": "Availability",
       "language": "Language",
       "clear": "Clear Filters",
-      "apply": "Apply Filters"
+      "apply": "Apply Filters",
+      "active": "active",
+      "favoritesOnly": "Favorites only"
     },
     "categories": {
       "education": "Education",
@@ -275,7 +286,8 @@
         "subtitle": "Drag and drop an image or click to browse (max 10MB)",
         "button": "Choose Image",
         "help": "Dimensions: min 50x50px, max 6000x6000px. Max size: 10MB."
-      }
+      },
+      "communityNotice": "This service will be published inside the community “{{name}}”."
     },
     "card": {
       "request_service": "Request Service",
@@ -303,7 +315,21 @@
         "rating": "Rating",
         "reviews": "Reviews",
         "exchanges": "Completed Exchanges"
-      }
+      },
+      "notFound": "Service not found.",
+      "backToServices": "Back to services",
+      "requestOverline": "REQUEST DETAIL",
+      "serviceOverline": "SERVICE DETAIL",
+      "requestIntro": "Review the published need, approximate location and reply only if you can really help.",
+      "serviceIntro": "Review the scope, approximate location and ratings before sending a request.",
+      "loginHintRequest": "You can review all information before deciding. When you want to reply to this request, we will take you to login.",
+      "loginHintService": "You can review all information before deciding. When you want to request this service, we will take you to login.",
+      "provider": "Provider",
+      "requester": "Requester",
+      "noLocation": "No location",
+      "viewProfile": "View profile",
+      "skills": "SKILLS",
+      "exchangesCompleted": "completed exchanges"
     },
     "not_found": "No services found",
     "error": "Error loading services",
@@ -311,7 +337,50 @@
       "created": "Service created successfully",
       "updated": "Service updated successfully",
       "deleted": "Service deleted successfully"
-    }
+    },
+    "viewModes": {
+      "list": "List",
+      "map": "Map"
+    },
+    "map": {
+      "unavailable": "Google Maps is not available right now. We show a basic OpenStreetMap map so browsing is not blocked.",
+      "openStreetMapTitle": "OpenStreetMap map"
+    },
+    "summary": {
+      "title": "Summary",
+      "services": "services",
+      "requests": "requests"
+    },
+    "intent": {
+      "offers": "Services",
+      "requests": "Requests"
+    },
+    "favorites": {
+      "save": "Save to favorites",
+      "remove": "Remove from favorites",
+      "saved": "Favorite"
+    },
+    "actions": {
+      "createRequest": "Create request",
+      "newPublication": "New publication",
+      "editRequest": "Edit request",
+      "editService": "Edit service",
+      "ownRequest": "Your request",
+      "ownService": "Your service",
+      "loginToHelp": "Log in to help",
+      "loginToRequest": "Log in to request",
+      "canHelp": "I can help",
+      "requestExchange": "Request exchange",
+      "requestHelper": "If you can cover this need, send an initial message explaining how you could help and under what conditions.",
+      "serviceHelper": "Review the description before sending your request. You can add an initial message for context.",
+      "inactiveRequestHelper": "This request is no longer active. You can keep exploring other needs published on the platform.",
+      "inactiveServiceHelper": "This service is not available right now, but you can keep exploring other alternatives.",
+      "estimatedExchangeTime": "Estimated exchange time",
+      "delete": "Delete"
+    },
+    "searchByName": "Search by name or description...",
+    "deleteConfirm": "Are you sure you want to delete this publication? This action cannot be undone.",
+    "deleteError": "Error deleting publication"
   },
   "exchanges": {
     "title": "My Exchanges",
@@ -352,16 +421,13 @@
     }
   },
   "chat": {
-    "title": "Chat",
+    "exchangeChat": "Exchange chat",
+    "newMessages": "{{count}} new message",
+    "newMessages_plural": "{{count}} new messages",
+    "empty": "No messages yet. Write to clarify availability, details and next steps.",
     "placeholder": "Type your message...",
-    "send": "Send",
-    "typing": "{{name}} is typing...",
-    "online": "Online",
-    "offline": "Offline",
-    "last_seen": "Last seen {{time}}",
-    "no_messages": "No messages yet",
-    "error": "Error loading messages",
-    "success": "Message sent successfully"
+    "refresh": "Refresh messages",
+    "realtimeEnabled": "Automatic updates enabled"
   },
   "ratings": {
     "title": "Ratings",
@@ -425,7 +491,8 @@
   "video": {
     "title": "How does our platform work?",
     "subtitle": "Discover in this video how you can exchange your time for services and unique experiences.",
-    "playButton": "Watch explanatory video"
+    "playButton": "Watch explanatory video",
+    "comingSoon": "Video coming soon"
   },
   "hero": {
     "title": "Share your time",
@@ -618,7 +685,12 @@
       "leave": "Leave community",
       "cancelRequest": "Cancel request",
       "join": "Join community",
-      "privateNotice": "This community is private. Your request must be approved by an owner or administrator.",
+      "joinOrganization": "Join organization",
+      "privateCommunityLoginTitle": "Private community",
+      "privateCommunityLoginDescription": "To access this private community content, sign in and request access.",
+      "privateOrganizationLoginTitle": "Private organization",
+      "privateOrganizationLoginDescription": "To access this private organization content, sign in and request access.",
+      "privateNotice": "This space is private. Your request must be approved by an owner or administrator.",
       "pendingNotice": "Your request is pending review. You can cancel it while you wait.",
       "pendingReview": "You have {{count}} pending requests to review.",
       "loginToRegisterEvent": "Sign in to register for events.",
@@ -634,7 +706,12 @@
       "roleError": "The member role could not be updated.",
       "statusApproved": "Request approved successfully.",
       "statusRejected": "Request rejected successfully.",
-      "statusError": "The request status could not be updated."
+      "statusError": "The request status could not be updated.",
+      "publishService": "Publish service",
+      "publishOrganizationService": "Publish initiative",
+      "requestJoin": "Request to join",
+      "requestJoinOrganization": "Request access",
+      "mustBeMemberToRegisterEvent": "You must belong to the community to register for its events."
     },
     "editPage": {
       "organizationPanel": "Organization management panel",
@@ -674,7 +751,8 @@
       "publishedDescription": "Review, edit or delete events in this space.",
       "empty": "There are no published events yet.",
       "noDescription": "No description",
-      "online": "Online"
+      "online": "Online",
+      "capacityLabel": "Capacity"
     },
     "activity": {
       "title": "Activity / Events",
@@ -691,9 +769,18 @@
       "verifiedOrganization": "Verified organization",
       "pendingOrganization": "Pending organization",
       "members": "{{count}} members",
+      "organizationMembers": "{{count}} participants",
       "events": "{{count}} events",
       "rules": "{{count}} rules",
+      "principles": "{{count}} principles",
+      "resources": "{{count}} resources",
       "created": "Created {{date}}"
+    },
+    "rulesSection": {
+      "title": "Community rules",
+      "description": "Basic guidelines to keep the space useful, kind and safe.",
+      "organizationTitle": "Participation principles",
+      "organizationDescription": "Internal criteria and rules that help the organization operate transparently and safely."
     },
     "resourcesSection": {
       "link": "Link",
@@ -701,6 +788,8 @@
       "image": "Image",
       "title": "Resource board",
       "description": "Links, notes and useful references for the community activity.",
+      "organizationTitle": "Institutional resources",
+      "organizationDescription": "Links, notes and useful materials to better understand the organization's activity.",
       "open": "Open resource",
       "editor": {
         "title": "Resources and announcements board",
@@ -726,7 +815,20 @@
       "approve": "Approve",
       "reject": "Reject",
       "requested": "Requested: {{date}}"
-    }
+    },
+    "services": {
+      "title": "Community services",
+      "description": "Offers and requests published in this space by its members.",
+      "empty": "There are no services associated with this community yet.",
+      "organizationTitle": "Organization initiatives",
+      "organizationDescription": "Offers, requests or activities published in this institutional space.",
+      "organizationEmpty": "There are no initiatives associated with this organization yet."
+    },
+    "verified": "Verified",
+    "pending": "Pending",
+    "rulesCount": "{{count}} rules",
+    "resourcesCount": "{{count}} resources",
+    "join": "Join"
   },
   "organizations": {
     "form": {
@@ -746,6 +848,29 @@
     "new": {
       "loginError": "You need to sign in to request an organization.",
       "submitError": "The organization request could not be submitted."
+    },
+    "list": {
+      "loadError": "Organizations could not be loaded.",
+      "summaryVisible": "Visible organizations",
+      "summaryTopics": "Represented areas",
+      "summaryResults": "Current results",
+      "summaryPending": "Pending requests",
+      "badge": "Verified and under-review entities",
+      "title": "Organizations with a more institutional and trustworthy profile",
+      "subtitle": "Here we bring together associations, NGOs and official groups with more context, governance and trust signals. Approved organizations are shown publicly and new requests go through administrative review.",
+      "request": "Request organization",
+      "review": "Review requests",
+      "whatToExpect": "What to expect here",
+      "expectations": [
+        "Visible organizations with a verification badge once approved.",
+        "Topics and activity areas to quickly identify each entity mission.",
+        "A differentiated request process to maintain a higher level of trust."
+      ],
+      "pendingAlert": "You have {{count}} pending organization requests to review.",
+      "searchPlaceholder": "Search organizations by name, description or topics...",
+      "clearSearch": "Clear search",
+      "emptyTitle": "No organizations match your search",
+      "emptyDescription": "Try another term or request a new organization if it does not exist on the platform yet."
     }
   },
   "faq": {
@@ -800,6 +925,14 @@
           {
             "question": "How should I request a service properly?",
             "answer": "Open the service detail page, review the description, location and duration, and then send a request. If there are logistical details or specific expectations, include a short message to provide context from the start."
+          },
+          {
+            "question": "What is the difference between an offer and a request?",
+            "answer": "An offer is something a person can provide to others, such as classes, technical help or occasional support. A request is a need published by someone looking for help. Both can start an exchange and continue through chat."
+          },
+          {
+            "question": "Why might no requests appear after filtering?",
+            "answer": "The request filter only shows publications marked as needs or help requests. If you combine it with category, location, duration or nearby filters, there may be no matching results. Clear the filters to see all available requests."
           },
           {
             "question": "What makes a service listing feel professional and credible?",
@@ -874,5 +1007,100 @@
         ]
       }
     ]
+  },
+  "exchangesPage": {
+    "states": {
+      "PENDING": "Pending",
+      "CONFIRMED": "Confirmed",
+      "IN_PROGRESS": "In progress",
+      "COMPLETED": "Completed",
+      "REJECTED": "Rejected",
+      "CANCELLED": "Cancelled"
+    },
+    "loadTokenError": "The authentication token could not be obtained",
+    "missingTokenError": "Authentication token is not available",
+    "loadError": "Error loading exchanges",
+    "updateError": "Error updating the exchange",
+    "updateFallback": "The exchange could not be updated",
+    "updated": "Exchange updated to “{{state}}”.",
+    "ratingSubmitted": "Thanks for your rating. We updated the exchange.",
+    "loginWarning": "Sign in to view your requests, manage statuses and follow your active exchanges.",
+    "login": "Sign in",
+    "overline": "EXCHANGE TRACKING",
+    "title": "My exchanges",
+    "subtitle": "Review your requests, confirm next steps and keep track of where each collaboration stands.",
+    "currentView": "Current view",
+    "total": "Total",
+    "pending": "Pending",
+    "inProgress": "In progress",
+    "completed": "Completed",
+    "tabReceived": "Requests sent to you",
+    "tabSent": "Requests you have sent",
+    "tabAll": "Global view of all your exchanges",
+    "emptyTitle": "There are no exchanges in this status",
+    "emptyReceived": "You have not received requests for this filter yet. Publishing clear and complete services usually helps generate more activity.",
+    "emptySent": "You have not sent requests matching this filter yet. You can explore services and try new categories.",
+    "emptyAll": "You have no exchanges matching the current selection. Change tabs or adjust the status to see more activity.",
+    "exploreServices": "Explore services",
+    "filters": {
+      "overline": "FILTER ACTIVITY",
+      "aria": "Exchange types",
+      "all": "All",
+      "received": "Received",
+      "sent": "Sent",
+      "confirmed": "Confirmed"
+    },
+    "card": {
+      "requestedService": "Someone requested this service from you",
+      "sentService": "You requested this service",
+      "openService": "Open service {{title}}",
+      "serviceFallback": "Service",
+      "updated": "Updated",
+      "requestedBy": "Requested by",
+      "offeredBy": "Offered by",
+      "created": "Created on {{date}}",
+      "duration": "{{hours}}h exchange",
+      "initialMessage": "Initial message",
+      "openChat": "Open chat",
+      "viewService": "View service",
+      "accept": "Accept",
+      "reject": "Reject",
+      "start": "Start exchange",
+      "complete": "Complete",
+      "unknownUser": "User"
+    },
+    "detail": {
+      "overline": "EXCHANGE DETAIL",
+      "back": "Back to exchanges",
+      "subtitle": "Your role: {{role}} · Conversation with {{name}}",
+      "roleRequester": "requester",
+      "roleProvider": "provider",
+      "summary": "Summary",
+      "service": "Service",
+      "createdAt": "Created on",
+      "duration": "Duration",
+      "durationValue": "{{hours}} hours",
+      "initialMessage": "Initial message",
+      "participants": "Participants",
+      "requester": "Requester",
+      "provider": "Provider",
+      "you": "You",
+      "chatTitle": "Conversation",
+      "chatSubtitle": "Coordinate the details with {{name}} before confirming or completing the exchange.",
+      "loadError": "Error loading the exchange",
+      "notFound": "The exchange detail could not be loaded"
+    }
+  },
+  "languageSwitcher": {
+    "current": "Current language"
+  },
+  "users": {
+    "profile": {
+      "loadError": "Error loading profile",
+      "notFound": "User not found",
+      "services": "services",
+      "ratings": "ratings",
+      "exchanges": "exchanges"
+    }
   }
 }

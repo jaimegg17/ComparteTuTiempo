@@ -1,6 +1,8 @@
 import { apiClient } from './client';
 import type { Event, EventCreate, EventListResponse, EventUpdate } from '@comparte-tu-tiempo/contracts';
 
+type EventCreateRequest = Omit<EventCreate, 'creatorId'>;
+
 type RawEvent = Omit<Event, 'date' | 'createdAt'> & {
   date: string | Date;
   createdAt: string | Date;
@@ -24,7 +26,7 @@ export const eventsApi = {
     return Array.isArray(response.events) ? response.events.map(normalizeEvent) : [];
   },
 
-  async createEvent(data: EventCreate): Promise<{ event: Event }> {
+  async createEvent(data: EventCreateRequest): Promise<{ event: Event }> {
     const response = await apiClient.post<{ event?: RawEvent }>('/events', data);
     if (!response?.event) {
       throw new Error('No se pudo crear el evento');

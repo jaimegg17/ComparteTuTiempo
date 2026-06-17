@@ -94,16 +94,6 @@ export class UploadController {
   ) {
     const userId = this.getAuthenticatedUserId(req);
 
-    // Log request details for debugging
-    console.log('📤 Upload request received:', {
-      hasFile: !!file,
-      fileName: file?.originalname,
-      fileSize: file?.size,
-      hasUser: !!req.user,
-      userId,
-      authHeader: req.headers?.authorization ? 'Present' : 'Missing',
-    });
-
     if (!file) {
       throw new BadRequestException('No se ha subido ningún archivo. Comprueba el tamaño (máx. 10MB) y vuelve a intentarlo.');
     }

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // ============================================================================
-// ESQUEMAS DE USUARIO
+// USER SCHEMAS
 // ============================================================================
 
 export const UserSchema = z.object({
@@ -19,9 +19,9 @@ export const UserSchema = z.object({
 });
 
 export const UserCreateSchema = z.object({
-  email: z.string().email('Email inválido'),
-  password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
-  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+  email: z.string().email('Invalid email'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  name: z.string().min(2, 'Name must be at least 2 characters'),
   phoneNumber: z.string().optional(),
   location: z.string().optional(),
   bio: z.string().optional(),
@@ -29,16 +29,16 @@ export const UserCreateSchema = z.object({
 });
 
 export const UserUpdateSchema = z.object({
-  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres').optional(),
+  name: z.string().min(2, 'Name must be at least 2 characters').optional(),
   phoneNumber: z.string().optional(),
   location: z.string().optional(),
   bio: z.string().optional(),
   skills: z.array(z.string()).optional(),
-  imageUrl: z.string().url('URL de imagen inválida').optional(),
+  imageUrl: z.string().url('Invalid image URL').optional(),
 });
 
 // ============================================================================
-// TIPOS INFERIDOS
+// INFERRED TYPES
 // ============================================================================
 
 export type User = z.infer<typeof UserSchema>;

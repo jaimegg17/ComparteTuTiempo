@@ -1,0 +1,242 @@
+\chapter{Manual de instalación}\label{anexo:manual_instalacion}
+
+Este anexo recoge los pasos necesarios para poner en marcha el proyecto en un entorno local de desarrollo. Su finalidad es que la instalación no dependa únicamente del autor del TFG, sino que pueda ser reproducida por otra persona siguiendo una secuencia ordenada de requisitos, configuración y comprobaciones.
+
+\section{Introducción}
+
+En este anexo se describe el proceso necesario para instalar y ejecutar \textit{ComparteTuTiempo} en un entorno local de desarrollo. El objetivo de este manual es facilitar que otra persona pueda preparar el proyecto, levantar la base de datos, configurar las variables de entorno y ejecutar tanto el backend como el frontend.
+
+La aplicación está organizada como un monorepo con \texttt{pnpm workspaces}. Dentro del repositorio se encuentran dos aplicaciones principales: el backend, desarrollado con NestJS, y el frontend, desarrollado con Next.js. Además, se utilizan paquetes compartidos para contratos y configuración común.
+
+\section{Requisitos previos}
+
+Antes de instalar el proyecto es necesario disponer de las siguientes herramientas:
+
+\begin{itemize}
+    \item \textbf{Node.js 18 o superior}: necesario para ejecutar las aplicaciones y herramientas del ecosistema JavaScript/TypeScript.
+    \item \textbf{pnpm}: gestor de paquetes utilizado por el monorepo.
+    \item \textbf{Docker Desktop}: necesario para ejecutar PostgreSQL en local mediante contenedores.
+    \item \textbf{Git}: necesario para clonar el repositorio del proyecto.
+    \item \textbf{Cuenta de Auth0}: necesaria para configurar la autenticación.
+    \item \textbf{Cuenta de Cloudinary}: necesaria para la subida de imágenes.
+    \item \textbf{Clave de Google Maps Platform}: necesaria para geolocalización y autocompletado de ubicaciones.
+\end{itemize}
+
+\section{Obtención del código fuente}
+
+El primer paso consiste en clonar el repositorio y acceder a la carpeta raíz del proyecto:
+
+\begin{lstlisting}[language=bash, caption={Clonación del repositorio}, label={lst:manual_instalacion_clone}]
+git clone <url-del-repositorio>
+cd ComparteTuTiempo
+\end{lstlisting}
+
+Una vez dentro del proyecto, se instalan las dependencias de todos los paquetes del monorepo:
+
+\begin{lstlisting}[language=bash, caption={Instalación de dependencias}, label={lst:manual_instalacion_dependencias}]
+pnpm install
+\end{lstlisting}
+
+\section{Configuración de variables de entorno}
+
+El proyecto requiere configurar variables de entorno tanto para el backend como para el frontend.
+
+\subsection{Variables del backend}
+
+En primer lugar, se debe crear el archivo \texttt{apps/api/.env} a partir del archivo de ejemplo:
+
+\begin{lstlisting}[language=bash, caption={Creación del archivo de entorno del backend}, label={lst:manual_instalacion_env_api}]
+cp apps/api/env.example apps/api/.env
+\end{lstlisting}
+
+Las variables principales del backend son las siguientes:
+
+\begin{table}[htbp]
+\centering
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{|p{4.5cm}|p{8cm}|}
+\hline
+\textbf{Variable} & \textbf{Descripción} \\ \hline
+\texttt{DATABASE\_URL} & Cadena de conexión principal a PostgreSQL. \\ \hline
+\texttt{DIRECT\_URL} & Cadena de conexión directa utilizada por Prisma. \\ \hline
+\texttt{PORT} & Puerto en el que se ejecutará la API. Por defecto, \texttt{3001}. \\ \hline
+\texttt{AUTH0\_DOMAIN} & Dominio del tenant de Auth0. \\ \hline
+\texttt{AUTH0\_CLIENT\_ID} & Identificador de cliente de Auth0. \\ \hline
+\texttt{AUTH0\_CLIENT\_SECRET} & Secreto del cliente de Auth0. \\ \hline
+\texttt{AUTH0\_AUDIENCE} & Audiencia configurada para la API protegida. \\ \hline
+\texttt{FRONTEND\_URL} & URL del frontend autorizado para CORS. \\ \hline
+\texttt{CLOUDINARY\_CLOUD\_NAME} & Nombre de la cuenta de Cloudinary. \\ \hline
+\texttt{CLOUDINARY\_API\_KEY} & Clave API de Cloudinary. \\ \hline
+\texttt{CLOUDINARY\_API\_SECRET} & Secreto API de Cloudinary. \\ \hline
+\texttt{GOOGLE\_MAPS\_API\_KEY} & Clave de Google Maps utilizada por el backend. \\ \hline
+\end{tabular}
+\end{adjustbox}
+\caption{Variables de entorno principales del backend}
+\label{tab:variables_entorno_backend}
+\end{table}
+
+Para ejecución local, la configuración de base de datos por defecto es:
+
+\begin{lstlisting}[language=bash, caption={Variables de base de datos local}, label={lst:manual_instalacion_database_env}]
+DATABASE_URL="postgresql://postgres:postgres123@localhost:5432/comparte_tiempo"
+DIRECT_URL="postgresql://postgres:postgres123@localhost:5432/comparte_tiempo"
+\end{lstlisting}
+
+\subsection{Variables del frontend}
+
+De forma similar, se debe crear el archivo \texttt{apps/web/.env.local} a partir del archivo de ejemplo:
+
+\begin{lstlisting}[language=bash, caption={Creación del archivo de entorno del frontend}, label={lst:manual_instalacion_env_web}]
+cp apps/web/env.example apps/web/.env.local
+\end{lstlisting}
+
+Las variables principales del frontend son las siguientes:
+
+\begin{table}[htbp]
+\centering
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{|p{5cm}|p{7.5cm}|}
+\hline
+\textbf{Variable} & \textbf{Descripción} \\ \hline
+\texttt{NEXT\_PUBLIC\_API\_URL} & URL base de la API consumida por el frontend. \\ \hline
+\texttt{AUTH0\_SECRET} & Secreto utilizado por Auth0 en la aplicación web. \\ \hline
+\texttt{AUTH0\_BASE\_URL} & URL base del frontend. En local, \texttt{http://localhost:3000}. \\ \hline
+\texttt{AUTH0\_ISSUER\_BASE\_URL} & URL del tenant de Auth0. \\ \hline
+\texttt{AUTH0\_CLIENT\_ID} & Identificador de cliente de Auth0 para la aplicación web. \\ \hline
+\texttt{AUTH0\_CLIENT\_SECRET} & Secreto del cliente de Auth0 para la aplicación web. \\ \hline
+\texttt{AUTH0\_AUDIENCE} & Audiencia de la API protegida. \\ \hline
+\texttt{NEXT\_PUBLIC\_GOOGLE\_MAPS\_API\_KEY} & Clave pública de Google Maps utilizada por el frontend. \\ \hline
+\end{tabular}
+\end{adjustbox}
+\caption{Variables de entorno principales del frontend}
+\label{tab:variables_entorno_frontend}
+\end{table}
+
+\section{Configuración de la base de datos}
+
+La base de datos se ejecuta mediante Docker usando PostgreSQL. Para levantar el contenedor se utiliza:
+
+\begin{lstlisting}[language=bash, caption={Arranque de PostgreSQL con Docker}, label={lst:manual_instalacion_db_up}]
+pnpm db:up
+\end{lstlisting}
+
+Este comando levanta un contenedor PostgreSQL en el puerto \texttt{5432}, con la base de datos \texttt{comparte\_tiempo} y el usuario \texttt{postgres}.
+
+Una vez iniciada la base de datos, se genera el cliente de Prisma:
+
+\begin{lstlisting}[language=bash, caption={Generación del cliente Prisma}, label={lst:manual_instalacion_prisma_generate}]
+pnpm --filter @comparte-tu-tiempo/api db:generate
+\end{lstlisting}
+
+Después, se aplican las migraciones:
+
+\begin{lstlisting}[language=bash, caption={Ejecución de migraciones}, label={lst:manual_instalacion_migrate}]
+pnpm --filter @comparte-tu-tiempo/api db:migrate
+\end{lstlisting}
+
+En caso de necesitar datos iniciales, se puede ejecutar el seed:
+
+\begin{lstlisting}[language=bash, caption={Ejecución opcional de seed}, label={lst:manual_instalacion_seed}]
+pnpm --filter @comparte-tu-tiempo/api db:seed
+\end{lstlisting}
+
+\section{Ejecución de la aplicación}
+
+Una vez instaladas las dependencias, configuradas las variables de entorno y preparada la base de datos, se puede ejecutar el proyecto completo con:
+
+\begin{lstlisting}[language=bash, caption={Ejecución completa del monorepo}, label={lst:manual_instalacion_run_all}]
+pnpm dev
+\end{lstlisting}
+
+Este comando ejecuta todas las aplicaciones del monorepo. También es posible ejecutar backend y frontend por separado:
+
+\begin{lstlisting}[language=bash, caption={Ejecución por separado de backend y frontend}, label={lst:manual_instalacion_run_separado}]
+pnpm --filter @comparte-tu-tiempo/api dev
+pnpm --filter @comparte-tu-tiempo/web dev
+\end{lstlisting}
+
+Una vez ejecutada la aplicación, los servicios quedan disponibles en las siguientes URLs:
+
+\begin{itemize}
+    \item Frontend: \texttt{http://localhost:3000}
+    \item API: \texttt{http://localhost:3001/api}
+    \item Swagger: \texttt{http://localhost:3001/docs}
+    \item PostgreSQL: \texttt{localhost:5432}
+\end{itemize}
+
+\section{Comprobación de funcionamiento}
+
+Para comprobar que el entorno funciona correctamente se recomienda seguir estos pasos:
+
+\begin{enumerate}
+    \item Acceder al frontend en \texttt{http://localhost:3000}.
+    \item Comprobar que la página principal carga correctamente.
+    \item Iniciar sesión mediante Auth0.
+    \item Acceder a la documentación Swagger en \texttt{http://localhost:3001/docs}.
+    \item Comprobar que el endpoint de salud de la API responde correctamente.
+    \item Crear o consultar servicios desde la interfaz web.
+\end{enumerate}
+
+\section{Ejecución de pruebas}
+
+El proyecto incluye pruebas automáticas tanto en backend como en frontend. Para ejecutar todas las pruebas del monorepo se utiliza:
+
+\begin{lstlisting}[language=bash, caption={Ejecución de pruebas del monorepo}, label={lst:manual_instalacion_tests}]
+pnpm test
+\end{lstlisting}
+
+También se pueden ejecutar las pruebas por aplicación:
+
+\begin{lstlisting}[language=bash, caption={Ejecución de pruebas por aplicación}, label={lst:manual_instalacion_tests_apps}]
+pnpm --filter @comparte-tu-tiempo/api test
+pnpm --filter @comparte-tu-tiempo/web test
+\end{lstlisting}
+
+Para comprobar los tipos de TypeScript:
+
+\begin{lstlisting}[language=bash, caption={Comprobación de tipos}, label={lst:manual_instalacion_typecheck}]
+pnpm typecheck
+\end{lstlisting}
+
+\section{Problemas frecuentes}
+
+\subsection{El backend no conecta con la base de datos}
+
+Debe comprobarse que Docker esté ejecutándose y que PostgreSQL se haya levantado correctamente con:
+
+\begin{lstlisting}[language=bash]
+pnpm db:up
+\end{lstlisting}
+
+También conviene revisar que \texttt{DATABASE\_URL} y \texttt{DIRECT\_URL} coinciden con la configuración del \texttt{docker-compose.yml}.
+
+\subsection{Errores de autenticación con Auth0}
+
+Si el inicio de sesión no funciona, se deben revisar las URLs configuradas en Auth0, especialmente:
+
+\begin{itemize}
+    \item Allowed Callback URLs.
+    \item Allowed Logout URLs.
+    \item Allowed Web Origins.
+    \item Audience configurada para la API.
+\end{itemize}
+
+En local, normalmente deben incluirse URLs como \texttt{http://localhost:3000} y \texttt{http://localhost:3001/api}.
+
+\subsection{No funciona Google Maps o el autocompletado}
+
+Debe comprobarse que las claves \texttt{GOOGLE\_MAPS\_API\_KEY} y \texttt{NEXT\_PUBLIC\_GOOGLE\_MAPS\_API\_KEY} estén configuradas y que las APIs necesarias estén habilitadas en Google Cloud.
+
+\subsection{Problemas con imágenes}
+
+Si la subida de imágenes falla, se deben revisar las credenciales de Cloudinary:
+
+\begin{itemize}
+    \item \texttt{CLOUDINARY\_CLOUD\_NAME}
+    \item \texttt{CLOUDINARY\_API\_KEY}
+    \item \texttt{CLOUDINARY\_API\_SECRET}
+\end{itemize}
+
+\section{Conclusión}
+
+Siguiendo los pasos descritos en este manual, es posible preparar un entorno local completo para ejecutar \textit{ComparteTuTiempo}. La combinación de pnpm, Docker, PostgreSQL, Prisma, NestJS y Next.js permite levantar la plataforma de forma relativamente sencilla, manteniendo separados los distintos componentes del sistema y facilitando tanto el desarrollo como la validación del proyecto.

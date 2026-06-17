@@ -9,7 +9,7 @@ interface Section {
   titleKey: string;
   image: string;
   category: string;
-  subtitle: string;
+  subtitleKey: string;
 }
 
 export function FindGeneralSections() {
@@ -21,28 +21,28 @@ export function FindGeneralSections() {
       titleKey: "sections.languages",
       image: "/images/sections/idiomas.jpg",
       category: "EDUCACION",
-      subtitle: "Clases, conversación y apoyo para aprender idiomas",
+      subtitleKey: "sections.descriptions.languages",
     },
     {
       id: "music",
       titleKey: "sections.music",
       image: "/images/sections/musica.jpg",
       category: "ARTE",
-      subtitle: "Instrumentos, canto, producción y creatividad musical",
+      subtitleKey: "sections.descriptions.music",
     },
     {
       id: "sports",
       titleKey: "sections.sports",
       image: "/images/sections/deporte.jpg",
       category: "DEPORTES",
-      subtitle: "Entrenamiento, bienestar y actividad física compartida",
+      subtitleKey: "sections.descriptions.sports",
     },
     {
       id: "education",
       titleKey: "sections.education",
       image: "/images/sections/estudios.jpg",
       category: "EDUCACION",
-      subtitle: "Refuerzo académico, estudio guiado y formación práctica",
+      subtitleKey: "sections.descriptions.education",
     },
   ];
 
@@ -64,7 +64,7 @@ export function FindGeneralSections() {
           {t("sections.title")}
         </Typography>
         <Typography sx={{ color: "text.secondary", maxWidth: 760, lineHeight: 1.7, pl: 2.5 }}>
-          Explora algunas áreas destacadas para empezar a descubrir servicios, personas y oportunidades de intercambio con más contexto.
+          {t("sections.description")}
         </Typography>
       </Box>
 
@@ -145,7 +145,7 @@ export function FindGeneralSections() {
                     textTransform: "uppercase",
                   }}
                 >
-                  Ver servicios
+                  {t("sections.viewServices")}
                 </Typography>
                 <Typography
                   variant="h6"
@@ -165,7 +165,7 @@ export function FindGeneralSections() {
                     color: "rgba(255,255,255,0.88)",
                   }}
                 >
-                  {section.subtitle}
+                  {t(section.subtitleKey)}
                 </Typography>
               </Box>
             </Box>

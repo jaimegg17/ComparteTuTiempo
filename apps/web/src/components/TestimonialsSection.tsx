@@ -64,7 +64,7 @@ export function TestimonialsSection() {
             {t("testimonials.title")}
           </Typography>
           <Typography sx={{ color: "text.secondary", maxWidth: 760, lineHeight: 1.7, pl: 2.5 }}>
-            Opiniones de personas que ya han usado la plataforma para compartir conocimientos, apoyo cotidiano y tiempo de calidad.
+            {t("testimonials.description")}
           </Typography>
         </Box>
 

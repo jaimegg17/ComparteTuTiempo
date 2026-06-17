@@ -55,14 +55,18 @@ export default function CommunitiesPage() {
         pageSize,
         kind: 'COMMUNITY' as const,
         creatorId: activeTab === 1 && user?.sub ? user.sub : undefined,
-        isPrivate:
-          activeTab === 2 ? false : visibilityFilter === 'all' ? undefined : visibilityFilter === 'private',
       };
 
       const response = await communitiesApi.getCommunities(query);
 
-      setCommunities(response.communities);
-      setTotal(response.total);
+      const visibilityFilteredCommunities = response.communities.filter((community) => {
+        if (visibilityFilter === 'public') return !community.isPrivate;
+        if (visibilityFilter === 'private') return community.isPrivate;
+        return true;
+      });
+
+      setCommunities(visibilityFilteredCommunities);
+      setTotal(visibilityFilteredCommunities.length);
     }, ERROR_MESSAGES.NETWORK_ERROR);
   }, [handleAsyncOperation, accessToken, page, pageSize, activeTab, user?.sub, visibilityFilter]);
 
@@ -92,6 +96,11 @@ export default function CommunitiesPage() {
   }, [communities, searchTerm]);
 
   const handleJoinCommunity = (community: Community) => {
+    if (!user?.sub) {
+      router.push(`/api/auth/login?returnTo=/communities/${community.id}`);
+      return;
+    }
+
     router.push(`/communities/${community.id}?action=join`);
   };
 
@@ -156,10 +165,9 @@ export default function CommunitiesPage() {
                   label={t("communities.tabs.my_communities")} 
                   disabled={!user?.sub}
                 />
-                <Tab label={t("communities.tabs.public")} />
               </Tabs>
               
-              {/* Número de resultados y botón */}
+              {/* Result count and action button */}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
                 <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '18px' }}>
                   {loading
@@ -216,7 +224,7 @@ export default function CommunitiesPage() {
                     setVisibilityFilter(event.target.value as VisibilityFilter);
                     setPage(1);
                   }}
-                  disabled={activeTab === 2}
+
                 >
                   <MenuItem value="all">{t('communities.tabs.all')}</MenuItem>
                   <MenuItem value="public">{t('communities.public')}</MenuItem>
@@ -243,7 +251,7 @@ export default function CommunitiesPage() {
                     key={community.id}
                     community={community}
                     onJoin={handleJoinCommunity}
-                    showJoinAction={Boolean(user?.sub && community.creatorId !== user.sub)}
+                    showJoinAction={community.creatorId !== user?.sub}
                   />
                 ))}
               </Box>

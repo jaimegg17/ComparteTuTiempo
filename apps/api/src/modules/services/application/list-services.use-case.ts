@@ -25,7 +25,7 @@ export class ListServicesUseCase {
   async execute(input: ListServicesInput): Promise<ListServicesOutput> {
     const { query } = input;
 
-    // Obtener servicios usando el repositorio
+    // Fetch services through the repository
     const result = await this.serviceRepository.list(query);
 
     return {

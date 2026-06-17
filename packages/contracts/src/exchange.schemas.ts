@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // ============================================================================
-// ESQUEMAS DE EXCHANGE
+// EXCHANGE SCHEMAS
 // ============================================================================
 
 export const ExchangeSchema = z.object({
@@ -11,7 +11,7 @@ export const ExchangeSchema = z.object({
   serviceId: z.number(),
   date: z.date(),
   state: z.enum(['PENDING', 'CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'DISPUTED']),
-  exchangedTime: z.number().positive('El tiempo intercambiado debe ser positivo'), // Will be converted to Decimal in Prisma
+  exchangedTime: z.number().positive('Exchanged time must be positive'), // Will be converted to Decimal in Prisma
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -21,13 +21,13 @@ export const ExchangeCreateSchema = z.object({
   offeredById: z.string(),   // Auth0 ID as string
   serviceId: z.number(),
   date: z.date(),
-  exchangedTime: z.number().positive('El tiempo intercambiado debe ser positivo'),
+  exchangedTime: z.number().positive('Exchanged time must be positive'),
 });
 
 export const ExchangeUpdateSchema = z.object({
   date: z.date().optional(),
   state: z.enum(['PENDING', 'CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'DISPUTED']).optional(),
-  exchangedTime: z.number().positive('El tiempo intercambiado debe ser positivo').optional(),
+  exchangedTime: z.number().positive('Exchanged time must be positive').optional(),
 });
 
 export const ExchangeListQuerySchema = z.object({
@@ -35,8 +35,8 @@ export const ExchangeListQuerySchema = z.object({
   offeredById: z.string().optional(),   // Auth0 ID as string
   serviceId: z.number().optional(),
   state: z.enum(['PENDING', 'CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'DISPUTED']).optional(),
-  page: z.number().min(1, 'La página debe ser mayor a 0').default(1),
-  pageSize: z.number().min(1, 'El tamaño de página debe ser mayor a 0').max(100, 'El tamaño de página no puede exceder 100').default(20),
+  page: z.number().min(1, 'Page must be greater than 0').default(1),
+  pageSize: z.number().min(1, 'Page size must be greater than 0').max(100, 'Page size cannot exceed 100').default(20),
 });
 
 export const ExchangeListResponseSchema = z.object({
@@ -48,7 +48,7 @@ export const ExchangeListResponseSchema = z.object({
 });
 
 // ============================================================================
-// TIPOS INFERIDOS
+// INFERRED TYPES
 // ============================================================================
 
 export type Exchange = z.infer<typeof ExchangeSchema>;

@@ -26,12 +26,6 @@ export const uploadApi = {
     const formData = new FormData();
     formData.append('image', file);
 
-    console.log('📤 Uploading image:', {
-      fileName: file.name,
-      fileSize: file.size,
-      fileType: file.type,
-    });
-
     return apiClient.post<UploadImageResponse>('/upload/image', formData, true);
   },
 

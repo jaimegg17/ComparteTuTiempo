@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useRouter } from 'next/router';
-import { Typography, Box, CircularProgress, Button, Tabs, Tab, Drawer, IconButton, Chip, Paper, Stack } from '@mui/material';
+import { Typography, Box, CircularProgress, Button, Tabs, Tab, Drawer, IconButton, Chip, Paper, Stack, Alert, TextField, InputAdornment } from '@mui/material';
 import { Layout } from '@/components/Layout';
 import { ServiceCard } from '@/components/ServiceCard';
 import { FilterSidebar } from '@/components/filters/FilterSidebar';
@@ -13,7 +13,7 @@ import { useUser } from '@auth0/nextjs-auth0/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useFavoriteServices } from '@/hooks/useFavoriteServices';
 import Script from 'next/script';
-import { FilterListRounded, CloseRounded, MapRounded, ViewListRounded, PlaceRounded } from '@mui/icons-material';
+import { FilterListRounded, CloseRounded, MapRounded, ViewListRounded, PlaceRounded, SearchRounded } from '@mui/icons-material';
 import { buildApiUrl } from '@/shared/api/config';
 
 type MapCenter = { lat: number; lng: number };
@@ -97,7 +97,7 @@ export default function ServicesPage() {
   const router = useRouter();
   const { t } = useTranslation();
   const { user } = useUser();
-  const { favoriteIds, favoritesCount } = useFavoriteServices(user?.sub);
+  const { favoriteIds, favoritesCount, isFavorite, toggleFavorite } = useFavoriteServices(user?.sub);
   const { userProfile } = useUserProfile();
   const { accessToken } = useAuth();
   const [services, setServices] = useState<Service[]>([]);
@@ -106,7 +106,7 @@ export default function ServicesPage() {
   const { showToast } = useToast();
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   
-  // Filtros
+  // Filters
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [location, setLocation] = useState('');
@@ -122,13 +122,14 @@ export default function ServicesPage() {
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [mapsLoaded, setMapsLoaded] = useState(false);
+  const [mapsUnavailable, setMapsUnavailable] = useState(false);
   const [mapCenter, setMapCenter] = useState<MapCenter>({ lat: 40.4168, lng: -3.7038 });
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<GoogleMapInstance | null>(null);
   const markersRef = useRef<GoogleMarkerInstance[]>([]);
   const infoWindowRef = useRef<GoogleInfoWindowInstance | null>(null);
 
-  // Estados de colapso para cada filtro
+  // Collapse state for each filter
   const [openCategories, setOpenCategories] = useState(false);
   const [openLocation, setOpenLocation] = useState(false);
   const [openType, setOpenType] = useState(false);
@@ -155,7 +156,7 @@ export default function ServicesPage() {
     }
   }, [router.isReady, router.query.category, router.query.intent, selectedCategory, selectedIntent, categories]);
   
-  // Mapping functions for display
+  // Display mapping functions
   const getCategoryDisplayName = useCallback((category: string) => {
     const categoryMap: Record<string, string> = {
       'EDUCACION': t('services.categories.education'),
@@ -208,9 +209,10 @@ export default function ServicesPage() {
       if (q) params.append('q', q);
       if (cat) params.append('category', cat);
       if (loc) params.append('location', loc);
-      // El backend filtra minPrice/maxPrice por créditos, no por duración.
-      // La duración se filtra abajo en cliente para evitar excluir resultados por precio.
+      // The backend filters minPrice/maxPrice by credits, not by duration.
+      // Duration is filtered below on the client to avoid excluding results by price.
       if (typ) params.append('type', typ);
+      params.append('pageSize', '48');
       if (intent !== 'ALL') params.append('intent', intent);
       if (nearbyEnabled && lat !== null && lng !== null) {
         params.append('nearLat', lat.toString());
@@ -302,6 +304,39 @@ export default function ServicesPage() {
     fetchServices(emptyFilters);
   };
 
+  const geocodeSearchLocation = async (): Promise<MapCenter | null> => {
+    const query = location.trim() || userProfile?.location?.trim();
+    if (!query) return mapCenter;
+
+    const googleObj = typeof window !== 'undefined' ? window.google : undefined;
+    if (googleObj?.maps?.Geocoder) {
+      const geocoder = new googleObj.maps.Geocoder();
+      const googleResult = await new Promise<MapCenter | null>((resolve) => {
+        geocoder.geocode({ address: query }, (results: GoogleGeocoderResult[], status: string) => {
+          if (status === 'OK' && results[0]?.geometry?.location) {
+            resolve({ lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng() });
+          } else {
+            resolve(null);
+          }
+        });
+      });
+      if (googleResult) return googleResult;
+    }
+
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`);
+      const data = await response.json() as Array<{ lat?: string; lon?: string }>;
+      const first = data[0];
+      if (first?.lat && first?.lon) {
+        return { lat: Number(first.lat), lng: Number(first.lon) };
+      }
+    } catch {
+      return null;
+    }
+
+    return null;
+  };
+
   const handleUseMyLocation = () => {
     if (!navigator.geolocation) {
       showToast({ message: 'Tu navegador no soporta geolocalización.', severity: 'warning' });
@@ -334,10 +369,19 @@ export default function ServicesPage() {
     fetchServices({ nearLat: null, nearLng: null, useNearby: false });
   };
 
-  const handleRadiusChange = (newRadius: number) => {
+  const handleRadiusChange = async (newRadius: number) => {
     setRadiusKm(newRadius);
     if (useNearby && nearLat !== null && nearLng !== null) {
       fetchServices({ radiusKm: newRadius, nearLat, nearLng, useNearby: true });
+      return;
+    }
+
+    const geocoded = await geocodeSearchLocation();
+    if (geocoded) {
+      setNearLat(geocoded.lat);
+      setNearLng(geocoded.lng);
+      setUseNearby(true);
+      fetchServices({ radiusKm: newRadius, nearLat: geocoded.lat, nearLng: geocoded.lng, useNearby: true });
     }
   };
 
@@ -360,12 +404,12 @@ export default function ServicesPage() {
   };
 
   const toggleCategory = (cat: string) => {
-    // Si ya está seleccionada, la deseleccionamos; si no, la seleccionamos
+    // Toggle selected state
     setSelectedCategory(prev => prev === cat ? '' : cat);
   };
 
   const toggleType = (type: string) => {
-    // Si ya está seleccionado, lo deseleccionamos; si no, lo seleccionamos
+    // Toggle selected state
     setSelectedType(prev => prev === type ? '' : type);
   };
 
@@ -436,6 +480,25 @@ export default function ServicesPage() {
     [visibleServices],
   );
 
+  const fallbackMapMarkers = useMemo(() => {
+    if (!servicesWithCoordinates.length) return [];
+    const lats = servicesWithCoordinates.map((service) => service.latitude as number);
+    const lngs = servicesWithCoordinates.map((service) => service.longitude as number);
+    const minLat = Math.min(...lats);
+    const maxLat = Math.max(...lats);
+    const minLng = Math.min(...lngs);
+    const maxLng = Math.max(...lngs);
+    const latSpan = Math.max(maxLat - minLat, 0.01);
+    const lngSpan = Math.max(maxLng - minLng, 0.01);
+
+    return servicesWithCoordinates.map((service, index) => ({
+      service,
+      index,
+      left: 8 + (((service.longitude as number) - minLng) / lngSpan) * 84,
+      top: 8 + ((maxLat - (service.latitude as number)) / latSpan) * 84,
+    }));
+  }, [servicesWithCoordinates]);
+
   useEffect(() => {
     if (useNearby && nearLat !== null && nearLng !== null) {
       setMapCenter({ lat: nearLat, lng: nearLng });
@@ -464,7 +527,22 @@ export default function ServicesPage() {
   }, [mapsLoaded, userProfile?.location, useNearby, nearLat, nearLng]);
 
   useEffect(() => {
-    if (viewMode !== 'map' || !mapsLoaded || !mapContainerRef.current || typeof window === 'undefined') return;
+    if (typeof window !== 'undefined' && window.google?.maps) {
+      setMapsLoaded(true);
+      setMapsUnavailable(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (viewMode === 'map' && googleMapsApiKey && !mapsLoaded) {
+      setMapsUnavailable(false);
+      const timeout = window.setTimeout(() => setMapsUnavailable(true), 5000);
+      return () => window.clearTimeout(timeout);
+    }
+  }, [viewMode, googleMapsApiKey, mapsLoaded]);
+
+  useEffect(() => {
+    if (viewMode !== 'map' || mapsUnavailable || !mapsLoaded || !mapContainerRef.current || typeof window === 'undefined') return;
 
     const googleObj = window.google;
     if (!googleObj?.maps) return;
@@ -541,15 +619,20 @@ export default function ServicesPage() {
       map.setCenter(mapCenter);
       map.setZoom(useNearby ? 12 : 6);
     }
-  }, [viewMode, mapsLoaded, servicesWithCoordinates, mapCenter, useNearby, nearLat, nearLng, getServiceMapPopupContent]);
+  }, [viewMode, mapsUnavailable, mapsLoaded, servicesWithCoordinates, mapCenter, useNearby, nearLat, nearLng, getServiceMapPopupContent]);
 
   return (
     <Layout>
       {googleMapsApiKey && (
         <Script
-          src={`https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}`}
+          id="google-maps-js"
+          src={`https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&libraries=places&loading=async`}
           strategy="afterInteractive"
-          onLoad={() => setMapsLoaded(true)}
+          onLoad={() => {
+            setMapsLoaded(true);
+            setMapsUnavailable(false);
+          }}
+          onError={() => setMapsUnavailable(true)}
         />
       )}
       <Box sx={{ bgcolor: '#f5f5f5', minHeight: '100%', py: 4 }}>
@@ -680,28 +763,42 @@ export default function ServicesPage() {
             >
               <Stack spacing={1.5}>
                 <Stack direction={{ xs: 'column', lg: 'row' }} spacing={1.5} justifyContent="space-between" alignItems={{ xs: 'stretch', lg: 'center' }}>
-                  <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ rowGap: 1 }}>
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} useFlexGap flexWrap="wrap" sx={{ rowGap: 1, flex: 1 }}>
+                    <TextField
+                      value={searchTerm}
+                      onChange={(event) => setSearchTerm(event.target.value)}
+                      placeholder={t('services.searchByName')}
+                      size="small"
+                      sx={{ minWidth: { xs: '100%', sm: 280 }, maxWidth: { sm: 420 }, flex: { sm: 1 } }}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchRounded fontSize="small" />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
                     <Button
                       variant={filtersOpen ? 'contained' : 'outlined'}
                       startIcon={<FilterListRounded />}
                       onClick={() => setFiltersOpen(true)}
                       sx={{ textTransform: 'none', fontWeight: 700, borderRadius: 999, px: 2.25 }}
                     >
-                      Filtros
+                      {t('services.filters.title')}
                     </Button>
                     {activeFiltersCount > 0 && (
-                      <Chip label={`${activeFiltersCount} activos`} size="small" color="primary" sx={{ fontWeight: 700 }} />
+                      <Chip label={`${activeFiltersCount} ${t('services.filters.active')}`} size="small" color="primary" sx={{ fontWeight: 700 }} />
                     )}
-                    {showFavoritesOnly && <Chip label="Solo favoritos" size="small" color="error" variant="outlined" sx={{ fontWeight: 700 }} />}
+                    {showFavoritesOnly && <Chip label={t('services.filters.favoritesOnly')} size="small" color="error" variant="outlined" sx={{ fontWeight: 700 }} />}
                   </Stack>
 
                   <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25} alignItems={{ xs: 'stretch', sm: 'center' }}>
                     <Box>
                       <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 800, letterSpacing: '0.08em', display: 'block', lineHeight: 1.2 }}>
-                        Resumen
+                        {t('services.summary.title')}
                       </Typography>
                       <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 700 }}>
-                      {loading ? t("common.loading") : `${visibleServices.length} ${selectedIntent === 'REQUEST' ? 'solicitudes' : 'servicios'} ${t("common.found")}`}
+                      {loading ? t("common.loading") : `${visibleServices.length} ${selectedIntent === 'REQUEST' ? t('services.summary.requests') : t('services.summary.services')} ${t("common.found")}`}
                       </Typography>
                     </Box>
                     <Button
@@ -718,7 +815,7 @@ export default function ServicesPage() {
                         '&:hover': { bgcolor: '#7028E0' },
                       }}
                     >
-                      + {selectedIntent === 'REQUEST' ? 'Crear solicitud' : 'Nueva publicación'}
+                      + {selectedIntent === 'REQUEST' ? t('services.actions.createRequest') : t('services.actions.newPublication')}
                     </Button>
                   </Stack>
                 </Stack>
@@ -731,14 +828,14 @@ export default function ServicesPage() {
                         onClick={() => setSelectedIntent('OFFER')}
                         sx={{ textTransform: 'none', borderRadius: 999, px: 2, fontWeight: 700, minHeight: 36 }}
                       >
-                        Servicios
+                        {t('services.intent.offers')}
                       </Button>
                       <Button
                         variant={selectedIntent === 'REQUEST' ? 'contained' : 'text'}
                         onClick={() => setSelectedIntent('REQUEST')}
                         sx={{ textTransform: 'none', borderRadius: 999, px: 2, fontWeight: 700, minHeight: 36 }}
                       >
-                        Solicitudes
+                        {t('services.intent.requests')}
                       </Button>
                     </Box>
 
@@ -749,7 +846,7 @@ export default function ServicesPage() {
                         onClick={() => setViewMode('list')}
                         sx={{ textTransform: 'none', borderRadius: 999, px: 2, fontWeight: 700, minHeight: 36 }}
                       >
-                        Lista
+                        {t('services.viewModes.list')}
                       </Button>
                       <Button
                         variant={viewMode === 'map' ? 'contained' : 'text'}
@@ -757,7 +854,7 @@ export default function ServicesPage() {
                         onClick={() => setViewMode('map')}
                         sx={{ textTransform: 'none', borderRadius: 999, px: 2, fontWeight: 700, minHeight: 36 }}
                       >
-                        Mapa
+                        {t('services.viewModes.map')}
                       </Button>
                     </Box>
 
@@ -794,13 +891,13 @@ export default function ServicesPage() {
                       <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 700, px: 0.5 }}>
                         Radio:
                       </Typography>
-                      <Button size="small" variant={radiusKm === 5 ? 'contained' : 'text'} onClick={() => handleRadiusChange(5)} sx={{ minWidth: 52, borderRadius: 999, fontWeight: 700 }}>
+                      <Button size="small" variant={radiusKm === 5 ? 'contained' : 'text'} onClick={() => { void handleRadiusChange(5); }} sx={{ minWidth: 52, borderRadius: 999, fontWeight: 700 }}>
                         5 km
                       </Button>
-                      <Button size="small" variant={radiusKm === 10 ? 'contained' : 'text'} onClick={() => handleRadiusChange(10)} sx={{ minWidth: 56, borderRadius: 999, fontWeight: 700 }}>
+                      <Button size="small" variant={radiusKm === 10 ? 'contained' : 'text'} onClick={() => { void handleRadiusChange(10); }} sx={{ minWidth: 56, borderRadius: 999, fontWeight: 700 }}>
                         10 km
                       </Button>
-                      <Button size="small" variant={radiusKm === 25 ? 'contained' : 'text'} onClick={() => handleRadiusChange(25)} sx={{ minWidth: 56, borderRadius: 999, fontWeight: 700 }}>
+                      <Button size="small" variant={radiusKm === 25 ? 'contained' : 'text'} onClick={() => { void handleRadiusChange(25); }} sx={{ minWidth: 56, borderRadius: 999, fontWeight: 700 }}>
                         25 km
                       </Button>
                     </Box>
@@ -842,14 +939,64 @@ export default function ServicesPage() {
                     </Box>
                   </Box>
 
-                  {!googleMapsApiKey ? (
-                    <Box sx={{ py: 8, textAlign: 'center' }}>
-                      <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
-                        Google Maps no está configurado en frontend.
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Añade la API key para habilitar la vista de mapa.
-                      </Typography>
+                  {!googleMapsApiKey || mapsUnavailable ? (
+                    <Box sx={{ display: 'grid', gap: 2 }}>
+                      <Alert severity="info">
+                        {t('services.map.unavailable')}
+                      </Alert>
+                      <Box
+                        role="img"
+                        aria-label={t('services.map.openStreetMapTitle')}
+                        sx={{
+                          position: 'relative',
+                          width: '100%',
+                          height: { xs: 420, md: 560 },
+                          borderRadius: 3,
+                          overflow: 'hidden',
+                          border: '1px solid rgba(148,163,184,0.24)',
+                          background: `
+                            linear-gradient(90deg, rgba(148,163,184,0.18) 1px, transparent 1px),
+                            linear-gradient(0deg, rgba(148,163,184,0.18) 1px, transparent 1px),
+                            linear-gradient(135deg, #ecfeff 0%, #eef2ff 48%, #f8fafc 100%)
+                          `,
+                          backgroundSize: '56px 56px, 56px 56px, cover',
+                        }}
+                      >
+                        {fallbackMapMarkers.map(({ service, index, left, top }) => (
+                          <Button
+                            key={service.id}
+                            onClick={() => router.push(`/services/${service.id}`)}
+                            title={service.title}
+                            sx={{
+                              position: 'absolute',
+                              left: `${left}%`,
+                              top: `${top}%`,
+                              minWidth: 0,
+                              width: 36,
+                              height: 36,
+                              borderRadius: '50%',
+                              transform: 'translate(-50%, -50%)',
+                              bgcolor: service.intent === 'REQUEST' ? '#0f766e' : '#8A33FD',
+                              color: '#fff',
+                              fontWeight: 900,
+                              boxShadow: '0 10px 24px rgba(15,23,42,0.25)',
+                              '&:hover': { bgcolor: service.intent === 'REQUEST' ? '#115e59' : '#7028E0' },
+                            }}
+                          >
+                            {index + 1}
+                          </Button>
+                        ))}
+                        <Box sx={{ position: 'absolute', left: 16, bottom: 16, right: 16, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                          {fallbackMapMarkers.slice(0, 8).map(({ service, index }) => (
+                            <Chip
+                              key={service.id}
+                              label={`${index + 1}. ${service.title}`}
+                              onClick={() => router.push(`/services/${service.id}`)}
+                              sx={{ bgcolor: 'rgba(255,255,255,0.92)', fontWeight: 700 }}
+                            />
+                          ))}
+                        </Box>
+                      </Box>
                     </Box>
                   ) : (
                     <Box
@@ -875,7 +1022,12 @@ export default function ServicesPage() {
                 }}
               >
                 {visibleServices.map((service) => (
-                  <ServiceCard key={service.id} service={service} />
+                  <ServiceCard
+                    key={service.id}
+                    service={service}
+                    favorite={isFavorite(service.id)}
+                    onToggleFavorite={toggleFavorite}
+                  />
                 ))}
               </Box>
             )}

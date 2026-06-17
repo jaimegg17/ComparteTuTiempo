@@ -24,11 +24,11 @@ export const useCreateRating = () => {
   return useMutation({
     mutationFn: (data: RatingCreate) => ratingsApi.createRating(data),
     onSuccess: (_, variables) => {
-      // Invalidar la lista de valoraciones del servicio
+      // Invalidate the service ratings list
       queryClient.invalidateQueries({ queryKey: ['ratings', { serviceId: variables.serviceId }] });
-      // Invalidar el servicio para actualizar el promedio
+      // Invalidate the service to refresh the average
       queryClient.invalidateQueries({ queryKey: ['service', variables.serviceId] });
-      // Invalidar todas las listas de valoraciones
+      // Invalidate all rating lists
       queryClient.invalidateQueries({ queryKey: ['ratings'] });
     },
   });
@@ -41,9 +41,9 @@ export const useUpdateRating = () => {
     mutationFn: ({ id, data }: { id: number; data: RatingUpdate }) =>
       ratingsApi.updateRating(id, data),
     onSuccess: (updatedRating) => {
-      // Actualizar el cache de la valoración específica
+      // Update the specific rating cache
       queryClient.setQueryData(['rating', updatedRating.rating.id], updatedRating);
-      // Invalidar listas relacionadas
+      // Invalidate related lists
       queryClient.invalidateQueries({ queryKey: ['ratings'] });
       queryClient.invalidateQueries({ queryKey: ['service', updatedRating.rating.serviceId] });
     },
@@ -56,9 +56,9 @@ export const useDeleteRating = () => {
   return useMutation({
     mutationFn: (id: number) => ratingsApi.deleteRating(id),
     onSuccess: () => {
-      // Invalidar todas las listas de valoraciones
+      // Invalidate all rating lists
       queryClient.invalidateQueries({ queryKey: ['ratings'] });
-      // Invalidar servicios para actualizar promedios
+      // Invalidate services to refresh averages
       queryClient.invalidateQueries({ queryKey: ['service'] });
     },
   });

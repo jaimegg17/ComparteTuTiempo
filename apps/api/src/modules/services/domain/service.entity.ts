@@ -19,6 +19,7 @@ export class Service {
   private readonly _status: ServiceContract['status'];
   private readonly _price: number;
   private readonly _imageUrl: string | null | undefined;
+  private readonly _communityId: number | null | undefined;
   private readonly _userId: string;
   private readonly _createdAt: Date;
   private readonly _updatedAt: Date;
@@ -41,6 +42,7 @@ export class Service {
     this._status = props.status;
     this._price = props.price;
     this._imageUrl = props.imageUrl;
+    this._communityId = props.communityId;
     this._userId = props.userId;
     this._createdAt = props.createdAt;
     this._updatedAt = props.updatedAt;
@@ -64,11 +66,12 @@ export class Service {
   get status(): ServiceContract['status'] { return this._status; }
   get price(): number { return this._price; }
   get imageUrl(): string | null | undefined { return this._imageUrl; }
+  get communityId(): number | null | undefined { return this._communityId; }
   get userId(): string { return this._userId; }
   get createdAt(): Date { return this._createdAt; }
   get updatedAt(): Date { return this._updatedAt; }
 
-  // Métodos de dominio
+  // Domain methods
   isActive(): boolean {
     return this._status === 'ACTIVO';
   }
@@ -85,7 +88,7 @@ export class Service {
     return this.isOwnedBy(userId);
   }
 
-  // Métodos de utilidad
+  // Utility methods
   get durationFormatted(): string {
     return `${this._duration} hora${this._duration !== 1 ? 's' : ''}`;
   }
@@ -98,7 +101,7 @@ export class Service {
     return this._type === 'PRESENCIAL';
   }
 
-  // Método para convertir a contrato
+  // Convert to contract format
   toContract(): ServiceWithImage {
     return {
       id: this._id,
@@ -118,6 +121,7 @@ export class Service {
       status: this._status,
       price: this._price,
       imageUrl: this._imageUrl,
+      communityId: this._communityId,
       userId: this._userId,
       createdAt: this._createdAt,
       updatedAt: this._updatedAt,

@@ -30,7 +30,7 @@ export class DeleteServiceUseCase {
         await this.cloudinaryService.deleteImage(publicId);
       } catch (error) {
         this.logger.warn(
-          `No se pudo limpiar imagen del servicio ${input.id} tras borrado: ${
+          `Could not clean up service image ${input.id} after deletion: ${
             error instanceof Error ? error.message : String(error)
           }`,
         );

@@ -1,0 +1,237 @@
+\chapter{Manual de usuario}\label{anexo:manual_usuario}
+
+Este anexo complementa la memoria técnica desde la perspectiva del uso de la plataforma. Mientras que los capítulos anteriores explican el análisis, el diseño, la implementación y las pruebas, aquí se describe cómo debe interactuar una persona usuaria con \textit{ComparteTuTiempo} para realizar las acciones principales de forma guiada.
+
+\section{Introducción}
+
+En este anexo se presenta el manual de usuario de \textit{ComparteTuTiempo}. Su objetivo es explicar de forma sencilla cómo utilizar las principales funcionalidades de la plataforma desde el punto de vista de un usuario final.
+
+La plataforma permite publicar servicios, buscar ofertas y demandas, solicitar intercambios, comunicarse con otros usuarios, valorar servicios y participar en comunidades. El manual se centra en los flujos más importantes implementados en el sistema.
+
+\section{Acceso a la plataforma}
+
+Para acceder a la aplicación, el usuario debe abrir la URL del frontend en el navegador. En entorno local, la dirección es:
+
+\begin{center}
+\texttt{http://localhost:3000}
+\end{center}
+
+Al acceder a la plataforma se muestra la página inicial, desde la que el usuario puede conocer el propósito de \textit{ComparteTuTiempo} y acceder a las opciones principales.
+
+\section{Registro e inicio de sesión}
+
+Para utilizar las funcionalidades principales de la plataforma es necesario iniciar sesión. La autenticación se realiza mediante Auth0, por lo que el usuario será redirigido al flujo de autenticación correspondiente.
+
+El proceso general es el siguiente:
+
+\begin{enumerate}
+    \item El usuario accede a la plataforma.
+    \item Pulsa la opción de iniciar sesión o registrarse.
+    \item El sistema redirige al formulario de autenticación.
+    \item El usuario introduce sus credenciales o utiliza un proveedor externo configurado.
+    \item Tras autenticarse correctamente, vuelve a la plataforma con la sesión iniciada.
+\end{enumerate}
+
+Una vez autenticado, el sistema identifica al usuario y permite acceder a funcionalidades como publicar servicios, solicitar intercambios, gestionar el perfil, enviar mensajes o participar en comunidades.
+
+\section{Gestión del perfil}
+
+El usuario puede acceder a su perfil desde la navegación principal. En esta sección puede consultar o modificar información personal relevante para el uso de la plataforma.
+
+Entre los datos gestionables se encuentran:
+
+\begin{itemize}
+    \item nombre del usuario;
+    \item información de contacto;
+    \item ubicación;
+    \item biografía o descripción personal;
+    \item habilidades;
+    \item imagen de perfil;
+    \item idioma o preferencias básicas.
+\end{itemize}
+
+Para actualizar el perfil, el usuario debe modificar los campos correspondientes y guardar los cambios. El sistema validará la información y actualizará los datos almacenados.
+
+\section{Consulta de servicios}
+
+Una de las funcionalidades principales de \textit{ComparteTuTiempo} es la consulta de servicios publicados por otros usuarios. Para ello, el usuario debe acceder a la sección de servicios.
+
+En esta pantalla se muestra un listado de ofertas y demandas disponibles. Cada servicio incluye información básica como título, descripción, duración, categoría, modalidad, ubicación y usuario asociado.
+
+El usuario puede utilizar distintos filtros para encontrar servicios relevantes:
+
+\begin{itemize}
+    \item búsqueda por texto;
+    \item categoría;
+    \item modalidad presencial, virtual o híbrida;
+    \item tipo de publicación, diferenciando entre oferta y demanda;
+    \item ubicación;
+    \item búsqueda por cercanía cuando se dispone de coordenadas.
+\end{itemize}
+
+También puede alternar entre una vista de listado y, cuando corresponde, una vista relacionada con mapa o ubicación.
+
+\section{Búsqueda de servicios cercanos}
+
+La plataforma incorpora funcionalidades de geolocalización para facilitar la búsqueda de servicios cercanos. Para utilizar esta opción, el usuario puede activar la búsqueda por ubicación.
+
+El flujo habitual es el siguiente:
+
+\begin{enumerate}
+    \item El usuario accede al listado de servicios.
+    \item Pulsa la opción de utilizar su ubicación.
+    \item El navegador solicita permiso para acceder a la ubicación.
+    \item El usuario acepta el permiso.
+    \item El sistema utiliza las coordenadas para buscar servicios dentro del radio seleccionado.
+\end{enumerate}
+
+El usuario puede modificar el radio de búsqueda para ampliar o reducir el área en la que desea encontrar servicios.
+
+\section{Creación de un servicio}
+
+Un usuario autenticado puede crear una nueva oferta o demanda de servicio. Para ello debe acceder a la opción de creación de servicio.
+
+El formulario solicita información como:
+
+\begin{itemize}
+    \item título del servicio;
+    \item descripción;
+    \item descripción detallada, si procede;
+    \item duración estimada;
+    \item categoría;
+    \item modalidad;
+    \item tipo de publicación, oferta o demanda;
+    \item ubicación;
+    \item imagen asociada, si se desea añadir.
+\end{itemize}
+
+Una vez completado el formulario, el usuario debe enviarlo. Si los datos son correctos, el sistema registra el servicio y lo publica para que pueda ser consultado por otros usuarios.
+
+En caso de que haya errores en el formulario, la plataforma mostrará mensajes para ayudar al usuario a corregirlos.
+
+\section{Edición y eliminación de servicios}
+
+El usuario puede editar los servicios que ha creado. Para ello, debe acceder al detalle del servicio o a la opción de edición correspondiente.
+
+Desde la pantalla de edición puede modificar información como el título, descripción, duración, ubicación, categoría, modalidad o imagen. Una vez guardados los cambios, el sistema actualiza la publicación.
+
+También es posible eliminar un servicio propio cuando ya no se desea mantenerlo publicado. Esta acción debe realizarse con precaución, ya que puede afectar a la disponibilidad de la publicación para otros usuarios.
+
+\section{Detalle de un servicio}
+
+Al seleccionar un servicio, el usuario accede a la pantalla de detalle. En ella se muestra información más completa sobre la publicación:
+
+\begin{itemize}
+    \item título y descripción;
+    \item categoría y modalidad;
+    \item duración;
+    \item ubicación;
+    \item imagen, si existe;
+    \item información del usuario propietario;
+    \item valoraciones asociadas;
+    \item opción de iniciar o solicitar un intercambio.
+\end{itemize}
+
+Esta pantalla permite al usuario decidir si está interesado en solicitar el servicio o contactar con el propietario.
+
+\section{Gestión de intercambios}
+
+Los intercambios representan la coordinación entre dos usuarios para realizar un servicio. Cuando un usuario solicita un servicio, se genera un intercambio asociado.
+
+Los intercambios pueden pasar por distintos estados, como pendiente, confirmado, en progreso, completado, cancelado o disputado. Estos estados ayudan a controlar el ciclo de vida del intercambio y evitan que se produzcan acciones incoherentes.
+
+El flujo general de un intercambio es el siguiente:
+
+\begin{enumerate}
+    \item Un usuario solicita un servicio.
+    \item El usuario propietario revisa la solicitud.
+    \item Si procede, confirma el intercambio.
+    \item Los usuarios coordinan los detalles mediante mensajería.
+    \item El intercambio pasa a estar en progreso.
+    \item Una vez realizado, se marca como completado.
+    \item El sistema puede actualizar los créditos de tiempo correspondientes.
+\end{enumerate}
+
+El usuario puede consultar sus intercambios desde la sección correspondiente y acceder al detalle de cada uno.
+
+\section{Mensajería}
+
+La plataforma incluye un sistema de mensajería asociado a intercambios. Esta funcionalidad permite que los usuarios coordinen detalles concretos antes o durante la realización de un servicio.
+
+Para utilizar la mensajería, el usuario debe acceder a la sección de conversaciones o al detalle de un intercambio. Desde ahí puede consultar mensajes anteriores y enviar nuevos mensajes.
+
+El sistema almacena los mensajes, muestra las conversaciones del usuario y permite marcar mensajes como leídos.
+
+\section{Valoraciones}
+
+Una vez realizado un servicio, los usuarios pueden valorar la experiencia. Las valoraciones permiten aumentar la confianza dentro de la plataforma y ayudan a otros usuarios a tomar decisiones.
+
+El usuario puede dejar una puntuación y, si lo desea, un comentario. La valoración queda asociada al servicio correspondiente.
+
+La plataforma permite consultar las valoraciones de un servicio desde su pantalla de detalle. También contempla la edición o eliminación de valoraciones cuando corresponde.
+
+\section{Comunidades}
+
+Las comunidades permiten agrupar usuarios alrededor de intereses, asociaciones, iniciativas u organizaciones. El usuario puede consultar el listado de comunidades disponibles y acceder al detalle de cada una.
+
+En la pantalla de comunidades se puede:
+
+\begin{itemize}
+    \item buscar comunidades;
+    \item consultar información general;
+    \item ver detalles de una comunidad;
+    \item unirse a una comunidad;
+    \item salir de una comunidad;
+    \item consultar miembros y eventos asociados.
+\end{itemize}
+
+Las comunidades ayudan a organizar la actividad de la plataforma y a fomentar la colaboración entre usuarios con intereses comunes.
+
+\section{Eventos}
+
+Dentro de una comunidad pueden existir eventos o actividades. Estos eventos permiten organizar encuentros, talleres o acciones comunitarias.
+
+El usuario puede consultar los eventos asociados a una comunidad, ver su información principal e inscribirse si está interesado. También puede cancelar su inscripción cuando ya no desea participar.
+
+La información habitual de un evento incluye:
+
+\begin{itemize}
+    \item título;
+    \item descripción;
+    \item fecha;
+    \item ubicación;
+    \item capacidad máxima, si existe;
+    \item comunidad organizadora.
+\end{itemize}
+
+\section{Servicios favoritos y notificaciones}
+
+La plataforma contempla la posibilidad de marcar servicios como favoritos para consultarlos posteriormente. Esta funcionalidad ayuda al usuario a guardar publicaciones que le resultan interesantes.
+
+Además, el sistema dispone de un modelo de notificaciones para informar sobre determinados eventos de la plataforma. En la versión actual, las notificaciones cubren funcionalidades básicas, quedando como mejora futura una configuración más avanzada por parte del usuario.
+
+\section{Página de ayuda}
+
+La aplicación incluye una sección de preguntas frecuentes o FAQ. Esta página tiene como objetivo resolver dudas comunes sobre el funcionamiento de la plataforma, los servicios, comunidades, intercambios y otros aspectos relevantes.
+
+El usuario puede consultar esta sección cuando necesite orientación sobre cómo utilizar alguna funcionalidad.
+
+\section{Recomendaciones de uso}
+
+Para utilizar correctamente \textit{ComparteTuTiempo}, se recomienda:
+
+\begin{itemize}
+    \item completar el perfil con información clara y fiable;
+    \item publicar servicios con descripciones detalladas;
+    \item indicar correctamente la duración y ubicación de los servicios;
+    \item comunicarse con otros usuarios antes de realizar un intercambio;
+    \item valorar los servicios de forma honesta;
+    \item respetar las normas de las comunidades;
+    \item utilizar la plataforma con responsabilidad y actitud colaborativa.
+\end{itemize}
+
+\section{Conclusión}
+
+Este manual recoge los principales flujos de uso de \textit{ComparteTuTiempo}. A través de estas funcionalidades, el usuario puede participar en una plataforma de banco de tiempo digital, publicar servicios, solicitar intercambios, comunicarse con otros miembros, valorar experiencias y formar parte de comunidades.
+
+Aunque algunas funciones pueden ampliarse en futuras versiones, el sistema actual permite cubrir los flujos principales necesarios para utilizar la plataforma de forma completa.

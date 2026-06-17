@@ -35,7 +35,7 @@ export class GoogleMapsService {
     this.apiKey = this.configService.get<string>('GOOGLE_MAPS_API_KEY');
     if (!this.apiKey) {
       this.logger.warn(
-        'GOOGLE_MAPS_API_KEY no configurada. El geocoding quedará deshabilitado.',
+        'GOOGLE_MAPS_API_KEY is not configured. Geocoding will be disabled.',
       );
     }
   }
@@ -52,7 +52,7 @@ export class GoogleMapsService {
       const response = await fetch(url.toString());
       if (!response.ok) {
         this.logger.warn(
-          `Error HTTP geocoding (${response.status}) para dirección "${trimmedAddress}"`,
+          `Geocoding HTTP error (${response.status}) for address "${trimmedAddress}"`,
         );
         return null;
       }
@@ -60,7 +60,7 @@ export class GoogleMapsService {
       const payload = (await response.json()) as GoogleGeocodeResponse;
       if (payload.status !== 'OK' || payload.results.length === 0) {
         this.logger.warn(
-          `Geocoding sin resultado para "${trimmedAddress}" (status=${payload.status})`,
+          `Geocoding returned no result for "${trimmedAddress}" (status=${payload.status})`,
         );
         return null;
       }

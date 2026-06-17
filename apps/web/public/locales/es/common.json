@@ -139,7 +139,15 @@
     "languages": "Idiomas",
     "music": "Música",
     "sports": "Deporte",
-    "education": "Estudios"
+    "education": "Estudios",
+    "description": "Explora algunas áreas destacadas para empezar a descubrir servicios, personas y oportunidades de intercambio con más contexto.",
+    "viewServices": "Ver servicios",
+    "descriptions": {
+      "languages": "Clases, conversación y apoyo para aprender idiomas",
+      "music": "Instrumentos, canto, producción y creatividad musical",
+      "sports": "Entrenamiento, bienestar y actividad física compartida",
+      "education": "Refuerzo académico, estudio guiado y formación práctica"
+    }
   },
   "testimonials": {
     "title": "Valora tu experiencia",
@@ -157,7 +165,8 @@
       "text": "Me encanta lo personalizable que es esta aplicación. Realmente puedo hacer que funcione para mí, sin importar en qué proyecto esté trabajando.",
       "author": "Carlos Rodríguez",
       "role": "Desarrollador"
-    }
+    },
+    "description": "Opiniones de personas que ya han usado la plataforma para compartir conocimientos, apoyo cotidiano y tiempo de calidad."
   },
   "services": {
     "title": "Servicios",
@@ -209,7 +218,9 @@
       "availability": "Disponibilidad",
       "language": "Idioma",
       "clear": "Limpiar Filtros",
-      "apply": "Aplicar Filtros"
+      "apply": "Aplicar Filtros",
+      "active": "activos",
+      "favoritesOnly": "Solo favoritos"
     },
     "categories": {
       "education": "Educación",
@@ -275,7 +286,8 @@
         "subtitle": "Arrastra y suelta una imagen o haz clic para explorar (máx. 10MB)",
         "button": "Elegir Imagen",
         "help": "Dimensiones: mínimo 50x50px, máximo 6000x6000px. Tamaño máximo: 10MB."
-      }
+      },
+      "communityNotice": "Este servicio se publicará dentro de la comunidad “{{name}}”."
     },
     "card": {
       "request_service": "Solicitar Servicio",
@@ -303,7 +315,21 @@
         "rating": "Valoración",
         "reviews": "Reseñas",
         "exchanges": "Intercambios Completados"
-      }
+      },
+      "notFound": "No se ha encontrado el servicio.",
+      "backToServices": "Volver a servicios",
+      "requestOverline": "DETALLE DE LA SOLICITUD",
+      "serviceOverline": "DETALLE DEL SERVICIO",
+      "requestIntro": "Comprueba la necesidad publicada, la ubicación aproximada y responde solo si realmente puedes ayudar.",
+      "serviceIntro": "Revisa el alcance del servicio, la ubicación aproximada y las valoraciones antes de enviar una solicitud.",
+      "loginHintRequest": "Puedes revisar toda la información antes de decidir. Cuando quieras responder a esta solicitud, te llevaremos al inicio de sesión.",
+      "loginHintService": "Puedes revisar toda la información antes de decidir. Cuando quieras solicitar este servicio, te llevaremos al inicio de sesión.",
+      "provider": "Proveedor",
+      "requester": "Solicitante",
+      "noLocation": "Sin ubicación",
+      "viewProfile": "Ver perfil",
+      "skills": "HABILIDADES",
+      "exchangesCompleted": "intercambios realizados"
     },
     "not_found": "No se encontraron servicios",
     "error": "Error al cargar servicios",
@@ -311,7 +337,50 @@
       "created": "Servicio creado exitosamente",
       "updated": "Servicio actualizado exitosamente",
       "deleted": "Servicio eliminado exitosamente"
-    }
+    },
+    "viewModes": {
+      "list": "Lista",
+      "map": "Mapa"
+    },
+    "map": {
+      "unavailable": "Google Maps no está disponible ahora mismo. Mostramos un mapa básico de OpenStreetMap para no bloquear la navegación.",
+      "openStreetMapTitle": "Mapa OpenStreetMap"
+    },
+    "summary": {
+      "title": "Resumen",
+      "services": "servicios",
+      "requests": "solicitudes"
+    },
+    "intent": {
+      "offers": "Servicios",
+      "requests": "Solicitudes"
+    },
+    "favorites": {
+      "save": "Guardar en favoritos",
+      "remove": "Quitar de favoritos",
+      "saved": "Favorito"
+    },
+    "actions": {
+      "createRequest": "Crear solicitud",
+      "newPublication": "Nueva publicación",
+      "editRequest": "Editar solicitud",
+      "editService": "Editar servicio",
+      "ownRequest": "Tu solicitud",
+      "ownService": "Tu servicio",
+      "loginToHelp": "Iniciar sesión para ayudar",
+      "loginToRequest": "Iniciar sesión para solicitar",
+      "canHelp": "Puedo ayudarte",
+      "requestExchange": "Solicitar intercambio",
+      "requestHelper": "Si puedes cubrir esta necesidad, envía un mensaje inicial explicando cómo podrías ayudar y en qué condiciones.",
+      "serviceHelper": "Revisa bien la descripción antes de enviar tu solicitud. Podrás añadir un mensaje inicial para dar contexto.",
+      "inactiveRequestHelper": "Esta solicitud ya no está activa. Puedes seguir explorando otras necesidades publicadas en la plataforma.",
+      "inactiveServiceHelper": "Este servicio no está disponible en este momento, pero puedes seguir explorando otras alternativas.",
+      "estimatedExchangeTime": "Tiempo estimado de intercambio",
+      "delete": "Eliminar"
+    },
+    "searchByName": "Buscar por nombre o descripción...",
+    "deleteConfirm": "¿Seguro que quieres eliminar esta publicación? Esta acción no se puede deshacer.",
+    "deleteError": "Error al eliminar la publicación"
   },
   "exchanges": {
     "title": "Mis Intercambios",
@@ -352,16 +421,13 @@
     }
   },
   "chat": {
-    "title": "Chat",
+    "exchangeChat": "Chat del intercambio",
+    "newMessages": "{{count}} mensaje nuevo",
+    "newMessages_plural": "{{count}} mensajes nuevos",
+    "empty": "Todavía no hay mensajes. Escribe para aclarar disponibilidad, detalles y próximos pasos.",
     "placeholder": "Escribe tu mensaje...",
-    "send": "Enviar",
-    "typing": "{{name}} está escribiendo...",
-    "online": "En línea",
-    "offline": "Desconectado",
-    "last_seen": "Visto por última vez {{time}}",
-    "no_messages": "Aún no hay mensajes",
-    "error": "Error al cargar mensajes",
-    "success": "Mensaje enviado exitosamente"
+    "refresh": "Actualizar mensajes",
+    "realtimeEnabled": "Actualización automática activada"
   },
   "ratings": {
     "title": "Valoraciones",
@@ -456,7 +522,12 @@
       "leave": "Salir de comunidad",
       "cancelRequest": "Cancelar solicitud",
       "join": "Unirse a comunidad",
-      "privateNotice": "Esta comunidad es privada. Tu solicitud deberá ser aprobada por un owner o administrador.",
+      "joinOrganization": "Unirme a organización",
+      "privateCommunityLoginTitle": "Comunidad privada",
+      "privateCommunityLoginDescription": "Para acceder al contenido de esta comunidad privada debes iniciar sesión y solicitar acceso.",
+      "privateOrganizationLoginTitle": "Organización privada",
+      "privateOrganizationLoginDescription": "Para acceder al contenido de esta organización privada debes iniciar sesión y solicitar acceso.",
+      "privateNotice": "Este espacio es privado. Tu solicitud deberá ser aprobada por un owner o administrador.",
       "pendingNotice": "Tu solicitud está pendiente de revisión. Puedes cancelarla mientras esperas respuesta.",
       "pendingReview": "Tienes {{count}} solicitudes pendientes de revisar.",
       "loginToRegisterEvent": "Inicia sesión para apuntarte a eventos.",
@@ -472,7 +543,12 @@
       "roleError": "No se pudo actualizar el rol del miembro.",
       "statusApproved": "Solicitud aprobada correctamente.",
       "statusRejected": "Solicitud rechazada correctamente.",
-      "statusError": "No se pudo actualizar el estado de la solicitud."
+      "statusError": "No se pudo actualizar el estado de la solicitud.",
+      "publishService": "Publicar servicio",
+      "publishOrganizationService": "Publicar iniciativa",
+      "requestJoin": "Solicitar unirme",
+      "requestJoinOrganization": "Solicitar acceso",
+      "mustBeMemberToRegisterEvent": "Debes pertenecer a la comunidad para apuntarte a sus eventos."
     },
     "editPage": {
       "organizationPanel": "Panel de gestión de la organización",
@@ -512,7 +588,8 @@
       "publishedDescription": "Revisa, edita o elimina los eventos del espacio.",
       "empty": "Todavía no hay eventos publicados.",
       "noDescription": "Sin descripción",
-      "online": "Online"
+      "online": "Online",
+      "capacityLabel": "Capacidad"
     },
     "activity": {
       "title": "Actividad / Eventos",
@@ -529,9 +606,18 @@
       "verifiedOrganization": "Organización verificada",
       "pendingOrganization": "Organización pendiente",
       "members": "{{count}} miembros",
+      "organizationMembers": "{{count}} integrantes",
       "events": "{{count}} eventos",
       "rules": "{{count}} reglas",
+      "principles": "{{count}} principios",
+      "resources": "{{count}} recursos",
       "created": "Creada {{date}}"
+    },
+    "rulesSection": {
+      "title": "Reglas de la comunidad",
+      "description": "Pautas básicas para mantener un espacio útil, amable y seguro.",
+      "organizationTitle": "Principios de participación",
+      "organizationDescription": "Criterios y normas internas que ayudan a operar con transparencia y seguridad."
     },
     "resourcesSection": {
       "link": "Enlace",
@@ -539,6 +625,8 @@
       "image": "Imagen",
       "title": "Tablón de recursos",
       "description": "Enlaces, notas y referencias útiles para la actividad de la comunidad.",
+      "organizationTitle": "Recursos institucionales",
+      "organizationDescription": "Enlaces, notas y materiales útiles para conocer mejor la actividad de la organización.",
       "open": "Abrir recurso",
       "editor": {
         "title": "Tablón de recursos y anuncios",
@@ -564,7 +652,20 @@
       "approve": "Aprobar",
       "reject": "Rechazar",
       "requested": "Solicitud: {{date}}"
-    }
+    },
+    "services": {
+      "title": "Servicios de la comunidad",
+      "description": "Ofertas y solicitudes publicadas dentro de este espacio por sus miembros.",
+      "empty": "Todavía no hay servicios asociados a esta comunidad.",
+      "organizationTitle": "Iniciativas de la organización",
+      "organizationDescription": "Ofertas, solicitudes o actividades publicadas dentro de este espacio institucional.",
+      "organizationEmpty": "Todavía no hay iniciativas asociadas a esta organización."
+    },
+    "verified": "Verificada",
+    "pending": "Pendiente",
+    "rulesCount": "{{count}} reglas",
+    "resourcesCount": "{{count}} recursos",
+    "join": "Unirse"
   },
   "auth": {
     "login": "Iniciar Sesión",
@@ -608,7 +709,8 @@
   "video": {
     "title": "¿Cómo funciona nuestra plataforma?",
     "subtitle": "Descubre en este video cómo puedes intercambiar tu tiempo por servicios y experiencias únicas.",
-    "playButton": "Ver video explicativo"
+    "playButton": "Ver video explicativo",
+    "comingSoon": "Video próximamente"
   },
   "hero": {
     "title": "Comparte tu tiempo",
@@ -746,6 +848,29 @@
     "new": {
       "loginError": "Necesitas iniciar sesión para solicitar una organización.",
       "submitError": "No se pudo registrar la solicitud de organización."
+    },
+    "list": {
+      "loadError": "No se pudieron cargar las organizaciones.",
+      "summaryVisible": "Organizaciones visibles",
+      "summaryTopics": "Ámbitos representados",
+      "summaryResults": "Resultados actuales",
+      "summaryPending": "Solicitudes pendientes",
+      "badge": "Entidades verificadas y en revisión",
+      "title": "Organizaciones con un perfil más institucional y fiable",
+      "subtitle": "Aquí reunimos asociaciones, ONG y colectivos oficiales con mayor contexto, gobernanza y señal de confianza. Las organizaciones aprobadas se muestran públicamente y las nuevas solicitudes pasan por revisión administrativa.",
+      "request": "Solicitar organización",
+      "review": "Revisar solicitudes",
+      "whatToExpect": "Qué esperar aquí",
+      "expectations": [
+        "Organizaciones visibles con badge de verificación cuando han sido aprobadas.",
+        "Temas y áreas de actividad para identificar rápido la misión de cada entidad.",
+        "Proceso de solicitud diferenciado para mantener un nivel de confianza más alto."
+      ],
+      "pendingAlert": "Tienes {{count}} solicitudes de organización pendientes de revisar.",
+      "searchPlaceholder": "Buscar organizaciones por nombre, descripción o temas...",
+      "clearSearch": "Limpiar búsqueda",
+      "emptyTitle": "No hay organizaciones que coincidan con la búsqueda",
+      "emptyDescription": "Prueba con otro término o solicita una nueva organización si todavía no existe en la plataforma."
     }
   },
   "faq": {
@@ -800,6 +925,14 @@
           {
             "question": "¿Cómo solicito un servicio correctamente?",
             "answer": "Abre el detalle del servicio, revisa descripción, ubicación y duración, y después usa la acción de solicitar. Si hay contexto importante o disponibilidad concreta, conviene incluir un mensaje breve desde el primer momento."
+          },
+          {
+            "question": "¿Qué diferencia hay entre una oferta y una solicitud?",
+            "answer": "Una oferta es algo que una persona puede aportar a otras, como clases, ayuda técnica o apoyo puntual. Una solicitud es una necesidad publicada por alguien que busca ayuda. En ambos casos se puede iniciar un intercambio y concretar los detalles por chat."
+          },
+          {
+            "question": "¿Por qué puede no aparecer una solicitud al filtrar?",
+            "answer": "El filtro de solicitudes solo muestra publicaciones marcadas como necesidad o petición de ayuda. Si combinas ese filtro con categoría, ubicación, duración o cercanía, puede que no haya resultados. Prueba a limpiar filtros para ver todas las solicitudes disponibles."
           },
           {
             "question": "¿Qué debería incluir una buena publicación de servicio?",
@@ -874,5 +1007,100 @@
         ]
       }
     ]
+  },
+  "exchangesPage": {
+    "states": {
+      "PENDING": "Pendiente",
+      "CONFIRMED": "Confirmado",
+      "IN_PROGRESS": "En progreso",
+      "COMPLETED": "Completado",
+      "REJECTED": "Rechazado",
+      "CANCELLED": "Cancelado"
+    },
+    "loadTokenError": "No se pudo obtener el token de autenticación",
+    "missingTokenError": "Token de autenticación no disponible",
+    "loadError": "Error al cargar los intercambios",
+    "updateError": "Error al actualizar el intercambio",
+    "updateFallback": "No se pudo actualizar el intercambio",
+    "updated": "Intercambio actualizado a “{{state}}”.",
+    "ratingSubmitted": "Gracias por tu valoración. Hemos actualizado el intercambio.",
+    "loginWarning": "Inicia sesión para consultar tus solicitudes, gestionar estados y seguir tus intercambios activos.",
+    "login": "Iniciar sesión",
+    "overline": "SEGUIMIENTO DE INTERCAMBIOS",
+    "title": "Mis intercambios",
+    "subtitle": "Consulta tus solicitudes, confirma próximos pasos y mantén claro en qué punto está cada colaboración.",
+    "currentView": "Vista actual",
+    "total": "Total",
+    "pending": "Pendientes",
+    "inProgress": "En curso",
+    "completed": "Completados",
+    "tabReceived": "Solicitudes que te han enviado",
+    "tabSent": "Solicitudes que has enviado",
+    "tabAll": "Vista global de todos tus intercambios",
+    "emptyTitle": "No hay intercambios en este estado",
+    "emptyReceived": "Todavía no has recibido solicitudes para este filtro. Publicar servicios claros y completos suele ayudar a generar más movimiento.",
+    "emptySent": "Aún no has enviado solicitudes que encajen con este filtro. Puedes explorar servicios y probar nuevas categorías.",
+    "emptyAll": "No tienes intercambios que coincidan con la selección actual. Cambia de pestaña o ajusta el estado para ver más actividad.",
+    "exploreServices": "Explorar servicios",
+    "filters": {
+      "overline": "FILTRAR ACTIVIDAD",
+      "aria": "Tipos de intercambios",
+      "all": "Todos",
+      "received": "Recibidos",
+      "sent": "Enviados",
+      "confirmed": "Confirmados"
+    },
+    "card": {
+      "requestedService": "Te han solicitado este servicio",
+      "sentService": "Has solicitado este servicio",
+      "openService": "Abrir servicio {{title}}",
+      "serviceFallback": "Servicio",
+      "updated": "Actualizado",
+      "requestedBy": "Solicitado por",
+      "offeredBy": "Ofrecido por",
+      "created": "Creado el {{date}}",
+      "duration": "{{hours}}h de intercambio",
+      "initialMessage": "Mensaje inicial",
+      "openChat": "Abrir chat",
+      "viewService": "Ver servicio",
+      "accept": "Aceptar",
+      "reject": "Rechazar",
+      "start": "Iniciar intercambio",
+      "complete": "Completar",
+      "unknownUser": "Usuario"
+    },
+    "detail": {
+      "overline": "DETALLE DEL INTERCAMBIO",
+      "back": "Volver a intercambios",
+      "subtitle": "Tu rol: {{role}} · Conversación con {{name}}",
+      "roleRequester": "solicitante",
+      "roleProvider": "proveedor/a",
+      "summary": "Resumen",
+      "service": "Servicio",
+      "createdAt": "Creado el",
+      "duration": "Duración",
+      "durationValue": "{{hours}} horas",
+      "initialMessage": "Mensaje inicial",
+      "participants": "Participantes",
+      "requester": "Solicitante",
+      "provider": "Proveedor/a",
+      "you": "Tú",
+      "chatTitle": "Conversación",
+      "chatSubtitle": "Coordina los detalles con {{name}} antes de confirmar o completar el intercambio.",
+      "loadError": "Error al cargar el intercambio",
+      "notFound": "No se pudo cargar el detalle del intercambio"
+    }
+  },
+  "languageSwitcher": {
+    "current": "Idioma actual"
+  },
+  "users": {
+    "profile": {
+      "loadError": "Error al cargar el perfil",
+      "notFound": "No se ha encontrado el usuario",
+      "services": "servicios",
+      "ratings": "valoraciones",
+      "exchanges": "intercambios"
+    }
   }
 }

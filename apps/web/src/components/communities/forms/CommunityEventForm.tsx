@@ -8,6 +8,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useTranslation } from '@/hooks/useTranslation';
+import { LocationAutocompleteField } from '@/components/location/LocationAutocompleteField';
 
 export interface CommunityEventFormValues {
   title: string;
@@ -116,15 +117,15 @@ export function CommunityEventForm({
           fullWidth
         />
 
-        <TextField
+        <LocationAutocompleteField
           label={t('communities.events.location')}
           value={values.location}
-          onChange={(event) => setValues((prev) => ({ ...prev, location: event.target.value }))}
+          onChange={(value) => setValues((prev) => ({ ...prev, location: value }))}
           fullWidth
         />
 
         <TextField
-          label={t('communities.events.capacity')}
+          label={t('communities.events.capacityLabel')}
           type="number"
           value={values.capacity}
           onChange={(event) => setValues((prev) => ({ ...prev, capacity: event.target.value }))}

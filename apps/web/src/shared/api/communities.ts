@@ -27,7 +27,7 @@ const normalizeCommunity = (community: RawCommunity): Community => ({
 });
 
 export const communitiesApi = {
-  // Obtener lista de comunidades
+  // Get community list
   async getCommunities(query: Partial<CommunityListQuery> = {}): Promise<CommunityListResponse> {
     const searchParams = new URLSearchParams();
     
@@ -57,7 +57,7 @@ export const communitiesApi = {
     };
   },
 
-  // Obtener comunidad por ID
+  // Get community by ID
   async getCommunity(id: number): Promise<{ community: Community }> {
     const response = await apiClient.get<{ community?: RawCommunity }>(`/communities/${id}`);
 
@@ -70,7 +70,7 @@ export const communitiesApi = {
     };
   },
 
-  // Crear nueva comunidad
+  // Create a new community
   async createCommunity(data: CommunityCreateRequest): Promise<{ community: Community }> {
     const response = await apiClient.post<{ community?: RawCommunity }>('/communities', data);
     if (!response?.community) {
@@ -79,7 +79,7 @@ export const communitiesApi = {
     return { community: normalizeCommunity(response.community) };
   },
 
-  // Actualizar comunidad
+  // Update community
   async updateCommunity(id: number, data: Partial<CommunityCreate>): Promise<{ community: Community }> {
     const response = await apiClient.put<{ community?: RawCommunity }>(`/communities/${id}`, data);
     if (!response?.community) {
@@ -111,7 +111,7 @@ export const communitiesApi = {
     return { community: normalizeCommunity(response.community) };
   },
 
-  // Eliminar comunidad
+  // Delete community
   async deleteCommunity(id: number): Promise<void> {
     return apiClient.delete<void>(`/communities/${id}`);
   },

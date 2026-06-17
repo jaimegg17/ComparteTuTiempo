@@ -109,7 +109,7 @@ export function FilterSidebar({
       
       <Box sx={{ p: drawerMode ? 0 : 2 }}>
         <Stack spacing={1.5}>
-          {/* Categorías */}
+          {/* Categories */}
           <CategoryFilter
             categories={categories}
             selectedCategories={selectedCategories}
@@ -122,7 +122,7 @@ export function FilterSidebar({
           
           <Divider sx={{ my: 0.5 }} />
           
-          {/* Ubicación */}
+          {/* Location */}
           <LocationFilter
             location={location}
             isOpen={openLocation}
@@ -146,7 +146,7 @@ export function FilterSidebar({
           
           <Divider sx={{ my: 0.5 }} />
           
-          {/* Duración */}
+          {/* Duration */}
           <DurationFilter
             durationRange={durationRange}
             isOpen={openDuration}
@@ -159,7 +159,7 @@ export function FilterSidebar({
           
           <Divider sx={{ my: 0.5 }} />
           
-          {/* Botones */}
+          {/* Buttons */}
           <Stack spacing={1} sx={{ pt: 1 }}>
             <Button 
               color='primary'

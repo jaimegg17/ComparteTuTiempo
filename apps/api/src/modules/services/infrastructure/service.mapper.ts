@@ -4,7 +4,7 @@ import { ServiceWithImage } from '../domain/service.types';
 
 export class ServiceMapper {
   toDomain(prismaService: PrismaService): Service {
-    // Mapear los enums de Prisma a los valores esperados por los contratos
+    // Map Prisma enums to contract values
     const mapCategory = (category: string) => {
       const mapping: Record<string, string> = {
         'EDUCACION': 'educacion',
@@ -54,6 +54,7 @@ export class ServiceMapper {
       status: mapStatus(prismaService.status) as unknown as ServiceWithImage['status'],
       price: prismaService.price,
       imageUrl: prismaService.imageUrl,
+      communityId: prismaService.communityId,
       userId: prismaService.userId,
       createdAt: prismaService.createdAt,
       updatedAt: prismaService.updatedAt,
@@ -63,7 +64,7 @@ export class ServiceMapper {
   }
 
   toPrisma(service: Service): Omit<PrismaService, 'id' | 'createdAt' | 'updatedAt'> {
-    // Mapear los valores de los contratos a los enums de Prisma
+    // Map contract values to Prisma enums
     const mapCategoryToPrisma = (category: string) => {
       const mapping: Record<string, string> = {
         'educacion': 'EDUCACION',
@@ -112,6 +113,7 @@ export class ServiceMapper {
       status: mapStatusToPrisma(service.status) as ServiceStatus,
       price: service.price,
       imageUrl: service.imageUrl || null,
+      communityId: service.communityId ?? null,
       userId: service.userId,
     };
   }

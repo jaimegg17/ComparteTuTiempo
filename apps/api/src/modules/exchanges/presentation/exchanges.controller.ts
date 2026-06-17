@@ -12,14 +12,9 @@ import {
   ParseIntPipe 
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam } from '@nestjs/swagger';
-import { createZodDto } from '@anatine/zod-nestjs';
 import { Type } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
-import { 
-  ExchangeCreateSchema, 
-  ExchangeUpdateSchema,
-  ExchangeStatus,
-} from '@comparte-tu-tiempo/contracts';
+import { IsDate, IsDateString, IsEnum, IsNumber, IsOptional, IsPositive, IsString, Max, Min } from 'class-validator';
+import { ExchangeStatus } from '@comparte-tu-tiempo/contracts';
 import { CreateExchangeUseCase } from '../application/create-exchange.use-case';
 import { ListExchangesUseCase } from '../application/list-exchanges.use-case';
 import { UpdateExchangeUseCase } from '../application/update-exchange.use-case';
@@ -27,11 +22,50 @@ import { GetExchangeUseCase } from '../application/get-exchange.use-case';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
 import { PrismaService } from '@/common/prisma/prisma.service';
 
-// DTOs generados desde Zod
-export class CreateExchangeDto extends createZodDto(ExchangeCreateSchema) {}
-export class UpdateExchangeDto extends createZodDto(ExchangeUpdateSchema) {}
+export class CreateExchangeDto {
+  @Type(() => Number)
+  @IsNumber()
+  serviceId: number;
+
+  @IsOptional()
+  @IsString()
+  offeredById?: string;
+
+  @IsOptional()
+  @IsString()
+  message?: string;
+
+  @IsOptional()
+  @IsDateString()
+  date?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @IsPositive()
+  exchangedTime?: number;
+}
+
+export class UpdateExchangeDto {
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  date?: Date;
+
+  @IsOptional()
+  @IsEnum(ExchangeStatus)
+  state?: (typeof ExchangeStatus)[keyof typeof ExchangeStatus];
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @IsPositive()
+  exchangedTime?: number;
+}
 
 type AuthenticatedRequest = { user?: { sub?: string; id?: string } };
+
+type ExchangeContract = ReturnType<import('../domain/exchange.entity').ExchangeEntity['toContract']>;
 
 export class ExchangeListQueryDto {
   @IsOptional()
@@ -83,6 +117,53 @@ export class ExchangesController {
     private readonly prisma: PrismaService,
   ) {}
 
+  private async enrichExchanges(exchanges: ExchangeContract[]) {
+    if (exchanges.length === 0) return [];
+
+    const exchangeIds = exchanges.map((exchange) => exchange.id);
+    const rows = await this.prisma.exchange.findMany({
+      where: { id: { in: exchangeIds } },
+      include: {
+        service: {
+          select: {
+            id: true,
+            title: true,
+            duration: true,
+            category: true,
+            imageUrl: true,
+          },
+        },
+        requestedBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            imageUrl: true,
+          },
+        },
+        offeredBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            imageUrl: true,
+          },
+        },
+      },
+    });
+
+    const rowById = new Map(rows.map((row) => [row.id, row]));
+    return exchanges.map((exchange) => {
+      const row = rowById.get(exchange.id);
+      return {
+        ...exchange,
+        service: row?.service ?? null,
+        requestedBy: row?.requestedBy ?? null,
+        offeredBy: row?.offeredBy ?? null,
+      };
+    });
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -102,7 +183,7 @@ export class ExchangesController {
     
     const service = await this.prisma.service.findUnique({
       where: { id: createExchangeDto.serviceId },
-      select: { id: true, userId: true, intent: true },
+      select: { id: true, userId: true, intent: true, duration: true, title: true },
     });
 
     if (!service) {
@@ -113,8 +194,13 @@ export class ExchangesController {
       throw new UnauthorizedException('No puedes iniciar un intercambio sobre tu propia publicación');
     }
 
+    const requestedDate = createExchangeDto.date ? new Date(createExchangeDto.date) : new Date(Date.now() + 60_000);
+    const safeDate = requestedDate <= new Date() ? new Date(Date.now() + 60_000) : requestedDate;
+
     const exchangeData = {
-      ...createExchangeDto,
+      serviceId: service.id,
+      date: safeDate,
+      exchangedTime: createExchangeDto.exchangedTime || service.duration,
       requestedById: service.intent === 'REQUEST' ? service.userId : userId,
       offeredById: service.intent === 'REQUEST' ? userId : service.userId,
     };
@@ -124,9 +210,25 @@ export class ExchangesController {
       userId,
     });
 
+    const exchange = result.exchange.toContract();
+    const recipientId = exchange.requestedById === userId ? exchange.offeredById : exchange.requestedById;
+    await this.prisma.userNotification.create({
+      data: {
+        userId: recipientId,
+        type: 'EXCHANGE_REQUEST',
+        title: service.intent === 'REQUEST' ? 'Nueva respuesta a tu solicitud' : 'Nueva solicitud de intercambio',
+        body: service.intent === 'REQUEST'
+          ? `Una persona se ha ofrecido a ayudarte con “${service.title}”.`
+          : `Una persona ha solicitado tu servicio “${service.title}”.`,
+        link: `/exchanges/${exchange.id}`,
+      },
+    }).catch(() => undefined);
+
+    const [enrichedExchange] = await this.enrichExchanges([exchange]);
+
     return {
       message: 'Solicitud de servicio creada exitosamente',
-      exchange: result.exchange.toContract(),
+      exchange: enrichedExchange,
     };
   }
 
@@ -145,7 +247,7 @@ export class ExchangesController {
       throw new UnauthorizedException('Usuario no autenticado');
     }
     
-    // Asegurar que page y pageSize estén presentes
+    // Ensure page and pageSize are present
     const queryWithDefaults = {
       page: query.page || 1,
       pageSize: query.pageSize || 20,
@@ -160,10 +262,12 @@ export class ExchangesController {
       userId 
     });
 
+    const exchanges = result.exchanges.exchanges.map(exchange => exchange.toContract());
+
     return {
       message: 'Intercambios obtenidos exitosamente',
       ...result.exchanges,
-      exchanges: result.exchanges.exchanges.map(exchange => exchange.toContract()),
+      exchanges: await this.enrichExchanges(exchanges),
     };
   }
 
@@ -186,9 +290,11 @@ export class ExchangesController {
     }
     const result = await this.getExchangeUseCase.execute({ id, userId });
 
+    const [exchange] = await this.enrichExchanges([result.exchange.toContract()]);
+
     return {
       message: 'Intercambio obtenido exitosamente',
-      exchange: result.exchange.toContract(),
+      exchange,
     };
   }
 

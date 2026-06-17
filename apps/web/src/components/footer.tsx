@@ -18,25 +18,25 @@ export function Footer() {
     {
       label: t("footer.help.title"),
       items: [
-        { href: "/contact", nameKey: "footer.help.contact" },
-        { href: "/incidents", nameKey: "footer.help.incidents" },
+        { href: "/about#contact", nameKey: "footer.help.contact" },
+        { href: "/about#scope", nameKey: "footer.help.incidents" },
         { href: "/faq", nameKey: "footer.help.faq" },
       ],
     },
     {
       label: t("footer.about.title"),
       items: [
-        { href: "/history", nameKey: "footer.about.history" },
-        { href: "/blog", nameKey: "footer.about.blog" },
-        { href: "/collaborations", nameKey: "footer.about.collaborations" },
+        { href: "/about", nameKey: "footer.about.history" },
+        { href: "/about#scope", nameKey: "footer.about.blog" },
+        { href: "/about#purpose", nameKey: "footer.about.collaborations" },
       ],
     },
     {
       label: t("footer.moreInfo.title"),
       items: [
-        { href: "/terms", nameKey: "footer.moreInfo.terms" },
-        { href: "/privacy", nameKey: "footer.moreInfo.privacy" },
-        { href: "#", nameKey: "footer.moreInfo.address" },
+        { href: "/about#scope", nameKey: "footer.moreInfo.terms" },
+        { href: "/about#scope", nameKey: "footer.moreInfo.privacy" },
+        { href: "/about#contact", nameKey: "footer.moreInfo.address" },
       ],
     },
   ];

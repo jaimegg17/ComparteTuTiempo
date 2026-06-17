@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // ============================================================================
-// ESQUEMAS DE EVENT
+// EVENT SCHEMAS
 // ============================================================================
 
 export const EventSchema = z.object({
@@ -19,20 +19,20 @@ export const EventSchema = z.object({
 
 export const EventCreateSchema = z.object({
   communityId: z.number(),
-  title: z.string().min(5, 'El título debe tener al menos 5 caracteres'),
+  title: z.string().min(5, 'Title must be at least 5 characters'),
   description: z.string().optional(),
   date: z.date(),
   location: z.string().optional(),
-  capacity: z.number().positive('La capacidad debe ser positiva').optional(),
+  capacity: z.number().positive('Capacity must be positive').optional(),
   creatorId: z.string(),
 });
 
 export const EventUpdateSchema = z.object({
-  title: z.string().min(5, 'El título debe tener al menos 5 caracteres').optional(),
+  title: z.string().min(5, 'Title must be at least 5 characters').optional(),
   description: z.string().optional(),
   date: z.date().optional(),
   location: z.string().optional(),
-  capacity: z.number().positive('La capacidad debe ser positiva').optional(),
+  capacity: z.number().positive('Capacity must be positive').optional(),
 });
 
 export const EventListQuerySchema = z.object({
@@ -41,8 +41,8 @@ export const EventListQuerySchema = z.object({
   dateFrom: z.date().optional(),
   dateTo: z.date().optional(),
   location: z.string().optional(),
-  page: z.number().min(1, 'La página debe ser mayor a 0').default(1),
-  pageSize: z.number().min(1, 'El tamaño de página debe ser mayor a 0').max(100, 'El tamaño de página no puede exceder 100').default(20),
+  page: z.number().min(1, 'Page must be greater than 0').default(1),
+  pageSize: z.number().min(1, 'Page size must be greater than 0').max(100, 'Page size cannot exceed 100').default(20),
 });
 
 export const EventListResponseSchema = z.object({
@@ -54,7 +54,7 @@ export const EventListResponseSchema = z.object({
 });
 
 // ============================================================================
-// TIPOS INFERIDOS
+// INFERRED TYPES
 // ============================================================================
 
 export type Event = z.infer<typeof EventSchema>;
