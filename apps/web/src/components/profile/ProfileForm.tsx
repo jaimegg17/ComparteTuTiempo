@@ -11,6 +11,7 @@ import {
   Divider,
 } from '@mui/material';
 import { useTranslation } from '@/hooks/useTranslation';
+import { LocationAutocompleteField } from '@/components/location/LocationAutocompleteField';
 
 interface ProfileFormValues {
   name: string;
@@ -103,11 +104,11 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
             fullWidth
           />
 
-          <TextField
+          <LocationAutocompleteField
             label={t('profile.form.location')}
             placeholder={t('profile.form.locationPlaceholder')}
             value={formData.location}
-            onChange={(e) => onInputChange('location', e.target.value)}
+            onChange={(value) => onInputChange('location', value)}
             fullWidth
           />
             </Box>
