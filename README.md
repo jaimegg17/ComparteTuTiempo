@@ -4,6 +4,12 @@
 
 El proyecto está organizado como un **monorepo pnpm** con frontend Next.js, API NestJS, base de datos PostgreSQL con Prisma y contratos TypeScript/Zod compartidos.
 
+## Proyecto desplegado
+
+La versión de demostración está disponible en:
+
+<https://project-w4dax.vercel.app/>
+
 ## Estado actual
 
 La aplicación está preparada para ejecución local y despliegue en servicios con capa gratuita:
