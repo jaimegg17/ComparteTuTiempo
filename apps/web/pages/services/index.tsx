@@ -527,6 +527,13 @@ export default function ServicesPage() {
   }, [mapsLoaded, userProfile?.location, useNearby, nearLat, nearLng]);
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && window.google?.maps) {
+      setMapsLoaded(true);
+      setMapsUnavailable(false);
+    }
+  }, []);
+
+  useEffect(() => {
     if (viewMode === 'map' && googleMapsApiKey && !mapsLoaded) {
       setMapsUnavailable(false);
       const timeout = window.setTimeout(() => setMapsUnavailable(true), 5000);
@@ -618,7 +625,8 @@ export default function ServicesPage() {
     <Layout>
       {googleMapsApiKey && (
         <Script
-          src={`https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&loading=async`}
+          id="google-maps-js"
+          src={`https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&libraries=places&loading=async`}
           strategy="afterInteractive"
           onLoad={() => {
             setMapsLoaded(true);

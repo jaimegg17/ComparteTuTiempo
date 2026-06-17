@@ -178,6 +178,15 @@ export default function EditServicePage() {
   }, [id, user, router, showToast]);
 
   useEffect(() => {
+    const googleObj = typeof window !== 'undefined'
+      ? (window as Window & { google?: { maps?: { places?: unknown } } }).google
+      : undefined;
+    if (googleObj?.maps?.places) {
+      setMapsLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
     if (!mapsLoaded || !locationInputRef.current || typeof window === 'undefined') return;
 
     const googleObj = (
@@ -367,6 +376,7 @@ export default function EditServicePage() {
     <Layout>
       {googleMapsApiKey && (
         <Script
+          id="google-maps-js"
           src={`https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&libraries=places&loading=async`}
           strategy="afterInteractive"
           onLoad={() => setMapsLoaded(true)}

@@ -190,6 +190,13 @@ export default function CreateServicePage() {
   };
 
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as GoogleMapsWindow).google?.maps?.places) {
+      setMapsLoaded(true);
+      setMapsFailed(false);
+    }
+  }, []);
+
   const handleChange = (field: keyof FormData) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -458,6 +465,7 @@ export default function CreateServicePage() {
     <Layout>
       {googleMapsApiKey && (
         <Script
+          id="google-maps-js"
           src={`https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&libraries=places&loading=async`}
           strategy="afterInteractive"
           onLoad={() => {
