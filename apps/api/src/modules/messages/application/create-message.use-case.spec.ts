@@ -13,6 +13,9 @@ describe('CreateMessageUseCase', () => {
     exchange: {
       findUnique: jest.fn(),
     },
+    userNotification: {
+      create: jest.fn(),
+    },
   };
 
   const useCase = new CreateMessageUseCase(messageRepository, prisma as unknown as PrismaService);
@@ -20,6 +23,7 @@ describe('CreateMessageUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    prisma.userNotification.create.mockResolvedValue({ id: 1 });
   });
 
   it('bloquea envío si el usuario no participa en el intercambio', async () => {
@@ -55,6 +59,7 @@ describe('CreateMessageUseCase', () => {
       id: 8,
       requestedById: 'auth0|requester',
       offeredById: 'auth0|provider',
+      service: { title: 'Clases de inglés' },
     });
     messageRepository.create.mockResolvedValue(new MessageEntity(1, 8, 'auth0|provider', 'Hola', false, now, now));
 
@@ -64,5 +69,49 @@ describe('CreateMessageUseCase', () => {
     });
 
     expect(messageRepository.create).toHaveBeenCalledWith({ exchangeId: 8, content: 'Hola' }, 'auth0|provider');
+  });
+
+  it('notifica al otro participante cuando se envía un mensaje', async () => {
+    prisma.exchange.findUnique.mockResolvedValue({
+      id: 8,
+      requestedById: 'auth0|requester',
+      offeredById: 'auth0|provider',
+      service: { title: 'Clases de inglés' },
+    });
+    prisma.userNotification.create.mockResolvedValue({ id: 99 });
+    messageRepository.create.mockResolvedValue(new MessageEntity(1, 8, 'auth0|provider', 'Hola', false, now, now));
+
+    await useCase.execute({
+      userId: 'auth0|provider',
+      data: { exchangeId: 8, content: 'Hola' },
+    });
+
+    expect(prisma.userNotification.create).toHaveBeenCalledWith({
+      data: {
+        userId: 'auth0|requester',
+        type: 'MESSAGE',
+        title: 'Nuevo mensaje',
+        body: 'Has recibido un mensaje sobre "Clases de inglés".',
+        link: '/exchanges/8',
+      },
+    });
+  });
+
+  it('no falla el envío si la notificación de mensaje no se puede crear', async () => {
+    prisma.exchange.findUnique.mockResolvedValue({
+      id: 8,
+      requestedById: 'auth0|requester',
+      offeredById: 'auth0|provider',
+      service: { title: 'Clases de inglés' },
+    });
+    prisma.userNotification.create.mockRejectedValue(new Error('notifications down'));
+    messageRepository.create.mockResolvedValue(new MessageEntity(1, 8, 'auth0|provider', 'Hola', false, now, now));
+
+    await expect(useCase.execute({
+      userId: 'auth0|provider',
+      data: { exchangeId: 8, content: 'Hola' },
+    })).resolves.toEqual({
+      message: expect.objectContaining({ id: 1 }),
+    });
   });
 });
