@@ -66,14 +66,14 @@ describe('ServicesPage performance and Maps loading', () => {
     } as Response);
   });
 
-  it('limita la carga inicial a pageSize=12', async () => {
+  it('limita la carga inicial a pageSize=48 para mostrar contenido real sin pedir todo el catálogo', async () => {
     render(<ServicesPage />);
 
     await waitFor(() => expect(global.fetch).toHaveBeenCalled());
 
     const firstUrl = String((global.fetch as ReturnType<typeof vi.fn>).mock.calls[0][0]);
     expect(firstUrl).toContain('/api/services?');
-    expect(firstUrl).toContain('pageSize=12');
+    expect(firstUrl).toContain('pageSize=48');
   });
 
   it('carga Google Maps con loading=async para evitar el warning de producción', async () => {

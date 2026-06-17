@@ -212,7 +212,7 @@ export default function ServicesPage() {
       // The backend filters minPrice/maxPrice by credits, not by duration.
       // Duration is filtered below on the client to avoid excluding results by price.
       if (typ) params.append('type', typ);
-      params.append('pageSize', '12');
+      params.append('pageSize', '48');
       if (intent !== 'ALL') params.append('intent', intent);
       if (nearbyEnabled && lat !== null && lng !== null) {
         params.append('nearLat', lat.toString());
