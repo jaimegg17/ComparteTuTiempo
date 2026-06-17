@@ -20,6 +20,7 @@ import { ListRatingsUseCase } from '../application/list-ratings.use-case';
 import { UpdateRatingUseCase } from '../application/update-rating.use-case';
 import { DeleteRatingUseCase } from '../application/delete-rating.use-case';
 import { JwtAuthGuard } from '@/common/auth/jwt-auth.guard';
+import { PrismaService } from '@/common/prisma/prisma.service';
 import { Type } from 'class-transformer';
 import { IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 export class CreateRatingDto {
@@ -93,6 +94,7 @@ export class RatingsController {
     private readonly listRatingsUseCase: ListRatingsUseCase,
     private readonly updateRatingUseCase: UpdateRatingUseCase,
     private readonly deleteRatingUseCase: DeleteRatingUseCase,
+    private readonly prisma: PrismaService,
   ) {}
 
   private getAuthenticatedUserId(req: { user?: { sub?: string; id?: string } }): string {
@@ -146,10 +148,20 @@ export class RatingsController {
       query: queryWithDefaults 
     });
 
+    const ratingContracts = result.ratings.ratings.map(rating => rating.toContract());
+    const users = await this.prisma.user.findMany({
+      where: { id: { in: [...new Set(ratingContracts.map((rating) => rating.userId))] } },
+      select: { id: true, name: true, email: true, imageUrl: true },
+    });
+    const usersById = new Map(users.map((user) => [user.id, user]));
+
     return {
       message: 'Valoraciones obtenidas exitosamente',
       ...result.ratings,
-      ratings: result.ratings.ratings.map(rating => rating.toContract()),
+      ratings: ratingContracts.map((rating) => ({
+        ...rating,
+        user: usersById.get(rating.userId) ?? undefined,
+      })),
     };
   }
 

@@ -10,16 +10,23 @@ describe('RatingsController - delete rating', () => {
   const listRatingsUseCase = { execute: jest.fn() };
   const updateRatingUseCase = { execute: jest.fn() };
   const deleteRatingUseCase = { execute: jest.fn() };
+  const prisma = {
+    user: {
+      findMany: jest.fn(),
+    },
+  };
 
   const controller = new RatingsController(
     createRatingUseCase as unknown as CreateRatingUseCase,
     listRatingsUseCase as unknown as ListRatingsUseCase,
     updateRatingUseCase as unknown as UpdateRatingUseCase,
     deleteRatingUseCase as unknown as DeleteRatingUseCase,
+    prisma as never,
   );
 
   beforeEach(() => {
     jest.clearAllMocks();
+    prisma.user.findMany.mockResolvedValue([]);
   });
 
   it('lanza UnauthorizedException si no hay usuario autenticado', async () => {
@@ -60,6 +67,48 @@ describe('RatingsController - delete rating', () => {
       userId: 'auth0|u1',
     });
     expect(result.rating).toEqual(expect.objectContaining({ serviceId: 1, score: 5 }));
+  });
+
+  it('enriquece la lista de valoraciones con datos públicos de usuario', async () => {
+    const createdAt = new Date('2026-06-17T10:00:00.000Z');
+    listRatingsUseCase.execute.mockResolvedValue({
+      ratings: {
+        ratings: [
+          {
+            toContract: () => ({
+              id: 7,
+              userId: 'google-oauth2|123456',
+              serviceId: 1,
+              score: 5,
+              comment: 'Muy buena experiencia',
+              createdAt,
+            }),
+          },
+        ],
+        total: 1,
+        page: 1,
+        pageSize: 20,
+        totalPages: 1,
+      },
+    });
+    prisma.user.findMany.mockResolvedValue([
+      {
+        id: 'google-oauth2|123456',
+        name: 'María García',
+        email: 'maria@example.com',
+        imageUrl: 'https://example.com/avatar.jpg',
+      },
+    ]);
+
+    const result = await controller.listRatings({ serviceId: 1 });
+
+    expect(prisma.user.findMany).toHaveBeenCalledWith({
+      where: { id: { in: ['google-oauth2|123456'] } },
+      select: { id: true, name: true, email: true, imageUrl: true },
+    });
+    expect(result.ratings[0]).toEqual(expect.objectContaining({
+      user: expect.objectContaining({ name: 'María García' }),
+    }));
   });
 
   it('ejecuta DeleteRatingUseCase con id y userId', async () => {

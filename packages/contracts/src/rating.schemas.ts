@@ -4,6 +4,13 @@ import { z } from 'zod';
 // RATING SCHEMAS
 // ============================================================================
 
+export const RatingUserSchema = z.object({
+  id: z.string(),
+  name: z.string().nullable().optional(),
+  email: z.string().nullable().optional(),
+  imageUrl: z.string().nullable().optional(),
+});
+
 export const RatingSchema = z.object({
   id: z.number(),
   userId: z.string(), // Auth0 ID as string
@@ -11,6 +18,7 @@ export const RatingSchema = z.object({
   score: z.number().int().min(1).max(5),
   comment: z.string().nullable(),
   createdAt: z.date(),
+  user: RatingUserSchema.optional(),
 });
 
 export const RatingCreateSchema = z.object({

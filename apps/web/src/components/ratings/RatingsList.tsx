@@ -15,6 +15,16 @@ interface RatingsListProps {
   onRatingUpdated?: () => void;
 }
 
+const getRatingUserLabel = (rating: RatingType) => {
+  const displayName = rating.user?.name?.trim();
+  if (displayName) return displayName;
+
+  const email = rating.user?.email?.trim();
+  if (email) return email.split('@')[0];
+
+  return 'Usuario';
+};
+
 export function RatingsList({ serviceId, serviceTitle, onRatingUpdated }: RatingsListProps) {
   const { user, getAccessToken } = useAuth();
   const [page, setPage] = useState(1);
@@ -88,19 +98,20 @@ export function RatingsList({ serviceId, serviceTitle, onRatingUpdated }: Rating
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {ratings.map((rating) => {
           const isOwnRating = user?.sub === rating.userId;
+          const userLabel = getRatingUserLabel(rating);
           
           return (
             <Paper key={rating.id} sx={{ p: 2, elevation: 1 }}>
               <Box sx={{ display: 'flex', gap: 2 }}>
-                <Avatar sx={{ width: 40, height: 40 }}>
-                  {rating.userId[0]?.toUpperCase() || 'U'}
+                <Avatar src={rating.user?.imageUrl || undefined} sx={{ width: 40, height: 40 }}>
+                  {userLabel[0]?.toUpperCase() || 'U'}
                 </Avatar>
                 
                 <Box sx={{ flex: 1 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
                     <Box>
                       <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                        Usuario {rating.userId.slice(0, 8)}...
+                        {userLabel}
                       </Typography>
                       <Rating 
                         value={rating.score} 
