@@ -1,297 +1,308 @@
-# ComparteTuTiempo ⏰ - Monorepo con Arquitectura Hexagonal
+# ComparteTuTiempo
 
-Plataforma de banco de tiempo para intercambiar habilidades usando horas como moneda. Implementada con **arquitectura hexagonal (puertos y adaptadores) + clean architecture** en un monorepo pnpm.
+**ComparteTuTiempo** es una plataforma de banco de tiempo desarrollada como Trabajo de Fin de Grado. Permite a las personas intercambiar servicios y habilidades usando el tiempo como unidad de valor: publicar ofertas, crear solicitudes, pedir intercambios, conversar por chat, valorar servicios y participar en comunidades u organizaciones.
 
-## 🏗️ Arquitectura
+El proyecto está organizado como un **monorepo pnpm** con frontend Next.js, API NestJS, base de datos PostgreSQL con Prisma y contratos TypeScript/Zod compartidos.
 
-Este proyecto implementa **arquitectura hexagonal** con las siguientes capas:
+## Estado actual
 
-- **🔄 Dominio**: Entidades puras, puertos (interfaces) y reglas de negocio
-- **🎯 Aplicación**: Casos de uso que orquestan los puertos
-- **🔌 Infraestructura**: Adaptadores que implementan los puertos (Prisma, JWT, etc.)
-- **🎨 Presentación**: Controladores HTTP y DTOs generados desde Zod
+La aplicación está preparada para ejecución local y despliegue en servicios con capa gratuita:
 
-## 📁 Estructura del Monorepo
+- **Frontend**: Next.js en Vercel.
+- **API**: NestJS en Render.
+- **Base de datos**: PostgreSQL/Supabase.
+- **Autenticación**: Auth0.
+- **Imágenes**: Cloudinary.
+- **Mapas y ubicaciones**: Google Maps Platform, Places y Geocoding, con degradación a entrada manual si Google no está disponible.
 
-```
+URLs de referencia del entorno desplegado:
+
+- Frontend: <https://project-w4dax.vercel.app>
+- API healthcheck: <https://comparte-tu-tiempo-api.onrender.com/api/health>
+
+> Las URLs anteriores corresponden al entorno de demostración del proyecto. Para una instalación propia deben configurarse las variables de entorno indicadas más abajo.
+
+## Funcionalidades principales
+
+- Registro e inicio de sesión mediante Auth0.
+- Perfil de usuario con imagen, biografía, habilidades, datos básicos y ubicación.
+- Marketplace de servicios con ofertas y demandas.
+- Creación, edición, eliminación, búsqueda y filtrado de servicios.
+- Vista de mapa y búsqueda por cercanía.
+- Autocompletado de ubicaciones con Google Places en formularios de ubicación.
+- Intercambios entre usuarios con estados y detalle de participantes.
+- Chat asociado a cada intercambio.
+- Notificaciones internas para solicitudes, respuestas y mensajes.
+- Valoraciones de servicios con datos públicos del autor.
+- Comunidades y organizaciones con eventos, miembros, recursos y control de acceso.
+- Subida de imágenes mediante Cloudinary.
+- Paneles administrativos protegidos en la interfaz.
+- Internacionalización básica en español e inglés.
+
+## Arquitectura
+
+El backend sigue una organización inspirada en arquitectura hexagonal y Clean Architecture:
+
+- **Dominio**: entidades, tipos y reglas de negocio.
+- **Aplicación**: casos de uso.
+- **Infraestructura**: persistencia con Prisma, mappers y servicios externos.
+- **Presentación**: controladores HTTP, guards y DTOs.
+
+El frontend está implementado con Next.js usando `pages/`, componentes reutilizables, hooks y clientes API compartidos.
+
+## Estructura del repositorio
+
+```text
 ComparteTuTiempo/
 ├── apps/
-│   ├── api/                    # NestJS API con arquitectura hexagonal
-│   │   ├── src/
-│   │   │   ├── modules/        # Módulos por bounded context
-│   │   │   │   ├── services/   # Ejemplo completo implementado
-│   │   │   │   │   ├── domain/         # Entidades + puertos
-│   │   │   │   │   ├── application/    # Casos de uso
-│   │   │   │   │   ├── infrastructure/ # Prisma + mappers
-│   │   │   │   │   └── presentation/   # Controllers + DTOs
-│   │   │   │   └── ...                 # Otros módulos
-│   │   │   ├── common/         # Servicios compartidos
-│   │   │   └── main.ts         # Bootstrap + Swagger
-│   │   └── prisma/             # Esquema de base de datos
-│   └── web/                    # Next.js App Router
-│       └── src/
-│           ├── app/            # Rutas
-│           ├── entities/       # Tipos + UI primitivos
-│           ├── features/       # Casos de uso UI
-│           ├── widgets/        # Composiciones
-│           └── shared/         # Cliente API + hooks
+│   ├── api/                 # API NestJS
+│   │   ├── prisma/          # Prisma schema, migraciones y datos demo
+│   │   └── src/             # Módulos, casos de uso y controladores
+│   └── web/                 # Frontend Next.js
+│       ├── pages/           # Rutas de Next.js
+│       ├── src/             # Componentes, hooks y clientes compartidos
+│       └── public/locales/  # Traducciones
 ├── packages/
-│   ├── contracts/              # ✅ Esquemas Zod compartidos
-│   │   ├── src/
-│   │   │   ├── auth.schemas.ts
-│   │   │   ├── user.schemas.ts
-│   │   │   ├── service.schemas.ts
-│   │   │   └── index.ts
-│   │   └── package.json
-│   └── config/                 # ESLint + Prettier compartidos
-└── package.json                # Scripts del monorepo
+│   └── contracts/           # Esquemas y tipos compartidos
+├── docs/
+│   └── manuales/            # Manuales LaTeX del TFG
+├── DEPLOYMENT.md            # Guía de despliegue free-tier
+├── Dockerfile.api           # Imagen de producción de la API
+└── package.json             # Scripts del monorepo
 ```
 
-## 🚀 Inicio Rápido
+## Requisitos previos
 
-### Prerrequisitos
-- Node.js 18+
-- pnpm 10+
-- Docker Desktop
+Para ejecutar el proyecto en local se necesita:
 
-### Instalación
+- Node.js 18 o superior.
+- pnpm 10.x.
+- Docker Desktop o una instancia PostgreSQL compatible.
+- Cuenta/tenant de Auth0.
+- Cuenta de Cloudinary.
+- Clave de Google Maps Platform con estas APIs activadas:
+  - Maps JavaScript API.
+  - Places API.
+  - Geocoding API.
+
+## Instalación local
+
+Clonar el repositorio e instalar dependencias:
+
 ```bash
-# Clonar el repositorio
-git clone <tu-repo>
+git clone <url-del-repositorio>
 cd ComparteTuTiempo
-
-# Instalar dependencias de todos los paquetes
 pnpm install
-
-# Iniciar base de datos
-pnpm db:up
-
-# Generar cliente Prisma
-cd apps/api && pnpm db:generate
-
-# Ejecutar migraciones
-pnpm db:migrate
-
-# Ejecutar seed (opcional)
-pnpm db:seed
 ```
 
-### Variables de entorno (frontend + maps)
-```bash
-# API
-cp apps/api/env.example apps/api/.env
+Levantar PostgreSQL local con Docker:
 
-# Web
+```bash
+pnpm db:up
+```
+
+Configurar variables de entorno:
+
+```bash
+cp apps/api/env.example apps/api/.env
 cp apps/web/env.example apps/web/.env.local
 ```
 
-> Para autocompletado de ubicación (Google Places) en crear/editar servicios, configura:
-> `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` en `apps/web/.env.local`.
+Generar Prisma Client y aplicar migraciones:
 
-### Ejecución
 ```bash
-# Ejecutar todas las aplicaciones
+pnpm --filter @comparte-tu-tiempo/api db:generate
+pnpm --filter @comparte-tu-tiempo/api db:migrate
+```
+
+Opcionalmente, cargar datos de demostración:
+
+```bash
+pnpm --filter @comparte-tu-tiempo/api db:seed
+pnpm --filter @comparte-tu-tiempo/api db:data:migrate
+```
+
+Ejecutar el proyecto:
+
+```bash
 pnpm dev
-
-# O ejecutar por separado:
-pnpm --filter @comparte-tu-tiempo/api dev    # Solo API
-pnpm --filter @comparte-tu-tiempo/web dev    # Solo Web
 ```
 
-### Puertos
-- **API**: http://localhost:3001/api
-- **Swagger**: http://localhost:3001/docs
-- **Web**: http://localhost:3000
-- **Base de datos**: localhost:5432
+O ejecutar cada aplicación por separado:
 
-## 🔧 Scripts Disponibles
-
-### Scripts del Monorepo
-| Comando | Descripción |
-|---------|-------------|
-| `pnpm dev` | Ejecuta todas las aplicaciones |
-| `pnpm build` | Construye todas las aplicaciones |
-| `pnpm lint` | Linting en todo el monorepo |
-| `pnpm typecheck` | Verificación de tipos |
-| `pnpm test` | Tests en todo el monorepo |
-| `pnpm db:up` | Inicia PostgreSQL |
-| `pnpm db:down` | Detiene PostgreSQL |
-| `pnpm db:reset` | Reinicia base de datos |
-
-### Scripts por Aplicación
 ```bash
-# API
-cd apps/api
-pnpm dev          # Desarrollo con watch mode
-pnpm build        # Construcción para producción
-pnpm db:generate  # Generar cliente Prisma
-pnpm db:migrate   # Ejecutar migraciones
-
-# Web
-cd apps/web
-pnpm dev          # Desarrollo con Next.js
-pnpm build        # Construcción para producción
-```
-
-## 🎯 Implementación Actual
-
-### ✅ Completado
-- **Monorepo**: Estructura pnpm workspaces
-- **Contratos**: Esquemas Zod para auth, user, service
-- **API Services**: Vertical slice completo implementado
-  - Entidad de dominio con reglas de negocio
-  - Puerto del repositorio (interfaz)
-  - Casos de uso de aplicación
-  - Implementación Prisma + mapper
-  - Controlador con DTOs generados desde Zod
-- **Prisma**: Esquema de base de datos en 3FN
-- **Swagger**: Documentación automática desde Zod
-
-### 🚧 En Progreso
-- **Autenticación**: JWT strategy + guard
-- **Otros módulos**: Users, Communities, Messages, Ratings
-- **Web**: Páginas y formularios con React Hook Form
-
-### 📋 Próximos Pasos
-- [ ] Implementar autenticación JWT completa
-- [ ] Crear módulos restantes (Users, Communities, etc.)
-- [ ] Implementar formularios en Next.js
-- [ ] Tests unitarios y e2e
-- [ ] CI/CD pipeline
-
-## 🏛️ Principios de Arquitectura
-
-### **Arquitectura Hexagonal**
-- **Puertos**: Interfaces que definen contratos
-- **Adaptadores**: Implementaciones concretas
-- **Inversión de dependencias**: El dominio no depende de infraestructura
-
-### **Clean Architecture**
-- **Dominio**: Reglas de negocio puras
-- **Aplicación**: Casos de uso que orquestan
-- **Infraestructura**: Implementaciones técnicas
-- **Presentación**: Controllers y DTOs
-
-### **Contratos Compartidos**
-- **Zod**: Esquemas de validación como fuente única de verdad
-- **Tipos TypeScript**: Generados automáticamente desde Zod
-- **DTOs**: Generados para Swagger con `@anatine/zod-nestjs`
-
-## 🧪 Testing
-
-### Tests Unitarios
-```bash
-# Tests de casos de uso
-pnpm --filter @comparte-tu-tiempo/api test
-
-# Tests con adaptadores en memoria
-pnpm --filter @comparte-tu-tiempo/api test:watch
-```
-
-### Tests E2E
-```bash
-# Tests end-to-end
-pnpm --filter @comparte-tu-tiempo/api test:e2e
-```
-
-## 🐳 Docker
-
-### Base de Datos
-```bash
-# Solo PostgreSQL
-docker-compose up postgres -d
-
-# Ver logs
-docker-compose logs postgres
-
-# Detener
-docker-compose down postgres
-```
-
-## 📚 Tecnologías
-
-### **API (NestJS)**
-- **Framework**: NestJS 11
-- **ORM**: Prisma + PostgreSQL
-- **Validación**: Zod + @anatine/zod-nestjs
-- **Autenticación**: JWT + Passport
-- **Documentación**: Swagger/OpenAPI
-
-### **Web (Next.js)**
-- **Framework**: Next.js 15 (App Router)
-- **Formularios**: React Hook Form + Zod resolver
-- **Estado**: TanStack Query
-- **Estilos**: Tailwind CSS v4
-
-### **Compartido**
-- **Package Manager**: pnpm workspaces
-- **Validación**: Zod schemas
-- **Tipos**: TypeScript generado desde Zod
-- **Linting**: ESLint + Prettier
-
-## 🔍 Monitoreo y Debugging
-
-### Verificar Estado
-```bash
-# Estado de las aplicaciones
 pnpm --filter @comparte-tu-tiempo/api dev
 pnpm --filter @comparte-tu-tiempo/web dev
-
-# Estado de la base de datos
-docker ps | grep postgres
 ```
 
-### Logs
+Puertos por defecto:
+
+- Web: <http://localhost:3000>
+- API: <http://localhost:3001/api>
+- Swagger: <http://localhost:3001/docs>
+- PostgreSQL local: `localhost:5432`
+
+## Variables de entorno principales
+
+### API: `apps/api/.env`
+
+| Variable | Descripción |
+| --- | --- |
+| `DATABASE_URL` | Cadena de conexión principal a PostgreSQL. |
+| `DIRECT_URL` | Cadena directa para Prisma, útil en Supabase. |
+| `PORT` | Puerto de la API. Por defecto, `3001`. |
+| `NODE_ENV` | Entorno de ejecución. |
+| `AUTH0_DOMAIN` | Dominio del tenant de Auth0. |
+| `AUTH0_CLIENT_ID` | Client ID de Auth0. |
+| `AUTH0_CLIENT_SECRET` | Client Secret de Auth0. |
+| `AUTH0_AUDIENCE` | Audience/API Identifier configurado en Auth0. |
+| `FRONTEND_URL` | URL del frontend permitida por CORS. |
+| `CORS_ORIGIN` | Orígenes permitidos por CORS. |
+| `CLOUDINARY_CLOUD_NAME` | Cloud name de Cloudinary. |
+| `CLOUDINARY_API_KEY` | API key de Cloudinary. |
+| `CLOUDINARY_API_SECRET` | API secret de Cloudinary. |
+| `GOOGLE_MAPS_API_KEY` | Clave para geocodificación desde backend. |
+
+### Web: `apps/web/.env.local`
+
+| Variable | Descripción |
+| --- | --- |
+| `NEXT_PUBLIC_API_URL` | URL pública de la API, por ejemplo `http://localhost:3001/api`. |
+| `AUTH0_SECRET` | Secreto usado por Auth0 Next SDK. |
+| `AUTH0_BASE_URL` | URL base del frontend. |
+| `AUTH0_ISSUER_BASE_URL` | URL del tenant de Auth0. |
+| `AUTH0_CLIENT_ID` | Client ID de la aplicación web Auth0. |
+| `AUTH0_CLIENT_SECRET` | Client Secret de la aplicación web Auth0. |
+| `AUTH0_AUDIENCE` | Audience/API Identifier de Auth0. |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Clave pública de Google Maps para mapas y autocompletado. |
+| `NEXT_PUBLIC_CONTACT_EMAIL` | Email público opcional mostrado en la página de información/contacto. |
+
+No se deben commitear archivos `.env`, `.env.local` ni backups con secretos.
+
+## Scripts útiles
+
+### Monorepo
+
+| Comando | Descripción |
+| --- | --- |
+| `pnpm dev` | Ejecuta API y web en desarrollo. |
+| `pnpm build` | Compila todos los paquetes. |
+| `pnpm typecheck` | Ejecuta comprobación de tipos. |
+| `pnpm test` | Ejecuta los tests. |
+| `pnpm db:up` | Levanta PostgreSQL local con Docker. |
+| `pnpm db:down` | Detiene PostgreSQL local. |
+| `pnpm db:reset` | Reinicia la base de datos local. |
+| `pnpm deploy:web:build` | Build de producción del frontend. |
+| `pnpm deploy:api:build` | Genera Prisma Client y compila la API. |
+| `pnpm deploy:api:migrate` | Aplica migraciones Prisma en producción. |
+
+### API
+
 ```bash
-# Logs de PostgreSQL
-docker logs comparte-tiempo-postgres
-
-# Logs de la API
-# Se muestran en la consola durante desarrollo
+pnpm --filter @comparte-tu-tiempo/api dev
+pnpm --filter @comparte-tu-tiempo/api build
+pnpm --filter @comparte-tu-tiempo/api typecheck
+pnpm --filter @comparte-tu-tiempo/api test
+pnpm --filter @comparte-tu-tiempo/api db:generate
+pnpm --filter @comparte-tu-tiempo/api db:migrate
+pnpm --filter @comparte-tu-tiempo/api db:data:migrate
 ```
 
-## 🚨 Solución de Problemas
+### Web
 
-### Error: "Cannot find module"
 ```bash
-# Reinstalar dependencias
-pnpm install
-
-# Limpiar cache
-pnpm store prune
+pnpm --filter @comparte-tu-tiempo/web dev
+pnpm --filter @comparte-tu-tiempo/web build
+pnpm --filter @comparte-tu-tiempo/web typecheck
+pnpm --filter @comparte-tu-tiempo/web test
 ```
 
-### Error: "Database connection failed"
+## Tests y validación antes de integrar en `main`
+
+Antes de fusionar cambios importantes en `main`, se recomienda ejecutar:
+
 ```bash
-# Verificar que Docker esté ejecutándose
-docker ps
+pnpm --filter @comparte-tu-tiempo/api typecheck
+pnpm --filter @comparte-tu-tiempo/api test
+pnpm --filter @comparte-tu-tiempo/api build
 
-# Reiniciar base de datos
-pnpm db:reset
+pnpm --filter @comparte-tu-tiempo/web typecheck
+pnpm --filter @comparte-tu-tiempo/web test
+pnpm --filter @comparte-tu-tiempo/web build
 ```
 
-### Error: "Prisma client not generated"
+También conviene comprobar manualmente en producción:
+
+- login/logout;
+- creación, edición, borrado y búsqueda de servicios;
+- mapa, autocompletado y búsqueda por cercanía;
+- solicitud y respuesta de intercambios;
+- chat y notificaciones;
+- perfil y valoraciones;
+- comunidades, organizaciones y eventos;
+- rutas públicas como `/about`, `/faq` y `/login`;
+- guardas de páginas administrativas.
+
+## Despliegue
+
+La guía detallada de despliegue está en:
+
+```text
+DEPLOYMENT.md
+```
+
+Resumen del despliegue actual:
+
+- Vercel sirve `apps/web`.
+- Render construye la API usando `Dockerfile.api`.
+- Render debe ejecutar como comando de arranque:
+
 ```bash
-cd apps/api
-pnpm db:generate
+pnpm --filter @comparte-tu-tiempo/api start:prod:migrate
 ```
 
-## 📖 Recursos
+Este comando aplica migraciones Prisma, intenta ejecutar migraciones de datos de demostración y arranca la API.
 
-- [NestJS Documentation](https://docs.nestjs.com/)
-- [Prisma Documentation](https://www.prisma.io/docs/)
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Zod Documentation](https://zod.dev/)
-- [Arquitectura Hexagonal](https://alistair.cockburn.us/hexagonal-architecture/)
+## Google Maps Platform
 
-## 🤝 Contribución
+Para que mapas, geocodificación y autocompletado funcionen correctamente se necesita una clave con:
 
-1. Fork el repositorio
-2. Crea una rama para tu feature (`git checkout -b feature/amazing-feature`)
-3. Commit tus cambios (`git commit -m 'Add amazing feature'`)
-4. Push a la rama (`git push origin feature/amazing-feature`)
-5. Abre un Pull Request
+- Maps JavaScript API habilitada.
+- Places API habilitada.
+- Geocoding API habilitada.
+- Facturación activa en Google Cloud.
+- Referrers web autorizados para el frontend.
 
-## 📄 Licencia
+Para el entorno desplegado actual, los referrers mínimos son:
 
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+```text
+https://project-w4dax.vercel.app
+https://project-w4dax.vercel.app/*
+http://localhost:3000
+http://localhost:3000/*
+```
+
+Si Google no está disponible, la aplicación debe permitir introducir la ubicación manualmente.
+
+## Documentación adicional
+
+- `DEPLOYMENT.md`: despliegue en Vercel, Render y Supabase.
+- `AUTH0_SETUP.md`: configuración de Auth0.
+- `DATABASE_SETUP.md`: configuración de base de datos.
+- `TESTING_GUIDE.md`: guía de pruebas.
+- `QA_AUDIT.md`: notas de auditoría y QA.
+- `docs/manuales/Anexo_Manual_Usuario.tex`: manual de usuario en formato LaTeX.
+- `docs/manuales/Anexo_Manual_Instalacion.tex`: manual de instalación en formato LaTeX.
+
+## Manuales del TFG
+
+Se incluyen dos anexos en LaTeX dentro de `docs/manuales/`:
+
+- **Manual de usuario**: explica el uso funcional de la plataforma desde la perspectiva de una persona usuaria.
+- **Manual de instalación**: explica cómo preparar el entorno local, configurar servicios externos, ejecutar migraciones y validar el sistema.
+
+Estos archivos están pensados para integrarse en la memoria del TFG o conservarse como documentación reproducible del proyecto.
+
+## Licencia
+
+Proyecto desarrollado con fines académicos para un Trabajo de Fin de Grado.
